@@ -8,51 +8,56 @@ mgd
 
 # cSpell:ignore sqlalchemy wtforms
 
-from flask import render_template, request
+from flask import request
 from sqlalchemy import func
 from flask_login import login_user
 
 from ...models.public import persist_user
-from ...helpers.py_helper import is_str_none_or_empty, now, to_str
+from ...helpers.py_helper import is_str_none_or_empty, now_as_iso, to_str
 from ...helpers.pw_helper import internal_logout, is_someone_logged, verify_pass
 from ...private.RolesAbbr import RolesAbbr
-from ...public.ups_handler import ups_handler
+from ...public.ups_handler import get_ups_jHtml
+from ...helpers.jinja_helper import process_template
 from ...common.app_context_vars import sidekick
-from ...common.app_error_assistant import ModuleErrorCode
-from ...helpers.ui_db_texts_helper import add_msg_error, add_msg_final
+from ...helpers.js_consts_helper import js_form_sec_check
+from ...common.app_error_assistant import ModuleErrorCode, AppStumbled
+from ...helpers.ui_db_texts_helper import add_msg_error
 from ...helpers.route_helper import (
     home_route,
     redirect_to,
     init_response_vars,
-    get_front_end_str,
+    get_form_input_value,
     get_account_response_data,
 )
 from ...models.public import User, get_user_role_abbr
 
 
-def login():
+def do_login():
 
     from ..wtforms import LoginForm
 
     task_code = ModuleErrorCode.ACCESS_CONTROL_LOGIN.value
-    flask_form, tmpl_ffn, is_get, ui_texts = init_response_vars()
+    jHtml, is_get, ui_db_texts = init_response_vars()
 
-    html = ""  # TODO init
     try:
         task_code += 1  # 1
-        flask_form = LoginForm(request.form)
+        form = LoginForm(request.form)
         task_code += 1  # 2
-        tmpl_ffn, is_get, ui_texts = get_account_response_data("login")
+        tmpl_rfn, is_get, ui_db_texts = get_account_response_data("login")
         task_code += 1  # 3
         if is_get and is_someone_logged():
             internal_logout()
         elif is_get:
             pass
+        elif not is_str_none_or_empty(msg_error_key := js_form_sec_check()):
+            task_code += 1
+            msg_error = add_msg_error(msg_error_key, ui_db_texts)
+            raise AppStumbled(msg_error, task_code, True, True)
         else:
             task_code += 1  # 4
-            username = get_front_end_str("username")  # TODO tmpl_form
+            username = get_form_input_value("username")  # TODO tmpl_form
             task_code += 1  # 5
-            password = get_front_end_str("password")
+            password = get_form_input_value("password")
             task_code += 1  # 6
             search_for = to_str(username).lower()
             task_code += 1  # 7
@@ -63,25 +68,23 @@ def login():
             task_code += 1  # 9
             if not user:
                 task_code += 1  # 10
-                add_msg_error("userOrPwdIsWrong", ui_texts)
+                add_msg_error("userOrPwdIsWrong", ui_db_texts)
             elif not verify_pass(password, user.password):
                 user.password_failed_at = func.now()
                 task_code += 2  # 11
                 user.password_failures = user.password_failures + 1
-                add_msg_error("userOrPwdIsWrong", ui_texts)
+                add_msg_error("userOrPwdIsWrong", ui_db_texts)
                 persist_user(user, task_code)
                 # persist_user creates an Anonymous User, so lets logout it
-                user
-
             elif user.disabled:
                 task_code += 3  # 12
-                add_msg_error("userIsDisabled", ui_texts)
+                add_msg_error("userIsDisabled", ui_db_texts)
             elif user_role_abbr is None:
                 task_code += 4  # 13
-                add_msg_error("roleNotFound", ui_texts, "(null)")
+                add_msg_error("roleNotFound", ui_db_texts, "(null)")
             elif not user_role_abbr in {role.value for role in RolesAbbr}:
                 task_code += 5  # 14
-                add_msg_error("roleNotFound", ui_texts, user_role_abbr)
+                add_msg_error("roleNotFound", ui_db_texts, user_role_abbr)
             else:
                 task_code += 6  # 15
                 user.recover_email_token = None
@@ -92,7 +95,7 @@ def login():
                 task_code += 1  # 17
                 login_user(user, remember_me)
                 task_code += 1  # 18
-                msg = f"{user.username} (with id {user.id} & role '{user.role.name}') just logged in."
+                msg = f"{user.username} (with id {user.id} & role '{user.role.name}') just logged in {now_as_iso()}"
                 sidekick.display.info(msg)
                 sidekick.app_log.info(msg)
                 # user obj is lost here
@@ -102,22 +105,15 @@ def login():
                 task_code += 1  # 20
                 return redirect_to(home_route())
 
-        html = render_template(
-            tmpl_ffn,
-            form=flask_form,
-            **ui_texts,
+        jHtml = process_template(
+            tmpl_rfn,
+            form=form,
+            **ui_db_texts.dict(),
         )
     except Exception as e:
-        error_code = task_code
-        msg = add_msg_final("errorLogin", ui_texts, task_code)
-        flask_form, tmpl_ffn, ui_texts = ups_handler(error_code, msg, e, True)
-        html = render_template(
-            tmpl_ffn,
-            form=flask_form,
-            **ui_texts,
-        )
+        jHtml = get_ups_jHtml("errorLogin", ui_db_texts, task_code, e)
 
-    return html
+    return jHtml
 
 
 # eof

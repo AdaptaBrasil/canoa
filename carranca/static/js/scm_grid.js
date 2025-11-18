@@ -21,7 +21,7 @@ const gridOptions = {
     rowSelection: 'single'
     , suppressRowDeselection: true
     , onGridReady: (params) => {
-        const firstRow = params.api.getDisplayedRowAtIndex(cargo[cargoKeys.index]);
+        const firstRow = params.api.getDisplayedRowAtIndex(cargo[cargoKeys.row_index]);
         if (firstRow) {
             setTimeout(() => {
                 firstRow.setSelected(true);
@@ -61,9 +61,9 @@ const gridOptions = {
     ]
 }; // gridOptions
 
-const setActiveRow = (row, rowIx) => {
+const setActiveRow = (row, row_index) => {
     if (!row) { return; }
-    cargo[cargoKeys.index] = rowIx;
+    cargo[cargoKeys.row_index] = row_index;
     cargo[cargoKeys.code] = row.data[colCode]
 }
 

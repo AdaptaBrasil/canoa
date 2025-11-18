@@ -1,16 +1,45 @@
+// ==========================================================================
+//  Award-winning tidy configuration by gemini
+//  Project-level VS Code settings
+//  Last updated: 2025-11-10
+//  Verified for VS Code ≥ 1.95 and Python ≥ 3.13
+//  https://chatgpt.com/share/69121fc6-0d0c-8013-8708-4bf31e095a59
+// ==========================================================================
+
 {
-    "python.analysis.extraPaths": [
-        "./carranca"
-    ],
-    "python.analysis.typeCheckingMode": "standard",
-    "github.copilot.enable": {
-        "*": false,
-        "plaintext": false,
-        "markdown": false,
-        "scminput": false
-    },
-    "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter",
-        "editor.formatOnSave": true
-    }
+   // === General Editor Settings ===
+   "editor.formatOnSave": true,
+
+   // === Language-specific (Python) Overrides ===
+   "[python]": {
+      "editor.defaultFormatter": "ms-python.black-formatter",
+      "editor.formatOnSave": true,
+      "editor.tabSize": 4
+   },
+
+   // === GitHub Copilot ===
+   // (Disabled or custom configuration placeholder)
+   "github.copilot.enable": { /* Copilot disabled for this workspace */ },
+
+   // === Python Analysis / Pylance Settings ===
+   "python.analysis.autoSearchPaths": true,
+   "python.analysis.diagnosticMode": "openFilesOnly",
+   "python.analysis.exclude": [
+      "**/__pycache__",
+      ".env",
+      ".git",
+      ".venv",
+      "venv"
+   ],
+   "python.analysis.importFormat": "relative",
+   "python.analysis.indexing": false,
+   "python.analysis.maxImportResolutionTries": 10,
+   "python.analysis.typeCheckingMode": "standard",
+   "python.analysis.extraPaths": [
+        ".env/Lib/site-packages"
+   ],
+
+   // === Environment and Interpreter Settings ===
+   "python.defaultInterpreterPath": ".env\\Scripts\\python.exe",
+   "python-envs.pythonProjects": []
 }

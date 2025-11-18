@@ -12,7 +12,8 @@ from typing import Optional
 
 
 def file_full_name_parse(file_full_name: str) -> tuple[str, str, str]:
-    # split full path into 3 components
+    ''' split full path into 3 components:
+        drive, path, filename '''
     drive, path = os.path.splitdrive(file_full_name)
     _, filename = os.path.split(path)
     return (drive, path, filename)

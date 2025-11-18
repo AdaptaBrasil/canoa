@@ -1,9 +1,9 @@
 """
-    Debug Info
-    Debug information
+Debug Info
+Debug information
 
-    Equipe da Canoa -- 2024
-    mgd
+Equipe da Canoa -- 2024
+mgd
 """
 
 # cSpell:ignore sqlalchemy
@@ -39,7 +39,7 @@ def get_debug_info(app, config: DynamicConfig) -> List[Tuple[str, str]]:
     _add("Debug Messages", config.APP_DISPLAY_DEBUG_MSG)
     _add("Logging to File", config.LOG_FILE_STATUS)
 
-    _add("Page Compression", config.APP_MINIFIED)
+    _add("Page Compression", config.APP_UNMINIFIED)
     _add("App  folder", config.APP_FOLDER)
     _add("Database address", config.SQLALCHEMY_DATABASE_URI)
     _add("Server 'name'", config.SERVER_ADDRESS)

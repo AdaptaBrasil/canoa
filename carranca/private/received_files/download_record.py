@@ -10,64 +10,97 @@ mgd 2025-01-14 03-18
 
 # cSpell: ignore samp rqst dnld rprt
 
+import json
 from os import path
-from flask import send_file, abort, request, Response
+from http import HTTPStatus
+from flask import send_file, request, Response, abort
 
 from .constants import DNLD_R, DNLD_F
-from .fetch_records import fetch_record_s, IGNORE_USER
-
-from ...helpers.js_grid_helper import (
-    js_grid_sec_key,
-    js_grid_rsp,
-    js_grid_sec_value,
-)
+from .fetch_records import fetch_record_s, IGNORE_USER, USER_RECEIPT
+from ...helpers.py_helper import is_str_none_or_empty
+from ...public.ups_handler import ups_handler
 from ...helpers.file_helper import change_file_ext
-from ...helpers.route_helper import get_private_response_data, init_response_vars
-from ...helpers.ui_db_texts_helper import UITextsKeys, add_msg_error
-from ...common.app_error_assistant import ModuleErrorCode, AppStumbled
+from ...helpers.types_helper import UsualDict
+from ...helpers.route_helper import MTD_GET, get_private_response_data, init_response_vars
+from ...common.app_error_assistant import HTTPStatusCode, ModuleErrorCode, AppStumbled
+from ...helpers.js_consts_helper import js_form_sec_check, js_form_cargo_id, js_grid_col_meta_info
+from ...helpers.ui_db_texts_helper import add_msg_error
 
 
-def download_rec() -> Response | None:
+def download_rec() -> Response:
     task_code = ModuleErrorCode.RECEIVED_FILES_MGMT.value
-    _, _, is_get, ui_texts = init_response_vars()
 
-    if not is_get:
-        return None  # TODO: error
+    _, is_get, ui_db_texts = init_response_vars()
 
-    file_response = None
+    file_response: Response = ""
+    http_status_code = HTTPStatus.INTERNAL_SERVER_ERROR
     try:
         task_code += 1  # 1
-        _, is_get, ui_texts = get_private_response_data("receivedFilesMgmt")
+        _, is_get, ui_db_texts = get_private_response_data("receivedFilesMgmt")
+
+        def _raise(msg: str, hsc: int, log_out=False):
+            nonlocal http_status_code
+            http_status_code = hsc
+            raise AppStumbled(msg, task_code, log_out, True)
+
+        def _get_receipt(db_record: UsualDict):
+            col_meta = ui_db_texts[js_grid_col_meta_info]
+            caption = json.loads(col_meta)[USER_RECEIPT]
+            return f"{caption}: [{db_record[USER_RECEIPT]}]."
+
+        if is_get:
+            msg = f"{add_msg_error(HTTPStatusCode.CODE_405.value, ui_db_texts)} (Requested: ${MTD_GET}.)"
+            _raise(msg, HTTPStatus.METHOD_NOT_ALLOWED)
 
         task_code += 1  # 2
-        rqst = request.form.get(js_grid_rsp)
+        rqst = request.form.get(js_form_cargo_id)
         rec_id, rec_type = rqst[:-1], rqst[-1]
-        if request.form.get(js_grid_sec_key) != js_grid_sec_value:
+
+        if not is_str_none_or_empty(msg_key := js_form_sec_check()):
             task_code += 1  # 3
-            msg = add_msg_error("secKeyViolation", ui_texts)
-            raise AppStumbled(msg, task_code, True, True)
+            msg = add_msg_error(msg_key, ui_db_texts)
+            _raise(msg, HTTPStatus.UNAUTHORIZED)
         elif not (rec_id.isdigit() and rec_type in [DNLD_R, DNLD_F]):
             task_code += 2  # 4
-            msg = add_msg_error("secKeyViolation", ui_texts)
-            raise AppStumbled(msg, task_code, True, True)
+            msg = add_msg_error("secKeyViolation", ui_db_texts)
+            _raise(msg, HTTPStatus.BAD_REQUEST, True)
         else:
             task_code += 3  # 5
-            no_sep = ui_texts["itemNone"]
-            received_files, download_file_name, report_ext = fetch_record_s(no_sep, rec_id, IGNORE_USER)
+            no_sep = ui_db_texts["itemNone"]
+            db_records, download_file_name, report_ext = fetch_record_s(no_sep, rec_id, IGNORE_USER)
+            if len(db_records) != 1:
+                msg = add_msg_error("noRecord", ui_db_texts)
+                _raise(msg, HTTPStatus.NOT_FOUND)
+
             if rec_type == DNLD_R:
+                # This is a Report
                 download_file_name = change_file_ext(download_file_name, report_ext)
 
-            if len(received_files) != 1:
-                ui_texts[UITextsKeys.Msg.error] = ui_texts["noRecord"]
-            elif path.isfile(download_file_name):
+            if path.isfile(download_file_name):
                 file_response = send_file(download_file_name)
-            else:  # just deleted :-(
-                ui_texts[UITextsKeys.Msg.error] = ui_texts["fileNotFound"]
+                http_status_code = HTTPStatus.OK
+            else:  # deleted just now :-(
+                msg = f"{add_msg_error("fileNotFound", ui_db_texts)} {_get_receipt(db_records[0])}"
+                _raise(msg, HTTPStatus.GONE)
 
     except Exception as e:
-        # TODO:
-        print(e)
-        return abort(404, description="File not found")
+        # ⚠️ Use default ups/error handler to log errors
+        ups_handler(task_code, str(e), e)
+
+        # ⚠️ Direct abort is required here
+        # ---------------------------------
+        abort(http_status_code, description=str(e))
+        # ---------------------------------
+        # This page runs during file download responses.
+        #
+        # Returning the project’s standard (`get_ups_jHtml` | 'ups_handler')
+        # HTML error page would corrupt the binary stream and confuse the client.
+        #
+        # Future refactors/technical reviews: preserve this abort() call
+        # unless the download mechanism itself is redesigned.
+        # Do not use:
+        # jHTML = get_ups_jHtml(http_status_code, ui_db_texts, task_code, e)
+        # return jHTML
 
     return file_response
 

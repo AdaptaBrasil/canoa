@@ -85,5 +85,4 @@ async def run_validator(
 
     return stdout_str, stderr_str, exit_code
 
-
 # eof

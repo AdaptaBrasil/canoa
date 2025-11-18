@@ -6,17 +6,21 @@
     //  "args": ["--no-reload",
     "version": "0.2.0",
     "configurations": [
+        
         {
-            "name": "Python: Flask APP",
+            "name": "Canoa",
             "type": "debugpy",
             "request": "launch",
             "console": "integratedTerminal",
             "module": "flask",
+            "cwd": "${workspaceFolder}/carranca",
             "env": {
                 "FLASK_APP": "main.py",
                 "FLASK_ENV": "development",
-                "FLASK_DEBUG": "true",
+                "FLASK_DEBUG": "1",
                 "CANOA_DEBUG": "true",
+                // "FLASK_RUN_HOST": "0.0.0.0",
+                // "FLASK_RUN_PORT": "5050",
             },
             "args": [
                 "run",
@@ -25,7 +29,6 @@
             ],
             "jinja": true,
             "justMyCode": true,
-            "cwd": "${workspaceFolder}/carranca",
         }
     ]
 }

@@ -8,12 +8,12 @@ mgd 2024-05-21: Base, Debug, Production
 mgd 2024-10-11: Base went to it's own file
 """
 
-# cSpell:ignore SQLALCHEMY searchpath
+# cSpell:ignore UNMINIFIED SQLALCHEMY searchpath
 
 from os import environ
 from hashlib import sha384
 
-from .BaseConfig import BaseConfig, app_mode_development, app_mode_production
+from .BaseConfig import BaseConfig, app_mode_development, app_mode_production, app_mode_stage
 from ..common.app_constants import APP_NAME, APP_VERSION
 from ..common.igniter import Fuse
 from ..helpers.py_helper import as_bool, is_str_none_or_empty, get_envvar_prefix
@@ -88,14 +88,16 @@ class DynamicConfig(BaseConfig):
         self.DB_len_val_for_email = LenValidate(8, 60)
 
         # propagate APP_DEBUG
-        def _if_debug(attrib, default=self.APP_DEBUG):
-            return default if attrib is None else as_bool(attrib)
+        default = self.APP_DEBUG if self.APP_PROPAGATE_DEBUG else False
 
-        if self.APP_PROPAGATE_DEBUG:
-            self.TESTING = _if_debug(self.TESTING)  # Flask
-            self.APP_MINIFIED = _if_debug(self.APP_MINIFIED, not self.APP_DEBUG)
-            self.DEBUG_TEMPLATES = _if_debug(self.DEBUG_TEMPLATES)  # jinja
-            self.APP_DISPLAY_DEBUG_MSG = _if_debug(self.APP_DISPLAY_DEBUG_MSG)
+        def _if_debug(value):
+            return default if value is None else as_bool(value)
+
+        self.TESTING = _if_debug(self.TESTING)  # Flask
+        self.APP_UNMINIFIED = _if_debug(self.APP_UNMINIFIED)  #
+        self.DEBUG_TEMPLATES = _if_debug(self.DEBUG_TEMPLATES)  # jinja
+        self.DEBUG_RENDERED_TEMPLATES = _if_debug(self.DEBUG_RENDERED_TEMPLATES)
+        self.APP_DISPLAY_DEBUG_MSG = _if_debug(self.APP_DISPLAY_DEBUG_MSG)
 
         if is_str_none_or_empty(self.SECRET_KEY):
             """
@@ -111,7 +113,7 @@ class DynamicConfig(BaseConfig):
     #     return self._db_helper
 
 
-# === Development Config
+# ===[1] Development Config
 class DevelopmentConfig(DynamicConfig):
     """
     The Debug Configuration Class for the App
@@ -120,10 +122,23 @@ class DevelopmentConfig(DynamicConfig):
     APP_MODE = app_mode_development
 
     def __init__(self, fuse: Fuse):
-        super().__init__(fuse, True, True, "127.0.0.1:5000")
+        super().__init__(fuse, True, True, "127.0.0.1:50090")
 
 
-# Production Config
+# ===[2] Stage Config
+class StageConfig(DynamicConfig):
+    """
+    The Staged Configuration Class for the App
+    non-production feature validation, reproduce platform-specific bugs and validate DB migrations/deploys.
+    """
+
+    APP_MODE = app_mode_stage
+
+    def __init__(self, fuse: Fuse):
+        super().__init__(fuse, False, False, "192.168.0.1:5002")
+
+
+# ===[3] Production Config
 class ProductionConfig(DynamicConfig):
     """
     The Production Configuration Class for the App
@@ -132,7 +147,7 @@ class ProductionConfig(DynamicConfig):
     APP_MODE = app_mode_production
 
     def __init__(self, fuse: Fuse):
-        super().__init__(fuse, False, False, "192.168.0.1:54754")
+        super().__init__(fuse, False, False, "192.168.0.1:54454")
 
 
 # Config factory by mode, add others
@@ -140,11 +155,15 @@ def get_config_for_mode(app_mode: str, fuse: Fuse) -> DynamicConfig:
     """
     Return the appropriated Configuration
     """
-    config = None
-    if app_mode == ProductionConfig.APP_MODE:
-        config = ProductionConfig(fuse)
-    elif app_mode == DevelopmentConfig.APP_MODE:
-        config = DevelopmentConfig(fuse)
+    match app_mode:
+        case ProductionConfig.APP_MODE:
+            config = ProductionConfig(fuse)
+        case DevelopmentConfig.APP_MODE:
+            config = DevelopmentConfig(fuse)
+        case StageConfig.APP_MODE:
+            config = StageConfig(fuse)
+        case _:
+            raise ValueError(f"Unknown app_mode: {app_mode!r}")
 
     return config
 

@@ -14,23 +14,36 @@ mgd 2024.03
 {% set dlg_var_v_centered= True %}
 {% set dlg_var_scroll= True %}
 {% set dlg_cls_size= 'modal-lg' %}
+{% set dlg_cls_body= 'document_cls_body' %}
+
 {% set form_close_btn_text = btnCloseForm %}
 
 
 {% extends "/layouts/dialog.html.j2" %}
 
+{# ╒══════════ Base CSS ═══════════╕ #}
 {% block base_blc_head_css %}
+
 {{ documentStyle | safe }}
-{% endblock base_blc_head_css %}
 
+{% endblock %}
+{# ╘══════════ Base CSS ═══════════╛ #}
 
+{# ╒═════════ Dialog Body ═════════╕ #}
 {% block dlg_blc_body %}
-{{ documentBody | safe }}
-{% endblock dlg_blc_body %}
 
-{% block dlg_blc_footer %}
-{% from "includes/_action_forms_and_btns.html.j2" import btn_close %}
-{{ btn_close(action_form__form_close_id, form_close_btn_text) }}
-{% endblock dlg_blc_footer %}
+{{ documentBody | safe }}
+
+{% endblock %}
+{# ╘═════════ Dialog Body ═════════╛ #}
+
+{# ╒════ Dialog Footer Footer ═════╕ #}
+{% block dlg_blc_footer_buttons %}
+
+{% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
+{{ btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, form_close_btn_text) }}
+
+{% endblock %}
+{# ╘════ Dialog Footer Footer ═════s╛ #}
 
 {# eof #}

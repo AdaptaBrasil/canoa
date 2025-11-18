@@ -30,7 +30,7 @@ mgd
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Canoa {%+ if pageTitle %} &ndash; {{pageTitle}}{% endif %}</title>
+    <title>Canoa {%- if pageTitle -%} &ndash; {{pageTitle}}{% endif %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="title" content="Canoa">
     <meta name="author" content="Equipe `Canoa`">
@@ -71,39 +71,28 @@ mgd
 </head>
 
 <body>
-    <main>
-        {# ┌┄┄┄┄ if user logged in ┄┄┄┄┐ #}
+    <header>
+    </header>
+
+    <nav>
         {% if jinja_user() %}
-        {# see 'carranca/templates/private/home.html.j2' #}
+        {# ╒═══════════════ Base Navigator ═══════════════╕ #}
         {% set _nav_button_state= nav_button_state | default('disabled') %}
         {% set _nav_sub_menu = nav_sub_menu | default(False) %}
-        {# ┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈ #}
+        {# ┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┄┈┄┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈ #}
         {% with nav_button_state = _nav_button_state, nav_sub_menu= _nav_sub_menu %}
         {% include 'includes/navigator.html.j2' %}
         {% endwith %}
-        {# ┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈┄┈ #}
-        {# see templates/includes/_form_and_buttons.html.j2 #}
-        {% set action_form__form_close_id= action_form__form_close_id | default('action-form-btn-close-id') %}
-        {% set action_form__form_on_close= action_form__form_on_close | default(public_route('login')) %}
+        {# ╘═══════════════ Base Navigator ═══════════════╛ #}
         {% endif %}
-        {# └┄┄┄┄ if user logged in ┄┄┄┄┘ #}
+    </nav>
 
-        {# ╒═══════ Base Content ══════╕ #}
-        {% block base_blc_content %}
-        {% endblock base_blc_content %}
-        {# ╘═══════ Base Content ══════╛ #}
+    <main>
+        {# ╒═══════════════ Base Main ═══════════════╕ #}
+        {% block base_blc_main %}
+        {% endblock base_blc_main %}
+        {# ╘═══════════════ Base Main ═══════════════╛ #}
     </main>
-
-    {# ╒═══════ Base HTML helpers ══════╕ #}
-    {% block base_blc_htmlHelpers %}
-    {% endblock base_blc_htmlHelpers %}
-    {# ╘═══════ Base HTML helpers ══════╛ #}
-    {% include 'includes/scripts.html' %}
-
-    {# ╒══════════ Base Body JS ════════╕ #}
-    {% block base_blc_body_js %}
-    {% endblock base_blc_body_js %}
-    {# ╘══════════ Base Body JS ════════╛ #}
 
     <div class="form-actions">
         {# ╒═══════ Base Forms ══════╕ #}
@@ -111,6 +100,11 @@ mgd
         {% endblock base_blc_forms %}
         {# ╘═══════ Base Forms ══════╛ #}
     </div>
+
+    {# ╒══════════ Base Body JS ════════╕ #}
+    {% block base_blc_body_js %}
+    {% endblock base_blc_body_js %}
+    {# ╘══════════ Base Body JS ════════╛ #}
 
 </body>
 

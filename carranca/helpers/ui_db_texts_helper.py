@@ -13,21 +13,18 @@ TODO:
 """
 
 # cSpell:ignore getDictResultset connstr adaptabrasil mgmt
-
-from typing import TypeAlias, Optional, Tuple
 from flask_login import current_user
 
-
+from typing import TypeAlias, Optional, Tuple
 from .pw_helper import is_someone_logged
 from .py_helper import is_str_none_or_empty
-
-# TODO from .jinja_helper import process_pre_templates
-from .types_helper import ui_db_texts
-
+from .types_helper import DBTexts, OptStr
+from ..common.UIDBTexts import UIDBTexts
 from ..common.app_constants import APP_LANG
 
 # === Global 'constants' for HTML ui flask forms =============
-from .. import global_ui_texts_cache # it is used, ignore warn
+from .. import global_ui_texts_cache  # it is used, ignore warn
+
 
 # ==== UI Texts Constants ====================================
 class UITextsKeys:
@@ -38,6 +35,7 @@ class UITextsKeys:
         error = "msgError"
         success = "msgSuccess"
         fatal = "msgFatal"
+        tech = "msgTech"
         # display only message, no form, inputs/buttons (see .carranca/templates/layouts/form.html.j2 & dialog.html.j2)
         display_only_msg = "msgOnly"
 
@@ -47,8 +45,10 @@ class UITextsKeys:
     class Form:  # & dialog
         title = "formTitle"
         icon_file = "iconFile"  # only the icon's name
-        icon_url = "iconFileUrl"  # url of an png/svg icon dlg_var_icon_url = iconFileUrl, dlg-var-icon-id
-        icon_css = "" # TODO
+        icon_url = (
+            "iconFileUrl"  # url of an png/svg icon dlg_var_icon_url = iconFileUrl, dlg-var-icon-id
+        )
+        icon_css = ""  # TODO
         date_format = "userDateFormat"
         # This button is only visible when msg_only is True OR is a Dialog/Document (see document.html.j2)
         btn_close = "btnCloseForm"
@@ -65,7 +65,7 @@ class UITextsKeys:
 
         error = "secError"
         success = "secSuccess"
-        # this is a special key that has the name of the section loaded in ui_db_Texts,
+        # this is a special key that has the name of the section loaded in db_Texts,
         # see  get_section
         name = "__section_name__"
 
@@ -94,11 +94,11 @@ class UITexts_TableSearch:
     def exists(self) -> bool:
         return self.as_tuple in global_ui_texts_cache
 
-    def update(self, texts: ui_db_texts | str) -> None:
+    def update(self, texts: DBTexts | str) -> None:
         if self._cfg_cache_lifetime_min == 0:
             global_ui_texts_cache[self.as_tuple] = texts
 
-    def get_text(self) -> Optional[ui_db_texts | str]:
+    def get_text(self) -> DBTexts | str | None:
         if not self.exists():
             return None
         value: dict | str = global_ui_texts_cache[self.as_tuple]
@@ -110,9 +110,7 @@ class UITexts_TableSearch:
         global_ui_texts_cache[UITexts_TableSearch._CACHE_INTERNAL_INFO_KEY] = cache_info
 
     def get_info_value(self) -> dict:
-        cache_value = global_ui_texts_cache.get(
-            UITexts_TableSearch._CACHE_INTERNAL_INFO_KEY, {}
-        )
+        cache_value = global_ui_texts_cache.get(UITexts_TableSearch._CACHE_INTERNAL_INFO_KEY, {})
         return cache_value
 
     @property
@@ -140,9 +138,7 @@ def __get_ui_texts_query(cols: str, table_search: UITexts_TableSearch) -> str:
     # returns Select query for locale, section and, eventually, for only one item.
     # Use SQL lower(item) is better than item.lower because uses db locale.
     optional_item_filter = (
-        ""
-        if table_search.item is None
-        else f" and (item_lower = lower('{table_search.item}'))"
+        "" if table_search.item is None else f" and (item_lower = lower('{table_search.item}'))"
     )
 
     # ** ⚠️ ******************************************************************
@@ -167,13 +163,13 @@ def __get_table_row(table_search: UITexts_TableSearch) -> tuple[str, str]:
     return ("", "") if not result else result
 
 
-def _get_query_as_dict(query) -> ui_db_texts:
-    """returns UI_Texts for the item/section pair"""
+def _get_query_as_dict(query) -> DBTexts:
+    """returns DBTexts for the item/section pair"""
     from .db_helper import retrieve_dict
 
-    result = retrieve_dict(query)
-    # TODO texts = process_pre_templates(result)
-    return result
+    db_texts = retrieve_dict(query)
+    # TODO db_texts = process_pre_templates(result)
+    return db_texts
 
 
 # === TODO use cache  ========================================
@@ -192,50 +188,47 @@ def _msg_not_found() -> str:  ## THIS IS OUTDATED ##
     return mnf
 
 
-def _add_msg(
-    item: str, section: str, name: str, texts: Optional[ui_db_texts] = None, *args
-) -> str:
+def _add_msg(item: str, section: str, name: str, ui_db_texts: UIDBTexts, *args) -> str:
     """Retrieves text and adds it to a dictionary.
 
     Args:
         item: The item identifier.
         section: The section identifier.
         name: The key for the dictionary entry.
-        texts: An optional dictionary to store the retrieved text.
+        ui_db_texts: UIDBTexts.
         args: Optional arguments for formatting the retrieved text.
 
     Returns:
         The formatted text.
-    """
-    s = get_text(item, section)
-    try:
-        value = "" if s is None else (s.format(*args) if args else s)
-    except:
-        value = s
 
-    if texts and value:  # add or refresh
-        texts[name] = value
+    mgd 2025-10-30
+    Check if texts contains the required item
+    This will allow to set the items of sections [secSuccess, secError]
+    in the 'current' section.
+
+    """
+    # new alternative, add the msg on the same section (not in a special one)
+    msg_text: str = ui_db_texts.get_str(item) if ui_db_texts else ""
+    if not msg_text:
+        msg_text = db_retrieve_text(item, section)
+
+    try:
+        value = (
+            "" if is_str_none_or_empty(msg_text) else (msg_text.format(*args) if args else msg_text)
+        )
+    except:
+        value = msg_text
+
+    if ui_db_texts and value:  # add or refresh
+        ui_db_texts[name] = value
 
     return value
 
 
-# =========================================================
-# === public ==============================================
-def format_ui_item(texts: ui_db_texts, key: str, *args):
-    result = texts[key]
-    try:
-        result = result.format(*args)
-    except:
-        # eat this err, user will see it (TODO log if debug)
-        pass
-
-    return result
-
-
 # Cached Texts retrievers ==================================
-def get_section(section_name: str) -> ui_db_texts:
+def get_section(section_name: str) -> DBTexts:
     """
-    returns a UI_Texts of the 'section_name' from table vw_ui_texts
+    returns a DBTexts of the 'section_name' from table vw_ui_texts
     """
     if is_str_none_or_empty(section_name):
         return {}
@@ -247,15 +240,17 @@ def get_section(section_name: str) -> ui_db_texts:
     else:  # not in cache, retrieve section
         query = __get_ui_texts_query("item, text", table_cache)
         items = _get_query_as_dict(query) or {}
-
-        # TODO process_pre_templates(items) # TODO: check if needed
+        # TODO: raise if section does not
+        # if len(items) == 0:
+        #     raise KeyError(f"UI texts section '{section_name}' for [{table_cache.locale}] not found or has no items.")
+        # # TODO process_pre_templates(items) # TODO: check if needed
         items[UITextsKeys.Section.name] = section_name
         items[UITextsKeys.Form.date_format] = table_cache.locale
         table_cache.update(items)
         return items.copy()  # Ensures caller gets a copy, preventing cache pollution
 
 
-def get_text(item: str, section: str, default: str = None) -> str:
+def db_retrieve_text(item: str, section: str, default: OptStr = None) -> str:
     """
     returns text for the item/section pair. if not found, a `warning message`
     """
@@ -278,17 +273,15 @@ def get_text(item: str, section: str, default: str = None) -> str:
     return text
 
 
-def get_app_menu() -> ui_db_texts:
-    app_dic = get_section("appMenu")
-    return app_dic
-
-
 # Texts retrievers helpers ==================================
-def get_form_texts(section_name: str) -> ui_db_texts:
-    items = get_section(section_name)
-    if items:
-        # items = process_pre_templates(items) # TODO:
-        # delete leftover messages, now I'm sure why they're stuck.
+def get_app_menu() -> DBTexts:
+    db_texts = get_section("appMenu")
+    return db_texts
+
+
+def get_db_texts(section_name: str) -> DBTexts:
+    db_texts = get_section(section_name)
+    if db_texts:
         for k in [
             UITextsKeys.Msg.success,
             UITextsKeys.Msg.warn,
@@ -296,44 +289,28 @@ def get_form_texts(section_name: str) -> ui_db_texts:
             UITextsKeys.Msg.fatal,
             UITextsKeys.Msg.display_only_msg,
         ]:
-            if k in items:  # DEBUG
+            if k in db_texts:  # DEBUG
                 print(f"Unexpected item en section {section_name}: {k}.")
-    return items
+    return db_texts
 
 
-def add_msg_warning(item: str, texts: ui_db_texts = {}, *args) -> str:
+def add_msg_warning(item: str, ui_db_texts: UIDBTexts = None, *args) -> str:
     """
     returns text for the [item/'sec_Error'] pair
     and adds pair to texts => texts.add( text, 'msgError')
     """
-    return _add_msg(
-        item, UITextsKeys.Section.error, UITextsKeys.Msg.error, texts, *args
-    )
+    return _add_msg(item, UITextsKeys.Section.error, UITextsKeys.Msg.error, ui_db_texts, *args)
 
 
-def add_msg_error(item: str, texts: ui_db_texts = {}, *args) -> str:
+def add_msg_error(item: str, ui_db_texts: UIDBTexts = None, *args) -> str:
     """
     returns text for the [item/'sec_Error'] pair
     and adds pair to texts => texts.add( text, 'msgError')
     """
-    return _add_msg(
-        item, UITextsKeys.Section.error, UITextsKeys.Msg.error, texts, *args
-    )
+    return _add_msg(item, UITextsKeys.Section.error, UITextsKeys.Msg.error, ui_db_texts, *args)
 
 
-def add_msg_final(item: str, texts: ui_db_texts = {}, *args) -> str:
-    """
-    TODO: fatal
-    Same as add_msg_error, but sets
-    texts[UITxtKey.Msg.display_only_msg] = True,
-    so the form only displays the message (no other form inputs)
-    """
-    msg = add_msg_error(item, texts, *args)
-    texts[UITextsKeys.Msg.display_only_msg] = True
-    return msg
-
-
-def add_msg_success(item: str, texts: ui_db_texts = None, *args) -> str:
+def add_msg_success(item: str, ui_db_texts: UIDBTexts, *args) -> str:
     """
     returns `text` for the [item, 'sec_Success'] pair
     (of the vw_ui_texts wonderful view)
@@ -343,10 +320,24 @@ def add_msg_success(item: str, texts: ui_db_texts = None, *args) -> str:
     the message (no other form inputs)
 
     """
-    msg = _add_msg(
-        item, UITextsKeys.Section.success, UITextsKeys.Msg.success, texts, *args
-    )
-    texts[UITextsKeys.Msg.display_only_msg] = True
+    # TODO:
+    # search for item in texts first, then in 'section'
+    # ren the family to set_ui_msg_xxx
+
+    msg = _add_msg(item, UITextsKeys.Section.success, UITextsKeys.Msg.success, ui_db_texts, *args)
+    ui_db_texts[UITextsKeys.Msg.display_only_msg] = True
+    return msg
+
+
+def add_msg_final(item: str, ui_db_texts: UIDBTexts, *args) -> str:
+    """
+    TODO: fatal
+    Same as add_msg_error, but sets
+    texts[UITxtKey.Msg.display_only_msg] = True,
+    so the form only displays the message (no other form inputs)
+    """
+    msg = add_msg_error(item, ui_db_texts, *args)
+    ui_db_texts[UITextsKeys.Msg.display_only_msg] = True
     return msg
 
 

@@ -17,11 +17,12 @@ from sqlalchemy.engine import CursorResult
 # from psycopg2.errors import ProgrammingError as psycopg2_ProgrammingError
 
 from .py_helper import is_str_none_or_empty, to_str
-from .types_helper import ui_db_texts
-
+from .types_helper import DBTexts
 from .. import global_sqlalchemy_scoped_session
 from ..config import BaseConfig
-from ..common.app_context_vars import sidekick
+
+# Avoid importing sidekick during app initialization
+# from ..common.app_context_vars import sidekick
 from ..common.app_error_assistant import AppStumbled, ModuleErrorCode
 
 
@@ -54,11 +55,9 @@ def try_get_mgd_msg(error: object, default_msg: str = None) -> str:
         return mgd_message if is_mgd else default_msg
 
 
-def col_names_to_columns(
-    column_names: List[str], columns: list[Column]
-) -> List[Column]:
+def col_names_to_columns(column_names: List[str], columns: list[Column]) -> List[Column]:
     if not column_names:
-        return columns
+        return []
 
     selected_cols = [col for col in columns if col.name in column_names]
     return selected_cols
@@ -98,9 +97,7 @@ def db_fetch_rows(
 
         # TODO LOG to log
         err_code = f"[{e.code}]" if hasattr(e, "code") else ""
-        sidekick.display.error(
-            f"[{func_or_query}]: '{msg}'; Table: [{table_name}]; Error{err_code} details: {e}."
-        )
+        sidekick.display.error(f"[{func_or_query}]: '{msg}'; Table: [{table_name}]; Error{err_code} details: {e}.")
 
         if table_name:
             db_ups_error(e, msg, table_name)
@@ -152,8 +149,6 @@ def retrieve_rows(query: str) -> Optional[Union[Any, Tuple]]:
       - A single value if the query returns a single row with a single column.
       - None if an error occurs or the query returns no results.
     """
-    from ..common.app_context_vars import sidekick
-
     try:
         err, _, data_cursor = db_fetch_rows(query)
         # TODO:
@@ -177,11 +172,13 @@ def retrieve_rows(query: str) -> Optional[Union[Any, Tuple]]:
             # Single row with a single column
             return (rows[0][0],)
     except Exception as e:
+        from ..common.app_context_vars import sidekick
+
         sidekick.app_log.error(f"An error occurred retrieving db data [{query}]: {e}")
         return tuple()
 
 
-def retrieve_dict(query: str):
+def retrieve_dict(query: str) -> DBTexts:
     """
     Executes the query and attempts to return the result as a dictionary,
     assuming the result consists of two columns (key, value) per row.
@@ -193,11 +190,10 @@ def retrieve_dict(query: str):
       - A dictionary where the first column is the key and the second column is the value.
       - An empty dictionary if the query returns no data or an error occurs.
     """
-    from ..common.app_context_vars import sidekick
 
     data = retrieve_rows(query)
 
-    result: ui_db_texts = {}
+    result: DBTexts = {}
     try:
         if data and isinstance(data, tuple):
             # Check if data contains multiple rows of at least two columns
@@ -208,9 +204,9 @@ def retrieve_dict(query: str):
                 # result = {data[0]: data[1]}
                 result = {data[i]: data[i + 1] for i in range(0, len(data) - 1, 2)}
     except Exception as e:
-        sidekick.app_log.error(
-            f"An error occurred loading the dict from [{query}]: {e}"
-        )
+        from ..common.app_context_vars import sidekick
+
+        sidekick.app_log.error(f"An error occurred loading the dict from [{query}]: {e}")
         result = {}
 
     # # Check if the result is a tuple of tuples (multiple rows)
@@ -236,9 +232,9 @@ def get_str_field_length(table_model: object, field_name: str) -> int:
 # TODO
 def db_ups_error(e: Exception, msg_error: str, table_name: str) -> None:
     if not e is None:
-        sidekick.display.error(
-            f"Fatal error while fetching rows in table [{table_name}]: {msg_error}"
-        )
+        from ..common.app_context_vars import sidekick
+
+        sidekick.display.error(f"Fatal error while fetching rows in table [{table_name}]: {msg_error}")
         raise AppStumbled(msg_error, ModuleErrorCode.DB_FETCH_ROWS, False, True, e)
 
     return

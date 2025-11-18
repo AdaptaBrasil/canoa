@@ -1,0 +1,25 @@
+{# ------------------------------------
+_action_forms_and_btns.js.j2
+
+Macros helper for Action Forms and Buttons HTML
+
+v2 2025.09.20
+mgd
+
+Spell:ignore endmacro preid onclick
+#}
+
+{% macro form_link_action(submit_form_id, response_id)%}
+	document.addEventListener('DOMContentLoaded', () => {
+		const elForm = /** @type {HTMLFormElement} */(document.getElementById('{{ submit_form_id }}'));
+		const elResponse = /** @type {HTMLInputElement} */(document.getElementById('{{ response_id }}'));
+		elForm?.addEventListener('submit', (event) => {
+			event.preventDefault();
+			cargo[cargoKeys.action] = event.submitter.id;
+			elResponse.value = JSON.stringify(cargo);
+			elForm.submit();
+		})
+	});
+{% endmacro %}
+
+{# eof #}

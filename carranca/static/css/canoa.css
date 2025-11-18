@@ -70,8 +70,6 @@ body {
 
 .dlg-body {
     background-color: var(--canoa-form-body-bg);
-    border-bottom-left-radius: var(--bs-modal-inner-border-radius);
-    border-bottom-right-radius: var(--bs-modal-inner-border-radius);
 }
 
 .dlg-header {
@@ -85,11 +83,36 @@ body {
     /* to align the icon vertically */
 }
 
-.dlg-icon-back {
+.dlg-sleep {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background-color: rgba(0, 0, 0, 0.3);
+    opacity: 1;
+
+    z-index: 10;
+
+    /* a la vuelta al contrario:
+    pointer-events: none;
+    transition: opacity 0.8s ease, background-color 0.8s ease;
+    opacity: 0;
+    transition: opacity 0.8s ease, background-color 0.8s ease;
+     */
+}
+
+.dlg-sep-icon-back {
     background-color: var(--adaptabrasil-back-color);
     vertical-align: middle;
     display: inline-block;
     padding: 1px;
+}
+
+.dlg-icon-back {
+    vertical-align: middle;
+    display: inline-block;
 }
 
 .dlg-icon-img {
@@ -99,6 +122,7 @@ body {
 .dlg-footer {
     background-color: var(--canoa-form-footer-bg);
     min-height: 2rem;
+    padding: 0rem !important;
 }
 
 /* dialog ids */
@@ -113,6 +137,17 @@ body {
     color: var(--bs-dropdown-link-color) !important;
 }
 
+/* ============================================
+ *  carranca\templates\home\document.html.j2
+ * ============================================ */
+.document_cls_body {
+    /* light dialog footer */
+    background-color: #fff8f1;
+    font-family: "Source Sans Pro", sans-serif;
+    color: black;
+    font-size: 1rem;
+    line-height: 1.2;
+}
 
 /* =+===========================================
  *  ag-grid override
@@ -147,6 +182,11 @@ body {
     transition: background-color 0.2s ease;
 }
 
+.ag-cell-focus.ag-cell-not-inline-editing.grd-col-sep_new {
+    border: 1px solid var(--ag-range-selection-border-color) !important;
+    /* initial  */
+}
+
 /* ============================================
  *  carranca\templates\layouts\grid.html.j2
  * ============================================ */
@@ -166,9 +206,37 @@ body {
     color: limegreen;
 }
 
-.ag-cell-focus.ag-cell-not-inline-editing.grd-col-sep_new {
-    border: 1px solid var(--ag-range-selection-border-color) !important;
-    /* initial  */
+.grid-body {
+    padding: 0.5rem;
+}
+
+
+/* ============================================
+ * carranca\templates\includes\backend-msg.html.j2
+ * ============================================ */
+
+.backend-msg-alert {
+    /* Set position to relative for absolute positioning of the icon if needed */
+    /* position: relative; */
+}
+
+.backend-msg-icon {
+    /* Use absolute positioning to move it to the true corner */
+    /* position: absolute;
+    top: 0.2rem;
+    left: 0.2rem;
+    font-size: 1.5rem;
+    line-height: 1; */
+    display: none;
+    /*
+        Error	❌ (Heavy X)	fa-xmark	\f00d
+        Fatal Error	💀 (Skull)	fa-skull-crossbones	\f714
+        Warn / Alert	⚠️ (Warning Sign)	fa-triangle-exclamation	\f071
+        Info	ℹ️ (Info Source)	fa-circle-info	\f05a
+        Tech Info	⚙️ (Gear)	fa-gears (or fa-gear)	\f085 (or \f013)
+        Success	✅ (Check Mark)	fa-circle-check	\f058
+    */
+
 }
 
 /* ============================================
@@ -225,14 +293,15 @@ body {
     border-radius: var(--bs-border-radius);
 }
 
-
 .form-main-btn:hover {
     /* same as fillcolor of carranca\static\icons\ups_handler.svg */
     filter: brightness(130%);
 }
 
 .form-main-btn:disabled {
-    filter: brightness(60%);
+    filter: brightness(70%);
+    color: var(--canoa-form-button-color);
+    background-color: var(--canoa-form-button-bg);
 }
 
 .form-icon-btn {

@@ -17,7 +17,7 @@ let removeCount = 0;
 const gridOptions = {
     rowSelection: 'single',
     onGridReady: (params) => {
-        const firstRow = params.api.getDisplayedRowAtIndex(cargo[cargoKeys.index]);
+        const firstRow = params.api.getDisplayedRowAtIndex(cargo[cargoKeys.row_index]);
         if (firstRow) {
             setTimeout(() => { firstRow.setSelected(true); setActiveRow(firstRow, firstRow.rowIndex) }, 20);
         }
@@ -28,18 +28,24 @@ const gridOptions = {
     }
     , rowData: gridRows
     , columnDefs: [
-        { field: colCode, flex: 1, hide: true },
-        { field: colIconUrl, flex: 1, hide: true },
-        { field: colMeta[2].n, headerName: colMeta[2].h, hide: false, flex: 3 },
-        { field: colMeta[3].n, headerName: colMeta[3].h, hide: false, flex: 3 },
-        { field: colMeta[4].n, headerName: colMeta[4].h, hide: false, flex: 3 },
-        { field: colMeta[5].n, headerName: colMeta[5].h, hide: false, flex: 1 },
+        { field: colCode, hide: true },
+        { field: colIconUrl, hide: true },
+        { field: colMeta[2].n, headerName: colMeta[2].h, flex: 3 },
+        { field: colMeta[3].n, headerName: colMeta[3].h, flex: 3 },
+        { field: colMeta[4].n, headerName: colMeta[4].h, flex: 3 },
+        {
+            field: colMeta[5].n,
+            headerName: colMeta[5].h,
+            headerClass: 'text-center',
+            cellStyle: { display: 'flex', justifyContent: 'center' },
+            flex: 1
+        },
     ]
 }; // gridOptions
 
 const setActiveRow = (row, rowIx) => {
     if (!row) { return; }
-    cargo[cargoKeys.index] = rowIx;
+    cargo[cargoKeys.row_index] = rowIx;
     cargo[cargoKeys.code] = row.data[colCode]
     if (icon.src != row.data[colIconUrl]) {
         icon.src = row.data[colIconUrl];

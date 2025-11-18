@@ -58,7 +58,7 @@ def process(
 
     current_module_name = __name__.split(".")[-1]
 
-    def _get_next_params(cargo: Cargo) -> list[object, dict]:
+    def _get_next_params(cargo: Cargo) -> Tuple[object, dict]:
         """
         Extracts the parameters of the next procedure,
         initialize cargo and returns to the loop
@@ -162,7 +162,9 @@ def process(
                     g_report_ready_at=cargo.report_ready_at,
                     h_email_started_at=cargo.email_started_at,
                     z_process_end_at=process_ended,
-                    error_msg=("<no error message>" if is_str_none_or_empty(msg_error) else msg_error),
+                    error_msg=(
+                        "<no error message>" if is_str_none_or_empty(msg_error) else msg_error
+                    ),
                     error_text=msg_exception,
                 )
                 _updated(error_code)

@@ -20,6 +20,7 @@ from sqlalchemy import (
     select,
 )
 from sqlalchemy.orm import Session
+from typing import List
 
 from ...models import SQLABaseTable
 from ...private.IdToCode import IdToCode
@@ -51,8 +52,8 @@ class SchemaGrid(SQLABaseTable):
     @staticmethod
     def get_schemas(
         col_names: OptListOfStr = None,
-        only_visible: bool = None,
-    ) -> DBRecords:
+        only_visible: bool | None = None,
+    ) -> DBRecords: # List["SchemaGrid"], does not have .to_list()
         """
         Returns:
           All records from SchemaGrid table, optional of selected fields

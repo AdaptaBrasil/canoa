@@ -13,6 +13,7 @@ from typing import Optional
 
 from ..helpers.py_helper import is_str_none_or_empty
 from ..helpers.file_helper import folder_must_exist
+from ..helpers.types_helper import SvgContent
 from ..common.app_context_vars import sidekick
 from ..common.app_error_assistant import AppStumbled, JumpOut
 from ..models.private import Sep
@@ -27,7 +28,7 @@ def icon_refresh(ifn_old: str, ifn_new: str, sep_id: int) -> bool:
 
     Deletes the 'old' icon file and creates a 'new' one
     """
-
+    file_full_name = '?'
     refreshed = False
     try:
         if is_str_none_or_empty(ifn_old) or ifn_old in SYSTEM_ICONS:
@@ -67,7 +68,7 @@ def do_icon_get_url(icon_file_name: str, sep_id: Optional[int] = None) -> str:
     returns the file's url
     """
 
-    if icon_file_name is None:
+    if is_str_none_or_empty(icon_file_name):
         icon_file_name = SepIconMaker.none_file
     elif icon_file_name == "":
         icon_file_name = SepIconMaker.empty_file
@@ -75,12 +76,12 @@ def do_icon_get_url(icon_file_name: str, sep_id: Optional[int] = None) -> str:
     file_full_name = SepIconMaker.get_full_name(icon_file_name)
     icon_url = SepIconMaker.get_url(icon_file_name)
 
+    content: SvgContent= ""
     if not folder_must_exist(SepIconMaker.local_path):
         # TODO: express this error more clearly
         sidekick.display.error(f"Cannot create folder [{SepIconMaker.local_path}]")
-        return None
+        return ''
     elif not icon_ready(file_full_name):
-        content = ""
         match icon_file_name:
             case SepIconMaker.error_file:
                 content = SepIconMaker.error_content

@@ -16,7 +16,7 @@ from ...helpers.py_helper import now, to_str
 from ...common.app_error_assistant import ModuleErrorCode
 from ...helpers.ui_db_texts_helper import add_msg_error, add_msg_success, add_msg_final
 from ...helpers.route_helper import (
-    get_front_end_str,
+    get_form_input_value,
     init_response_vars,
     get_account_response_data,
 )
@@ -36,16 +36,18 @@ def password_reset(token):
         return 0 <= days <= max
 
     task_code = ModuleErrorCode.ACCESS_CONTROL_PW_RESET.value
-    flask_form, tmpl_ffn, is_get, texts = init_response_vars()
+    tmpl_rfn, is_get, texts = init_response_vars()
     # TODO test, fake form?
 
     try:
         task_code += 1  # 1
-        tmpl_ffn, is_get, texts = get_account_response_data("passwordreset", "password_reset_or_change")
+        tmpl_rfn, is_get, texts = get_account_response_data(
+            "passwordreset", "password_reset_or_change"
+        )
         token_str = to_str(token)
-        password = "" if is_get else get_front_end_str("password")
+        password = "" if is_get else get_form_input_value("password")
         task_code += 1  # 2
-        confirm_password = "" if is_get else get_front_end_str("confirm_password")
+        confirm_password = "" if is_get else get_form_input_value("confirm_password")
 
         # If you need the password pwd=  hash_pass(password);
         task_code += 1  # 3
@@ -78,7 +80,7 @@ def password_reset(token):
         sidekick.app_log.debug(msg)
 
     return render_template(
-        tmpl_ffn,
+        tmpl_rfn,
         form=flask_form,
         **texts,
     )

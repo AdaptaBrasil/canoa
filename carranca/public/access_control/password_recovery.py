@@ -11,35 +11,35 @@ mgd
 from flask import render_template, request
 import secrets
 
+from ..wtforms import PasswordRecoveryForm
+from ...models.public import get_user_where
 from ...models.public import persist_user
+from ...helpers.email_helper import RecipientsListStr
 from ...helpers.sendgrid_helper import send_email
 from ...common.app_error_assistant import ModuleErrorCode
-from ...helpers.email_helper import RecipientsListStr
 from ...helpers.ui_db_texts_helper import add_msg_error, add_msg_success, add_msg_final
 from ...helpers.route_helper import (
     public_route,
-    get_front_end_str,
+    get_form_input_value,
     init_response_vars,
     is_external_ip_ready,
     get_account_response_data,
     public_route__password_reset,
 )
-from ...models.public import get_user_where
-from ..wtforms import PasswordRecoveryForm
 
 
 def password_recovery():
     from ...common.app_context_vars import sidekick
 
     task_code = ModuleErrorCode.ACCESS_CONTROL_PW_RECOVERY.value
-    flask_form, tmpl_ffn, is_get, texts = init_response_vars()
+    tmpl_rfn, is_get, texts = init_response_vars()
     try:
         task_code += 1  # 1
-        flask_form = PasswordRecoveryForm(request.form)
+        form = PasswordRecoveryForm(request.form)
         task_code += 1  # 2
-        tmpl_ffn, is_get, texts = get_account_response_data("passwordRecovery")
+        tmpl_rfn, is_get, texts = get_account_response_data("passwordRecovery")
         task_code += 1  # 3
-        requested_email = "" if is_get else get_front_end_str("user_email").lower()
+        requested_email = "" if is_get else get_form_input_value("user_email").lower()
         task_code += 1  # 4
         record_to_update = None if is_get else get_user_where(email=requested_email)
 
@@ -68,7 +68,7 @@ def password_recovery():
         sidekick.app_log.error(e)
         sidekick.app_log.debug(msg)
 
-    return render_template(tmpl_ffn, form=flask_form, **texts)
+    return render_template(tmpl_rfn, form=form, **texts)
 
 
 # eof

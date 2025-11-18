@@ -18,9 +18,7 @@ def do_scm_import(json_string: str) -> UsualDict:
     """
     _dict = json.loads(json_string)
 
-    decoded_dict = json_to_dict(_dict, True)
-
-    # TODO
+    decoded_dict: UsualDict = json_to_dict(_dict, True)
 
     return decoded_dict
 

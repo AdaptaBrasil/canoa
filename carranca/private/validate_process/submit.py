@@ -52,9 +52,8 @@ def _store_report_result(
         else:
             rd = re.findall(stdout_result_pattern, std_out_str)
             if len(rd) == 0:
-                result_json_str = _local_result(
-                    f"no data matched regex: [{stdout_result_pattern}]"
-                )
+                result_json_str = f"{_local_result(f"no data matched regex: [{stdout_result_pattern}]")}\n'std_out_str': [{std_out_str}]"
+
             else:
                 result_json_str = rd[0][1:-1]
                 result = ""
@@ -127,13 +126,14 @@ def submit(cargo: Cargo) -> Cargo:
     #     {"msg_success": ''},
     # )
 
+    _path_read = cargo.pd.path.data_tunnel_user_read
+    _path_write = cargo.pd.path.data_tunnel_user_write
     try:
         task_code += 1  # 2
         # shortcuts
         _cfg = cargo.receive_file_cfg
         _path = cargo.pd.path
-        _path_read = cargo.pd.path.data_tunnel_user_read
-        _path_write = cargo.pd.path.data_tunnel_user_write
+
         batch_full_name = _path.batch_full_name
         data_validate_path = cargo.pd.path.data_validate
         batch_has_run_permission = True
@@ -144,7 +144,7 @@ def submit(cargo: Cargo) -> Cargo:
             )
         elif OS_IS_LINUX and not access(batch_full_name, X_OK):
             batch_has_run_permission = False
-            sidekick.warn(
+            sidekick.display.warn(
                 f"Account doesn't have the necessary permissions to execute '{batch_full_name}'."
             )
 
@@ -178,6 +178,8 @@ def submit(cargo: Cargo) -> Cargo:
         task_code += 1  # 7
         if not path.exists(final_report_full_name):
             task_code += 1  # 8
+            def _x(std_str: str) -> str:
+                return f"\n'{std_str}'" if std_str else "'<empty>.'"
             raise Exception(
                 f"\n{sidekick.app_name}: Report was not found."
                 + (
@@ -185,17 +187,18 @@ def submit(cargo: Cargo) -> Cargo:
                     if not batch_has_run_permission
                     else ""
                 )
-                + f"\n » {_cfg.dv_app.ui_name}.stderr:\n{std_err_str}"
-                + f"\n » {_cfg.dv_app.ui_name}.stdout:\n {std_out_str}"
+                + f"\n » {_cfg.dv_app.ui_name}.stderr: {_x(std_err_str)}"
+                + f"\n » {_cfg.dv_app.ui_name}.stdout: {_x(std_out_str)}"
                 + f"\nExitCode {exit_code}"
                 + "\nEnd."
             )
         elif stat(final_report_full_name).st_size < 200:
             task_code += 2  # 9
             raise Exception(
-                f"\n{sidekick.app_name}: Report has an invalid size = {stat(final_report_full_name).st_size}b."
+                f"\n{sidekick.app_name}: The report has an invalid size of = {stat(final_report_full_name).st_size}b."
             )
         else:
+            # ⚠️ PDF is moved to /canoa/user_files/uploaded/<user_id>
             # copy the final_report file to the same folder and
             # with the same name as the uploaded file,
             # But with extension `result_ext`
@@ -220,18 +223,24 @@ def submit(cargo: Cargo) -> Cargo:
             std_out_str,
         )
         try:
+            def _remove_folder(folder: str ):
+                msg = f"The intermediate process folder '{folder}' was "
+                if path.exists(folder) and path.isdir(folder):
+                    shutil.rmtree(folder)
+                    sidekick.app_log.info(msg + "removed.")
+                else:
+                    sidekick.app_log.warning(msg + "not found.")
+
             if cargo.receive_file_cfg.remove_tmp_files:
-                shutil.rmtree(_path_read)
-                shutil.rmtree(_path_write)
+                _remove_folder(_path_read)
+                _remove_folder(_path_write)
             else:
                 sidekick.app_log.info(
-                    "The communication folders contents was not removed, as requested."
+                    "The intermediate process folders contents was *not* removed, as requested."
                 )
-                pass  # leave the files for debugging
-
-        except:
+        except e:
             sidekick.app_log.warning(
-                "The communication folders contents were *not* removed because of an error."
+                f"The intermediate process folders contents were *not* removed because of an error [{e}]."
             )
 
     # goto email.py

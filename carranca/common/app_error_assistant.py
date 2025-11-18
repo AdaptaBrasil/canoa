@@ -9,7 +9,10 @@ Equipe da Canoa  2024 — 2025
 mgd
 """
 
-from enum import IntEnum
+# type: ignore[reportUnknownMemberType]
+
+from enum import IntEnum, StrEnum
+from typing import Optional
 
 from ..helpers.py_helper import crc16, now_as_iso
 
@@ -25,10 +28,7 @@ def proper_user_exception(e: Exception, task_code: int) -> str:
         str: A detailed error message for support/administrative users, or a
              code (e-code) that is searchable in the log
     """
-    from .app_context_vars import (
-        app_user,
-        sidekick,
-    )  # global_sidekick is not ready yet when this module is used
+    from .app_context_vars import app_user, sidekick  # global_sidekick is not ready yet when this module is used
 
     error_str = str(e)
     code = crc16(error_str)
@@ -41,13 +41,8 @@ def proper_user_exception(e: Exception, task_code: int) -> str:
         return info_str
 
 
-def did_I_stumbled(e: Exception):
-    """Is it me who stumbled?"""
-    return isinstance(e, AppStumbled)
-
-
 def code_interrupted(e: Exception):
-    """Is it me who stumbled?"""
+    """Is it me interrupted?"""
     return isinstance(e, JumpOut)
 
 
@@ -68,13 +63,15 @@ class AppStumbled(Exception):
         error_code: int = 0,
         logout: bool = False,
         is_fatal: bool = False,
-        original_e: Exception = None
+        original_e: Optional[Exception] = None,
+        tech_info: Optional[str] = None,
     ):
         self.msg = msg
         self.error_code = error_code
         self.logout = logout
         self.is_fatal = is_fatal
         self.original_e = original_e
+        self.tech_info = tech_info
 
     def __str__(self):
         return f"{self.msg} (Error Code: {self.error_code}, Logout: {self.logout}, Fatal: {self.is_fatal})"
@@ -90,6 +87,9 @@ class ModuleErrorCode(IntEnum):
 
     # User Interface Text Retrieval
     UI_TEXTS = 170  # 1
+    # Jinja Helper
+    TEMPLATE_ERROR = 171
+    TEMPLATE_BUG = 172
 
     # RECEIVE_FILE_* =: [200... 270] + 100
     RECEIVE_FILE_ADMIT = 200
@@ -108,16 +108,26 @@ class ModuleErrorCode(IntEnum):
     SEP_GRID = 600
     SCM_GRID = 700
     SCM_EDIT = 750
-    SCM_EXPORT = 800
+    SCM_EXPORT_UI_SHOW = 800
+    SCM_EXPORT_UI_SAVE = 820
+    SCM_EXPORT_DB = 840
+    CONFIRM_EMAIL = 850
 
     DB_FETCH_ROWS = 590  # only on
 
     RECEIVED_FILES_MGMT = 700
 
 
+class HTTPStatusCode(StrEnum):
+    # this are key for table ui_items.name = <key>, section= 2 (secError)
+    CODE_400 = "HTTP-400"  # 400 Bad Request:
+    CODE_404 = "HTTP-404"  # 404 Not Found
+    CODE_405 = "HTTP-405"  # 404 Not Found
+
+
 class RaiseIf:
-    """Flags to raise an error if
-    or just ignore the condition
+    """Flags to raise an error
+    or just print the condition
     """
 
     ignite_no_sql_conn = True

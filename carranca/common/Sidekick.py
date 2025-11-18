@@ -35,7 +35,6 @@ Sidekick
           app_context_vars.py
 
 """
-
 # cSpell:ignore sqlalchemy mgd appcontext
 
 from flask import Flask, current_app
@@ -59,12 +58,12 @@ class Sidekick:
         self.debugging = self.config.APP_DEBUGGING
         self.display = display
         self.started_at = datetime.now()
+        self.log_filename = ''
         display.debug(f"{self.__class__.__name__} was created.")
 
     # TODO remove almost unused
     @property
     def app(self) -> Flask:
-
         return current_app
 
     @property

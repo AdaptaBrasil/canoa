@@ -10,47 +10,61 @@ carranca/templates/accounts/
 
 mgd
 --------------------------------------- #}
-{# cSpell:ignore mt_x #}
+{# cSpell:ignore #}
 
 {# ┌┄┄┄┄┄┄┄┄┄┄┄┄┄ if any message exists ┄┄┄┄┄┄┄┄┄┄┄┄┄┐ #}
-{% if msgInfo or msgWarn or msgError or msgSuccess %}
+{% if msgInfo or msgWarn or msgError or msgSuccess or msgTech %}
 
 <div class="text-center text-md-center">
     <h6 class="font-weight-normal">
         {# Warn is only used is ups_handler, to show a 'light error', if user is adm, follows str(e) #}
-        {% set mt_x= "mt-0" %}
-        {% set mt_d= "mt-2" %}
+        {% set first_msg = True %}
 
         {# ┄┄┄┄┄ Warning ┄┄┄┄┄ #}
         {% if msgWarn %}
-        <div class="alert alert-warning mb-0">
-            {{ msgWarn | safe }}
+        <div class="alert alert-warning {% if not first_msg %}mt-1{% endif %} mb-0">
+            <i class="backend-msg-icon" inert>⚠️</i>
+            <div>{{ msgWarn | safe }}</div>
         </div>
-        {% set mt_x= mt_d %}
+         {% set first_msg = False %}
         {% endif %}
 
         {# ┄┄┄┄┄ Error ┄┄┄┄┄ #}
         {% if msgError %}
-        <div class="alert alert-danger mb-0 {{mt_x}}">
-            {{ msgError | safe }}
+        <div class="alert alert-danger {% if not first_msg %}mt-1{% endif %} mb-0">
+            <i class="backend-msg-icon" inert>🛑</i>
+            <div>{{ msgError | safe }}</div>
         </div>
-        {% set mt_x= mt_x or mt_d %}
+         {% set first_msg = False %}
         {% endif %}
 
         {# ┄┄┄┄┄ Success ┄┄┄┄┄ #}
         {% if msgSuccess %}
-        <div class="alert alert-success mb-0 {{mt_x}}">
-            {{ msgSuccess | safe }}
+        <div class="alert alert-success {% if not first_msg %}mt-1{% endif %} mb-0">
+            <i class="backend-msg-icon" inert>⭐</i>
+            <div>{{ msgSuccess | safe }}</div>
         </div>
-        {% set mt_x= mt_x or mt_d %}
+         {% set first_msg = False %}
         {% endif %}
 
         {# ┄┄┄┄┄ Information ┄┄┄┄┄ #}
         {% if msgInfo %}
-        <div class="alert alert-info mb-0 {{mt_x}}">
-            {{ msgInfo | safe }}
+        <div class="alert alert-info {% if not first_msg %}mt-1{% endif %} mb-0">
+            <i class="backend-msg-icon" inert>🛈</i>
+            <div>{{ msgInfo | safe }}</div>
         </div>
+         {% set first_msg = False %}
         {% endif %}
+
+        {# ┄┄┄┄┄ Technical ┄┄┄┄┄ #}
+        {% if msgTech %}
+        <div class="alert alert-dark {% if not first_msg %}mt-1{% endif %} mb-0">
+            <i class="backend-msg-icon" inert>⚙️</i>
+            <div>{{ msgTech | safe }}</div>
+        </div>
+         {% set first_msg = False %}
+        {% endif %}
+
     </h6>
 </div>
 

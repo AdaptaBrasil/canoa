@@ -18,7 +18,7 @@
 
 """
 
-# cSpell:ignore SQLALCHEMY searchpath
+# cSpell:ignore SQLALCHEMY UNMINIFIED searchpath
 
 from os import path
 from flask import Config
@@ -34,9 +34,11 @@ CONFIG_MANDATORY_KEYS = [
     "APP_MODE",
 ]
 
+type TrueInDebug = bool | None
 # === Available app/config modes, add yours own mode here (extend)
 app_mode_production: str = "Production"  # capital P
 app_mode_development: str = "Development"  # capital D
+app_mode_stage: str = "Stage"  # capital S
 # ---------------------------
 # Get the folder from main.py
 app_folder = path.abspath(path_remove_last_folder(path.dirname(__file__)))
@@ -65,21 +67,22 @@ class BaseConfig(Config):
     """
     # This is the final debug state of the app.
     #  See _get_debug_2 & Fuse
-    APP_DEBUGGING: bool = None
+    APP_DEBUGGING: TrueInDebug = None
     # see initialize:
     #  several keys are set to APP_PROPAGATE_DEBUG
     #  when it's config value is None
     APP_PROPAGATE_DEBUG = False
     # set in derived classes
-    APP_DEBUG: bool = None
-    APP_MINIFIED: bool = None  # <- True if APP_PROPAGATE_DEBUG else False
-    APP_DISPLAY_DEBUG_MSG: bool = None  # <- True if APP_PROPAGATE_DEBUG else False
+    APP_DEBUG: TrueInDebug = None
+    APP_UNMINIFIED: TrueInDebug = False  #
+    APP_DISPLAY_DEBUG_MSG: TrueInDebug = None
+
     APP_MODE = "None"  # see below (enum)
     # see main.py, uses package `watchfiles` if --no-reload is set in launch.json
     APP_AUTO_RELOAD = True  # <- True if APP_PROPAGATE_DEBUG else False
 
     # UI Texts cache (to avoid multiple DB queries)
-    # (see table ui_texts, ui_db_texts.py and carranca.py>global_ui_texts_cache: dict)
+    # (see table ui_texts, UIDbTexts.py and carranca.py>global_ui_texts_cache: dict)
     # 0= no cache; -1 < 0 infinite; n > 0 = _n_ minutes
     APP_UI_DB_TEXTS_CACHE_LIFETIME_MIN = 0
 
@@ -90,17 +93,26 @@ class BaseConfig(Config):
     EMAIL_ORIGINATOR = ""  # from os_environment
     EMAIL_ORIGINATOR_NAME = f"e-mail de {APP_NAME}"
     # "  with key
-    EMAIL_API_KEY = ""  # from os_environment
+    SENDGRID_API_KEY = ""  # from os_environment
     # Folders
     APP_FOLDER = app_folder
     # storage area (user_files, schema_icons...)
     COMMON_PATH = path_remove_last_folder(app_folder)
 
+    # The name of the folder for storing sensitive, non-versioned files.
+    LOCAL_STORAGE_FOLDER = "LocalStorage"
+    # ⚠️ CRITICAL: This path points to a directory for sensitive, non-versioned files.
+    # It MUST NOT be committed to Git or any other version control system. This
+    # directory is intended for confidential information such as API keys, service
+    # account credentials (e.g., 'canoa-gmail-key.json'), and other secrets that
+    # must never be exposed in the codebase.
+    LOCAL_STORAGE_PATH = path.join(COMMON_PATH, LOCAL_STORAGE_FOLDER)
+
     # My address service is SERVER_EXTERNAL_IP is empty
     # (used to send recovery email confirmation, etc)
     EXTERNAL_IP_SERVICE = "https://checkip.amazonaws.com"
     # satelier.dev.br
-    SERVER_EXTERNAL_IP = "177.43.119.39"
+    # SERVER_EXTERNAL_IP = "177.43.119.39"
     SERVER_EXTERNAL_PORT = ""
 
     """ Flask Configuration
@@ -109,13 +121,14 @@ class BaseConfig(Config):
         this must be set individually for each APP_MODE (see config.py)
         to send envvars directly to flask use the FLASK_ prefix
     """
-    DEBUG: bool = None  # <- True if APP_PROPAGATE_DEBUG else False
-    TESTING: bool = None  # <- True if APP_PROPAGATE_DEBUG else False
-    DEBUG_TEMPLATES: bool = None  # <- True if APP_PROPAGATE_DEBUG else False
+    DEBUG: TrueInDebug = None  # <- True if APP_PROPAGATE_DEBUG else False
+    TESTING: TrueInDebug = None  # <- True if APP_PROPAGATE_DEBUG else False
+    DEBUG_TEMPLATES: TrueInDebug = None  # <- True if APP_PROPAGATE_DEBUG else False
+    DEBUG_RENDERED_TEMPLATES: TrueInDebug = None  # <- True if APP_PROPAGATE_DEBUG else False
     # this does'nt work (spend a day to find out), is SERVER_NAME: SERVER_ADDRESS = ""
     # https://flask.palletsprojects.com/en/latest/config/#SERVER_NAME
     # Inform the application what host and port it is bound to (NO Scheme).
-    # SERVER_NAME = "" use it after understand how
+    # SERVER_NAME = '' use it after understand how
     PREFERRED_URL_SCHEME = ""
     SECRET_KEY = ""
     SESSION_COOKIE_NAME = f"{APP_NAME.lower()}"
@@ -134,9 +147,9 @@ class BaseConfig(Config):
     LOG_TO_FILE = True  # Log
     LOG_MIN_LEVEL = logging.INFO
     # folder is log_files
-    LOG_FILE_FOLDER: str = None  # "log_files"
-    LOG_FILE_NAME: str = None  # defaults to APP_NAME.datetime.log
-    LOG_FILE_STATUS = "?"  # internal set
+    LOG_FILE_FOLDER = ""  # "log_files"
+    LOG_FILE_NAME = ""  # defaults to APP_NAME.datetime.log
+    LOG_FILE_STATUS = "?"  # internal set at startup
 
     """ Database constant
         --------------------------

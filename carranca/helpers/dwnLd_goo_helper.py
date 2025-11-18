@@ -170,10 +170,8 @@ def download_public_google_file(
 
         scope = ["https://www.googleapis.com/auth/drive.readonly"]
 
-        # TODO: Pass as param
         service_account_file = path.join(
-            sidekick.config.COMMON_PATH,
-            "LocalStorage",
+            sidekick.config.LOCAL_STORAGE_PATH,
             "canoa-download-key.json",
         )
 

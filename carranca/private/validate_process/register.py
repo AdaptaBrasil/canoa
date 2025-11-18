@@ -81,6 +81,7 @@ def register(cargo: Cargo, file_data: object | str) -> Cargo:
             b_process_started_at=cargo.process_started_at,
             c_check_started_at=cargo.check_started_at,
             d_register_started_at=register_started_at,
+            log_file_name = sidekick.log_filename,
         )
         task_code += 1  # 7
         # After registered, table_udf_key has a value, set in cargo.file_registered

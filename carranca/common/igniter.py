@@ -17,7 +17,7 @@
 # It is only run once.
 
 import time, os.path as path
-from typing import Tuple, NamedTuple
+from typing import Tuple, NamedTuple, Optional, Any
 from urllib.parse import urlparse
 
 from .Args import Args
@@ -26,7 +26,7 @@ from .app_error_assistant import RaiseIf
 from ..helpers.py_helper import is_str_none_or_empty
 
 _ERROR_MSG = "[{}]: An error occurred while {}. Message: `{}`."
-fuse: "Fuse" = None
+fuse: Optional["Fuse"] = None
 
 
 # ---------------------------------------------------------------------------- #
@@ -52,9 +52,7 @@ class Fuse:
         self.args = args
 
         if is_str_none_or_empty(args.app_mode):
-            self.app_mode = (
-                app_mode_development if args.app_debug else app_mode_production
-            )
+            self.app_mode = app_mode_stage
         else:
             self.app_mode = self.args.app_mode
 
@@ -77,19 +75,19 @@ def _get_debug_2() -> bool:
 
     debug_4 = False
     debug_3 = debug_4  # Read above 'Considerations'
-    debug_2 = bool(get_envvar("debug", debug_3))
+    debug_2 = bool(get_envvar("debug", str(debug_3)))
     return debug_2
 
 
 # ---------------------------------------------------------------------------- #
-def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple[any, str]:
+def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple[Any, str]:
     """
     Create the 'fuse' that will assists the initializations of classes
     """
     import json
 
-    msg_error = None
-    new_fuse: Fuse = None
+    msg_error = ''
+    new_fuse: Optional[Fuse] = None
     try:
         from .Display import Display
 
@@ -104,12 +102,12 @@ def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple[any, st
         new_fuse.display.info(
             f"The 'fuse' was started in {new_fuse.app_mode} mode (and now we have how to print pretty)."
         )
-        args = f"{app_name}'s args: {{0}}"
+        s_args = f"{app_name}'s args: {{0}}"
         if new_fuse.debugging:
             _args = f"\n{json.dumps(new_fuse.args.__dict__, indent=3, sort_keys=True)}"
-            new_fuse.display.debug(args.format(_args))
+            new_fuse.display.debug(s_args.format(_args))
         else:
-            new_fuse.display.info(args.format(new_fuse.args))
+            new_fuse.display.info(s_args.format(new_fuse.args))
     except Exception as e:
         new_fuse = None
         msg_error = _ERROR_MSG.format(__name__, "starting the fuse", str(e))
@@ -118,7 +116,7 @@ def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple[any, st
 
 
 # ---------------------------------------------------------------------------- #
-from ..config.DynamicConfig import DynamicConfig
+from ..config.DynamicConfig import DynamicConfig, app_mode_stage
 
 
 def _ignite_config(fuse: Fuse) -> Tuple[DynamicConfig, str]:
@@ -126,36 +124,36 @@ def _ignite_config(fuse: Fuse) -> Tuple[DynamicConfig, str]:
     Select the config, based in the app_mode (production or debug)
     WARNING: Don't run with debug turned on in production!
     """
-    Config = None  # this config will later be shared by sidekick
-    msg_error = None
+    config = None  # this config will later be shared by sidekick
+    msg_error = ''
     try:
         from ..config.DynamicConfig import get_config_for_mode
 
-        Config = get_config_for_mode(fuse.app_mode, fuse)
-        if Config is None:
+        config = get_config_for_mode(fuse.app_mode, fuse)
+        if config is None:
             raise Exception(f"Unknown config mode '{fuse.app_mode}'.")
 
-        if not path.isfile(path.join(Config.APP_FOLDER, "main.py")):
+        if not path.isfile(path.join(config.APP_FOLDER, "main.py")):
             raise Exception(
                 "main.py file not found in the app folder. Check BaseConfig.APP_FOLDER."
             )
 
-        Config.APP_DEBUGGING = True if fuse.debugging else Config.APP_DEBUG
-        Config.APP_ARGS = fuse.args
+        config.APP_DEBUGGING = True if fuse.debugging else config.APP_DEBUG
+        config.APP_ARGS = fuse.args
         fuse.display.info(f"The app config, in '{fuse.app_mode}' mode, was ignited.")
     except Exception as e:
         msg_error = _ERROR_MSG.format(
             __name__, f"initializing the app config in mode '{fuse.app_mode}'", str(e)
         )
 
-    return Config, msg_error
+    return config, msg_error
 
 
 # ---------------------------------------------------------------------------- #
 def _check_mandatory_keys(config, fDisplay) -> str:
     """Check if the mandatories environment variables are set."""
 
-    msg_error = None
+    msg_error = ''
     try:
         from ..config.BaseConfig import CONFIG_MANDATORY_KEYS
 
@@ -176,12 +174,12 @@ def _check_mandatory_keys(config, fDisplay) -> str:
                 has_empty = True
 
         msg_error = (
-            None
+            ''
             if not has_empty
             else _ERROR_MSG.format(
                 __name__,
-                f"confirming the existence of the mandatory configuration keys {CONFIG_MANDATORY_KEYS}",
-                f"Missing: {empty_keys.strip(',')} As Environment Variable must be prefixed with {APP_NAME}.",
+                f"confirming the existence of the mandatory configuration keys: [{CONFIG_MANDATORY_KEYS}]",
+                f"Missing: [{empty_keys.strip(',')}]. Note that environment variables must be prefixed with '{APP_NAME}'.",
             )
         )
 
@@ -194,14 +192,15 @@ def _check_mandatory_keys(config, fDisplay) -> str:
 
 
 # ---------------------------------------------------------------------------- #
-def _ignite_server_name(config) -> Tuple[any, str]:
+def _ignite_server_name(config) -> Tuple[Any, str]:
     """Confirm validity of the server address"""
-    msg_error = None
+    msg_error = ''
 
     class Address(NamedTuple):
         host: str
         port: int
 
+    address = Address('', 0)
     try:
 
         try_url = f"http://{config.SERVER_ADDRESS}"
@@ -280,7 +279,7 @@ def _ignite_sql_connection(uri: str) -> Tuple[str, str]:
 from .Sidekick import Sidekick
 
 
-def ignite_app(app_name, start_at) -> Tuple[Sidekick, bool]:
+def ignite_app(app_name, start_at) -> Tuple[Sidekick, str, bool]:
     from .Display import Display
 
     global fuse
@@ -332,7 +331,7 @@ def ignite_app(app_name, start_at) -> Tuple[Sidekick, bool]:
     # ---------------------------------------------------------------------------- #
     # Give warnings of import configuration that may be missing
 
-    if is_str_none_or_empty(config.EMAIL_API_KEY):
+    if is_str_none_or_empty(config.SENDGRID_API_KEY):
         warns += 1
         fuse.display.warn(
             "Sendgrid API key was not found, the app will not be able to send emails."

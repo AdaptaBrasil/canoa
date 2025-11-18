@@ -8,28 +8,31 @@ mgd 2025-01-14 & 03-18
 """
 
 from os import path
-from typing import Tuple
+from typing import Tuple, Optional
 from ...models.private import ReceivedFiles
 from ...common.app_context_vars import app_user
 from ...config.ValidateProcessConfig import ValidateProcessConfig
 
-from ...helpers.user_helper import UserFolders
+from ...helpers.user_helper import UserFolders, get_user_folder
 from ...helpers.file_helper import change_file_ext
+from ...helpers.types_helper import UsualDict
 from ...helpers.db_records.DBRecords import DBRecords
 
-ALL_RECS = None
+ALL_USER_RECS = None
 IGNORE_USER = None
+
+USER_RECEIPT = "receipt"
 
 
 def fetch_record_s(
-    no_sep: str, rec_id: int = ALL_RECS, user_id: int = IGNORE_USER
+    no_sep: str, rec_id: Optional[int] = ALL_USER_RECS, user_id: Optional[int] = IGNORE_USER
 ) -> Tuple[DBRecords, str, str]:
     """Fetch received files records from the view vw_user_data_files
 
     no_sep: str: text to show when the record has an empty SEP
     rec_id: int | None: record id to fetch or None
             When rec_id is:
-                - ALL_RECS(None), fetch all records for the user with user_id
+                - ALL_USER_RECS (None), fetch all records for the user with user_id
                 - has value, ignore user_id and fetch the record with the given id & return file full_name too
     user_id: int  user id to fetch records for
 
@@ -37,20 +40,21 @@ def fetch_record_s(
 
     """
 
-    if rec_id is ALL_RECS and user_id is IGNORE_USER:
-        return DBRecords(), None, None
+    if rec_id is ALL_USER_RECS and user_id is IGNORE_USER:
+        return DBRecords(), "", ""
 
+    file_full_name = ""
     received_recs = ReceivedFiles.get_records(file_id=rec_id, user_id=user_id)
-    file_full_name: str = None
     report_ext = ValidateProcessConfig(False).output_file.ext
-    grid_rows = []
+    grid_rows: list[UsualDict] = []
     if received_recs:
         """Adapt the records to the local environment"""
         uf = UserFolders()
+        user_folder = get_user_folder(user_id) if user_id else app_user.folder  # app_user.folder
 
         for record in received_recs:
             folder = uf.uploaded if record.file_origin == "L" else uf.downloaded
-            file_full_name = path.join(folder, app_user.folder, record.stored_file_name)
+            file_full_name: str = path.join(folder, user_folder, record.stored_file_name)
             # Copy specific fields to a new object 'row'
             row = {
                 "id": record.id,
@@ -59,7 +63,7 @@ def fetch_record_s(
                 "sep": record.sep_fullname if record.sep_fullname else no_sep,
                 "file_name": change_file_ext(record.file_name),
                 "user_name": record.user_name,
-                "receipt": record.user_receipt,
+                USER_RECEIPT: record.user_receipt,
                 "when": record.submitted_at,
                 "errors": record.report_errors,
                 "warns": record.report_warns,

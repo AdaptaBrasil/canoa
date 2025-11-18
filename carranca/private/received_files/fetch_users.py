@@ -14,7 +14,7 @@ from ...common.app_context_vars import app_user
 from ...helpers.db_records.DBRecords import DBRecords
 
 
-def fetch_user_s(user_id: int = None) -> DBRecords:
+def fetch_user_s(user_id: int | None = None) -> DBRecords:
     """
     user_id:
         if None: fetch all users name, email ...

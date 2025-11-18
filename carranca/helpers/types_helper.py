@@ -2,11 +2,11 @@
 This module defines Python Type Aliases to improve code readability and maintainability.
 
 Type Aliases:
-- `ui_db_texts`: A dictionary where both keys and values are strings, typically used for database UI texts.
-- `sep_mgmt_rtn`: A tuple containing two strings and an integer, used for SEP management return values.
-- `cargo_item`: A dictionary representing a JSON-like structure, which may include nested dictionaries.
-- `cargo_list`: A list of `cargo_item` dictionaries, representing a JSON-like HTML response.
-- `template_file_full_name`: A string representing the full name of a template file.
+- `DBTexts`: A dictionary where both keys and values are strings, typically used for database UI texts.
+- `SepMgmtReturn`: A tuple containing two strings and an integer, used for SEP management return values.
+- `CargoItem`: A dictionary representing a JSON-like structure, which may include nested dictionaries.
+- `CargoList`: A list of `CargoItem` dictionaries, representing a JSON-like HTML response.
+- `TemplateFileFullName`: A string representing the full name of a template file.
 
 Naming Conventions:
 Type aliases follow `snake_case` naming as per PEP 8 guidelines for better readability and consistency.
@@ -19,26 +19,32 @@ cSpell:ignore
 # --- ⚠️ ---
 # Avoid adding project-specific imports in this module to prevent circular dependencies.
 
-from typing import TypeAlias, Optional, Any, Dict, Tuple, List
+from typing import Optional, Any, Dict, Tuple, List
 
-ui_db_texts: TypeAlias = Dict[str, str]
-UsualDict: TypeAlias = Dict[str, Any]
+type DBTexts = Dict[str, str]
+type UsualDict = Dict[str, Any]
+type JsConstants = Dict[str, str]
 
-sep_mgmt_rtn: TypeAlias = Tuple[str, str, int]
+type SepMgmtReturn = Tuple[str, str, int]
 
-cargo_item: TypeAlias = Dict[str, str | Dict[str, str]]
-cargo_list: TypeAlias = List[cargo_item]
+type CargoItem = Dict[str, str | Dict[str, str]]
+type CargoList = List[CargoItem]
 
-template_file_full_name: TypeAlias = str
-jinja_template: TypeAlias = str
+type TemplateFileFullName = str
+type JinjaTemplate = str
+type JinjaGeneratedHtml = str
 
-svg_content: TypeAlias = str
+type SvgContent = str
 
-OptListOfStr: TypeAlias = Optional[List[str]]
+type OptListOfStr = Optional[List[str]]
 
+type OptStr = Optional[str]
 
 # make str type explicit
-error_message: TypeAlias = str
-success_message: TypeAlias = str
-dic_as_json: TypeAlias = str
+type ErrorMessage = str
+type SuccessMessage = str
+type DictAsJson = str
+type JsonText = str
+
+
 # eof

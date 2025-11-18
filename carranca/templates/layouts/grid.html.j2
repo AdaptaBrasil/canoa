@@ -8,11 +8,14 @@ mgd 2025-05-23
 #}
 
 
-{% extends "./layouts/dialog.html.j2" %}
-
 {% set dlg_cls_size= dlg_cls_size | default('modal-xl') %}
 {% set dlg_var_icon_url= iconFileUrl %}
-{% set dlg_var_icon_id= 'dlg-icon-id' %}
+{# {% set dlg_icon_id= 'dlg-icon-id' %} #}
+
+{% extends "./layouts/dialog.html.j2" %}
+
+
+{% block dlg_blc_body_cls_tweak %}grid-body{% endblock %}
 
 
 {% if dlg_bke_display_ui %}
@@ -20,43 +23,31 @@ mgd 2025-05-23
 
 {% block base_blc_head_js %}
 {% include "./includes/grid-header.html.j2" %}
-{% endblock base_blc_head_js %}
+{% endblock %}
 
 {% block dlg_blc_body %}
 {% include "./includes/grid-body.html.j2" %}
-{% endblock dlg_blc_body %}
+{% endblock %}
 
-{# ╒══════ Override dialog ══════╕ #}
+  {# ╒══════════ Footer Buttons ══════════╕ #}
+  {% block dlg_blc_footer_buttons %}
+    {% block grid_blc_footer %}{% endblock %}
+  {% endblock %}
+  {# ╘══════════ Footer Buttons ══════════╛ #}
 
-{# ┌┄┄┄┄┄┄┄ footer ┄┄┄┄┄┄┄┐ #}
-{% block dlg_blc_footer %}
+  {# ╒════════════ JavaScript ═════════════╕ #}
+  {% block dlg_blc_javascript %}
+    {{ super() }}
+    {% block grid_blc_javascript %}{% endblock %}
+  {% endblock %}
+  {# ╘════════════ JavaScript ═════════════╛ #}
 
-{% block grid_blc_footer %}
-{% endblock grid_blc_footer %}
-
-{% endblock dlg_blc_footer %}
-{# └┄┄┄┄┄┄┄ footer ┄┄┄┄┄┄┄┘ #}
-
-{# ┌┄┄┄┄┄ javascript ┄┄┄┄┄┐ #}
-{% block dlg_blc_javascript %}
-
-{% block grid_blc_javascript %}
-{% endblock grid_blc_javascript %}
-
-{% endblock dlg_blc_javascript %}
-{# └┄┄┄┄┄ javascript ┄┄┄┄┄┘ #}
-
-{# ┌┄┄┄┄┄ base forms ┄┄┄┄┄┐ #}
-{% block base_blc_forms %}
-{{ super() }}
-
-{% block grid_blc_forms %}
-{% endblock grid_blc_forms %}
-
-{% endblock base_blc_forms %}
-{# └┄┄┄┄┄ base forms ┄┄┄┄┄┘ #}
-
-{# ╘══════ Override dialog ══════╛ #}
+  {# ╒══════════════ Forms ════════════════╕ #}
+  {% block base_blc_forms %}
+    {{ super() }}
+    {% block grid_blc_forms %} {% endblock %}
+  {% endblock %}
+  {# ╘══════════════ Forms ════════════════╛ #}
 
 {# ╘════════════ Display UI ══════════════╛ #}
 {% endif %}

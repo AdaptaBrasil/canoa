@@ -12,7 +12,9 @@ mgd
 # cSpell:ignore
 
 from os import path
+from ..private.IdToCode import IdToCode
 from ..helpers.py_helper import UsualDict, now
+from ..helpers.types_helper import OptListOfStr
 from ..helpers.file_helper import folder_must_exist
 from ..common.app_context_vars import sidekick, app_user
 
@@ -28,12 +30,18 @@ class ExportProcessConfig:
     _header = None
     _full_file_name = None
     _started = None
-    scm_cols = ["name", "color", "title", "v_sep_count", "ui_order"]
-    sep_cols = ["name", "description", "icon_svg", "icon_file_name", "ui_order"]
+    _scm_cols = ["name", "color", "title", "v_sep_count", "ui_order"]
+    _sep_cols = ["name", "description", "icon_svg", "icon_file_name", "ui_order"]
+    scm_cols = []
+    sep_cols = []
+    coder: IdToCode
 
-    def __init__(self):
+    def __init__(self, scm_cols: OptListOfStr=[], sep_cols: OptListOfStr= []):
+        self.scm_cols = scm_cols.copy() if scm_cols else ExportProcessConfig._scm_cols.copy()
+        self.sep_cols = sep_cols.copy() if sep_cols else ExportProcessConfig._sep_cols.copy()
         self._started = now()
         self.path = path.join(sidekick.config.COMMON_PATH, ExportProcessConfig.folder)
+        self.coder = IdToCode(7)  #  obfuscate PKs when sent to UI
         if not folder_must_exist(self.path):
             raise Exception("No output folder")
 

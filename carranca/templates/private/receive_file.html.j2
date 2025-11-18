@@ -58,15 +58,17 @@ mgd
 
 {% endblock frm_blc_inputs %}
 
-{% if form_bke_display_ui %}
+
+{% if form_display_ui %}
+
 {% block dlg_blc_javascript %}
-<script>
+<script id="sep_select">
     const seps = {{ seps | tojson | safe }};
     const select = document.getElementById('{{ form.schema_sep.id }}');
-    const icon = document.getElementById('{{ dlg_var_icon_id }}');
+    const icon = document.getElementById('{{ dlg_icon_id }}');
     const add_item = (id, text) => {
         const option = document.createElement('option');
-        option.value = id < 1 ? "" : id
+        option.value = id < 1 ? '' : id
         option.textContent = text;
         select.appendChild(option);
     }

@@ -32,7 +32,7 @@ from .ui_db_texts_helper import get_section
 
 
 # headers = {
-#    'Authorization': f'Bearer {EMAIL_API_KEY}',
+#    'Authorization': f'Bearer {SENDGRID_API_KEY}',
 #    'Content-Type': 'application/json',
 # }
 # response = requests.post('https://api.sendgrid.com/v3/mail/send', headers=headers, json=json_data)
@@ -94,7 +94,7 @@ def send_email(
             raise ValueError(error)
 
         task = "setting email API key"
-        apiKey = sidekick.config.EMAIL_API_KEY
+        apiKey = sidekick.config.SENDGRID_API_KEY
         if is_str_none_or_empty(apiKey):
             error = "Unknown `email API key`. Cannot send email."
             raise ValueError(error)
@@ -182,7 +182,7 @@ def send_email(
 
         # Add recipients (generic way)
         task = "preparing Api"
-        apiKey = sidekick.config.EMAIL_API_KEY
+        apiKey = sidekick.config.SENDGRID_API_KEY
         sg = sendgrid.SendGridAPIClient(apiKey)
         if is_str_none_or_empty(file_to_send_full_name):
             pass

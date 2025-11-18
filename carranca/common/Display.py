@@ -4,7 +4,7 @@ Equipe da Canoa -- 2024
 Simple colored print to screen
 
 mgd 2024-09-27,10-11,12-05
-
+F
 """
 
 # cSpell:ignore colorfy
@@ -181,7 +181,7 @@ class Display:
                 return f"{open_color}{text}{Display.reset_color}"
 
         _prompt = self.prompt if prompt is None else str(prompt)
-        start_text = "" if is_str_none_or_empty(_prompt) else _colorfy(Display.Kind.PROMPT, _prompt)
+        start_text = '' if is_str_none_or_empty(_prompt) else _colorfy(Display.Kind.PROMPT, _prompt)
         if self.elapsed_output:
             start_text = f"{start_text}{_colorfy(Display.Kind.ELAPSED, self.elapsed())} "
 
@@ -208,7 +208,7 @@ class Display:
 
     def set_prompt(self, value: str) -> str:
         p = self.prompt
-        self.prompt = "" if is_str_none_or_empty(value) else str(value)
+        self.prompt = '' if is_str_none_or_empty(value) else str(value)
         return p
 
     def set_icon_output(self, value: bool) -> bool:

@@ -9,7 +9,7 @@ mgd
 --------------------------------------- #}
 {# cspell:ignore unselectable #}
 
-{% set dlg_var_close= False %}
+{% set dlg_close_btn_visible= False %}
 {% set dlg_cls_size= '' %} {# default size #}
 {% extends "./layouts/form.html.j2" %}
 
@@ -49,10 +49,15 @@ mgd
 {# ╘════════════════ Inputs ════════════════╛ #}
 
 
-{# ╒════════════════ Below ════════════════╕ #}
-{% block frm_blc_below %}
+{# ╒════════════════ Buttons ═══════════════╕ #}
+{# % block dlg_blc_footer_buttons  % #}
+{# ╘════════════════ Inputs ════════════════╛ #}
 
-<div class="row no-gutters mt-2">
+{# ╒════════════════ Options ═══════════════╕ #}
+{% block dlg_blc_footer_options %}
+{# Replaced Bootstrap class= "row" with style= "display: flex; flex-wrap: wrap;" to avoid gutter #}
+
+<div style="display: flex; flex-wrap: wrap;" class="row mt-0 ps-0 pe-0">
     <div class="col-6">
         <a href="{{ public_route('docs', publicDocName='privacyPolicy') }}" class="form-link">
             {{ privacyPolicy}}
@@ -71,7 +76,12 @@ mgd
     </div>
 </div>
 
-{% endblock frm_blc_below %}
-{# ╘════════════════ Below ════════════════╛ #}
+{% endblock dlg_blc_footer_options %}
+{# ╘════════════════ Options ═══════════════╛ #}
 
+{% block frm_blc_script %}
+<script>
+    Canoa.submitImmediately = true;
+</script>
+{% endblock frm_blc_script %}
 {# eof #}

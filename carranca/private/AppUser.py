@@ -10,15 +10,17 @@ mgd
 # cSpell:ignore MgmtSep mgmt
 
 from flask_login import current_user
+from typing import TYPE_CHECKING
 
-from .UserSep import user_sep_list
 from .RolesAbbr import RolesAbbr
 
 from ..common.app_constants import APP_LANG
 from ..common.app_error_assistant import AppStumbled
 from ..helpers.user_helper import get_user_code, get_user_folder
-from ..helpers.types_helper import error_message
+from ..helpers.types_helper import ErrorMessage
 
+if TYPE_CHECKING:
+    from .UserSep import UserSepList
 
 # App needed information of the logged user.
 class AppUser:
@@ -44,7 +46,6 @@ class AppUser:
             self.is_adm = False
             self.is_support = False
             self.is_power = False
-            # self.seps: user_sep_list= [] see @property below
         else:
             sidekick.display.debug(f"{self.__class__.__name__} was created.")
             self.lang = current_user.lang
@@ -62,26 +63,21 @@ class AppUser:
             self.is_support: bool = self.role_abbr == RolesAbbr.Support.value
             self.is_power: bool = (
                 self.is_adm
-               # or (self.is_support and sidekick.debugging)
+                # or (self.is_support and sidekick.debugging)
                 or self.name in ["Mauro", "Miguel"]
             )
-            # self.seps: user_sep_list = [] see @property below
 
     @property
-    def seps(self) -> user_sep_list:
+    def seps(self) -> "UserSepList":
         from ..common.app_context_vars import user_seps
 
-        result: user_sep_list = []
+        result: "UserSepList" = []
         if not self.ready:
             result = []
         elif isinstance(us_list := user_seps, list):
-            result: user_sep_list = us_list
+            result: "UserSepList" = us_list
         else:
-            msg: error_message = (
-                str(us_list)
-                if isinstance(user_seps, str)
-                else "Error loading user SEP."
-            )
+            msg: ErrorMessage = str(us_list) if isinstance(user_seps, str) else "Error loading user SEP."
             raise AppStumbled(msg)
 
         return result

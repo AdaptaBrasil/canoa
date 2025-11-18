@@ -9,20 +9,22 @@ upload_file validation process loop.
 Part of Canoa `File Validation` Processes
 """
 from datetime import datetime
+from typing import Optional
+
+from ..receive_file import RECEIVE_FILE_DEFAULT_ERROR
 
 from ..AppUser import AppUser
-from ...helpers.py_helper import is_str_none_or_empty, now
+from ...helpers.py_helper import UsualDict, is_str_none_or_empty, now
 from ...common.app_constants import APP_VERSION
 from ...config.ValidateProcessConfig import ValidateProcessConfig
 
 from ..UserSep import UserSep
-from ..receive_file import RECEIVE_FILE_DEFAULT_ERROR
 from .ProcessData import ProcessData
 
 
 class Cargo:
     name = "Cargo"
-    default_error: int = RECEIVE_FILE_DEFAULT_ERROR
+    default_error: str = RECEIVE_FILE_DEFAULT_ERROR
 
     def __init__(
         self,
@@ -78,8 +80,8 @@ class Cargo:
         error_code: int,
         msg_error: str = "",
         msg_exception: str = "",
-        next: dict = {},
-        final: dict = {},
+        next: Optional[dict] = {},
+        final: Optional[UsualDict] = {},
     ) -> tuple[int, str, str, object]:
         """
         Updates the class with the 'next' procedure values

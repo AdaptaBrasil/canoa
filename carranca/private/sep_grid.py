@@ -7,73 +7,64 @@ mgd
 
 # cSpell: ignore samp sepsusr usrlist
 
-from typing import Tuple, List
+from typing import List
 
 from .sep_icon import do_icon_get_url
-from .grid_helper import GridCargoKeys
-from .SepIconMaker import SepIconMaker
 from ..models.private import MgmtSepsUser
-from ..public.ups_handler import ups_handler
-from ..common.app_error_assistant import ModuleErrorCode, AppStumbled
-
 from ..helpers.py_helper import class_to_dict
-from ..helpers.jinja_helper import process_template
-from ..helpers.route_helper import get_private_response_data, init_response_vars
-from ..helpers.js_grid_helper import js_grid_col_meta_info,  js_grid_constants
-from ..helpers.ui_db_texts_helper import add_msg_final, UITextsKeys
-from ..helpers.db_records.DBRecords import DBRecords, ListOfDBRecords
+from ..public.ups_handler import get_ups_jHtml
+from ..helpers.uiact_helper import UiActResponseKeys
+from ..helpers.jinja_helper import JinjaGeneratedHtml, process_template
+from ..helpers.route_helper import MTD_POST, get_private_response_data, init_response_vars
+from ..helpers.js_consts_helper import js_grid_col_meta_info, js_ui_dictionary
+from ..helpers.ui_db_texts_helper import add_msg_final
+from ..common.app_error_assistant import ModuleErrorCode, AppStumbled, HTTPStatusCode
+from ..helpers.db_records.DBRecords import DBRecords
 
 
-def get_sep_grid() -> str:
+def get_sep_grid() -> JinjaGeneratedHtml:
+
+    def _sep_data_fetch(col_names: List[str]) -> DBRecords:
+        sep_usr_rows = MgmtSepsUser.get_seps_usr(col_names)
+        for record in sep_usr_rows:
+            sep_id = record.id
+            record.id = MgmtSepsUser.code(sep_id)
+            record.icon_file_name = do_icon_get_url(record.icon_file_name, sep_id)
+
+        return sep_usr_rows
+
     task_code = ModuleErrorCode.SEP_GRID.value
-    _, tmpl_ffn, is_get, ui_texts = init_response_vars()
+    jHtml, is_get, ui_db_texts = init_response_vars()
 
-    sep_data: ListOfDBRecords = []
-    tmpl = ""
     try:
         task_code += 1  # 1
-        tmpl_ffn, is_get, ui_texts = get_private_response_data("sepGrid")
+        tmpl_rfn, is_get, ui_db_texts = get_private_response_data("sepGrid")
 
         task_code += 1  # 2
-        ui_texts[UITextsKeys.Form.icon_url] = SepIconMaker.get_url(
-            SepIconMaker.empty_file
-        )
+        if not is_get:
+            msg = f"{add_msg_final(HTTPStatusCode.CODE_405.value, ui_db_texts)} (Requested: ${MTD_POST}.)"
+            raise AppStumbled(msg, task_code, False, True)
 
         task_code += 1  # 3
         col_names = ["id", "icon_file_name", "scm_name", "name", "user_curr", "visible"]
-        grid_const = js_grid_constants(ui_texts[js_grid_col_meta_info], col_names, task_code)
+        js_ui_dict = js_ui_dictionary(ui_db_texts[js_grid_col_meta_info], col_names, task_code)
 
-        sep_data = []
-        if is_get:
-            task_code += 1  # 4
-            sep_data = _sep_data_fetch(col_names)
-        else:
-            raise AppStumbled("Unexpected route method.")
+        task_code += 1  # 4
+        sep_data = _sep_data_fetch(col_names)
 
-        tmpl = process_template(
-            tmpl_ffn,
+        task_code += 1  # 5
+        jHtml = process_template(
+            tmpl_rfn,
             sep_data=sep_data.to_list(),
-            cargo_keys=class_to_dict(GridCargoKeys),
-            **grid_const,
-            **ui_texts,
+            cargo_keys=class_to_dict(UiActResponseKeys),
+            **ui_db_texts.dict(),
+            **js_ui_dict,
         )
 
     except Exception as e:
-        msg = add_msg_final("gridException", ui_texts, task_code)
-        _, tmpl_ffn, ui_texts = ups_handler(task_code, msg, e)
-        tmpl = process_template(tmpl_ffn, **ui_texts)
+        jHtml = get_ups_jHtml("gridException", ui_db_texts, task_code, e)
 
-    return tmpl
-
-
-def _sep_data_fetch(col_names: List[str]) -> Tuple[DBRecords]:
-    sep_usr_rows = MgmtSepsUser.get_seps_usr(col_names)
-    for record in sep_usr_rows:
-        sep_id = record.id
-        record.id = MgmtSepsUser.code(sep_id)
-        record.icon_file_name = do_icon_get_url(record.icon_file_name, sep_id)
-
-    return sep_usr_rows
+    return jHtml
 
 
 # eof

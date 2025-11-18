@@ -40,7 +40,7 @@ from ...models import SQLABaseTable
 from ...helpers.db_helper import db_fetch_rows
 from ...helpers.py_helper import is_str_none_or_empty
 from ...helpers.user_helper import get_user_code
-from ...private.SepIconMaker import SepIconMaker, svg_content
+from ...private.SepIconMaker import SepIconMaker, SvgContent
 from ...helpers.db_records.DBRecords import DBRecords
 
 from ...private.IdToCode import IdToCode

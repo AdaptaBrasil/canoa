@@ -6,7 +6,20 @@ main.py
   mgd 2024-10-03
 """
 
-# cSpell:ignore sqlalchemy keepalives
+# cSpell:ignore sqlalchemy cssless keepalives UNMINIFIED
+
+
+def _get_minify():
+    minify = None
+    try:
+        from flask_minify import Minify
+
+        minify = Minify(app=app, html=True, js=True, cssless=True)
+    except:
+        minify = None
+
+    return minify
+
 
 import time
 from .common.app_constants import APP_NAME, APP_VERSION
@@ -20,11 +33,20 @@ print(f"{'-' * len(the_aperture_msg)}\n{the_aperture_msg}")
 
 
 # Flask app
-from . import create_app, started  # see __init__.py
+from carranca import create_app, started  # see __init__.py
 
 app, sidekick = create_app()
 
-sidekick.display.info("All mandatory information has been checked and is available.")
+
+if sidekick.config.APP_UNMINIFIED:
+    sidekick.display.info("App minification is fully disabled.")
+elif m := _get_minify():
+    sidekick.display.info(f"Flask-Minify initialized: [html: {m.html}, js: {m.js}, cssless: {m.cssless}].")
+else:
+    sidekick.display.error("Configuration error: Flask-Minify is enabled but not installed.")
+    sidekick.display.info("Install with 'pip install Flask-Minify' or set APP_UNMINIFIED=True in config.")
+
+
 sidekick.display.info("The app is ready to run!")
 
 
@@ -50,10 +72,8 @@ sidekick.display.info(
 app_debug = sidekick.config.APP_DEBUG
 app_reload = sidekick.config.APP_AUTO_RELOAD
 if __name__ != "__main__":
-    sidekick.display.warn(
-        "This module is not running as `__main__`, so the app will not automatically run."
-    )
-
+    sidekick.display.info("Using configuration from `.vscode/launch.json`.")
+    sidekick.display.warn("This module is *not* running as `__main__`, so the app will not automatically run.")
 else:
     app.run(debug=app_debug)
 

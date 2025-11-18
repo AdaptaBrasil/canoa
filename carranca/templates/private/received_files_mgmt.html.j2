@@ -13,11 +13,8 @@ mgd
 --------------------------------------- #}
 {# cSpell:ignore onclick tojson onsubmit dnld Rprt endfor onchange #}
 
-{# only specify if different from default #}
-
-{% set dlg_cls_size= 'modal-xl' %}
-
-{% extends "./layouts/dialog.html.j2" %}
+{# {% extends "./layouts/dialog.html.j2" %} #}
+{% extends "./layouts/grid.html.j2" %}
 
 {% if dlg_bke_display_ui %}
 
@@ -34,73 +31,84 @@ mgd
 {% endblock dlg_blc_body %}
 {# ╘════════════════ Dialog Body ════════════════╛ #}
 
-{% block dlg_blc_footer %}
-<div class="mb-3 row">
+{% block dlg_blc_footer_buttons %}
     {% if users_list %}
     <div class="col-auto">
-        <select id="{{sel_id}}" class="form-control form-select" style="{{sel_width}}">
+        <select id="{{sel_id}}" class="form-control form-select" >
             {% for code, name, enabled in users_list %}
             <option value="{{code}}" {% if not enabled %}disabled{% endif %}>{{name | safe}}</option>
             {% endfor %}
         </select>
     </div>
     {% endif %}
+    {# TODO: from "includes/_action_forms_and_btns.html.j2" import btn_click #}
     <div class="col-auto">
-        <button type="button" onclick="download('{{dnld_F}}')" id="btn{{dnld_F}}" class="form-control form-main-btn"
-            style="{{btn_width}}" disabled>
+        <button type="button" onclick="download('{{dnld_F}}')" id="btn{{dnld_F}}" class="form-control form-main-btn" disabled>
             {{btnDwnLoadFile}}
         </button>
     </div>
     <div class="col-auto">
         <button type="button" onclick="download('{{dnld_R}}')" id="btn{{dnld_R}}" class="form-control form-main-btn"
-            style="{{btn_width}}" disabled>
+            disabled>
             {{btnDwnLoadRprt}}
         </button>
     </div>
-</div>
-{% endblock dlg_blc_footer %}
+{# </div> #}
+{% endblock dlg_blc_footer_buttons %}
 
 {% block dlg_blc_javascript %}
-<script id="jsData">
+<script id="data_to_json">
     const usersList = {{ users_list | default ([]) | tojson}}
     const gridRows = ({{ files_rec | default ([]) | tojson}}).map(item => ({ ...item, when: item.when ? new Date(item.when) : null }));
-    const listUser = ({{ users_list | default ([]) | tojson}})
+    const listUser = {{ users_list | default ([]) | tojson}}
     const colMeta = {{ grid_col_meta | tojson}};
 </script>
-<script>
+<script id="file_download">
     const gridID = '{{grid_id}}';
     const dateFormat = '{{userDateFormat}}';
     const itemNone = '{{itemNone}}';
     const isPower = {{ user_is_power | tojson}};
-    const defButtons = () => {
-        const btnFile = document.getElementById('btn{{dnld_F}}');
-        const btnRprt = document.getElementById('btn{{dnld_R}}');
-        return [btnFile, btnRprt];
-    }
+    const btnFile = document.getElementById('btn{{dnld_F}}');
+    const btnRprt = document.getElementById('btn{{dnld_R}}');
+    let activeID = null;
+
     const download = (t) => {
-        if (activeRow) {
-            const id = `${activeRow.data["id"]}${t}`;
-            document.getElementById('{{grid_rsp}}').value = id;
-            document.getElementById('{{grid_submit_id}}').submit();
+        if (activeID) {
+            document.getElementById('{{form_cargo_id}}').value = `${activeID}${t}`;;
+            document.getElementById('{{dlg_submit_form_id}}').submit();
         }
-    }
+    };
+
+    const setActiveRow = (row) => {
+        activeID = null;
+        if (!row) { return; }
+        activeID = row.data["id"];
+        btnFile.disabled = !row.data.data_f_found;
+        btnRprt.disabled = !row.data.report_found;
+    };
+
     document.getElementById('{{sel_id}}').addEventListener('change',
         (e) => {
-            const href = '{{ private_route('received_files_mgmt') }}?id=' + e.target.value;
-            window.location.href = href
+            sleep();
+            setTimeout(() => {
+                const href = '{{ private_route('received_files_mgmt') }}?id=' + e.target.value;
+                window.location.href = href
+            }, 20);
         }
-    )
+    );
 </script>
 
 <script src='{{static_route("js/received_files_mgmt.js")}}'></script>
 {% endblock dlg_blc_javascript %}
 
+{# ╒════════════════ Dialog Forms ════════════════╕ #}
 {% block dlg_blc_forms %}
-<form method="post" action="{{private_route('received_file_download')}}" id="{{grid_submit_id}}">
-    <input type="hidden" name="{{grid_rsp}}" id="{{grid_rsp}}">
-    <input type="hidden" name="{{grid_sec_key}}" value="{{grid_sec_value}}">
-</form>
-{% endblock dlg_blc_forms %}
+
+{% from "includes/_action_forms_and_btns.html.j2" import action_form__submit_cargo %}
+{{ action_form__submit_cargo(dlg_submit_form_id, private_route('received_file_download'), extra='target="_blank"') }}
+
+{% endblock %}
+{# ╘═════════════════ Dialog Forms ════════════════╛ #}
 
 {% endif %}
 {#--- end » dlg_bke_display_ui --- #}

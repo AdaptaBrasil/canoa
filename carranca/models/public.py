@@ -10,7 +10,7 @@ mgd
 
 from carranca import global_sqlalchemy_scoped_session, global_login_manager
 
-from typing import Optional, Any
+from typing import Optional, Any, List
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import ColumnExpressionArgument
@@ -89,19 +89,16 @@ class User(SQLABaseTable, UserMixin):
         """
 
         def _get_data(db_session: Session) -> "User":
-            user = (
-                db_session.query(User)
-                .options(joinedload(User.role))
-                .filter_by(**filter)
-                .first()
-            )
+            user = db_session.query(User).options(joinedload(User.role)).filter_by(**filter).first()
             return user
 
         _, _, user = db_fetch_rows(_get_data, User.__tablename__)
         return user
 
     @staticmethod
-    def get_all_users(arg_where: ColumnExpressionArgument[bool], arg_order: Optional[Column] = None) -> DBRecords:
+    def get_all_users(
+        arg_where: ColumnExpressionArgument[bool], arg_order: Optional[Column] = None
+    ) -> List["User"]:  # DBRecords:
         """
         Fetches a list of all users (id, id_role, username, email, disabled)
         from the `users` table.
@@ -168,12 +165,7 @@ def get_user_where(**filter: Any) -> User:
         try:
             # stmt = select(User).filter_by(**filter)
             # user =  db_session.execute(stmt).scalar_one_or_none()
-            user = (
-                db_session.query(User)
-                .options(joinedload(User.role))
-                .filter_by(**filter)
-                .first()
-            )
+            user = db_session.query(User).options(joinedload(User.role)).filter_by(**filter).first()
         except Exception as e:
             sidekick.app_log.error(f"Error retrieving user {filter}: [{e}].")
 
@@ -219,9 +211,7 @@ def user_loader(id):
 def request_loader(request):
     username = "" if len(request.form) == 0 else request.form.get("username", "")
     user = (
-        None
-        if is_str_none_or_empty(username)
-        else User.get_where(username_lower=username.lower())
+        None if is_str_none_or_empty(username) else User.get_where(username_lower=username.lower())
     )
     return user
 

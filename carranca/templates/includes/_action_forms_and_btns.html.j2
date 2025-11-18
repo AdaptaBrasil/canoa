@@ -2,47 +2,59 @@
 _action_forms_and_btns.html.j2
 
 Macros for Action Forms and Buttons:
-- `action_form__close`: Closes the form and redirects to login().
+- `action_form__close`: Closes the form and redirects to 'on_close' usually login()
 
 Buttons:
 - `btn_close`: [Close] | [X]
 - `btn_submit`: [Submit]
 
-v2 2024.04.01
+v2 2025.04.01
 mgd
 
 Spell:ignore endmacro preid onclick
 #}
 
-{# `action_form__form_close_id` is defined in templates/layouts/base.html.j2 #}
-{% macro action_form__close(action_form__form_on_close, action_form__form_close_id) %}
-<form action="{{action_form__form_on_close}}" method="get" id="{{action_form__form_close_id}}"></form>
+
+{# == Close <
+  went to dialog.htm.j2 only place where it was used
+{ # -- Close Form: includes security token --
+{% macro action_form__close(on_close, form_id) %}
+<form action="{{on_close}}" method="get" id="{{form_id}}"></form>
+{% endmacro %}
+#}
+
+{# -- Close Button:  [x] of layouts/dialog.html.j2 -- #}
+{% macro btn_close_dlg(form_id, btn_id, caption)%}
+<button type="submit" form="{{form_id}}" id="{{btn_id}}" class="form-main-btn form-cancel">
+    {{caption | default('Close')}}
+</button>
+{% endmacro %}
+{# == Close > #}
+
+
+{# == Submit < #}
+
+{# -- Submit Button -- #}
+{% macro btn_submit(form_id, btn_id, caption, extra='') %}
+<button type="submit" form="{{form_id}}" id="{{btn_id}}" class="form-main-btn form-submit" {{extra}}>
+    {{caption | default('Save')}}
+</button>
 {% endmacro %}
 
-{% macro action_form__submit(action_form__form_on_submit) %}
-<form method="post" action="{{action_form__form_on_submit}}" id="{{grid_submit_id}}">
-    <input type="hidden" name="{{grid_rsp}}" id="{{grid_rsp}}">
-    <input type="hidden" name="{{grid_sec_key}}" value="{{grid_sec_value}}">
+{# -- Submit Form: includes security token -- #}
+{% macro action_form__submit_cargo(form_id, action_url, method= 'post', extra='')%}
+<form id="{{form_id}}" action="{{action_url}}" method="{{method}}" {{extra}}>
+    <input type="hidden" name="{{safe_token.cargo}}" id="{{safe_token.cargo}}">
+    <input type="hidden" name="{{safe_token.key}}" value="{{safe_token.value}}">
 </form>
 {% endmacro %}
 
-{% macro
-btn_close(action_form__form_submit_id, caption="OK", id="form-btn-close-id", class="form-main-btn form-cancel")
-%}
-<button type="submit" class="{{class}}" form="{{action_form__form_submit_id}}" id="{{id}}" onclick='hideDialog()'>
-    {{caption}}
-</button>
-{% endmacro %}
+{# == Submit > #}
 
-{% macro btn_submit(action_form__form_submit_id, caption="Save", id="form-btn-submit-id", attrib= "") %}
-<button type="submit" class="form-main-btn form-submit" form="{{action_form__form_submit_id}}" id="{{id}}" {{attrib}}>
-    {{caption}}
-</button>
-{% endmacro %}
-
-{% macro btn_action(action_form__id, caption, pre_id="")%}
+{# -- A Button to linked through ui_constant -- #}
+{% macro btn_action(action_form__id, caption, cmd= '', attrib= '')%}
 <button type="submit" class="form-main-btn form-submit btn-action" form="{{action_form__id}}"
-    id="{{pre_id}}{{hash(caption)}}">
+    id="{{do_btn_id(cmd, caption)}}" {{attrib}}>
     {{caption}}
 </button>
 {% endmacro %}

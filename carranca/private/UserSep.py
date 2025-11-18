@@ -9,15 +9,16 @@ mgd
 
 # spell:ignore Mgmt
 
-from typing import TypeAlias, Optional, List, Dict, Any
-
-from ..helpers.types_helper import error_message
+from typing import TYPE_CHECKING, List, Dict, Any
 
 from .IdToCode import IdToCode
+from ..helpers.types_helper import ErrorMessage
 
-user_sep_list: TypeAlias = List["UserSep"]
-user_sep_dict: TypeAlias = Dict[str, Any]
-user_seps_rtn: TypeAlias = user_sep_list | error_message
+
+if TYPE_CHECKING:
+    type UserSepList = List["UserSep"]
+    type UserSepDict = Dict[str, Any]
+    type UserSepsRtn = UserSepList | ErrorMessage
 
 
 class UserSep:
@@ -51,7 +52,7 @@ class UserSep:
         description: str,
         visible: bool,
         icon_file_name: str,
-        icon_url: Optional[str] = None,
+        icon_url: str = "",
     ):
         from .SepIconMaker import SepIconMaker
 
@@ -71,7 +72,7 @@ class UserSep:
     description: str
     visible: bool
     icon_file_name: str
-    icon_url: Optional[str]  # expensive to 'calculate', so it is optional
+    icon_url: str  # expensive to 'calculate', so it is optional
 
 
 # eof

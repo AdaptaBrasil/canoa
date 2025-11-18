@@ -10,6 +10,7 @@
         "venv",
         "btns",
         "dunder",
-        "tmpl"
+        "tmpl",
+        "UIDBTexts",
     ]
 }

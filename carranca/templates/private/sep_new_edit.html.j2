@@ -16,7 +16,7 @@ mgd
 {# ╒═════════════════════ Inputs ═════════════════════════╕ #}
 {% block frm_blc_inputs %}
 
-{# [ Manager (when is_full_edit) #}
+{# [ Manager (when SepEditMode.FULL_EDIT) #}
 {% if (form.manager_name and form.manager_name.data) or formForNew %}
 <div class="form-group mb-2">
     {# TODO correct 'for' #}
@@ -110,7 +110,7 @@ mgd
 
 {% block dlg_blc_javascript %}
 
-{% if formForNew and form_bke_display_ui %}
+{% if formForNew and form_display_ui %}
 <script>
     const scm_list = document.getElementById('{{ form.schema_list.id }}');
     const mng_list = document.getElementById('{{ form.manager_list.id }}');

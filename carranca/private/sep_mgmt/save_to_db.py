@@ -12,65 +12,62 @@ mgd 202-04-09
 from typing import Tuple
 
 from sqlalchemy.orm import Session
-
+from ...common.UIDBTexts import UIDBTexts
 from ...helpers.py_helper import is_str_none_or_empty
 from ...helpers.db_helper import try_get_mgd_msg
-from ...helpers.types_helper import ui_db_texts, sep_mgmt_rtn, cargo_list
-from ...helpers.ui_db_texts_helper import format_ui_item
+from ...helpers.types_helper import SepMgmtReturn, CargoList, OptStr
 
 from .keys_values import SepMgmtGridCols, CargoKeys
 
 
 def save_data(
-    grid_response: cargo_list,
+    grid_response: CargoList,
     batch_code: str,
-    ui_texts: ui_db_texts,
+    ui_db_texts: UIDBTexts,
     task_code: int,
-) -> sep_mgmt_rtn:  # msg_success, msg_error, task_code
+) -> SepMgmtReturn:  # msg_success, msg_error, task_code
     """Saves user modifications to the DB via the view's trigger"""
 
     msg_success = None
     msg_error = None
     try:
         msg_error, remove, assign, task_code = _prepare_data_to_save(
-            grid_response, ui_texts, task_code
+            grid_response, ui_db_texts, task_code
         )
         if not is_str_none_or_empty(msg_error):
             return "", msg_error, task_code
         elif len(remove) + len(assign) == 0:
-            return ui_texts["tasksNothing"], "", task_code
+            return ui_db_texts["tasksNothing"], "", task_code
 
         task_code += 1  # 561
         _, msg_error, task_code = _save_data_to_db(
-            remove, assign, batch_code, ui_texts, task_code
+            remove, assign, batch_code, ui_db_texts, task_code
         )
         task_code += 1  # 565
         if is_str_none_or_empty(msg_error):
-            msg_success = format_ui_item(
-                ui_texts, "tasksSuccess", len(remove), len(assign)
-            )
+            msg_success = ui_db_texts.format("tasksSuccess", len(remove), len(assign))
     except Exception as e:
-        msg_error = format_ui_item(ui_texts, "tasksError", task_code, str(e))
+        msg_error = ui_db_texts.format("tasksError", task_code, str(e))
 
     return msg_success, msg_error, task_code
 
 
 def _prepare_data_to_save(
-    grid_response: cargo_list,
-    ui_texts: ui_db_texts,
+    grid_response: CargoList,
+    ui_db_texts: UIDBTexts,
     task_code: int,
-) -> Tuple[str, cargo_list, cargo_list, int]:
+) -> Tuple[str, CargoList, CargoList, int]:
     """Distributes grid's modifications in two groups: remove & assign"""
 
     msg_error = None
-    remove: cargo_list = []
-    assign: cargo_list = []
+    remove: CargoList = []
+    assign: CargoList = []
     try:
         actions = grid_response[CargoKeys.actions]
         task_code += 1
         str_none: str = actions[CargoKeys.none]
         task_code += 1
-        grid: cargo_list = grid_response[CargoKeys.cargo]
+        grid: CargoList = grid_response[CargoKeys.cargo]
         task_code += 1
         for item in grid:
             usr_new = item[SepMgmtGridCols.usr_new]
@@ -83,18 +80,18 @@ def _prepare_data_to_save(
                 assign.append(item)
 
     except Exception as e:
-        msg_error = format_ui_item(ui_texts, "taskPrepare", task_code, str(e))
+        msg_error = ui_db_texts.format("taskPrepare", task_code, str(e))
 
     return msg_error, remove, assign, task_code
 
 
 def _save_data_to_db(
-    remove: cargo_list,
-    update: cargo_list,
+    remove: CargoList,
+    update: CargoList,
     batch_code: str,
-    ui_texts: ui_db_texts,
+    ui_db_texts: UIDBTexts,
     task_code: int,
-) -> sep_mgmt_rtn:
+) -> SepMgmtReturn:
     """
     Saves user-made changes to the UI grid to the database
     via an 'instead-of' trigger that:
@@ -116,7 +113,7 @@ def _save_data_to_db(
     with global_sqlalchemy_scoped_session() as db_session:
         try:
 
-            def __set_sep_new_user(id: int, usr_new: str | None):
+            def __set_sep_new_user(id: int, usr_new: OptStr):
                 user_sep = db_session.query(MgmtSepsUser).filter_by(id=id).one_or_none()
                 if user_sep:
                     user_sep.user_new = usr_new
@@ -143,7 +140,7 @@ def _save_data_to_db(
             db_session.commit()
         except Exception as e:
             db_session.rollback()
-            saveError = format_ui_item(ui_texts, "saveError", task_code)
+            saveError = ui_db_texts.format("saveError", task_code)
             msg_error = try_get_mgd_msg(e, saveError)
             sidekick.app_log.error(str(e))
 

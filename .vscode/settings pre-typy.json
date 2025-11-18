@@ -1,0 +1,43 @@
+{
+    // === Pylance Performance/Analysis Settings ===
+
+    // CHANGE 1: Use 'openFilesOnly' to restrict analysis to files currently open in the editor.
+    // This dramatically reduces CPU load and lag.
+    "python.analysis.diagnosticMode": "openFilesOnly",
+
+    // Indexing is often necessary for auto-completion and Go to Definition on larger projects.
+    // However, if you are certain it hurts performance, keeping it false is fine.
+    "python.analysis.indexing": false,
+
+    // CHANGE 2: Give Pylance more attempts to resolve complex internal imports before giving up.
+    "python.analysis.maxImportResolutionTries": 10,
+
+    "python.analysis.importFormat": "relative",
+    "python.analysis.autoSearchPaths": true,
+
+    // This list looks good for excluding standard non-source code directories.
+    "python.analysis.exclude": [
+        "**/__pycache__",
+        ".git",
+        ".env",
+        "venv",
+        ".venv"
+    ],
+
+    // This is good for strong typing!
+    "python.analysis.typeCheckingMode": "standard",
+
+    // === Other Settings ===
+    "github.copilot.enable": { /* ... (These settings are fine, Copilot is disabled) ... */ },
+
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.tabSize": 4,
+    },
+    "python-envs.pythonProjects": [],
+
+    // This looks correct, afor Windows
+    "python.defaultInterpreterPath": ".env\\Scripts\\python.exe",
+    "editor.formatOnSave": true
+}

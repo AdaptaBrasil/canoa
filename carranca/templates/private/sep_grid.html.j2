@@ -2,7 +2,7 @@
 
 sep_grid.html.j2
 -----------------
-CRUD por seps
+CRUD for seps
 
 Extends
 "./layouts/grid.html.j2"
@@ -16,34 +16,33 @@ mgd
 
 {# only specify if different from default #}
 {% set dlg_cls_size= 'modal-lg' %}
-{% set grid_submit_id= 'grd-submit-id' %}
 
-
-
+{# ╒════════════════ Grid Footer ════════════════╕ #}
 {% block grid_blc_footer %}
-<div class="mb-2 row">
-    {# ----------- Action Triggers --------- #}
     <div class="col-auto">
         {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
-        {{ btn_action(dlg_id_submit_form, grdBtnEdit, cargo_keys.edit) }}
+        {{ btn_action(dlg_submit_form_id, grdBtnEdit, cargo_keys.edit) }}
     </div>
     <div class="col-auto">
         {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
-        {{ btn_action(dlg_id_submit_form, grdBtnDelete, cargo_keys.delete) }}
+        {{ btn_action(dlg_submit_form_id, grdBtnDelete, cargo_keys.delete) }}
     </div>
-</div>
 {% endblock grid_blc_footer %}
+{# ╘═══════════════ Grid Footer ═════════════════╛ #}
 
+{# ╒════════════════ Grid Forms ═════════════════╕ #}
 {% block grid_blc_forms %}
-{# TODO: substitute form with action_form__submit #}
-<form method="get" action="{{private_route('sep_grid', code=grid_rsp)}}" id={{dlg_id_submit_form}}>
-    <input type="hidden" name="{{grid_rsp}}" id="{{grid_rsp}}">
-    <input type="hidden" name="{{grid_sec_key}}" value="{{grid_sec_value}}">
-</form>
+
+{% from "includes/_action_forms_and_btns.html.j2" import action_form__submit_cargo %}
+{{ action_form__submit_cargo(dlg_submit_form_id, private_route('sep_grid', code=form_cargo_id)) }}
+
 {% endblock grid_blc_forms %}
+{# ╘════════════════ Grid Forms ═════════════════╛ #}
 
 
+{# ╒══════════════ Grid JavaScript ══════════════╕ #}
 {% block grid_blc_javascript %}
+
 <script>
     const colMeta = {{ grid_col_meta | tojson | safe }};
     const colCode = colMeta[0].n;
@@ -53,22 +52,16 @@ mgd
     const cargoKeys = {{ cargo_keys | tojson }};
     const gridID = '{{ grid_id }}';
     const initRow = {{ grid_init_row | default (0) }};
-    const cargo = { [cargoKeys.action]: '', [cargoKeys.index]: initRow, [cargoKeys.code]: '' };
-    const icon = /** @type {HTMLImageElement} */(document.getElementById('{{ dlg_var_icon_id }}'))
+    const cargo = { [cargoKeys.action]: '', [cargoKeys.row_index]: initRow, [cargoKeys.code]: '' };
+    const icon = /** @type {HTMLImageElement} */(document.getElementById('{{ dlg_icon_id }}'));
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const elForm = /** @type {HTMLFormElement} */(document.getElementById('{{ dlg_id_submit_form }}'));
-        const elResponse = /** @type {HTMLInputElement} */(document.getElementById('{{ grid_rsp }}'));
-        elForm?.addEventListener('submit', (event) => {
-            event.preventDefault();
-            cargo[cargoKeys.action] = event.submitter.id;
-            elResponse.value = JSON.stringify(cargo);
-            elForm.submit();
-        })
-    });
+    {% from "includes/_action_forms_and_btns.js.j2" import form_link_action %}
+    {{ form_link_action(dlg_submit_form_id, form_cargo_id) }}
+
 </script>
 <script src="{{static_route('js/sep_grid.js')}}"></script>
-{% endblock grid_blc_javascript %}
 
+{% endblock grid_blc_javascript %}
+{# ╘══════════════ Grid JavaScript ══════════════╛ #}
 
 {# eof #}

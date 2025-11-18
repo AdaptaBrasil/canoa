@@ -29,7 +29,7 @@ from ..common.app_context_vars import sidekick
 def __prepare_img_files(
     html_images: list[str], db_images: list[str], img_local_path: str, section: str
 ) -> bool:
-    from ..helpers.ui_db_texts_helper import get_text
+    from ..helpers.ui_db_texts_helper import retrieve_text
 
     is_img_local_path_ready = os.path.exists(img_local_path)
     missing_files = html_images.copy()  # missing files from folder, assume all
@@ -61,7 +61,7 @@ def __prepare_img_files(
 
     for file in available_files:
         try:
-            b64encoded = get_text(file, section)
+            b64encoded = retrieve_text(file, section)
             if not is_str_none_or_empty(b64encoded):
                 image_data = base64.b64decode(b64encoded)
                 with open(os.path.join(img_local_path, file), "wb") as file:
@@ -81,13 +81,13 @@ def __prepare_img_files(
 
 
 def display_html(docName: str):
-    template = "./home/document.html.j2"
+    tmpl = "./home/document.html.j2"
     section = docName
 
     ui_defaults = get_section("DisplayDoc")
     ui_texts = get_section(section)
 
-    def _setValue(key: str, default: str) -> str:
+    def _setValue(key: str, default: str):
         value = ui_texts.get(key, None)
         if value is None:
             value = ui_defaults.get(key, default)
@@ -142,7 +142,7 @@ def display_html(docName: str):
     # temp = current_app.jinja_env.from_string("{{ app_version() }}  + {{ app_name()}}")
     # print(temp.render())
 
-    tmpl = render_template(template, **ui_texts)
+    tmpl = render_template(tmpl, **ui_texts)
     return tmpl
 
 

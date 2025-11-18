@@ -4,71 +4,71 @@
 ----------------------
 Managed & Displays HTML Forms
 
-Used by:
-./accounts
-- login.html.j2
-- register.html.j2
-- password_recovery.html.j2
-- password_reset_or_change.html.j2
-
-./private
-- receive_file.html.j2
-
 mgd
 --------------------------------------- #}
 
-{# only specify if different from default #}
-{% set dlg_cls_footer= "collapse" %}
-{% set form_bke_only_msg= msgOnly | default(False) %}
-{% set form_bke_display_ui= not form_bke_only_msg %}
+{# only specify value if different from default #}
+{% set form_backend_msg= msgOnly | default(False) %}
+{% set form_display_ui= not form_backend_msg %}
 {% set form_close_btn_text= form_close_btn_text | default('Fechar') %}
-
-{% set form_post_id= "form-post-id"%}
 
 {% extends "./layouts/dialog.html.j2" %}
 
-{# ╒════════════════ Dialog Body ════════════════╕ #}
+{# ╒════════════════════ Dialog Body ══════════════════════╕ #}
 {% block dlg_blc_body %}
 
-{% include "includes/backend-msg.html.j2" %}
-
-{% if form_bke_only_msg %}
-{# ╒══════════ Display Message Only ══════════╕ #}
-
-{% from "includes/_action_forms_and_btns.html.j2" import btn_close %}
-{{ btn_close(action_form__form_close_id, form_close_btn_text) }}
-
-{# ╘══════════ Display Message Only ══════════╛ #}
+{% if form_display_ui %}
+    {# ╒═══════════════ Display UI ═══════════════╕ #}
+    <form method="post" action="" id="{{dlg_submit_form_id}}" {{ formAttribute | default('') }}>
+        <input type="hidden" name="{{safe_token.key}}" value="{{safe_token.value}}">
+        {# {{ form.hidden_tag() }} #}
+        {# ╒═══════════════ Form's input ═══════════════╕ #}
+        {% block frm_blc_inputs %}{% endblock %}
+        {# ╘══════════════ Form's input ════════════════╛ #}
+    </form>
+    {# ╘═══════════════ Display UI ═══════════════╛ #}
+{% else %}
+    {# ╒═════════ Display Only Message ═══════════╕ #}
+    {% include "includes/backend-msg.html.j2" %}
+    {# ╘═════════ Display Only Message ═══════════╛ #}
 {% endif %}
-
-{% block frm_blc_above %}
-{% endblock frm_blc_above %}
-
-
-{% if form_bke_display_ui %}
-{# ╒═══════════════ Display UI ═══════════════╕ #}
-<form method="post" action="" id={{form_post_id}} {{ formAttribute | default('') }}>
-    {{ form.hidden_tag() }}
-
-    {% block frm_blc_inputs %}
-    {% endblock frm_blc_inputs %}
-</form>
-
-<div class="d-grid mt-6">
-    {% from "includes/_action_forms_and_btns.html.j2" import btn_submit %}
-    {{ btn_submit(form_post_id, submitButton, dlg_id_submit_btn) }}
-</div>
-{# ╘═══════════════ Display UI ═══════════════╛ #}
-{% endif %}
-
-{% block frm_blc_below %}
-{% endblock frm_blc_below %}
 
 {% endblock dlg_blc_body %}
-{# ╘════════════════ Dialog Body ════════════════╛ #}
+{# ╘════════════════════ Dialog Body ══════════════════════╛ #}
 
 
-{% if form_bke_display_ui %}
+{# ╒════════════════ Footer ════════════════════╕ #}
+
+{# ╒════════════ Footer Buttons ══════════╕ #}
+{% block dlg_blc_footer_buttons %}
+{% if form_display_ui %}
+    {# ╒═══════════ Display UI ═══════════╕ #}
+        <div class="col-auto">
+            {% from "includes/_action_forms_and_btns.html.j2" import btn_submit %}
+            {{ btn_submit(dlg_submit_form_id, dlg_submit_btn_id, submitButton) }}
+        </div>
+    {# ╘══════════ Display UI ═══════════╛ #}
+{% else %}
+    {# ╒══════ Display Only Message ═════╕ #}
+        <div class="col-auto">
+            {% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
+            {{ btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, form_close_btn_text) }}
+        </div>
+    {# ╘══════ Display Only Message ══════╛ #}
+{% endif %}
+{% endblock dlg_blc_footer_buttons %}
+{# ╘════════════ Footer Buttons ══════════╛ #}
+
+
+
+{# ╒═══════════ Footer Option ════════════╕ #}
+{% block dlg_blc_footer_options %}
+{# optional; for a example see login.html.j2 #}
+{% endblock dlg_blc_footer_options %}
+{# ╘═══════════ Footer Option ════════════╛ #}
+
+
+{% if form_display_ui %}
 {# ╒═══════════════ Display UI ═══════════════╕ #}
 {# ╒══════ Override dialog ══════╕ #}
 {% block dlg_blc_javascript %}
@@ -79,7 +79,8 @@ mgd
 
 {% endblock dlg_blc_javascript %}
 {# ╘══════ Override dialog ══════╛ #}
-{# ╘═══════════════ Display UI ═══════════════╛ #}
+
 {% endif %}
+{# ╘═══════════════ Display UI ═══════════════╛ #}
 
 {# eof #}

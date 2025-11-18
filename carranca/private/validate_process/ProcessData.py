@@ -114,11 +114,11 @@ class ProcessData:
         self.path = self._Path(self, user_folder, common_folder, data_validate_folder, batch_name)
         # values are given in receive_file.py
         self.received_file_name = ""
-        self.received_original_name = None
+        self.received_original_name:str = None
 
-    def working_file_name(self):
+    def working_file_name(self) -> str :
         return (
-            None
+            ''
             if is_str_none_or_empty(self.received_file_name)
             else f"{self.file_ticket}_{self.received_file_name}"
         )

@@ -45,12 +45,12 @@ cSpell:ignore semi-words: formul estrat gicos sess tojson jinja nbsp endfor j_us
                     </a>
                     {% if nav_sub_menu %}
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ private_route('receive_file') }}"
+                        <li><a class="dropdown-item" href="{{private_route('receive_file')}}"
                                 title="Abre formulário para enviar um arquivo local ZIP ou do Google Drive ao processo de valida&ccedil;&atilde;o">
                                 Enviar Arquivo ou Link
                             </a>
                         </li>
-                        <li><a class="dropdown-item" href="{{ private_route('received_files_mgmt') }}"
+                        <li><a class="dropdown-item" href="{{private_route('received_files_mgmt')}}"
                                 title="Abre grid dos arquivos enviados ao processo de valida&ccedil;&atilde;o e resultados">
                                 Arquivos Enviados e Resultados
                             </a>
@@ -70,19 +70,19 @@ cSpell:ignore semi-words: formul estrat gicos sess tojson jinja nbsp endfor j_us
                         {% if j_user.power %}
                         {# ╒════════ admin sep menu ═══════╕ #}
                         <li>
-                            <a class="dropdown-item" href="{{ private_route('sep_mgmt') }}"
+                            <a class="dropdown-item" href="{{private_route('sep_mgmt')}}"
                                 title="Abre grid de atribuiç&atilde;o de gestores a setores estrat&eacute;gicos">
                                 Gest&atilde;o
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ private_route('sep_edit', code=grid_cmd_add) }}"
+                            <a class="dropdown-item" href="{{private_route('sep_edit', code=ui_act_add) }}"
                                 title="Abre formul&aacute;rio para adicionar um setor estrat&eacute;gico">
                                 Inser&ccedil;&atilde;o
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ private_route('sep_grid', code=grid_cmd_shw) }}"
+                            <a class="dropdown-item" href="{{private_route('sep_grid', code=ui_act_shw) }}"
                                 title="Abre grid para editar ou remover setores estrat&eacute;gicos">
                                 Edi&ccedil;&atilde;o e Remo&ccedil;&atilde;o
                             </a>
@@ -93,7 +93,7 @@ cSpell:ignore semi-words: formul estrat gicos sess tojson jinja nbsp endfor j_us
                         {% for sep in sep_list %}
                         <li>
                             <a class="dropdown-item"
-                                href="{{ private_route('sep_edit', code=sep.code) }}">{{sep.name}}</a>
+                                href="{{private_route('sep_edit', code=sep.code) }}">{{sep.name}}</a>
                         </li>
                         {% endfor %}
                         {# ╘════════ user sep menu ════════╛ #}
@@ -103,40 +103,32 @@ cSpell:ignore semi-words: formul estrat gicos sess tojson jinja nbsp endfor j_us
                 </li>
 
                 {# ╒════════════════════ Menu: Esquema ══════════════════════════════╕ #}
-                {% if (j_user.power or True) and scm_list %}
+                {% if j_user.power  %}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}} {{scm_menu_class}}"
+                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}"
                         href="#" id="menu-se" role="button" data-bs-toggle="dropdown">
                         {{menu_header['Schema']}}
                     </a>
                     {# ╒════════ schema menu ════════╕ #}
                     <ul class="dropdown-menu">
                         <li>
-                            <a class="dropdown-item" href="{{ private_route('scm_edit', code=grid_cmd_add) }}"
+                            <a class="dropdown-item" href="{{private_route('scm_edit', code=ui_act_add) }}"
                                 title="Abre formul&aacute;rio para adicionar um esquema">
                                 Inser&ccedil;&atilde;o
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ private_route('scm_grid', code=grid_cmd_shw) }}"
+                            <a class="dropdown-item" href="{{private_route('scm_grid', code=ui_act_shw) }}"
                                 title="Abre grid para editar ou remover esquemas">
                                 Edi&ccedil;&atilde;o e Remo&ccedil;&atilde;o
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ private_route('scm_export_ui') }}"
+                            <a class="dropdown-item" href="{{private_route('scm_export', code=ui_act_shw)}}"
                                 title="Abre a pagina para exportar os esquemas ao BD">
                                 Exporta&ccedil;&atilde;o
                             </a>
                         </li>
-
-                        {# <div class="dropdown-divider"></div>
-                        {% for scm in scm_list %}
-                        <li>
-                            <a class="dropdown-item" href="{{ private_route('scm_edit', code=scm.id) }}">{{scm.name}}
-                            </a>
-                        </li>
-                        {% endfor %} #}
                     </ul>
                     {# ╘════════ schema menu ════════╛ #}
                 </li>
@@ -161,20 +153,20 @@ cSpell:ignore semi-words: formul estrat gicos sess tojson jinja nbsp endfor j_us
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ public_route('docs', publicDocName='termsOfUse') }}"
+                            <a class="dropdown-item" href="{{ public_route('docs', publicDocName='privacyPolicy')}}"
                                 title="Exibe documento de pol&iacute;tica de privacidade do aplicativo">
                                 Pol&iacute;tica de Privacidade
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ public_route('docs', publicDocName='termsOfUse') }}"
+                            <a class="dropdown-item" href="{{ public_route('docs', publicDocName='termsOfUse')}}"
                                 title="Exibe documento de termos de uso do aplicativo">
                                 Termos de Uso
                             </a>
                         </li>
                         <li>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{{ public_route('docs', publicDocName='aboutApp') }}"
+                            <a class="dropdown-item" href="{{ public_route('docs', publicDocName='aboutApp')}}"
                                 title="Mostra informa&ccedil;&atilde;o sobre o aplicativo">
                                 Sobre {{ app_name }}
                             </a>
@@ -197,11 +189,18 @@ cSpell:ignore semi-words: formul estrat gicos sess tojson jinja nbsp endfor j_us
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ private_route('change_password') }}"
+                            <a class="dropdown-item" href="{{private_route('change_password')}}"
                                 title="Abre formul&aacute;rio para alterar sua senha">
                                 Mudar Senha
                             </a>
                         </li>
+                        <li>
+                            <a class="dropdown-item" href="{{private_route('confirm_user_email')}}"
+                                title="Lhe envia um e-mail de teste">
+                                Confirmar e-mail
+                            </a>
+                        </li>
+
                         <li>
                             <hr class="dropdown-divider">
                         </li>

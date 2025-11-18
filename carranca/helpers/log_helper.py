@@ -8,7 +8,7 @@ mgd 2025-03-14
 import logging
 from os import path
 from flask import Flask
-from typing import Tuple, Optional
+from typing import Tuple
 from logging.handlers import RotatingFileHandler
 
 from .py_helper import is_str_none_or_empty
@@ -19,12 +19,12 @@ from .file_helper import folder_must_exist
 # ---------------------------------------------------------------------------- #
 def do_log_file(
     app: Flask,
-    file_name: Optional[str] = None,
-    file_folder: Optional[str] = None,
-    min_level: Optional[int] = logging.INFO,
+    file_name: str = "",
+    file_folder: str = "",
+    min_level: int = logging.INFO,
 ) -> Tuple[str, str, str]:
 
-    msg_error = None
+    msg_error = ""
     full_name = ""
     s_level = logging.NOTSET
 
@@ -48,7 +48,7 @@ def do_log_file(
             s_level = logging._levelToName[min_level]
 
             task = "handler"
-            handler = RotatingFileHandler(full_name, maxBytes=10000, backupCount=1)
+            handler = RotatingFileHandler(full_name, maxBytes=10000, backupCount=1, encoding="utf-8")
             handler.setLevel(min_level)
             app.logger.addHandler(handler)
     except Exception as e:

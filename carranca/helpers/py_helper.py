@@ -8,7 +8,7 @@ mgd 2025-02-04
 """
 
 # cSpell:ignore latin CCITT
-
+import re
 import json
 import base64
 import os, time, platform
@@ -17,7 +17,7 @@ from sys import argv
 from datetime import datetime
 from typing import Any, Type, Dict, Tuple, List, Optional
 
-from .types_helper import UsualDict
+from .types_helper import UsualDict, OptStr
 from ..common.app_constants import APP_NAME
 
 # https://docs.python.org/3/library/platform.html#platform.system
@@ -41,9 +41,7 @@ def get_envvar_prefix() -> str:
 
 
 def get_envvar(name: str, default: Optional[str] = "") -> str:
-    value = (
-        "" if is_str_none_or_empty(name) else os.getenv(f"{get_envvar_prefix()}{name}")
-    )
+    value = "" if is_str_none_or_empty(name) else os.getenv(f"{get_envvar_prefix()}{name}")
     return default if is_str_none_or_empty(value) else value
 
 
@@ -76,7 +74,7 @@ def as_str_strip(s: str) -> str:
     return "" if s is None else (str(s) + "").strip()
 
 
-def encode64_utf8(data: str) -> str | None:
+def encode64_utf8(data: str) -> OptStr:
     # encodes srt into utf-8  => base64
     encoded = data
     if data is None:
@@ -93,7 +91,7 @@ def encode64_utf8(data: str) -> str | None:
     return encoded
 
 
-def decode64_utf8(data_encoded: str) -> str | None:
+def decode64_utf8(data_encoded: str) -> OptStr:
     # decodes srt from utf-8  => base64
     data = data_encoded
     if data_encoded is None:
@@ -159,7 +157,7 @@ def quote(s: str, always: Optional[bool] = True) -> str:
     return f'"{quoted}"'
 
 
-def is_str_none_or_empty(s: str) -> bool:
+def is_str_none_or_empty(s: str | None) -> bool:
     """
     Returns True if the argument is None, not a str, or an empty (only spaces, \n, \t, etc) string
     """
@@ -194,9 +192,7 @@ def get_init_params(from_instance: Any, From_class=None) -> dict:
     init_signature = inspect.signature(From_Class.__init__)
 
     # Get parameter names, excluding 'self'
-    init_params = [
-        param_name for param_name in init_signature.parameters if param_name != "self"
-    ]
+    init_params = [param_name for param_name in init_signature.parameters if param_name != "self"]
 
     params = {
         param_name: getattr(from_instance, param_name)
@@ -216,7 +212,7 @@ def to_code(id: int, shift: int, expand: int = 1) -> str:
     return to_base(expand * (shift + id), 21).zfill(5)
 
 
-def to_int(s: str, default=-1) -> int:
+def to_int(s: Optional[str], default=-1) -> int:
     """
     Returns the argument as a integer or default if not a valid int
     """
@@ -241,7 +237,7 @@ def as_bool(val: Any, val_if_none: Optional[bool] = False) -> bool:
     # fmt: on
 
 
-def clean_text(text: str, not_allowed: Optional[str] = ""):
+def clean_text(text: str, not_allowed: str = ""):
     # - Strip leading and trailing whitespace
     # - Remove not_allowed chars (optional)
     # - Exclude all chars < 32
@@ -253,13 +249,11 @@ def clean_text(text: str, not_allowed: Optional[str] = ""):
     check_1 = "".join(c for c in check_0 if c not in exclude)
     check_2 = "".join(c for c in check_1 if ord(c) >= 32)  # Remove any char < 32
     # Remove extra spaces (left, right, and more than 2 consecutive)
-    check_3 = " ".join( check_2.split() )
+    check_3 = " ".join(check_2.split())
     return check_3
 
 
-def strip_and_ignore_empty(
-    s: str, sep: Optional[str] = ",", max_split: Optional[int] = -1
-) -> list[str]:
+def strip_and_ignore_empty(s: str, sep: Optional[str] = ",", max_split: Optional[int] = -1) -> list[str]:
     """
     Returns a list of the striped items created by splitting s and ignoring empty items
     """
@@ -280,11 +274,21 @@ def camel_to_snake(string: str) -> str:
     Returns:
       The converted snake case string.
     """
-    snake_case = ""
-    for char in string:
-        snake_case += ("_" if char.isupper() else "") + char.lower()
+    # snake_case = ""
+    # for char in string:
+    #     snake_case += ("_" if char.isupper() else "") + char.lower()
 
-    return snake_case.strip("_")  # Remove leading underscores
+    # return snake_case.strip("_")  # Remove leading underscores
+
+    # 1. Insert an underscore before any lowercase letter that follows an uppercase letter
+    # This handles transitions like 'DBank' -> 'D_Bank' (the 'B' is followed by 'a')
+    string = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", string)
+
+    # 2. Insert an underscore before any uppercase letter that follows a lowercase letter
+    # This handles the main splits like 'scmExport' -> 'scm_Export'
+    string = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", string)
+
+    return string.lower()
 
 
 def coalesce(val1, val2):
@@ -375,9 +379,7 @@ def to_base(number: int, base: int) -> str:
     elif base == 16:
         result = format(number, "x")
     else:
-        base_digits = "0123456789abcdefghijklmnopqrstuvwxyz"[
-            :base
-        ]  # Digits for the specified base
+        base_digits = "0123456789abcdefghijklmnopqrstuvwxyz"[:base]  # Digits for the specified base
         while number:
             number, remainder = divmod(number, base)
             result = base_digits[remainder] + result
@@ -425,11 +427,7 @@ def set_flags_from_argv(obj):
         # param = f"-{attr}"
         if attr.startswith("_"):
             pass  # Skip private attributes
-        elif (
-            any(f.lower() == flag.lower() for f in argv)
-            if OS_IS_WINDOWS
-            else (flag in argv)
-        ):
+        elif any(f.lower() == flag.lower() for f in argv) if OS_IS_WINDOWS else (flag in argv):
             setattr(obj, attr, True)
         # elif any(f.lower() == param.lower() for f in argv) if OS_IS_WINDOWS else (param in argv):
         # TODO: setattr(obj, attr, attr++)
@@ -441,9 +439,7 @@ class EmptyClass:
     pass
 
 
-def copy_attributes(
-    class_instance: Any, this_types: Optional[Tuple[Type] | Type] = None
-) -> EmptyClass:
+def copy_attributes(class_instance: Any, this_types: Optional[Tuple[Type] | Type] = None) -> EmptyClass:
     """
     Copies the specified simple type attributes from a class_instance,
     of the ones specified in the second argument or the defaults
@@ -485,11 +481,7 @@ def class_to_dict(from_class: Type) -> UsualDict:
     """
     dic = {}
     if from_class is not None:
-        dic = {
-            k: v
-            for k, v in from_class.__dict__.items()
-            if not k.startswith("_") and not callable(v)
-        }
+        dic = {k: v for k, v in from_class.__dict__.items() if not k.startswith("_") and not callable(v)}
 
     return dic
 

@@ -11,15 +11,14 @@ Ups Files
 /static/icons/ups_handler.svg
 /templates/home/ups_page.html.j2
 
-
-
 Extends:
 ./layouts/form.html.j2
 
 mgd 2025-03-05--15
 --------------------------------------- #}
 
-{% set dlg_var_close= False %}
+{% set dlg_var_v_centered= True %}
+{% set dlg_close_btn_visible= False %}
 {% set dlg_var_icon_url= iconFileUrl %}
 {% set dlg_var_svg= iconSvgUrl %}
 {% set form_close_btn_text= btnCloseForm %}
@@ -32,21 +31,20 @@ mgd 2025-03-05--15
 
 {% include "includes/backend-msg.html.j2" %}
 
-{% block frm_blc_above %}
-{% endblock frm_blc_above %}
-
-{% block frm_blc_below %}
-{% endblock frm_blc_below %}
-
 {% endblock dlg_blc_body %}
 {# ╘═════════ Dialog Body ═════════╛ #}
 
-{% block dlg_blc_footer %}
 
-{% from "includes/_action_forms_and_btns.html.j2" import btn_close %}
-{{ btn_close(action_form__form_close_id, form_close_btn_text ) }}
+{# ╒════════ Dialog Footer ════════╕ #}
+{% block dlg_blc_footer_buttons %}
 
-{% endblock dlg_blc_footer %}
+<div class="col-auto">
+{% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
+{{ btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, form_close_btn_text) }}
+</div>
+
+{% endblock dlg_blc_footer_buttons %}
+{# ╘════════ Dialog Footer ════════╛ #}
 
 
 {# eof #}

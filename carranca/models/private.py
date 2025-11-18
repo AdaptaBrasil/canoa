@@ -8,6 +8,8 @@ Equipe da Canoa -- 2024
 # cSpell:ignore: nullable sqlalchemy sessionmaker sep ssep scm sepsusr usrlist SQLA duovigesimal
 
 from typing import List, Optional
+from ..public.ups_handler import AppStumbled
+from ..private.scm_export_ui_save import SepUiOrder
 from sqlalchemy import (
     Computed,
     DateTime,
@@ -18,6 +20,7 @@ from sqlalchemy import (
     select,
     exists,
     Text,
+    text,
     func,
     and_,
 )
@@ -32,7 +35,7 @@ from ..helpers.db_helper import db_fetch_rows, col_names_to_columns
 from ..helpers.py_helper import is_str_none_or_empty
 from ..helpers.user_helper import get_user_code
 from ..helpers.types_helper import OptListOfStr
-from ..private.SepIconMaker import SepIconMaker, svg_content
+from ..private.SepIconMaker import SepIconMaker, SvgContent
 from ..common.app_context_vars import sidekick, app_user
 from ..helpers.db_records.DBRecords import DBRecords
 
@@ -59,7 +62,7 @@ class UserDataFiles(SQLABaseTable):
     ticket = Column(String(40), unique=True)
     id_sep = Column(Integer)  # fk
     id_users = Column(Integer)  # fk
-
+    log_file_name = Column(String(200))  # use in case of error
     # register, file info
     file_name = Column(String(80))
     file_size = Column(Integer)
@@ -130,9 +133,7 @@ class UserDataFiles(SQLABaseTable):
         elif len(rows) == 1:
             return rows[0]
         else:
-            raise KeyError(
-                f"The ticket {uTicket} return several records, expecting only one."
-            )
+            raise KeyError(f"The ticket {uTicket} return several records, expecting only one.")
 
     @staticmethod
     def _ins_or_upd(isInsert: bool, uTicket: str, **kwargs) -> None:
@@ -227,23 +228,19 @@ class Schema(SQLABaseTable):
         return row
 
     @staticmethod
-    def get_schemas(col_names: OptListOfStr = None) -> DBRecords:
+    def get_schemas(col_names: OptListOfStr = None, order_by: str = "") -> DBRecords:
         """
         Returns:
-          All records from Schema table, optional of selected fields
+          All records from Schema table, optional of selected fields, order by the order_by, eg 'name ASC'
         """
 
         def _get_data(db_session: Session):
-
-            # def __cols() -> List[Column]:
-            #     all_cols = Schema.__table__.columns
-            #     _cols = [col for col in all_cols if col.name in col_names]
-            #     return _cols
-
-            # sel_cols = __cols() if field_names else None
             sel_cols = col_names_to_columns(col_names, Schema.__table__.columns)
 
             stmt = select(*sel_cols) if sel_cols else select(Schema)
+            if order_by:
+                stmt = stmt.order_by(text(order_by))
+
             rows = db_session.execute(stmt).all()
             recs = DBRecords(stmt, rows)
             return recs
@@ -358,12 +355,12 @@ class Sep(SQLABaseTable):
         return sep_row
 
     @staticmethod
-    def get_content(id: int) -> Optional[svg_content]:
+    def get_content(id: int) -> Optional[SvgContent]:
         """
         Returns the content of the icon_svg (useful for creating a file)
         """
 
-        def _get_data(db_session: Session) -> svg_content:
+        def _get_data(db_session: Session) -> SvgContent:
             try:
                 stmt = select(Sep).where(Sep.id == id)
                 sep = db_session.execute(stmt).scalar_one_or_none()
@@ -371,13 +368,36 @@ class Sep(SQLABaseTable):
                 icon_content = SepIconMaker.empty_content if is_empty else sep.icon_svg
             except Exception as e:
                 icon_content = SepIconMaker.error_content
-                sidekick.app_log.error(
-                    f"Error retrieving icon content of SEP {id}: [{e}]."
-                )
+                sidekick.app_log.error(f"Error retrieving icon content of SEP {id}: [{e}].")
             return icon_content
 
         e, msg_error, icon_content = db_fetch_rows(_get_data)
         return icon_content, msg_error
+
+    @staticmethod
+    def save_ui_order(items: SepUiOrder, task_code: int) -> bool:
+        # The new order is implied by the position in the list, grouped by schema.
+        # ⚠️ We intentionally update *all* items instead of only modified ones.
+        #     Reason: keeping the stored order always synchronized with the frontend
+        #     ensures deterministic behavior, avoids "out-of-sync" inconsistencies,
+        #     and greatly simplifies rollback and debugging.
+        #     The performance cost is negligible given the small number of SEPs per SCM.
+
+        db_session: Session
+        sep_id = -1
+        with global_sqlalchemy_scoped_session() as db_session:
+
+            try:
+                for sep_id, new_index in items:
+                    db_session.query(Sep).filter_by(id=sep_id).update({"ui_order": new_index})
+
+                db_session.commit()
+
+            except Exception as e:
+                db_session.rollback()
+                raise AppStumbled("Error save Schema ui-order.", task_code, False, e)
+
+        return True
 
     @staticmethod
     def save(sep_row: "Sep", schema_changed: bool, batch_code: str) -> int:
@@ -420,11 +440,9 @@ class Sep(SQLABaseTable):
     @staticmethod
     def full_name_exists(id_schema: int, sep_name: str) -> bool:
 
-        def _get_data(db_session: Session) -> svg_content:
+        def _get_data(db_session: Session) -> SvgContent:
             # see sep__sch_name_lower_uix
-            stmt = select(Sep.name_lower).where(
-                Sep.id_schema == id_schema, Sep.name_lower == func.lower(sep_name)
-            )
+            stmt = select(Sep.name_lower).where(Sep.id_schema == id_schema, Sep.name_lower == func.lower(sep_name))
             name_exists = db_session.query(exists(stmt)).scalar()
             return name_exists
 
@@ -438,11 +456,7 @@ class Sep(SQLABaseTable):
 
         def _get_data(db_session: Session) -> List[Sep]:
             sel_cols = col_names_to_columns(col_names, Sep.__table__.columns)
-            stmt = (
-                select(*sel_cols)
-                .where(and_(Sep.id_schema == scm_id, Sep.visible == True))
-                .order_by(Sep.ui_order)
-            )
+            stmt = select(*sel_cols).where(and_(Sep.id_schema == scm_id, Sep.visible == True)).order_by(Sep.ui_order)
             rows = db_session.execute(stmt).all()
             recs = DBRecords(stmt, rows)
             return recs
@@ -483,12 +497,8 @@ class ReceivedFiles(SQLABaseTable):
     report_warns = Column(Integer)
 
     user_receipt = Column(String(15))
-    email_sent = Column(
-        Boolean
-    )  # index (email_sent, had_reception_error, user_id, registered_at)
-    had_reception_error = Column(
-        Boolean
-    )  # index (email_sent, had_reception_error, user_id, registered_at)
+    email_sent = Column(Boolean)  # index (email_sent, had_reception_error, user_id, registered_at)
+    had_reception_error = Column(Boolean)  # index (email_sent, had_reception_error, user_id, registered_at)
 
     @staticmethod
     def get_records(
@@ -515,10 +525,11 @@ class ReceivedFiles(SQLABaseTable):
             else:
                 # For grid
                 stmt = stmt.where(
-                    and_(
-                        ReceivedFiles.email_sent == email_sent,
-                        ReceivedFiles.had_reception_error == had_reception_error,
-                    )
+                    # 2025.11.11 debuging ReceivedFiles.had_reception_error == had_reception_error,
+                    # and_( # and_(  mgd-bug-2025-10-01
+                    #     ReceivedFiles.email_sent == email_sent,
+                    #     ReceivedFiles.had_reception_error == had_reception_error,
+                    # )
                 )
                 if user_id is not None:
                     stmt = stmt.where(ReceivedFiles.user_id == user_id)
@@ -558,9 +569,7 @@ class ReceivedFilesCount(SQLABaseTable):
     @staticmethod
     def get_records(user_id: Optional[int] = None) -> DBRecords:
         def _get_data(db_session: Session) -> DBRecords:
-            stmt = select(
-                ReceivedFilesCount
-            )  # stmt : Select[Tuple[ReceivedFilesCount]] =
+            stmt = select(ReceivedFilesCount)
             if user_id is not None:
                 stmt = stmt.where(ReceivedFilesCount.user_id == user_id)
 
@@ -569,9 +578,7 @@ class ReceivedFilesCount(SQLABaseTable):
 
             return recs
 
-        _, _, received_files_count = db_fetch_rows(
-            _get_data, ReceivedFilesCount.__tablename__
-        )
+        _, _, received_files_count = db_fetch_rows(_get_data, ReceivedFilesCount.__tablename__)
         return received_files_count
 
 
@@ -636,11 +643,9 @@ class MgmtSepsUser(SQLABaseTable):
         return MgmtSepsUser.id_to_code.encode(id)
 
     @staticmethod
-    def _get_sep_list(
-        user_id: Optional[int] = None, sep_id: Optional[int] = None
-    ) -> DBRecords:
+    def _get_sep_list(user_id: Optional[int] = None, sep_id: Optional[int] = None) -> DBRecords:
         """⚠️
-        any change here must be replated in
+        any change here must be repeated in
         carranca/private/UserSep.py:UserSep
         """
         field_names = [
@@ -664,7 +669,7 @@ class MgmtSepsUser(SQLABaseTable):
         return MgmtSepsUser._get_sep_list(user_id)
 
     @staticmethod
-    def get_sep_row(sep_id: int) -> "MgmtSepsUser":
+    def get_sep_row(sep_id: int) -> Optional["MgmtSepsUser"]:
         """Get one sep"""
         records: DBRecords = MgmtSepsUser._get_sep_list(None, sep_id)
         return None if records is None or (records.count == 0) else records[0]

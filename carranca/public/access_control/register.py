@@ -15,7 +15,11 @@ from ...common.app_context_vars import sidekick
 from ...models.public import persist_user
 from ...helpers.pw_helper import internal_logout, is_someone_logged
 from ...common.app_error_assistant import ModuleErrorCode
-from ...helpers.route_helper import get_account_response_data, get_front_end_str, init_response_vars
+from ...helpers.route_helper import (
+    get_account_response_data,
+    get_form_input_value,
+    init_response_vars,
+)
 from ...helpers.ui_db_texts_helper import add_msg_success, add_msg_error, add_msg_final
 
 from ..wtforms import RegisterForm
@@ -29,14 +33,14 @@ def register():
         return user is not None
 
     task_code = ModuleErrorCode.ACCESS_CONTROL_REGISTER.value
-    flask_form, tmpl_ffn, is_get, texts = init_response_vars()
+    tmpl_rfn, is_get, texts = init_response_vars()
 
     try:
         task_code += 1  # 1
         flask_form = RegisterForm(request.form)
         task_code += 1  # 2
-        tmpl_ffn, is_get, texts = get_account_response_data("register")
-        user_name = "" if is_get else get_front_end_str("username")
+        tmpl_rfn, is_get, texts = get_account_response_data("register")
+        user_name = "" if is_get else get_form_input_value("username")
         task_code += 1  # 3
 
         if is_get and is_someone_logged():
@@ -45,9 +49,9 @@ def register():
             pass
         elif __exists_user_where(username_lower=user_name.lower()):
             add_msg_error("userAlreadyRegistered", texts)
-        elif __exists_user_where(email=get_front_end_str("email").lower()):
+        elif __exists_user_where(email=get_form_input_value("email").lower()):
             add_msg_error("emailAlreadyRegistered", texts)
-        elif not sidekick.config.DB_len_val_for_pw.check(get_front_end_str("password")):
+        elif not sidekick.config.DB_len_val_for_pw.check(get_form_input_value("password")):
             add_msg_error(
                 "invalidPassword",
                 texts,
@@ -76,7 +80,7 @@ def register():
         sidekick.app_log.debug(msg)
 
     return render_template(
-        tmpl_ffn,
+        tmpl_rfn,
         form=flask_form,
         **texts,
     )

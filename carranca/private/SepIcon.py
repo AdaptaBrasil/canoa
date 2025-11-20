@@ -7,7 +7,6 @@ mgd
 
 # cSpell:ignore MgmtSep
 
-
 from ..helpers.py_helper import is_str_none_or_empty
 
 ICON_MIN_SIZE = 60  # bytes

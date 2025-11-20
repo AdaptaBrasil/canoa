@@ -55,11 +55,10 @@ def get_sep_data(
     edit_mode: SepEditMode,
     no_manager: NoManager,
     ui_db_texts: UIDBTexts,
-    sep_id: int,
     form: SepNew,
+    sep_id: int,
     sep_tmp_name: str,
-) -> Tuple[int, UserSep, Sep, UsualDict, str]:
-    return_task_code = task_code + 20  # here we can use up to 19
+) -> Tuple[Sep, UsualDict, str]:
     is_get = is_method_get()
     load_sep_icon_content = not is_get
     sep_row = Sep() if (edit_mode == SepEditMode.INSERT) else Sep.get_row(sep_id, load_sep_icon_content)
@@ -94,8 +93,6 @@ def get_sep_data(
         ui_db_texts[UITextsKeys.Form.icon_url] = ""
         ui_select_lists = _get_ui_select_lists(no_scm)
         return (
-            return_task_code,
-            None,
             sep_row,
             ui_select_lists,
             ui_db_texts["sepNewTmpName"],
@@ -134,7 +131,6 @@ def get_sep_data(
         usr_sep = UserSep(**usr_sep_dict)
         usr_sep.icon_url = SepIconMaker.get_url(usr_sep.icon_file_name)
 
-
     # fill the form for edition
     if is_get:
         # set the form's data row for edition, just in case (someone messed with the db) clean up the text
@@ -153,7 +149,7 @@ def get_sep_data(
 
     task_code += 1
     ui_db_texts[UITextsKeys.Form.icon_url] = usr_sep.icon_url
-    return return_task_code, usr_sep, sep_row, ui_select_lists, sep_usr_row.fullname
+    return sep_row, ui_select_lists, sep_usr_row.fullname
 
 
 # eof

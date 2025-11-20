@@ -73,8 +73,8 @@ class BaseConfig(Config):
     #  when it's config value is None
     APP_PROPAGATE_DEBUG = False
     # set in derived classes
-    APP_DEBUG: TrueInDebug = None
-    APP_UNMINIFIED: TrueInDebug = False  #
+    APP_DEBUG: TrueInDebug = True
+    APP_MINIFY_OFF: TrueInDebug = None  #
     APP_DISPLAY_DEBUG_MSG: TrueInDebug = None
 
     APP_MODE = "None"  # see below (enum)
@@ -111,8 +111,8 @@ class BaseConfig(Config):
     # My address service is SERVER_EXTERNAL_IP is empty
     # (used to send recovery email confirmation, etc)
     EXTERNAL_IP_SERVICE = "https://checkip.amazonaws.com"
-    # satelier.dev.br
-    # SERVER_EXTERNAL_IP = "177.43.119.39"
+    # satelier.dev.br -> "177.43.119.39"
+    SERVER_EXTERNAL_IP = ""
     SERVER_EXTERNAL_PORT = ""
 
     """ Flask Configuration

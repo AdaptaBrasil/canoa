@@ -91,13 +91,21 @@ class DynamicConfig(BaseConfig):
         default = self.APP_DEBUG if self.APP_PROPAGATE_DEBUG else False
 
         def _if_debug(value):
+            """
+            Resolve a tri-state config flag (True/False/None).
+            Args:
+                value: The raw flag value (True, False, or None).
+                default: The default boolean to use if value is None.
+            Returns:
+                bool: The resolved flag.
+            """
             return default if value is None else as_bool(value)
 
         self.TESTING = _if_debug(self.TESTING)  # Flask
-        self.APP_UNMINIFIED = _if_debug(self.APP_UNMINIFIED)  #
         self.DEBUG_TEMPLATES = _if_debug(self.DEBUG_TEMPLATES)  # jinja
-        self.DEBUG_RENDERED_TEMPLATES = _if_debug(self.DEBUG_RENDERED_TEMPLATES)
+        self.APP_MINIFY_OFF = _if_debug(self.APP_MINIFY_OFF)  #
         self.APP_DISPLAY_DEBUG_MSG = _if_debug(self.APP_DISPLAY_DEBUG_MSG)
+        self.DEBUG_RENDERED_TEMPLATES = _if_debug(self.DEBUG_RENDERED_TEMPLATES)
 
         if is_str_none_or_empty(self.SECRET_KEY):
             """
@@ -135,7 +143,7 @@ class StageConfig(DynamicConfig):
     APP_MODE = app_mode_stage
 
     def __init__(self, fuse: Fuse):
-        super().__init__(fuse, False, False, "192.168.0.1:5002")
+        super().__init__(fuse, True, True, "192.168.0.1:5002")
 
 
 # ===[3] Production Config

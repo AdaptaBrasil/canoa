@@ -38,13 +38,13 @@ from carranca import create_app, started  # see __init__.py
 app, sidekick = create_app()
 
 
-if sidekick.config.APP_UNMINIFIED:
+if sidekick.config.APP_MINIFY_OFF:
     sidekick.display.info("App minification is fully disabled.")
 elif m := _get_minify():
     sidekick.display.info(f"Flask-Minify initialized: [html: {m.html}, js: {m.js}, cssless: {m.cssless}].")
 else:
     sidekick.display.error("Configuration error: Flask-Minify is enabled but not installed.")
-    sidekick.display.info("Install with 'pip install Flask-Minify' or set APP_UNMINIFIED=True in config.")
+    sidekick.display.info("Install with 'pip install Flask-Minify' or set APP_MINIFY_OFF=False in config.")
 
 
 sidekick.display.info("The app is ready to run!")

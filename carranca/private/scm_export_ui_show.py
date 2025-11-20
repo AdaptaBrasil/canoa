@@ -8,7 +8,7 @@ mgd 2025.08
 """
 
 from .sep_icon import do_icon_get_url
-from .scm_data import scm_data_get
+from .scm_data import get_scm_data
 from ..helpers.py_helper import class_to_dict
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.types_helper import JinjaTemplate
@@ -36,7 +36,7 @@ def scm_export_ui_show(uiact_rsp: UiActResponse) -> JinjaTemplate:
         config = ExportProcessConfig(scm_cols, sep_cols)
 
         task_code += 1
-        schema_data, task_code = scm_data_get(task_code, False, config)
+        schema_data, task_code = get_scm_data(task_code, False, config)
         task_code += 1
         grid_data = ExportGrid.get_data()
         task_code += 1

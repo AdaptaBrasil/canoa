@@ -7,7 +7,7 @@
    mgd 2024-10-01--07
 """
 
-# cSpell:ignore sqlalchemy app_name cssless sendgrid ENDC mandatories
+# cSpell:ignore sqlalchemy app_name cssless sendgrid ENDC mandatories elap
 
 # -- ⚠️ ----------------------------------
 # This module uses `local imports`
@@ -44,8 +44,6 @@ class Fuse:
     from .Display import Display
 
     def __init__(self, app_name, display: Display, args: Args):
-        from ..config.BaseConfig import app_mode_production, app_mode_development
-
         self.app_name = app_name
         self.debugging = args.app_debug
         self.display = display
@@ -86,7 +84,7 @@ def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple[Any, st
     """
     import json
 
-    msg_error = ''
+    msg_error = ""
     new_fuse: Optional[Fuse] = None
     try:
         from .Display import Display
@@ -125,7 +123,7 @@ def _ignite_config(fuse: Fuse) -> Tuple[DynamicConfig, str]:
     WARNING: Don't run with debug turned on in production!
     """
     config = None  # this config will later be shared by sidekick
-    msg_error = ''
+    msg_error = ""
     try:
         from ..config.DynamicConfig import get_config_for_mode
 
@@ -134,17 +132,13 @@ def _ignite_config(fuse: Fuse) -> Tuple[DynamicConfig, str]:
             raise Exception(f"Unknown config mode '{fuse.app_mode}'.")
 
         if not path.isfile(path.join(config.APP_FOLDER, "main.py")):
-            raise Exception(
-                "main.py file not found in the app folder. Check BaseConfig.APP_FOLDER."
-            )
+            raise Exception("main.py file not found in the app folder. Check BaseConfig.APP_FOLDER.")
 
         config.APP_DEBUGGING = True if fuse.debugging else config.APP_DEBUG
         config.APP_ARGS = fuse.args
         fuse.display.info(f"The app config, in '{fuse.app_mode}' mode, was ignited.")
     except Exception as e:
-        msg_error = _ERROR_MSG.format(
-            __name__, f"initializing the app config in mode '{fuse.app_mode}'", str(e)
-        )
+        msg_error = _ERROR_MSG.format(__name__, f"initializing the app config in mode '{fuse.app_mode}'", str(e))
 
     return config, msg_error
 
@@ -153,7 +147,7 @@ def _ignite_config(fuse: Fuse) -> Tuple[DynamicConfig, str]:
 def _check_mandatory_keys(config, fDisplay) -> str:
     """Check if the mandatories environment variables are set."""
 
-    msg_error = ''
+    msg_error = ""
     try:
         from ..config.BaseConfig import CONFIG_MANDATORY_KEYS
 
@@ -161,9 +155,7 @@ def _check_mandatory_keys(config, fDisplay) -> str:
             value = getattr(config, key, "")
             empty = value is None or value.strip() == ""
             if empty:
-                fDisplay.error(
-                    f"[{__name__}]: Config[{config.APP_MODE}].{key} has no value."
-                )
+                fDisplay.error(f"[{__name__}]: Config[{config.APP_MODE}].{key} has no value.")
             return empty
 
         has_empty = False
@@ -174,7 +166,7 @@ def _check_mandatory_keys(config, fDisplay) -> str:
                 has_empty = True
 
         msg_error = (
-            ''
+            ""
             if not has_empty
             else _ERROR_MSG.format(
                 __name__,
@@ -184,9 +176,7 @@ def _check_mandatory_keys(config, fDisplay) -> str:
         )
 
     except Exception as e:
-        msg_error = _ERROR_MSG.format(
-            __name__, f"checking mandatory keys of config[`{config.APP_MODE}`]", e
-        )
+        msg_error = _ERROR_MSG.format(__name__, f"checking mandatory keys of config[`{config.APP_MODE}`]", e)
 
     return msg_error
 
@@ -194,16 +184,16 @@ def _check_mandatory_keys(config, fDisplay) -> str:
 # ---------------------------------------------------------------------------- #
 def _ignite_server_name(config) -> Tuple[Any, str]:
     """Confirm validity of the server address"""
-    msg_error = ''
+    msg_error = ""
 
     class Address(NamedTuple):
         host: str
         port: int
 
-    address = Address('', 0)
+    address = Address("", 0)
+    try_url = f"http://{config.SERVER_ADDRESS}"
     try:
 
-        try_url = f"http://{config.SERVER_ADDRESS}"
         url = urlparse(try_url)
 
         address = Address(url.hostname, url.port)
@@ -211,22 +201,14 @@ def _ignite_server_name(config) -> Tuple[Any, str]:
             msg_error = f"Invalid host or port address found in [{config.SERVER_ADDRESS}], parsed: {address.host}:{address.port}`."
         else:
             config.SERVER_ADDRESS = f"{address.host}:{address.port}"
-            scheme = (
-                ""
-                if is_str_none_or_empty(config.PREFERRED_URL_SCHEME)
-                else f"{config.PREFERRED_URL_SCHEME}://"
-            )
+            scheme = "" if is_str_none_or_empty(config.PREFERRED_URL_SCHEME) else f"{config.PREFERRED_URL_SCHEME}://"
             # Flask Config
             config.RUN_HOST = address.host
             config.RUN_PORT = address.port
-            fuse.display.info(
-                f"The Flask Server address was set to '{scheme}{config.SERVER_ADDRESS}'."
-            )
+            fuse.display.info(f"The Flask Server address was set to '{scheme}{config.SERVER_ADDRESS}'.")
 
     except Exception as e:
-        fuse.display.error(
-            f"`urlparse({try_url}) -> parsed: {address.host}:{address.port}`"
-        )
+        fuse.display.error(f"`urlparse({try_url}) -> parsed: {address.host}:{address.port}`")
         msg_error = _ERROR_MSG.format(
             __name__,
             f"parsing server address. Expect value is [HostName:Port], found: [{config.SERVER_ADDRESS}]",
@@ -250,7 +232,7 @@ def _ignite_sql_connection(uri: str) -> Tuple[str, str]:
     from sqlalchemy import create_engine, text
     from sqlalchemy.exc import OperationalError
 
-    error: str = None
+    error = ""
     db_version: str = ""
     fuse.display.debug("Connecting to the database.")  # this may take a while
     error_msg = "{} error: Unable to connect to the database. Error details: [{}]."
@@ -258,13 +240,10 @@ def _ignite_sql_connection(uri: str) -> Tuple[str, str]:
         engine = create_engine(uri)
         start_time = time.time()
         with engine.connect() as connection:
-            result = connection.execute(
-                text("select number from db_version order by id desc limit 1")
-            )
+            result = connection.execute(text("select number from db_version order by id desc limit 1"))
             db_version = result.scalar()
-            fuse.display.info(
-                f"Connected to database version {db_version} successfully in {(time.time() - start_time) * 1000:,.2f} ms."
-            )
+            elap = f"{(time.time() - start_time)    * 1000:,.2f}"
+            fuse.display.info(f"Connected to database version {db_version} successfully in {elap} ms.")
     except OperationalError as e:
         error = error_msg.format("Operational", e)
     except Exception as e:
@@ -315,9 +294,7 @@ def ignite_app(app_name, start_at) -> Tuple[Sidekick, str, bool]:
     # Check DB connection, stop if not debugging
     error, db_version = _ignite_sql_connection(config.SQLALCHEMY_DATABASE_URI)
     if not error:
-        fuse.display.info(
-            "SQLAlchemy engine was created and the db connection was successfully tested."
-        )
+        fuse.display.info("SQLAlchemy engine was created and the db connection was successfully tested.")
     elif RaiseIf.ignite_no_sql_conn:
         _log_and_exit(error)
     else:
@@ -333,25 +310,17 @@ def ignite_app(app_name, start_at) -> Tuple[Sidekick, str, bool]:
 
     if is_str_none_or_empty(config.SENDGRID_API_KEY):
         warns += 1
-        fuse.display.warn(
-            "Sendgrid API key was not found, the app will not be able to send emails."
-        )
+        fuse.display.warn("Sendgrid API key was not found, the app will not be able to send emails.")
 
     if is_str_none_or_empty(config.EMAIL_ORIGINATOR):
         warns += 1
-        fuse.display.warn(
-            "The app email originator is not defined, the app will not be able to send emails."
-        )
+        fuse.display.warn("The app email originator is not defined, the app will not be able to send emails.")
 
     # ---------------------------------------------------------------------------- #
     # Final message
 
     fuse.display.print(
-        (
-            Display.Kind.INFO
-            if warns + errors == 0
-            else (Display.Kind.WARN if errors == 0 else Display.Kind.ERROR)
-        ),
+        (Display.Kind.INFO if warns + errors == 0 else (Display.Kind.WARN if errors == 0 else Display.Kind.ERROR)),
         f"{__name__} module completed with {errors} errors and {warns} warnings.",
     )
     display_mute_after_init = fuse.args.display_mute_after_init

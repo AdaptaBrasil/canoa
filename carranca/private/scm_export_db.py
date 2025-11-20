@@ -6,7 +6,7 @@ mgd 2025.10
 
 import json
 
-from .scm_data import scm_data_get
+from .scm_data import get_scm_data
 from ..helpers.py_helper import class_to_dict
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.uiact_helper import UiActResponse
@@ -30,7 +30,7 @@ def scm_export_db(uiact_rsp: UiActResponse) -> JinjaGeneratedHtml:
         task_code += 1
         config = ExportProcessConfig()
         task_code += 1
-        schema_data, task_code = scm_data_get(task_code, True, config)
+        schema_data, task_code = get_scm_data(task_code, True, config)
 
         task_code += 1
         if False:

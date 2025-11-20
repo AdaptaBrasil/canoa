@@ -17,7 +17,7 @@ from ..helpers.uiact_helper import UiActResponseKeys
 from ..helpers.jinja_helper import JinjaGeneratedHtml, process_template
 from ..helpers.route_helper import MTD_POST, get_private_response_data, init_response_vars
 from ..helpers.js_consts_helper import js_grid_col_meta_info, js_ui_dictionary
-from ..helpers.ui_db_texts_helper import add_msg_final
+from ..helpers.ui_db_texts_helper import add_msg_final, UITextsKeys
 from ..common.app_error_assistant import ModuleErrorCode, AppStumbled, HTTPStatusCode
 from ..helpers.db_records.DBRecords import DBRecords
 
@@ -26,10 +26,10 @@ def get_sep_grid() -> JinjaGeneratedHtml:
 
     def _sep_data_fetch(col_names: List[str]) -> DBRecords:
         sep_usr_rows = MgmtSepsUser.get_seps_usr(col_names)
-        for record in sep_usr_rows:
-            sep_id = record.id
-            record.id = MgmtSepsUser.code(sep_id)
-            record.icon_file_name = do_icon_get_url(record.icon_file_name, sep_id)
+        for sep in sep_usr_rows:
+            sep_id = sep.id
+            sep.id = MgmtSepsUser.code(sep_id)
+            sep.icon_file_name = do_icon_get_url(sep.icon_file_name, sep_id)
 
         return sep_usr_rows
 
@@ -53,6 +53,10 @@ def get_sep_grid() -> JinjaGeneratedHtml:
         sep_data = _sep_data_fetch(col_names)
 
         task_code += 1  # 5
+        # TODO sep_data[ start_index ]
+        ui_db_texts[UITextsKeys.Form.icon_url] = sep_data[0].icon_file_name if len(sep_data) > 0 else ""
+
+        task_code += 1  # 6
         jHtml = process_template(
             tmpl_rfn,
             sep_data=sep_data.to_list(),

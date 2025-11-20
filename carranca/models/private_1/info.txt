@@ -1,0 +1,7 @@
+This folder should contain the private models, each in its own file.
+Remove each model from
+   carranca\models\private.py
+and create files like
+   carranca\models\private_1\ExportGrid.py
+
+When finished, rename private_1 -> private

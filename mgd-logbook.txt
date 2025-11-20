@@ -70,6 +70,11 @@
 
 
 ------- 2025 - November ----------
+2025-11-19 Issue #78 solved & several sep fixes
+    - Issue #78 solved
+    - background image back to original
+    - Fixes in sep_grid.py
+
 2025-11-10 -- 16 Global Revision  v β 5.07
     - Fixing the Gemini mess, Part B/B
     - Global Revision with Power User OK

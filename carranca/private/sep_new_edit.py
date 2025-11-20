@@ -10,22 +10,21 @@ status
 
 # cSpell: ignore wtforms werkzeug sepsusr usrlist scms nsert
 
-import re
+
 from flask import request
 from typing import Tuple, cast
-from os.path import splitext
 from sqlalchemy import func  # func.now() == server time
 from dataclasses import dataclass
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
 from .wtforms import SepEdit, SepNew
-from .sep_icon import icon_refresh, ICON_MIN_SIZE
+from .sep_icon import icon_refresh
 from .SepIconMaker import SepIconMaker
+from .sep_icon_data import get_icon_data, IconInfo
 from .sep_form_data import get_sep_data, SepEditMode, NoManager, SCHEMA_LIST_KEY
 from ..private.UserSep import UserSep
-
-from ..helpers.py_helper import is_str_none_or_empty, to_int, crc16
+from ..helpers.py_helper import is_str_none_or_empty, to_int
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.user_helper import get_batch_code
 from ..helpers.uiact_helper import UiActResponseProxy
@@ -54,15 +53,6 @@ def do_sep_edit(data: str) -> str:
     from ..models.private import Sep
 
     SVG_MIME = "image/svg+xml"
-
-    @dataclass
-    class IconData:
-        content: str = ""
-        file_name: str = ""
-        ready: bool = False
-        crc: int = 0
-        error_hint: str = ""
-        error_code: int = 0
 
     action, code, row_index = UiActResponseProxy().decode(data)
 
@@ -96,27 +86,31 @@ def do_sep_edit(data: str) -> str:
 
     task_code = ModuleErrorCode.SEP_EDIT.value
     jHtml, is_get, ui_db_texts = init_response_vars()
+    tmpl_rfn = ""
 
     # &#8209 is a `nobreak-hyphen`, &hyphen does not work.
     sep_fullname = f"SPC&#8209;{code}"
     try:
         no_manager = NoManager()
 
-        def was_icon_file_sent(form: SepNew | SepEdit) -> Tuple[bool, FileStorage | None]:
+        def get_icon_info(form: SepNew | SepEdit) -> IconInfo:
+            info = IconInfo()
             form_file_name = form.icon_filename.name
-            file_storage: FileStorage = request.files[form_file_name] if form_file_name in request.files else None
-            icon_file_sent = file_storage is not None and file_storage.content_type.startswith(SVG_MIME)
-            return icon_file_sent, file_storage
+            info.storage = request.files[form_file_name] if form_file_name in request.files else None
+            info.sent = info.storage is not None and info.storage.content_type.startswith(SVG_MIME)
+            return info
 
-        def _was_form_sep_modified(sep_row: Sep, form: SepNew | SepEdit) -> Tuple[bool, bool, str, int, int]:
+        def _was_form_sep_modified(
+            sep_row: Sep, form: SepNew | SepEdit, icon_sent: bool
+        ) -> Tuple[bool, bool, str, int, int]:
             if is_get:
                 return (False, False, "", -1, -1)
 
-            id_manager, frm_id_schema, frm_sep_name = (-1, 0, "")
+            id_manager, frm_id_schema, frm_sep_name = (None, 0, "")
 
             if edit_full_or_ins:
                 frm_id_manager = cast(int, form.manager_list.data)
-                id_manager = -1 if (frm_id_manager == no_manager.id) else frm_id_manager
+                id_manager = None if (frm_id_manager == no_manager.id) else frm_id_manager
                 frm_id_schema = cast(int, form.schema_list.data)
                 frm_visible = cast(bool, form.visible.data)
                 frm_sep_name = get_form_input_value(form.sep_name.name, [Sep.scm_sep])
@@ -132,20 +126,18 @@ def do_sep_edit(data: str) -> str:
                     sep_modified = True
                 case SepEditMode.SIMPLE_EDIT:
                     form_modified = (
-                        (frm_visible != sep_row.visible)
-                        or (frm_description != sep_row.description)
-                        or was_icon_file_sent(form)[0]
+                        (frm_visible != sep_row.visible) or (frm_description != sep_row.description) or icon_sent
                     )
                     sep_modified = False
                 case SepEditMode.FULL_EDIT:
                     form_modified = (
-                        (id_manager != sep_row.users_id)
+                        ((id_manager or sep_row.users_id) and (id_manager != sep_row.users_id))
                         or (frm_id_schema != sep_row.id_schema)
                         or (frm_visible != sep_row.visible)
                         or (frm_sep_name != sep_row.name)
                         or (frm_description != sep_row.description)
                         # keep it last, resource consuming
-                        or was_icon_file_sent(form)[0]
+                        or icon_sent
                     )
                     sep_modified = frm_sep_name != sep_row.name
 
@@ -153,42 +145,6 @@ def do_sep_edit(data: str) -> str:
             form.description.data = frm_description
             form.sep_name.data = frm_sep_name
             return form_modified, sep_modified, frm_sep_name, frm_id_schema, id_manager
-
-        def _get_icon_data(sep_row: Sep) -> IconData:
-            def __find(pattern: str, data: str) -> int:
-                match = re.search(pattern, data, re.IGNORECASE | re.DOTALL)
-                return match.start() if match else -1
-
-            icon_file_sent, file_storage = was_icon_file_sent(form)
-            icon_data = IconData(file_name=file_storage.filename)
-            expected_ext = f".{SepIconMaker.ext}".lower()
-
-            if not icon_file_sent:
-                pass
-            elif not splitext(icon_data.file_name)[1].lower().endswith(expected_ext):
-                icon_data.error_hint = expected_ext
-                icon_data.error_code = 1
-            elif not (file_obj := request.files.get(form.icon_filename.name)):
-                icon_data.error_hint = "↑×"
-                icon_data.error_code = 2
-            elif len(data := file_obj.read().decode("utf-8").strip()) < ICON_MIN_SIZE:
-                icon_data.error_hint = f"≤ {ICON_MIN_SIZE}"
-                icon_data.error_code = 3
-            elif (start := __find(r"<svg.*?>", data)) < 0:
-                icon_data.error_hint = "¿<svg>"
-                icon_data.error_code = 4
-            elif (end := __find(r"</svg\s*>", data)) < 0:
-                icon_data.error_hint = "</svg>?"
-                icon_data.error_code = 5
-            elif (end - start) < ICON_MIN_SIZE:
-                icon_data.error_hint = f"< {ICON_MIN_SIZE}"
-                icon_data.error_code = 6
-            elif not (sep_row.icon_svg or "") == (data or ""):
-                icon_data.content = data
-                icon_data.crc = crc16(data)
-                icon_data.ready = True
-
-            return icon_data
 
         task_code += 1  # 1
         tmpl_rfn, is_get, ui_db_texts = get_private_response_data("sepNewEdit")
@@ -207,12 +163,15 @@ def do_sep_edit(data: str) -> str:
             form.description.render_kw["lang"] = app_user.lang
 
         task_code += 1  # 3
-        task_code, usr_sep, sep_row, ui_select_lists, sep_fullname = get_sep_data(
-            task_code, editMode, no_manager, ui_db_texts, sep_id, form, sep_fullname
+        sep_row, ui_select_lists, sep_fullname = get_sep_data(
+            task_code, editMode, no_manager, ui_db_texts, form, sep_id, sep_fullname
         )
 
         task_code = ModuleErrorCode.SEP_EDIT.value + 10  # 510
-        form_modified, sep_modified, sep_name, id_schema, id_manager = _was_form_sep_modified(sep_row, form)
+        icon_info = get_icon_info(form)
+        form_modified, sep_modified, sep_name, id_schema, id_manager = _was_form_sep_modified(
+            sep_row, form, icon_info.sent
+        )
 
         if is_get:
             task_code += 1
@@ -233,15 +192,11 @@ def do_sep_edit(data: str) -> str:
             pass
         elif sep_modified and Sep.full_name_exists(id_schema, sep_name):
             raise Exception(add_msg_error("sepNameRepeated", ui_db_texts, scm_name, sep_name))
-        elif (icon_data := _get_icon_data(sep_row)).error_code > 0:
+        elif (icon_data := get_icon_data(sep_row, icon_info, form.icon_filename.name)).error_code > 0:
             # msg {ext} [{hint}-{code}]
             raise Exception(
                 add_msg_error(
-                    "sepEditInvalidFormat",
-                    ui_db_texts,
-                    SepIconMaker.ext,
-                    icon_data.error_hint,
-                    icon_data.error_code,
+                    "sepEditInvalidFormat", ui_db_texts, SepIconMaker.ext, icon_data.error_hint, icon_data.error_code
                 )
             )
         # TODO: Check if icon used (CRC) in other SEP, index is ready
@@ -253,14 +208,14 @@ def do_sep_edit(data: str) -> str:
             batch_code = get_batch_code()
 
             if editMode == SepEditMode.INSERT:
-                icon_old_file_name = None
+                icon_old_file_name = ""
                 sep_row.id = None
                 sep_row.visible = True
                 sep_row.id_schema = id_schema
                 sep_row.ins_by = app_user.id
                 sep_row.ins_at = func.now()
             else:
-                icon_old_file_name = sep_row.icon_file_name
+                icon_old_file_name: str = sep_row.icon_file_name
                 sep_row.edt_by = app_user.id
                 sep_row.edt_at = func.now()
 
@@ -273,7 +228,7 @@ def do_sep_edit(data: str) -> str:
             if schema_changed := ((editMode == SepEditMode.FULL_EDIT) and (id_schema != sep_row.id_schema)):
                 sep_row.id_schema = id_schema
 
-            icon_new_file_name = None
+            icon_new_file_name = ""
             if fresh_icon := icon_data.ready:
                 task_code += 4  # 516
                 sep_row.icon_svg = icon_data.content
@@ -312,7 +267,7 @@ def do_sep_edit(data: str) -> str:
         )
 
     except JumpOut:
-        jHtml = process_template(tmpl_rfn, **ui_db_texts)
+        jHtml = process_template(tmpl_rfn, **ui_db_texts.dict())
 
     except Exception as e:
         jHtml = get_ups_jHtml("sepEditException", ui_db_texts, task_code, e, task_code, sep_fullname)

@@ -10,10 +10,10 @@ from os.path import splitext
 from dataclasses import dataclass
 from werkzeug.datastructures import FileStorage
 
-from ..models.private import Sep
-from .SepIconMaker import SepIconMaker
-from ..helpers.py_helper import crc16
 from .sep_icon import ICON_MIN_SIZE
+from .SepIconMaker import SepIconMaker
+from ..models.private import Sep
+from ..helpers.py_helper import crc16
 
 
 @dataclass

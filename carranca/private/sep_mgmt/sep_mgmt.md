@@ -21,7 +21,7 @@
 - `init_grid.py` *(main module)*
 - `keys-values.py` *(front-end ↔ back-end keys/values, via class)*
 - `save_to_db.py`
-- `send_email.py`
+- `mgmt_notify.py`
 
 ### 📂 Jinja
 > carranca/templates/private/

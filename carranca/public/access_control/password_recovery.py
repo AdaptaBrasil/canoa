@@ -14,8 +14,7 @@ import secrets
 from ..wtforms import PasswordRecoveryForm
 from ...models.public import get_user_where
 from ...models.public import persist_user
-from ...helpers.email_helper import RecipientsListStr
-from ...helpers.sendgrid_helper import send_email
+from ...helpers.email_helper import RecipientsListStr, send_email
 from ...common.app_error_assistant import ModuleErrorCode
 from ...helpers.ui_db_texts_helper import add_msg_error, add_msg_success, add_msg_final
 from ...helpers.route_helper import (

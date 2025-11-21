@@ -7,9 +7,10 @@ mgd
 
 """
 
-# cSpell:ignore app_name sqlalchemy sessionmaker autoflush gethostname connstr juser scms
+# cSpell:ignore app_name sqlalchemy sessionmaker autoflush gethostname connstr juser scms gcfg
 
 # ============================================================================ #
+from flask_mail import Mail
 from flask_login import LoginManager
 from sqlalchemy.orm import scoped_session
 
@@ -52,6 +53,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from .helpers.py_helper import crc16
 from .private.JinjaUser import JinjaUser
+from .config.BaseConfig import BaseConfig
 from .helpers.pw_helper import is_someone_logged
 from .helpers.file_helper import file_full_name_parse
 
@@ -214,6 +216,26 @@ def _register_db(app: Flask):
 
 
 # ---------------------------------------------------------------------------- #
+def _register_mail(app: Flask, cfg: BaseConfig):
+
+    fm_cfg = cfg.FLASK_MAIL
+    app.config["MAIL_SERVER"] = fm_cfg.get("server")
+    app.config["MAIL_PORT"] = fm_cfg.get("port")
+    app.config["MAIL_USE_TLS"] = fm_cfg.get("use_tls")
+    app.config["MAIL_USE_SSL"] = False
+    app.config["MAIL_USERNAME"] = cfg.EMAIL_ORIGINATOR
+    app.config["MAIL_PASSWORD"] = cfg.EMAIL_API_KEY_PW
+    app.config["MAIL_DEBUG"] = cfg.EMAIL_DEBUG
+    app.config["MAIL_SUPPRESS_SEND"] = False
+
+    mail = Mail()
+    mail.init_app(app)
+    _info(f"The Flask SMTP email server has been successfully initialized. The sender is <{cfg.EMAIL_ORIGINATOR}>.")
+
+    return
+
+
+# ---------------------------------------------------------------------------- #
 def _info(text: str):  # shortcut
     global_sidekick.display.info(text)
 
@@ -267,8 +289,10 @@ def _create_app_and_log_file(app_name: str):
 # ============================================================================ #
 # App + helpers
 def create_app():
-    from .common.app_constants import APP_NAME, APP_VERSION
+    import json
     from .common.igniter import ignite_app
+    from .helpers.email_helper import EmailProvider
+    from .common.app_constants import APP_NAME, APP_VERSION
 
     # ⚠️ =================================================
     # Global variables should be assigned before any other module
@@ -280,10 +304,11 @@ def create_app():
     # === Check if all mandatory information is ready === #
     global_sidekick, APP_DB_VERSION, display_mute_after_init = ignite_app(APP_NAME, started)
     _info(f"[{global_sidekick}] instance is now ready. It will be available during app's context.")
+    gcfg = global_sidekick.config  # shorcut
 
     # == 2/3 Global Scoped SQLAlchemy Session
     global global_sqlalchemy_scoped_session
-    db_uri = str(global_sidekick.config.SQLALCHEMY_DATABASE_URI)
+    db_uri = str(gcfg.SQLALCHEMY_DATABASE_URI)
     global_sqlalchemy_scoped_session = _do_sqlalchemy_scoped_session(db_uri)
     db_uri = None  # is a secret
     _info("A scoped SQLAlchemy session was successfully instantiated.")
@@ -298,6 +323,10 @@ def create_app():
     global_login_manager.init_app(app)
     _info("The Login Manager has been successfully initialized and attached to the app.")
 
+    # -- create the SMTP provider
+    if gcfg.EMAIL_PROVIDER_VALUE == EmailProvider.SMTP.value:
+        _register_mail(app, gcfg)
+
     # -- Register SQLAlchemy
     _register_db(app)
     _info("The app was registered in SqlAlchemy.")
@@ -309,8 +338,8 @@ def create_app():
     _info("The blueprint routes were collected and registered within the app.")
 
     # -- Jinja2
-    _register_jinja(app, global_sidekick.config.DEBUG_TEMPLATES, APP_NAME, APP_VERSION)
-    sd = f"(with debug_templates as {global_sidekick.config.DEBUG_TEMPLATES})"
+    _register_jinja(app, gcfg.DEBUG_TEMPLATES, APP_NAME, APP_VERSION)
+    sd = f"(with debug_templates as {gcfg.DEBUG_TEMPLATES})"
     _info(f"All Jinja functions of this app have been successfully attached to 'jinja_env.globals' {sd}.")
 
     # config sidekick.display

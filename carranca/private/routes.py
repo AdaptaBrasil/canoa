@@ -326,10 +326,10 @@ def confirm_user_email():
     else:
         from .confirm_email import confirm_email
 
-        from ..common.app_context_vars import __prepare_user_seps
-        # get_user_sep TEST
-        seps = __prepare_user_seps()
-        print(seps)
+        # from ..common.app_context_vars import __prepare_user_seps
+        # # get_user_sep TEST
+        # seps = __prepare_user_seps()
+        # print(seps)
 
         tmpl = confirm_email(current_user.email, current_user.username)
         return tmpl

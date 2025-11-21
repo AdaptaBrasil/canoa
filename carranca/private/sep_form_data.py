@@ -3,7 +3,7 @@ SEP Form data for iInsertion & edition
 
 
 Equipe da Canoa -- 2025
-mgd 2025-11-07
+mgd 2025-11-19
 """
 
 from enum import IntEnum

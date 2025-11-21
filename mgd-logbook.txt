@@ -1,7 +1,7 @@
 #spell:ignore onclick jinja apikey bingint vw_sepcombined andrade inpe nginx getusermail passwordrecovery changepassword resetpassword
 #spell:ignore desloga sepcombined especificacaosetor suporteusuariogrupo suporteusuarioelemento tmpl wtforms getuseremail getusermail requestemail
 #spell:ignore venv ccedil atilde receivefile datetime saude uix unsync healthcheck
-#spell:ignore Setorista sendgrid linux cnpq ajax mgmt SQLA sqla
+#spell:ignore Setorista sendgrid linux cnpq ajax mgmt SQLA sqla gmail
 
 
 ------------- Use of / in schema/SEP -------------
@@ -70,6 +70,18 @@
 
 
 ------- 2025 - November ----------
+2025-11-20 Issue #74 gmail β 5.09
+    - Issue #74 solved
+    - gmail com SMTP
+    - as SendGrid, Google API estão disponíveis
+      EMAIL_PROVIDER_VALUE = EmailProvider.SMTP.value
+
+2025-11-20 Issue #78
+    - Issue #78 solved
+    - Install package Flask-Mail
+    - Start with SMTP mail
+    - Remove Google-auth-* & -api
+
 2025-11-19 Issue #78 solved & several sep fixes
     - Issue #78 solved
     - background image back to original

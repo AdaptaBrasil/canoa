@@ -22,13 +22,14 @@ from googleapiclient.discovery import build
 
 # --- Internal: Common Message Construction Logic ---
 
+
 def _create_mime_message(
     recipients: RecipientsDic,
     subject: str,
     content: str,
     sender_email: str,
-    file_to_send_full_name: str = '',
-    file_to_send_type: str = '',
+    file_to_send_full_name: str = "",
+    file_to_send_type: str = "",
 ) -> bytes:
     """
     Constructs the MIME message object including recipients, subject, body, and attachments.
@@ -37,18 +38,12 @@ def _create_mime_message(
     message = MIMEMultipart()
 
     # 1. Set Recipients
-    message["to"] = ", ".join(
-        [recipients.to.parse(item)[0] for item in recipients.to.list()]
-    )
+    message["to"] = ", ".join([recipients.to.parse(item)[0] for item in recipients.to.list()])
     if recipients.cc.list():
-        message["cc"] = ", ".join(
-            [recipients.cc.parse(item)[0] for item in recipients.cc.list()]
-        )
+        message["cc"] = ", ".join([recipients.cc.parse(item)[0] for item in recipients.cc.list()])
     if recipients.bcc.list():
         # BCC addresses are handled by the API itself when using the 'raw' message format
-        message["bcc"] = ", ".join(
-            [recipients.bcc.parse(item)[0] for item in recipients.bcc.list()]
-        )
+        message["bcc"] = ", ".join([recipients.bcc.parse(item)[0] for item in recipients.bcc.list()])
 
     message["from"] = sender_email
     message["subject"] = subject
@@ -57,12 +52,8 @@ def _create_mime_message(
     message.attach(MIMEText(content, "html"))
 
     # 3. Handle Attachment
-    if not is_str_none_or_empty(file_to_send_full_name) and path.exists(
-        file_to_send_full_name
-    ):
-        main_type, sub_type = (
-            file_to_send_type.split("/") if file_to_send_type else ("application", "octet-stream")
-        )
+    if not is_str_none_or_empty(file_to_send_full_name) and path.exists(file_to_send_full_name):
+        main_type, sub_type = file_to_send_type.split("/") if file_to_send_type else ("application", "octet-stream")
         with open(file_to_send_full_name, "rb") as f:
             part = MIMEBase(main_type, sub_type)
             part.set_payload(f.read())
@@ -78,16 +69,22 @@ def _create_mime_message(
     return message.as_bytes()
 
 
-# --- Public Sender Function ---
+# --- Internal Sender Function ---
+# ---    see email_helper.py   ---
 
-def send_mail(
+
+def _send_email(
     recipients: RecipientsDic,
     subject: str,
     content: str,
-    file_to_send_full_name: str= '',
-    file_to_send_type: str= '',
-) -> str:
+    file_to_send_full_name: str = "",
+    file_to_send_type: str = "",
+) -> bool:
     """
+     ⚠️ _send_email:
+        This function is the internal implementation for the [Google] email API and should
+        only be called by the central public send_email wrapper.
+
     Sends an email using the Gmail API, selecting the authentication method based on config.
 
     Args:
@@ -120,9 +117,7 @@ def send_mail(
     if getattr(sidekick.config, "USE_SERVICE_ACCOUNT_DWD", False):
         # Use Service Account Client (DWD)
         service = get_gmail_service_dwd(
-            storage_path=sidekick.config.LOCAL_STORAGE_PATH,
-            sender_email=sender_email,
-            scopes=scopes
+            storage_path=sidekick.config.LOCAL_STORAGE_PATH, sender_email=sender_email, scopes=scopes
         )
     else:
         # Default to OAuth 2.0 (User Account)
@@ -130,12 +125,7 @@ def send_mail(
 
     # --- Message Creation ---
     raw_message_bytes = _create_mime_message(
-        recipients,
-        subject,
-        content,
-        sender_email,
-        file_to_send_full_name,
-        file_to_send_type
+        recipients, subject, content, sender_email, file_to_send_full_name, file_to_send_type
     )
 
     # --- Encoding and Sending ---
@@ -144,9 +134,7 @@ def send_mail(
 
     try:
         # Execute the send operation. Exceptions (HttpError, etc.) will be raised here.
-        sent_message = service.users().messages().send(
-            userId="me", body=create_message
-        ).execute()
+        sent_message = service.users().messages().send(userId="me", body=create_message).execute()
     except Exception as e:
         # Re-raise the exception to allow the calling function to handle logging/failure.
         raise e
@@ -157,6 +145,7 @@ def send_mail(
         # Safety check for an unexpected successful response without an ID.
         raise Exception(f"API response missing message ID: {sent_message}")
 
-    return message_id
+    return True
+
 
 # eof

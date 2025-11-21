@@ -4,6 +4,7 @@ SEP Edition
 Equipe da Canoa -- 2024
 mgd 2024-10-09, 11-12
 mgd 2025-08-19--22  allow edit manager
+mgd 2025-11-19 several fixes + refactor -> sep_form_data, sep_icon_data
 
 status
 """
@@ -243,7 +244,7 @@ def do_sep_edit(data: str) -> str:
                 icon_new_file_name = sep_row.icon_file_name
 
             if (sep_id := Sep.save(sep_row, schema_changed, batch_code)) >= 0:  # :——)
-                task_code += 5  # 21
+                task_code += 5  # 517
                 add_msg_success(
                     "sepSuccessNew" if editMode == SepEditMode.INSERT else "sepSuccessEdit",
                     ui_db_texts,

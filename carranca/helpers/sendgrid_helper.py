@@ -32,13 +32,16 @@ from .ui_db_texts_helper import get_section
 
 
 # headers = {
-#    'Authorization': f'Bearer {SENDGRID_API_KEY}',
+#    'Authorization': f'Bearer {EMAIL_API_KEY_PW}',
 #    'Content-Type': 'application/json',
 # }
 # response = requests.post('https://api.sendgrid.com/v3/mail/send', headers=headers, json=json_data)
 
+# --- Internal Sender Function ---
+# ---    see email_helper.py   ---
 
-def send_email(
+
+def _send_email(
     send_to_or_dic: RecipientsListStr | RecipientsDic,
     texts_or_section: dict | str,
     email_body_params: Optional[dict] = None,
@@ -46,6 +49,10 @@ def send_email(
     file_to_send_type: Optional[str] = None,
 ) -> bool:
     """
+     ⚠️ _send_email:
+        This function is the internal implementation for the [SendGrid] email API and should
+        only be called by the central public send_email wrapper.
+
         » Sends an email, handling both: string and dictionary formats for the recipient.
 
         » Takes the body text from the `vw_ui_texts` (view ui_texts_section) and
@@ -94,7 +101,7 @@ def send_email(
             raise ValueError(error)
 
         task = "setting email API key"
-        apiKey = sidekick.config.SENDGRID_API_KEY
+        apiKey = sidekick.config.EMAIL_API_KEY_PW
         if is_str_none_or_empty(apiKey):
             error = "Unknown `email API key`. Cannot send email."
             raise ValueError(error)
@@ -147,9 +154,7 @@ def send_email(
 
         # A nice notice
         if is_str_none_or_empty(recipients.to) and not is_str_none_or_empty(recipients.bcc):
-            sidekick.display.warn(
-                "Warning: Sending email with only BCC recipient might be rejected by some servers."
-            )
+            sidekick.display.warn("Warning: Sending email with only BCC recipient might be rejected by some servers.")
 
         # Create the sendgrid mail
         task = "creating Mail data"
@@ -182,7 +187,6 @@ def send_email(
 
         # Add recipients (generic way)
         task = "preparing Api"
-        apiKey = sidekick.config.SENDGRID_API_KEY
         sg = sendgrid.SendGridAPIClient(apiKey)
         if is_str_none_or_empty(file_to_send_full_name):
             pass

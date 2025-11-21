@@ -30,7 +30,7 @@ from ...helpers.ui_db_texts_helper import add_msg_final, add_msg_error, UITextsK
 from ...helpers.db_records.DBRecords import DBRecords, ListOfDBRecords
 
 from .save_to_db import save_data
-from .send_email import send_email
+from .sep_mgmt_notify import mgmt_notify
 from .keys_values import SepMgmtGridCols, CargoKeys
 
 
@@ -120,7 +120,7 @@ def _save_and_email(grid_response: CargoList, ui_db_texts: UIDBTexts, task_code:
         return "", msg_error, task_code
 
     task_code += 1  # 567
-    msg_success_email, msg_error, task_code = send_email(batch_code, ui_db_texts, task_code)
+    msg_success_email, msg_error, task_code = mgmt_notify(batch_code, ui_db_texts, task_code)
     if not is_str_none_or_empty(msg_error):
         return "", msg_error, task_code
 

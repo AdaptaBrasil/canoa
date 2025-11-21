@@ -26,6 +26,7 @@ import logging
 
 from ..common.app_constants import APP_NAME, APP_VERSION
 from ..helpers.file_helper import path_remove_last_folder
+from ..helpers.email_helper import EmailProvider
 
 CONFIG_MANDATORY_KEYS = [
     "SQLALCHEMY_DATABASE_URI",
@@ -91,13 +92,18 @@ class BaseConfig(Config):
     """
     # Registered user on the email API
     EMAIL_ORIGINATOR = ""  # from os_environment
+    EMAIL_API_KEY_PW = ""  # from os_environment
     EMAIL_ORIGINATOR_NAME = f"e-mail de {APP_NAME}"
+    EMAIL_PROVIDER_VALUE = EmailProvider.SMTP.value
+    EMAIL_DEBUG = False
+    # Flask Mail info
+    FLASK_MAIL = {"server": "smtp.gmail.com", "port": 587, "use_tls": True}
+
     # "  with key
-    SENDGRID_API_KEY = ""  # from os_environment
     # Folders
     APP_FOLDER = app_folder
     # storage area (user_files, schema_icons...)
-    COMMON_PATH = path_remove_last_folder(app_folder)
+    COMMON_PATH = path_remove_last_folder(app_folder)s
 
     # The name of the folder for storing sensitive, non-versioned files.
     LOCAL_STORAGE_FOLDER = "LocalStorage"

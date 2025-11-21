@@ -15,8 +15,7 @@ from ...models.private import UserDataFiles
 from ...common.app_context_vars import sidekick
 from ...common.app_error_assistant import ModuleErrorCode
 from ...helpers.py_helper import now_as_text, now
-from ...helpers.email_helper import RecipientsDic, RecipientsListStr
-from ...helpers.sendgrid_helper import send_email
+from ...helpers.email_helper import RecipientsDic, RecipientsListStr, send_email
 
 
 def email(cargo: Cargo, user_report_full_name) -> Cargo:
@@ -56,9 +55,7 @@ def email(cargo: Cargo, user_report_full_name) -> Cargo:
     except Exception as e:
         task_code += 5
         msg_exception = str(e)
-        sidekick.app_log.fatal(
-            f"There was a problem sending the results email: {msg_exception}.", exc_info=task_code
-        )
+        sidekick.app_log.fatal(f"There was a problem sending the results email: {msg_exception}.", exc_info=task_code)
 
     error_code = 0 if task_code == 0 else ModuleErrorCode.RECEIVE_FILE_EMAIL.value + task_code
     return cargo.update(error_code, "uploadFileEmail_failed", msg_exception)

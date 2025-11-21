@@ -20,6 +20,8 @@ import time, os.path as path
 from typing import Tuple, NamedTuple, Optional, Any
 from urllib.parse import urlparse
 
+from carranca.helpers.email_helper import EmailProvider
+
 from .Args import Args
 from .app_constants import APP_NAME
 from .app_error_assistant import RaiseIf
@@ -50,7 +52,7 @@ class Fuse:
         self.args = args
 
         if is_str_none_or_empty(args.app_mode):
-            self.app_mode = app_mode_stage
+            self.app_mode = app_mode_development
         else:
             self.app_mode = self.args.app_mode
 
@@ -78,14 +80,14 @@ def _get_debug_2() -> bool:
 
 
 # ---------------------------------------------------------------------------- #
-def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple[Any, str]:
+def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple["Fuse|None", str]:
     """
     Create the 'fuse' that will assists the initializations of classes
     """
     import json
 
     msg_error = ""
-    new_fuse: Optional[Fuse] = None
+    _fuse: Optional[Fuse] = None
     try:
         from .Display import Display
 
@@ -96,25 +98,23 @@ def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple[Any, st
             args.display_icons,
             started_from,
         )
-        new_fuse = Fuse(app_name, display, args)
-        new_fuse.display.info(
-            f"The 'fuse' was started in {new_fuse.app_mode} mode (and now we have how to print pretty)."
-        )
+        _fuse = Fuse(app_name, display, args)
+        _fuse.display.info(f"The 'fuse' was started in {_fuse.app_mode} mode (and now we have how to print pretty).")
         s_args = f"{app_name}'s args: {{0}}"
-        if new_fuse.debugging:
-            _args = f"\n{json.dumps(new_fuse.args.__dict__, indent=3, sort_keys=True)}"
-            new_fuse.display.debug(s_args.format(_args))
+        if _fuse.debugging:
+            _args = f"\n{json.dumps(_fuse.args.__dict__, indent=3, sort_keys=True)}"
+            _fuse.display.debug(s_args.format(_args))
         else:
-            new_fuse.display.info(s_args.format(new_fuse.args))
+            _fuse.display.info(s_args.format(_fuse.args))
     except Exception as e:
-        new_fuse = None
+        _fuse = None
         msg_error = _ERROR_MSG.format(__name__, "starting the fuse", str(e))
 
-    return new_fuse, msg_error
+    return _fuse, msg_error
 
 
 # ---------------------------------------------------------------------------- #
-from ..config.DynamicConfig import DynamicConfig, app_mode_stage
+from ..config.DynamicConfig import DynamicConfig, app_mode_development, app_mode_stage
 
 
 def _ignite_config(fuse: Fuse) -> Tuple[DynamicConfig, str]:
@@ -308,13 +308,21 @@ def ignite_app(app_name, start_at) -> Tuple[Sidekick, str, bool]:
     # ---------------------------------------------------------------------------- #
     # Give warnings of import configuration that may be missing
 
-    if is_str_none_or_empty(config.SENDGRID_API_KEY):
-        warns += 1
-        fuse.display.warn("Sendgrid API key was not found, the app will not be able to send emails.")
+    no_email_text = "The email {0} for the app is not defined. The app will not be able to send emails."
 
-    if is_str_none_or_empty(config.EMAIL_ORIGINATOR):
-        warns += 1
-        fuse.display.warn("The app email originator is not defined, the app will not be able to send emails.")
+    no_email = not hasattr(config, "EMAIL_PROVIDER_VALUE") or (
+        config.EMAIL_PROVIDER_VALUE == EmailProvider.NO_EMAIL.value
+    )
+    if no_email:
+        config.EMAIL_PROVIDER_VALUE = EmailProvider.NO_EMAIL.value
+    else:
+        if is_str_none_or_empty(config.EMAIL_API_KEY_PW):
+            warns += 1
+            fuse.display.warn(no_email_text.format("API key/password"))
+
+        if is_str_none_or_empty(config.EMAIL_ORIGINATOR):
+            warns += 1
+            fuse.display.warn(no_email_text.format("originator"))
 
     # ---------------------------------------------------------------------------- #
     # Final message

@@ -7,11 +7,10 @@ mgd 2025.10.29 -- 11.08
 
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.jinja_helper import process_template
-from ..helpers.email_helper import RecipientsDic, RecipientsListStr
+from ..helpers.email_helper import RecipientsDic, RecipientsListStr, send_email
 from ..helpers.route_helper import get_private_response_data, init_response_vars
-from ..helpers.gmail_api_helper import send_mail
 from ..common.app_error_assistant import ModuleErrorCode
-from ..helpers.ui_db_texts_helper import add_msg_success, add_msg_error, add_msg_final
+from ..helpers.ui_db_texts_helper import add_msg_success, add_msg_error
 
 
 def confirm_email(email: str, name: str = "") -> str:
@@ -27,7 +26,7 @@ def confirm_email(email: str, name: str = "") -> str:
         task_code += 1
         body = ui_db_texts.format("emailSendBody", (" " if name else "") + name)
         task_code += 1
-        success = send_mail(recipients, subject, body)
+        success = send_email(recipients, subject, body)
         task_code += 1
         if success:
             add_msg_success("emailSentSuccess", ui_db_texts)

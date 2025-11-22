@@ -182,43 +182,6 @@ def _check_mandatory_keys(config, fDisplay) -> str:
 
 
 # ---------------------------------------------------------------------------- #
-def _ignite_server_name(config) -> Tuple[Any, str]:
-    """Confirm validity of the server address"""
-    msg_error = ""
-
-    class Address(NamedTuple):
-        host: str
-        port: int
-
-    address = Address("", 0)
-    try_url = f"http://{config.SERVER_ADDRESS}"
-    try:
-
-        url = urlparse(try_url)
-
-        address = Address(url.hostname, url.port)
-        if is_str_none_or_empty(address.host) or (address.port == 0):
-            msg_error = f"Invalid host or port address found in [{config.SERVER_ADDRESS}], parsed: {address.host}:{address.port}`."
-        else:
-            config.SERVER_ADDRESS = f"{address.host}:{address.port}"
-            scheme = "" if is_str_none_or_empty(config.PREFERRED_URL_SCHEME) else f"{config.PREFERRED_URL_SCHEME}://"
-            # Flask Config
-            config.RUN_HOST = address.host
-            config.RUN_PORT = address.port
-            fuse.display.info(f"The Flask Server address was set to '{scheme}{config.SERVER_ADDRESS}'.")
-
-    except Exception as e:
-        fuse.display.error(f"`urlparse({try_url}) -> parsed: {address.host}:{address.port}`")
-        msg_error = _ERROR_MSG.format(
-            __name__,
-            f"parsing server address. Expect value is [HostName:Port], found: [{config.SERVER_ADDRESS}]",
-            e,
-        )
-
-    return address, msg_error
-
-
-# ---------------------------------------------------------------------------- #
 def _ignite_sql_connection(uri: str) -> Tuple[str, str]:
     """
     Establish a connection to the database and retrieve the database version.
@@ -285,11 +248,6 @@ def ignite_app(app_name, start_at) -> Tuple[Sidekick, str, bool]:
         _log_and_exit(error)
     fuse.display.debug("All mandatory configuration keys were informed.")
 
-    # Server Address
-    _, error = _ignite_server_name(config)
-    if error:
-        _log_and_exit(error)
-    fuse.display.debug("Flask's Server Name is ready and configured.")
 
     # Check DB connection, stop if not debugging
     error, db_version = _ignite_sql_connection(config.SQLALCHEMY_DATABASE_URI)

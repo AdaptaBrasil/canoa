@@ -70,6 +70,12 @@
 
 
 ------- 2025 - November ----------
+2025-11-21--22 Issue #73 β 5.10
+    - gmail com SMTP ready
+    - new gmail sender
+      <Canoa.AdaptaBrasil> em gmail
+
+
 2025-11-20 Issue #74 gmail β 5.09
     - Issue #74 solved
     - gmail com SMTP

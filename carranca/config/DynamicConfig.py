@@ -155,7 +155,7 @@ class ProductionConfig(DynamicConfig):
     APP_MODE = app_mode_production
 
     def __init__(self, fuse: Fuse):
-        super().__init__(fuse, False, False, "192.168.0.1:54454")
+        super().__init__(fuse, False, False, "192.168.0.1:5001")
 
 
 # Config factory by mode, add others

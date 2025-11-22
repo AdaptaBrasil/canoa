@@ -103,7 +103,7 @@ class BaseConfig(Config):
     # Folders
     APP_FOLDER = app_folder
     # storage area (user_files, schema_icons...)
-    COMMON_PATH = path_remove_last_folder(app_folder)s
+    COMMON_PATH = path_remove_last_folder(app_folder)
 
     # The name of the folder for storing sensitive, non-versioned files.
     LOCAL_STORAGE_FOLDER = "LocalStorage"

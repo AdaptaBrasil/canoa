@@ -18,17 +18,19 @@ import base64
 
 from flask import render_template
 
+from ..common.UIDBTexts import UIDBTexts
 from ..helpers.py_helper import is_str_none_or_empty
+from ..public.ups_handler import get_ups_jHtml
 from ..helpers.file_helper import folder_must_exist
+from ..helpers.route_helper import init_response_vars
 from ..helpers.html_helper import img_filenames, img_change_src_path
-from ..helpers.jinja_helper import jinja_pre_template
-from ..helpers.ui_db_texts_helper import get_msg_error, get_section, UITextsKeys
+from ..helpers.jinja_helper import process_template, jinja_pre_template
 from ..common.app_context_vars import sidekick
+from ..common.app_error_assistant import ModuleErrorCode, AppStumbled
+from ..helpers.ui_db_texts_helper import add_msg_error, get_section, UITextsKeys
 
 
-def __prepare_img_files(
-    html_images: list[str], db_images: list[str], img_local_path: str, section: str
-) -> bool:
+def __prepare_img_files(html_images: list[str], db_images: list[str], img_local_path: str, section: str) -> bool:
     from ..helpers.ui_db_texts_helper import retrieve_text
 
     is_img_local_path_ready = os.path.exists(img_local_path)
@@ -67,9 +69,7 @@ def __prepare_img_files(
                 with open(os.path.join(img_local_path, file), "wb") as file:
                     file.write(image_data)
         except Exception as e:
-            sidekick.app_log.error(
-                f"Error writing image [{file}] in folder {img_local_path}. Message [{str(e)}]"
-            )
+            sidekick.app_log.error(f"Error writing image [{file}] in folder {img_local_path}. Message [{str(e)}]")
 
     return True
 
@@ -81,72 +81,78 @@ def __prepare_img_files(
 
 
 def display_html(docName: str):
-    tmpl = "./home/document.html.j2"
+    task_code = ModuleErrorCode.DISPLAY_HTML_DOC
+    tmpl_rfn = "./home/document.html.j2"
     section = docName
+    jHtml, _, ui_db_texts = init_response_vars()
 
-    ui_defaults = get_section("DisplayDoc")
-    ui_texts = get_section(section)
+    try:
 
-    def _setValue(key: str, default: str):
-        value = ui_texts.get(key, None)
-        if value is None:
-            value = ui_defaults.get(key, default)
-            ui_texts[key] = value
-        return
+        def _get_section(ui_section: str) -> UIDBTexts:
+            ui_texts = get_section(ui_section)
+            return UIDBTexts(ui_texts, sidekick.debugging)
 
-    _setValue(UITextsKeys.Page.title, "Display Document")
-    _setValue(UITextsKeys.Form.title, "Document")
-    _setValue(UITextsKeys.Form.btn_close, "Close")
-    _setValue("documentStyle", "")
+        ui_db_texts = _get_section("DisplayDoc")
+        doc_texts = _get_section(section)
 
-    # shortcuts
-    body_key = "documentBody"
-    body = ui_texts.get(body_key, None)
-    images = ui_texts.get("images", None)
+        def _setValue(key: str, default: str):
+            value = doc_texts.get_str(key)
+            if not value:
+                value = ui_db_texts.get_str(key, default)
+                doc_texts[key] = value
+            return
 
-    # a comma separated list of images.ext names available on the db,
-    # see below db_images & _prepare_img_files
+        _setValue(UITextsKeys.Page.title, "Display Document")
+        _setValue(UITextsKeys.Form.title, "Document")
+        _setValue(UITextsKeys.Form.btn_close, "Close")
+        _setValue("documentStyle", "")
 
-    db_images = (
-        [] if is_str_none_or_empty(images) else [s.strip() for s in images.split(",")]
-    )  # list of img names in db
+        # shortcuts
+        task_code += 1
+        body_key = "documentBody"
+        body = doc_texts.get_str(body_key)
+        images = doc_texts.get_str("images")
 
-    html_images = (
-        [] if is_str_none_or_empty(body) else sorted(img_filenames(body))
-    )  # list of img tags in HTML
+        # a comma separated list of images.ext names available on the db,
+        # see below db_images & _prepare_img_files
+        task_code += 1
+        db_images = (
+            [] if is_str_none_or_empty(images) else [s.strip() for s in images.split(",")]
+        )  # list of img names in db
 
-    img_folders = ["static", "docs", section, "images"]
-    img_local_path = os.path.join(sidekick.config.APP_FOLDER, *img_folders)
-    if is_str_none_or_empty(body):
-        msg = get_msg_error("documentNotFound").format(docName)
-        body = f"<h4>{msg}</h4>"
+        task_code += 1  # 173
+        html_images = [] if is_str_none_or_empty(body) else sorted(img_filenames(body))  # list of img tags in HTML
 
-    elif len(html_images) == 0:
-        # html has no images
-        pass
+        task_code += 1
+        img_folders = ["static", "docs", section, "images"]
+        img_local_path = os.path.join(sidekick.config.APP_FOLDER, *img_folders)
+        task_code += 1
+        if is_str_none_or_empty(body):
+            task_code += 1
+            msg = add_msg_error("documentNotFound", ui_db_texts, docName)
+            raise AppStumbled(msg, task_code, False, True)
+        elif len(html_images) == 0:
+            # html has no images
+            task_code += 2
+            pass
+        elif len(db_images) == 0:
+            # if any images are missing in the folder,
+            # I can't help, no images found in db
+            # TODO: have a not_found_image.img
+            pass
+        elif __prepare_img_files(html_images, db_images, img_local_path, section):
+            task_code += 3
+            img_folders.insert(0, os.sep)
+            body = img_change_src_path(body, img_folders)
 
-    elif len(db_images) == 0:
-        # if any images are missing in the folder,
-        # I can't help, no images found in db
-        # TODO: have a not_found_image.img
-        pass
+        doc_body = jinja_pre_template(body)
+        doc_texts[body_key] = doc_body
+        jHtml = process_template(tmpl_rfn, **doc_texts.dict())
 
-    elif __prepare_img_files(html_images, db_images, img_local_path, section):
-        img_folders.insert(0, os.sep)
-        body = img_change_src_path(body, img_folders)
+    except Exception as e:
+        jHtml = get_ups_jHtml("displayDocException", ui_db_texts, task_code, e, task_code)
 
-    _body = jinja_pre_template(body)
-    ui_texts[body_key] = _body
-
-    # Test function
-    # temp = current_app.jinja_env.from_string("{{ app_version() }}  + {{ app_name()}}")
-    # print(temp.render())
-
-    tmpl = render_template(tmpl, **ui_texts)
-    return tmpl
-
-
-# )
+    return jHtml
 
 
 # eof

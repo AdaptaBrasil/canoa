@@ -192,12 +192,12 @@ body {
  * ============================================ */
 
 
-/* if changed, see SepIconConfig.error_content */
+/* if changed, see SepIconConfig.error_content() */
 .grid-item-remove {
     color: firebrick;
 }
 
-/* if changed, see SepIconConfig.empty_content */
+/* if changed, see SepIconConfig.empty_content() */
 .grid-item-none {
     color: darkgrey;
 }

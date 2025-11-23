@@ -22,7 +22,7 @@ from werkzeug.datastructures import FileStorage
 from .wtforms import SepEdit, SepNew
 from .sep_icon import icon_refresh
 from .SepIconMaker import SepIconMaker
-from .sep_icon_data import get_icon_data, IconInfo
+from .sep_icon_data import get_icon_data, IconData
 from .sep_form_data import get_sep_data, SepEditMode, NoManager, SCHEMA_LIST_KEY
 from ..private.UserSep import UserSep
 from ..helpers.py_helper import is_str_none_or_empty, to_int
@@ -46,6 +46,7 @@ from ..helpers.ui_db_texts_helper import (
     add_msg_success,
     add_msg_error,
     add_msg_final,
+    add_msg_warning,
 )
 
 
@@ -94,16 +95,16 @@ def do_sep_edit(data: str) -> str:
     try:
         no_manager = NoManager()
 
-        def get_icon_info(form: SepNew | SepEdit) -> IconInfo:
-            info = IconInfo()
-            form_file_name = form.icon_filename.name
-            info.storage = request.files[form_file_name] if form_file_name in request.files else None
-            info.sent = info.storage is not None and info.storage.content_type.startswith(SVG_MIME)
-            return info
+        def _init_icon_data(form: SepNew | SepEdit) -> IconData:
+            icon_data = IconData()
+            icon_data.storage = request.files.get(form.icon_filename.name, None)
+            icon_data.sent = bool(icon_data.storage and icon_data.storage.filename)
+            if icon_data.sent:
+                icon_data.is_svg = icon_data.storage.content_type.startswith(SVG_MIME)
+                icon_data.file_name = icon_data.storage.filename
+            return icon_data
 
-        def _was_form_sep_modified(
-            sep_row: Sep, form: SepNew | SepEdit, icon_sent: bool
-        ) -> Tuple[bool, bool, str, int, int]:
+        def _was_form_sep_modified(sep_row: Sep, form: SepNew | SepEdit) -> Tuple[bool, bool, str, int, int]:
             if is_get:
                 return (False, False, "", -1, -1)
 
@@ -126,9 +127,7 @@ def do_sep_edit(data: str) -> str:
                     form_modified = True
                     sep_modified = True
                 case SepEditMode.SIMPLE_EDIT:
-                    form_modified = (
-                        (frm_visible != sep_row.visible) or (frm_description != sep_row.description) or icon_sent
-                    )
+                    form_modified = (frm_visible != sep_row.visible) or (frm_description != sep_row.description)
                     sep_modified = False
                 case SepEditMode.FULL_EDIT:
                     form_modified = (
@@ -137,8 +136,6 @@ def do_sep_edit(data: str) -> str:
                         or (frm_visible != sep_row.visible)
                         or (frm_sep_name != sep_row.name)
                         or (frm_description != sep_row.description)
-                        # keep it last, resource consuming
-                        or icon_sent
                     )
                     sep_modified = frm_sep_name != sep_row.name
 
@@ -146,6 +143,11 @@ def do_sep_edit(data: str) -> str:
             form.description.data = frm_description
             form.sep_name.data = frm_sep_name
             return form_modified, sep_modified, frm_sep_name, frm_id_schema, id_manager
+
+        def _check_if_icon_is_repeated(sep_id: int, icon_crc: int):
+            if msg_repeated := Sep.icon_exist_sep(sep_id, icon_crc) if icon_crc else "":
+                add_msg_error("sepIconRepeated", ui_db_texts, msg_repeated)
+            return
 
         task_code += 1  # 1
         tmpl_rfn, is_get, ui_db_texts = get_private_response_data("sepNewEdit")
@@ -169,14 +171,15 @@ def do_sep_edit(data: str) -> str:
         )
 
         task_code = ModuleErrorCode.SEP_EDIT.value + 10  # 510
-        icon_info = get_icon_info(form)
-        form_modified, sep_modified, sep_name, id_schema, id_manager = _was_form_sep_modified(
-            sep_row, form, icon_info.sent
-        )
-
+        icon_data = _init_icon_data(form)
+        form_modified, sep_modified, sep_name, id_schema, id_manager = _was_form_sep_modified(sep_row, form)
         if is_get:
             task_code += 1
-        elif not form_modified:
+            if sep_id and sep_row.icon_crc:
+                _check_if_icon_is_repeated(sep_id, sep_row.icon_crc)
+
+            task_code += 1
+        elif not (form_modified or icon_data.sent):
             return redirect_to(process_on_end)
         elif not is_str_none_or_empty(msg_error_key := js_form_sec_check()):
             task_code += 2
@@ -190,17 +193,21 @@ def do_sep_edit(data: str) -> str:
             )
         ) is None:
             # should never happen, is used to keep the if's one level indentation
-            pass
+            AppStumbled(f"Schema with id {id_schema} was not found.", task_code + 3)
         elif sep_modified and Sep.full_name_exists(id_schema, sep_name):
             raise Exception(add_msg_error("sepNameRepeated", ui_db_texts, scm_name, sep_name))
-        elif (icon_data := get_icon_data(sep_row, icon_info, form.icon_filename.name)).error_code > 0:
+        elif (icon_data := get_icon_data(sep_row, icon_data)).error_code > 0:
             # msg {ext} [{hint}-{code}]
             raise Exception(
                 add_msg_error(
                     "sepEditInvalidFormat", ui_db_texts, SepIconMaker.ext, icon_data.error_hint, icon_data.error_code
                 )
             )
-        # TODO: Check if icon used (CRC) in other SEP, index is ready
+
+        elif not (form_modified or icon_data.ready):
+            add_msg_warning("dataUnmodified", ui_db_texts)
+            ui_db_texts[UITextsKeys.Msg.display_only_msg] = True
+
         else:
             task_code += 1  # 511
             sep_row.name = sep_name
@@ -243,17 +250,16 @@ def do_sep_edit(data: str) -> str:
                 ui_db_texts[UITextsKeys.Form.icon_url] = SepIconMaker.get_url(sep_row.icon_file_name)
                 icon_new_file_name = sep_row.icon_file_name
 
-            if (sep_id := Sep.save(sep_row, schema_changed, batch_code)) >= 0:  # :——)
+            icon_crc = sep_row.icon_crc
+            if (sep_id := Sep.save(sep_row, schema_changed, batch_code)) >= 0:  # :——
                 task_code += 5  # 517
-                add_msg_success(
-                    "sepSuccessNew" if editMode == SepEditMode.INSERT else "sepSuccessEdit",
-                    ui_db_texts,
-                    sep_fullname,
-                )
-                if fresh_icon:  # after post
+                msg_key = "sepSuccessNew" if editMode == SepEditMode.INSERT else "sepSuccessEdit"
+                add_msg_success(msg_key, ui_db_texts, sep_fullname)
+                _check_if_icon_is_repeated(sep_id, icon_crc)
+
+                if fresh_icon:  # after post, refresh the icon file on disk
                     icon_refresh(icon_old_file_name, icon_new_file_name, sep_id)
-                if action:
-                    return redirect_to(process_on_end)
+
             else:  # :——(
                 task_code += 6  # 19
                 item = f"sepFailed{'Edit' if editMode == SepEditMode.SIMPLE_EDIT else 'New'}"

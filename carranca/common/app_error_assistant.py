@@ -78,6 +78,7 @@ class AppStumbled(Exception):
 
 
 class ModuleErrorCode(IntEnum):
+
     # Public Access Control Processes
     ACCESS_CONTROL_LOGIN = 100  # 1-14
     ACCESS_CONTROL_REGISTER = 120  # 1-06
@@ -86,10 +87,11 @@ class ModuleErrorCode(IntEnum):
     ACCESS_CONTROL_PW_RESET = 160
 
     # User Interface Text Retrieval
-    UI_TEXTS = 170  # 1
+    DISPLAY_HTML_DOC = 170
+    UI_TEXTS = 172  # 1
     # Jinja Helper
-    TEMPLATE_ERROR = 171
-    TEMPLATE_BUG = 172
+    TEMPLATE_ERROR = 174
+    TEMPLATE_BUG = 176
 
     # RECEIVE_FILE_* =: [200... 270] + 100
     RECEIVE_FILE_ADMIT = 200

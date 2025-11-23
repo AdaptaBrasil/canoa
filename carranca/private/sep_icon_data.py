@@ -5,7 +5,6 @@ Equipe da Canoa -- 2025
 """
 
 import re
-from flask import request
 from os.path import splitext
 from dataclasses import dataclass
 from werkzeug.datastructures import FileStorage
@@ -18,38 +17,34 @@ from ..helpers.py_helper import crc16
 
 @dataclass
 class IconData:
-    content: str = ""
+    storage: FileStorage = None
+    sent: bool = False
     file_name: str = ""
+    is_svg: bool = False
+    # set get_icon_data
+    content: str = ""
     ready: bool = False
     crc: int = 0
     error_hint: str = ""
     error_code: int = 0
 
 
-@dataclass
-class IconInfo:
-    sent: bool = False
-    storage: FileStorage = None
-    file_name: str = ""
-
-
-def get_icon_data(sep_row: Sep, icon_info: IconInfo, icon_name) -> IconData:
+def get_icon_data(sep_row: Sep, icon_data: IconData) -> IconData:
     def __find(pattern: str, data: str) -> int:
         match = re.search(pattern, data, re.IGNORECASE | re.DOTALL)
         return match.start() if match else -1
 
-    icon_data = IconData(file_name=icon_info.file_name)
     expected_ext = f".{SepIconMaker.ext}".lower()
 
-    if not icon_info.sent:
+    if not icon_data.sent:
         pass
     elif not splitext(icon_data.file_name)[1].lower().endswith(expected_ext):
         icon_data.error_hint = expected_ext
         icon_data.error_code = 1
-    elif not (file_obj := request.files.get(form.icon_filename.name)):
-        icon_data.error_hint = "↑×"
+    elif not icon_data.is_svg:
+        icon_data.error_hint = expected_ext
         icon_data.error_code = 2
-    elif len(data := file_obj.read().decode("utf-8").strip()) < ICON_MIN_SIZE:
+    elif len(data := icon_data.storage.read().decode("utf-8").strip()) < ICON_MIN_SIZE:
         icon_data.error_hint = f"≤ {ICON_MIN_SIZE}"
         icon_data.error_code = 3
     elif (start := __find(r"<svg.*?>", data)) < 0:

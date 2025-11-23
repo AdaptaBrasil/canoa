@@ -9,6 +9,7 @@ mgd
 
 {# only specify value if different from default #}
 {% set form_backend_msg= msgOnly | default(False) %}
+{% set form_display_msg= msgOnly | default(False) %}
 {% set form_display_ui= not form_backend_msg %}
 {% set form_close_btn_text= form_close_btn_text | default('Fechar') %}
 
@@ -16,6 +17,10 @@ mgd
 
 {# ╒════════════════════ Dialog Body ══════════════════════╕ #}
 {% block dlg_blc_body %}
+
+{# ╒═════════ Display Message If Any ═══════════╕ #}
+{% include "includes/backend-msg.html.j2" %}
+{# ╘═════════ Display Message If Any ═══════════╛ #}
 
 {% if form_display_ui %}
     {# ╒═══════════════ Display UI ═══════════════╕ #}
@@ -27,11 +32,17 @@ mgd
         {# ╘══════════════ Form's input ════════════════╛ #}
     </form>
     {# ╘═══════════════ Display UI ═══════════════╛ #}
+
+
+{#
 {% else %}
-    {# ╒═════════ Display Only Message ═══════════╕ #}
+    {^ ╒═════════ Display Only Message ═══════════╕ ^}
     {% include "includes/backend-msg.html.j2" %}
-    {# ╘═════════ Display Only Message ═══════════╛ #}
+    {^ ╘═════════ Display Only Message ═══════════╛ ^}
+#}
+
 {% endif %}
+
 
 {% endblock dlg_blc_body %}
 {# ╘════════════════════ Dialog Body ══════════════════════╛ #}

@@ -88,7 +88,7 @@ class Cargo:
 
         Args:
             error_code (int):         error code (0 none)
-            msg_error (str):          an entry in vw_ui_texts (see texts_helper.py[get_msg_error()])
+            msg_error (str):          an entry in vw_ui_texts
             msg_exception (str):      exception error message, to be logged, in order to assist in the debugging process
             next (dict):              parameters for the `next` procedure
             final (dict):             collects items for the final result: `return final`
@@ -96,7 +96,7 @@ class Cargo:
         Returns:
             tuple:
             int   error code (0 no error)
-            str   an entry in vw_ui_texts (see texts_helper.py[get_msg_error()])
+            str   an entry in vw_ui_texts
             str   exception error message, to be logged, in order to assist in the debugging process
             obj   self, the Cargo instance
         """

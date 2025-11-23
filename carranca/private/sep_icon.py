@@ -84,18 +84,18 @@ def do_icon_get_url(icon_file_name: str | None, sep_id: Optional[int] = None) ->
     elif not icon_ready(file_full_name):
         match icon_file_name:
             case SepIconMaker.error_file:
-                content = SepIconMaker.error_content
+                content = SepIconMaker.error_content()
             case SepIconMaker.empty_file:
-                content = SepIconMaker.empty_content
+                content = SepIconMaker.empty_content()
             case SepIconMaker.none_file:
-                content = SepIconMaker.none_content
+                content = SepIconMaker.none_content()
             case _:
                 if sep_id is None:
-                    content = SepIconMaker.none_content
+                    content = SepIconMaker.none_content()
                 else:
                     content, msg_error = Sep.get_content(sep_id)
                     if msg_error:
-                        content = SepIconMaker.error_content
+                        content = SepIconMaker.error_content()
                         sidekick.display.error(f"Cannot retrieve icon content of SEP id {sep_id}': [{msg_error}].")
 
         try:

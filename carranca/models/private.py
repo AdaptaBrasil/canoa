@@ -365,9 +365,9 @@ class Sep(SQLABaseTable):
                 stmt = select(Sep).where(Sep.id == id)
                 sep = db_session.execute(stmt).scalar_one_or_none()
                 is_empty = is_str_none_or_empty(sep.icon_svg)
-                icon_content = SepIconMaker.empty_content if is_empty else sep.icon_svg
+                icon_content = SepIconMaker.empty_content() if is_empty else sep.icon_svg
             except Exception as e:
-                icon_content = SepIconMaker.error_content
+                icon_content = SepIconMaker.error_content()
                 sidekick.app_log.error(f"Error retrieving icon content of SEP {id}: [{e}].")
             return icon_content
 
@@ -448,6 +448,17 @@ class Sep(SQLABaseTable):
 
         _, _, name_exists = db_fetch_rows(_get_data, Sep.__tablename__)
         return name_exists
+
+    @staticmethod
+    def icon_exist_sep(sep_id: int, icon_crc: int) -> str:
+
+        def _get_data(db_session: Session) -> str:
+            stmt = select(Sep.name).where(Sep.id != sep_id, Sep.icon_crc == icon_crc)
+            sep_name = db_session.execute(stmt).scalar()
+            return sep_name
+
+        _, _, sep_name = db_fetch_rows(_get_data, Sep.__tablename__)
+        return sep_name
 
     @staticmethod
     def get_visible_seps_of_scm(scm_id: int, col_names: List[str]) -> List["Sep"]:

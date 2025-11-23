@@ -38,7 +38,9 @@ source ../../canoa_env_vars.txt
 source ../.venv/bin/activate
 export CANOA_APP_MODE="Production" # Stage | Development
 export FLASK_RUN_PORT="5001"
+export FLASK_USE_RELOADER=0
 flask run
+#eof
 
 ```
 
@@ -52,7 +54,7 @@ export CANOA_EMAIL_REPORT_CC="a1@canoa.com,a2@canoa.com"
 export CANOA_EMAIL_ORIGINATOR="canoa--adaptabrasil@"
 export CANOA_SQLALCHEMY_DATABASE_URI="postgresql://"
 export FLASK_APP="main"
-export FLASK_DEBUG="True"
+export FLASK_DEBUG=0
 export FLASK_RUN_HOST="0.0.0.0"
 # 2025-10-21
 # CANOA_APP_MODE & FLASK_RUN_PORT

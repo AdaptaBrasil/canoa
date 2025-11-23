@@ -68,15 +68,15 @@ class SepIconMaker:
             "</svg>"
         )
 
-    @class_property
+    @classmethod
     def empty_content(cls) -> SvgContent:
         return cls.content_for("white", "", 1, "0.1", "0.1")
 
-    @class_property
+    @classmethod
     def error_content(cls) -> SvgContent:
         return cls.content_for("firebrick", "!")
 
-    @class_property
+    @classmethod
     def none_content(cls) -> SvgContent:
         return cls.content_for("darkgrey", "?", stroke_opacity="0.45")
 

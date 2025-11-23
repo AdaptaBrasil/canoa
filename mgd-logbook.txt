@@ -70,13 +70,14 @@
 
 
 ------- 2025 - November ----------
+2025-11-23 adjust Linux launcher script rema.sh
+
 2025-11-22--23 Issues #84, #85, #86 β 5.11
     - Upload svg fixed
     - &c&oacute; -> código Fixed
     - Error msg in display doc updated
     - Jinja bug in password_reset_or_change.html.js fixed
     - New document file_structure.md for linux
-    -
 
 2025-11-21--22 Issue #73 β 5.10
     - gmail com SMTP ready

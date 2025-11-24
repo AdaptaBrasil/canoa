@@ -177,7 +177,7 @@ def submit(cargo: Cargo) -> Cargo:
             raise Exception(
                 f"\n{sidekick.app_name}: Report was not found."
                 + (
-                    f"\nCheck eXec permission: `ls -l {batch_full_name}`\nUse `chmocd ..d +x {batch_full_name}` if missing."
+                    f"\nCheck eXec permission: `ls -l {batch_full_name}`\nUse `chmod +x {batch_full_name}` if missing."
                     if not batch_has_run_permission
                     else ""
                 )
@@ -206,7 +206,7 @@ def submit(cargo: Cargo) -> Cargo:
         error_code = task_code + ModuleErrorCode.RECEIVE_FILE_SUBMIT.value
         msg_exception = str(e)
         sidekick.display.error(msg_exception)
-        sidekick.fatal(msg_exception, exc_info=error_code)
+        Sidekick.display.fatal(msg_exception, exc_info=error_code)
     finally:
         _store_report_result(
             _cfg.dv_app.ui_name,

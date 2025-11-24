@@ -201,7 +201,7 @@ def receive_file() -> JinjaTemplate:
         tmpl = _get_template(error_code)
     except Exception as e:
         error_code = _log_error(RECEIVE_FILE_DEFAULT_ERROR, task_code + 1, "", True)
-        sidekick.fatal(f"{RECEIVE_FILE_DEFAULT_ERROR}: Code {error_code}, Message: {e}.")
+        Sidekick.display.fatal(f"{RECEIVE_FILE_DEFAULT_ERROR}: Code {error_code}, Message: {e}.")
         msg = add_msg_final("receiveFileException", ui_db_texts, task_code)
         _, tmpl_rfn, ui_db_texts = ups_handler(task_code, msg, e)
         tmpl = process_template(tmpl_rfn, **ui_db_texts.dict())

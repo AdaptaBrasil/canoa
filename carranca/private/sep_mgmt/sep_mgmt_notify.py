@@ -88,7 +88,7 @@ def mgmt_notify(batch_code: str, ui_db_texts: UIDBTexts, task_code: int) -> SepM
                 task_code,
                 proper_user_exception(e, task_code),
             )
-            sidekick.app_log.error(msg_error)
+            sidekick.display.error(msg_error)
 
     return ui_db_texts["emailSuccess"], msg_error, task_code
 

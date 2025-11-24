@@ -14,6 +14,7 @@ from typing import Tuple, Optional
 
 from .py_helper import is_str_none_or_empty, camel_to_snake, clean_text
 from .html_helper import URL_PATH_SEP
+
 # 2/3. This line produce the sidekick-incident
 from .jinja_helper import TemplateFileFullName
 from .types_helper import JinjaGeneratedHtml
@@ -150,7 +151,7 @@ def _get_response_data(ui_db_section: str, tmpl_file_name: str, folder: str) -> 
 
     except Exception as e:
         # Re-raise exception to allow it to propagate
-        sidekick.app_log.error(f"Failed in _get_response_data for section '{ui_db_section}': {e}")
+        sidekick.display.error(f"Failed in _get_response_data for section '{ui_db_section}': {e}")
         raise
 
     return tmpl_full_file_name, is_get, ui_db_texts

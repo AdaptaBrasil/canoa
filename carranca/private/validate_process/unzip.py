@@ -51,7 +51,7 @@ def unzip(cargo: Cargo) -> Cargo:
     except Exception as e:
         msg_exception = str(e)
         error_code = task_code + ModuleErrorCode.RECEIVE_FILE_UNZIP.value
-        sidekick.app_log.fatal(
+        sidekick.display.fatal(
             f"Error unzipping file [{zip_full_name}] in [{unzip_folder}]: [{e}].", exc_info=error_code
         )
 

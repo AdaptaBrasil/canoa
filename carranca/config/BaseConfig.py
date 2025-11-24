@@ -87,6 +87,9 @@ class BaseConfig(Config):
     # 0= no cache; -1 < 0 infinite; n > 0 = _n_ minutes
     APP_UI_DB_TEXTS_CACHE_LIFETIME_MIN = 0
 
+    # send to the log all sidekick display text
+    SIDEKICK_LOG = True
+
     """ Helpers Configuration
         --------------------------
     """

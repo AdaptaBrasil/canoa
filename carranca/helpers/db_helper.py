@@ -174,7 +174,7 @@ def retrieve_rows(query: str) -> Optional[Union[Any, Tuple]]:
     except Exception as e:
         from ..common.app_context_vars import sidekick
 
-        sidekick.app_log.error(f"An error occurred retrieving db data [{query}]: {e}")
+        sidekick.display.error(f"An error occurred retrieving db data [{query}]: {e}")
         return tuple()
 
 
@@ -206,7 +206,7 @@ def retrieve_dict(query: str) -> DBTexts:
     except Exception as e:
         from ..common.app_context_vars import sidekick
 
-        sidekick.app_log.error(f"An error occurred loading the dict from [{query}]: {e}")
+        sidekick.display.error(f"An error occurred loading the dict from [{query}]: {e}")
         result = {}
 
     # # Check if the result is a tuple of tuples (multiple rows)

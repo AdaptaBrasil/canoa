@@ -74,23 +74,17 @@ def _register_blueprint_events(app: Flask):
         # It is 'usually'define in teardown_request. but is to often, each time a
         #   "GET /static/img/pages/canoa_fundo.jpeg HTTP/1.1" 304 -
         # it shuts the session.
-        try:
-            if global_sqlalchemy_scoped_session.dirty:
-                app.logger.error(
-                    f"SqlAlchemySession is dirty. Modified instances: [{global_sqlalchemy_scoped_session.dirty}]."
-                )
-            else:
-                app.logger.debug(
-                    f"SqlAlchemySession is shutting down {('active' if global_sqlalchemy_scoped_session.is_active else 'inactive')} and clean."
-                )
-
-            cl = (int(r.headers.get("Content-Length", 0)) if r else 0) / 1000
-            app.logger.debug(f"Ending secession, sending  {cl:,.2f} Kb, with response status [{r.status}].")
-            global_sqlalchemy_scoped_session.remove()
-        except Exception as e:
-            app.logger.error(
-                f"An error occurred removing the current session [{global_sqlalchemy_scoped_session}]. Error [{e}]."
-            )
+        # TRYING to debug teardown Firefox webpage
+        # try:
+        #     if global_sqlalchemy_scoped_session.dirty:
+        #         app.logger.error("SqlAlchemySession is dirty.")
+        #     cl = (int(r.headers.get("Content-Length", 0)) if r else 0) / 1000
+        #     app.logger.debug(f"Ending secession, sending  {cl:,.2f} Kb, with response status [{r.status}].")
+        #     # global_sqlalchemy_scoped_session.remove()
+        # except Exception as e:
+        #     app.logger.error(
+        #         f"An error occurred removing the current session [{global_sqlalchemy_scoped_session}]. Error [{e}]."
+        #     )
 
         return r
 
@@ -247,7 +241,7 @@ def _create_app_and_log_file(app_name: str):
 
     # -- the Flask's app
     app = Flask(app_name)
-    _info(f"The Flask App was created, named '{app.name}'.")
+    _info(f"The Flask App, named '{app.name}', was created.")
 
     # 🖋️ Local alias for clarity — sk rides with sidekick, no duplication.
     # from ..common.app_context_vars import sidekick
@@ -303,7 +297,7 @@ def create_app():
     global global_sidekick, APP_DB_VERSION
     # === Check if all mandatory information is ready === #
     global_sidekick, APP_DB_VERSION, display_mute_after_init = ignite_app(APP_NAME, started)
-    _info(f"[{global_sidekick}] instance is now ready. It will be available during app's context.")
+    _info(f"[{global_sidekick}] instance is now ready to assist you.")
     gcfg = global_sidekick.config  # shorcut
 
     # == 2/3 Global Scoped SQLAlchemy Session

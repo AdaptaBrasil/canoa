@@ -147,7 +147,7 @@ def _send_email(
                     try:
                         texts[key] = value.format(**email_body_params)
                     except KeyError as e:
-                        sidekick.app_log.error(f"Missing placeholder {e} in params.")
+                        sidekick.display.error(f"Missing placeholder {e} in params.")
         else:
             error = f"Unknown `texts_or_section` datatype {type(texts_or_section)}, expected is [dict|str]. Cannot send email."
             raise ValueError(error)
@@ -208,7 +208,7 @@ def _send_email(
             mail.add_attachment(attachment)
 
         task = f"sending email with subject [{mail.subject}]"
-        sidekick.app_log.info(task)
+        sidekick.display.info(task)
 
         response = sg.send(mail)
         # https://www.twilio.com/docs/sendgrid/api-reference/how-to-use-the-sendgrid-v3-api/responses#status-codes
@@ -224,7 +224,7 @@ def _send_email(
         error = f"Sendgrid email failed while {task}. Error: [{e}], Status Code: [{sc}]."
         msg = getattr(e, "body", str(e))
         msg_error = f"{error} \nSendGrid: [{msg}]."
-        sidekick.app_log.error(msg_error)
+        sidekick.display.error(msg_error)
         raise RuntimeError(msg_error)
 
 

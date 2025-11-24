@@ -146,11 +146,11 @@ def process(
                 error_code = ModuleErrorCode.RECEIVE_FILE_PROCESS.value + 1
                 fatal_msg = f"An error occurred while updating the final process record: [{e}]."
                 sidekick.display.error(fatal_msg)
-                sidekick.app_log.fatal(fatal_msg)
+                sidekick.fatal(fatal_msg)
         else:
             fatal_msg = f"Processing {('downloaded' if cargo.pd.file_was_downloaded else 'uploaded')} file [{cargo.pd.received_file_name}] raised error code {error_code} in module '{current_module_name}'."
             sidekick.display.error(fatal_msg)
-            sidekick.app_log.fatal(fatal_msg)
+            sidekick.fatal(fatal_msg)
             try:
                 UserDataFiles.update(
                     cargo.table_udf_key,
@@ -162,9 +162,7 @@ def process(
                     g_report_ready_at=cargo.report_ready_at,
                     h_email_started_at=cargo.email_started_at,
                     z_process_end_at=process_ended,
-                    error_msg=(
-                        "<no error message>" if is_str_none_or_empty(msg_error) else msg_error
-                    ),
+                    error_msg=("<no error message>" if is_str_none_or_empty(msg_error) else msg_error),
                     error_text=msg_exception,
                 )
                 _updated(error_code)
@@ -172,13 +170,13 @@ def process(
                 error_code = ModuleErrorCode.RECEIVE_FILE_PROCESS.value + 2
                 msg_exception = _get_msg_exception(e, msg_exception, error_code)
                 sidekick.display.error(msg_exception)
-                sidekick.app_log.fatal(msg_exception, exc_info=error_code)
+                sidekick.fatal(msg_exception, exc_info=error_code)
 
     except Exception as e:
         error_code = ModuleErrorCode.RECEIVE_FILE_PROCESS.value + 3
         msg_exception = _get_msg_exception(e, msg_exception, error_code)
         sidekick.display.error(msg_exception)
-        sidekick.app_log.fatal(msg_exception, exc_info=error_code)
+        sidekick.fatal(msg_exception, exc_info=error_code)
 
     finally:
         _display(f"The validation process end with error code [{error_code}]")

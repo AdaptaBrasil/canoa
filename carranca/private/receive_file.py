@@ -90,7 +90,7 @@ def receive_file() -> JinjaTemplate:
             if fatal
             else add_msg_error(msg_id, ui_db_texts, e_code, msg)
         )
-        sidekick.app_log.error(log_error)
+        sidekick.display.error(log_error)
         return e_code
 
     task_code = 1
@@ -174,7 +174,7 @@ def receive_file() -> JinjaTemplate:
                 task_code += 1  # 18
                 pd.received_original_name = md["name"]
             else:
-                sidekick.app_log.error(f"Download error code {download_code}.")
+                sidekick.display.error(f"Download error code {download_code}.")
                 fn = filename if filename else "<ainda sem nome>"
                 task_code += 2  # 19
                 error_code = _log_error("receiveFileAdmit_bad_dl", task_code, fn)
@@ -201,7 +201,7 @@ def receive_file() -> JinjaTemplate:
         tmpl = _get_template(error_code)
     except Exception as e:
         error_code = _log_error(RECEIVE_FILE_DEFAULT_ERROR, task_code + 1, "", True)
-        sidekick.app_log.fatal(f"{RECEIVE_FILE_DEFAULT_ERROR}: Code {error_code}, Message: {e}.")
+        sidekick.fatal(f"{RECEIVE_FILE_DEFAULT_ERROR}: Code {error_code}, Message: {e}.")
         msg = add_msg_final("receiveFileException", ui_db_texts, task_code)
         _, tmpl_rfn, ui_db_texts = ups_handler(task_code, msg, e)
         tmpl = process_template(tmpl_rfn, **ui_db_texts.dict())

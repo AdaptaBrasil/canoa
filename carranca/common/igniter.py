@@ -20,12 +20,12 @@ import time, os.path as path
 from typing import Tuple, NamedTuple, Optional, Any
 from urllib.parse import urlparse
 
-from carranca.helpers.email_helper import EmailProvider
 
 from .Args import Args
 from .app_constants import APP_NAME
-from .app_error_assistant import RaiseIf
 from ..helpers.py_helper import is_str_none_or_empty
+from .app_error_assistant import RaiseIf
+from ..helpers.email_helper import EmailProvider
 
 _ERROR_MSG = "[{}]: An error occurred while {}. Message: `{}`."
 fuse: Optional["Fuse"] = None
@@ -247,7 +247,6 @@ def ignite_app(app_name, start_at) -> Tuple[Sidekick, str, bool]:
     if error:
         _log_and_exit(error)
     fuse.display.debug("All mandatory configuration keys were informed.")
-
 
     # Check DB connection, stop if not debugging
     error, db_version = _ignite_sql_connection(config.SQLALCHEMY_DATABASE_URI)

@@ -71,9 +71,7 @@ def get_file_id_from_url(url: str) -> str:
     return id
 
 
-def download_response(
-    response: requests.Response, filename: str, rename_it: bool
-) -> int:
+def download_response(response: requests.Response, filename: str, rename_it: bool) -> int:
 
     task_code = 1
     _, file_ext = path.splitext(filename)
@@ -88,12 +86,8 @@ def download_response(
                     task_code = 6
                     f.write(chunk)
                     task_code = 8
-                    ext_by_magic = (
-                        ext_by_magic if ext_found else puremagic.what(None, chunk)
-                    )
-                    ext_found = ext_found or bool(
-                        ext_by_magic
-                    )  # just try to find extension with the first `chunk`
+                    ext_by_magic = ext_by_magic if ext_found else puremagic.what(None, chunk)
+                    ext_found = ext_found or bool(ext_by_magic)  # just try to find extension with the first `chunk`
 
         if rename_it and not is_same_file_name(to_str(ext_by_magic), file_ext):
             task_code = 9
@@ -101,8 +95,7 @@ def download_response(
             rename(filename, new_filename)
 
         return 0
-    except:  # Exception #as e:
-        #   g.app_log.error(f"Could save file  [{filename}], error [{e}].")
+    except:
         return task_code
 
 
@@ -131,7 +124,9 @@ def download_public_google_file(
         from googleapiclient.http import MediaIoBaseDownload
         from googleapiclient.discovery import build
     except ImportError as e:
-        raise ImportError("googleapiclient is required for Google Drive downloads. Please install it with 'pip install google-api-python-client'.") from e
+        raise ImportError(
+            "googleapiclient is required for Google Drive downloads. Please install it with 'pip install google-api-python-client'."
+        ) from e
     from google.oauth2.service_account import Credentials
 
     def get_file_metadata(service, file_id):
@@ -149,9 +144,7 @@ def download_public_google_file(
         gdFile_id = None
         if is_str_none_or_empty(url_or_file_id) or len(url_or_file_id) < 10:
             task_code = 2
-            raise ValueError(
-                f"Invalid parameter value 'url_or_file_id' [{url_or_file_id}]]."
-            )
+            raise ValueError(f"Invalid parameter value 'url_or_file_id' [{url_or_file_id}]].")
         elif url_or_file_id.lower().startswith("https://"):
             task_code = 3
             gdFile_id = get_file_id_from_url(url_or_file_id)
@@ -180,9 +173,7 @@ def download_public_google_file(
             raise FileNotFoundError(service_account_file)
 
         task_code += 1  # 8
-        credentials = Credentials.from_service_account_file(
-            service_account_file, scopes=scope
-        )
+        credentials = Credentials.from_service_account_file(service_account_file, scopes=scope)
 
         task_code += 1  # 9
         gdService = build("drive", "v3", credentials=credentials)
@@ -203,11 +194,7 @@ def download_public_google_file(
         else:
             gdFile_name = original_file_name + ext
 
-        file_full_path = (
-            path.join(file_folder, gdFile_name)
-            if not is_str_none_or_empty(file_folder)
-            else gdFile_name
-        )
+        file_full_path = path.join(file_folder, gdFile_name) if not is_str_none_or_empty(file_folder) else gdFile_name
 
         if not path.isfile(file_full_path):
             pass
@@ -230,24 +217,19 @@ def download_public_google_file(
             downloader = MediaIoBaseDownload(f, request, chunksize=cs)
             task_code += 1  # 17
             done = False
-            sidekick.display.info(
-                f"download: The download of the file [{file_full_path}] has begun."
-            )
+            sidekick.display.info(f"download: The download of the file [{file_full_path}] has begun.")
             # file_crc32 = crc32(b'')  # Initialize CRC32 checksum
             while done is False:
                 status, done = downloader.next_chunk()
                 # TODO find how: file_crc32 = crc32(status, file_crc32)
                 if status:
-                    sidekick.display.debug(
-                        "download: progress %d%%." % int(status.progress() * 100)
-                    )
+                    sidekick.display.debug("download: progress %d%%." % int(status.progress() * 100))
 
         task_code = 0
         sidekick.display.info("download: The file was downloaded.")
     except Exception as e:
         msg_error = f"An error occurred while downloading the file. Task code {task_code}, message '{e}'.)"
         sidekick.display.error(msg_error)
-        sidekick.app_log.error(msg_error)
     return task_code, gdFile_name, gdFile_md
 
 

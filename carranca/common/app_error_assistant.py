@@ -34,7 +34,7 @@ def proper_user_exception(e: Exception, task_code: int) -> str:
     code = crc16(error_str)
     info_str = f"e-code: {code}, task: {task_code}, date: {now_as_iso()}"
 
-    sidekick.app_log.error(f"user: {app_user.id}, {info_str}, error: {error_str}")
+    sidekick.display.error(f"user: {app_user.id}, {info_str}, error: {error_str}")
     if app_user and app_user.ready and (app_user.is_support or app_user.is_adm):
         return error_str
     else:

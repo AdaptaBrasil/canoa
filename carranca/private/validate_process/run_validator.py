@@ -55,9 +55,9 @@ async def run_validator(
 
     if debug_validator and not is_str_none_or_empty(d_v.flag_debug):
         run_command.append(d_v.flag_debug)
-        sidekick.app_log.info(" ".join(run_command))  # LOG
+        sidekick.display.info(" ".join(run_command))  # LOG
     else:
-        sidekick.app_log.debug(" ".join(run_command))  # DEBUG
+        sidekick.display.debug(" ".join(run_command))  # DEBUG
 
     # Run the script command asynchronously
     stdout = None
@@ -76,7 +76,7 @@ async def run_validator(
 
     except Exception as e:
         err_msg = f"{d_v.ui_name}.running: {e}, Code [{exit_code}]."
-        sidekick.app_log.critical(err_msg)
+        sidekick.display.fatal(err_msg)
         return "", err_msg, exit_code
 
     # Decode the output from bytes to string
@@ -84,5 +84,6 @@ async def run_validator(
     stderr_str = decode_std_text(stderr)
 
     return stdout_str, stderr_str, exit_code
+
 
 # eof

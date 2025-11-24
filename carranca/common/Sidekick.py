@@ -35,11 +35,13 @@ Sidekick
           app_context_vars.py
 
 """
+
 # cSpell:ignore sqlalchemy mgd appcontext
 
 from flask import Flask, current_app
 from logging import Logger
 from datetime import datetime
+from flask_login import current_user
 
 from .Display import Display
 from ..config.BaseConfig import BaseConfig
@@ -56,10 +58,15 @@ class Sidekick:
         self.config: DynamicConfig = config
         self.app_name = self.config.APP_NAME
         self.debugging = self.config.APP_DEBUGGING
+        self.log_text = self.config.SIDEKICK_LOG
         self.display = display
         self.started_at = datetime.now()
-        self.log_filename = ''
-        display.debug(f"{self.__class__.__name__} was created.")
+        self.log_filename = ""
+        echo = ""
+        if self.config.SIDEKICK_LOG:
+            display.echo = self._echo
+            echo = " and is echoing to the log file."
+        display.debug(f"{self.__class__.__name__} was created{echo}.")
 
     # TODO remove almost unused
     @property
@@ -69,6 +76,22 @@ class Sidekick:
     @property
     def app_log(self) -> Logger:
         return self.app.logger
+
+    def _echo(self, kind: Display.Kind, log_text: str):
+        if not (self.app and self.app.logger):
+            # Todo create a buffer
+            return
+
+        text = f"{(current_user.id if current_user else 0):03d}|{log_text}"
+        match kind:
+            case Display.Kind.INFO:
+                self.app_log.info(text)
+            case Display.Kind.WARN:
+                self.app_log.warning(text)
+            case Display.Kind.ERROR:
+                self.app_log.error(text)
+            case Display.Kind.DEBUG:
+                self.app_log.debug(text)
 
     def __str__(self):
         return f"{self.__class__.__name__} the ƒ+py dev's companion"

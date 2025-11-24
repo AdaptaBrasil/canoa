@@ -4,7 +4,7 @@ Equipe da Canoa -- 2024
 Simple colored print to screen
 
 mgd 2024-09-27,10-11,12-05
-F
+
 """
 
 # cSpell:ignore colorfy
@@ -55,6 +55,7 @@ class Display:
         WARN = 4
         ERROR = 5
         DEBUG = 6
+        FATAL = 7
 
     #  EXCEPT = 7 # todo, call
 
@@ -71,6 +72,7 @@ class Display:
     ESC = code(None)
     elapsed_format = [f"{{:0{i}}}" for i in range(1, 6)]
     with_color = True
+
     try:
         # https://en.wikipedia.org/wiki/ANSI_escape_code#DOS_and_Windows
         # Since 2016! Windows 10 version 1511 -> Windows has colors
@@ -94,6 +96,7 @@ class Display:
             code(33),  # Warn yellow
             code(31),  # Error red
             code(35),  # Debug Magenta
+            code(91),  # Bright Red
         ],
         [
             "",  # Prompt
@@ -103,6 +106,7 @@ class Display:
             "[▲] ",  # Warn
             "[!] ",  # Error
             "[¤] ",  # Debug
+            "[🚨] ",  # Fatal
         ],
         None,  # with_color (bool, use color)
     )
@@ -126,6 +130,8 @@ class Display:
         with_color: bool = None,
     ):
         _d = Display.default  # value is None => use default
+        self.echo = lambda kind, text: None  # Default no-op function
+
         self.prompt = _d.prompt if prompt is None else prompt
         self.mute_all = True if mute_all else False
         self.debug_output = _d.debug_output if debug_output is None else debug_output
@@ -145,9 +151,7 @@ class Display:
     def color_for_kind(self, kind: Kind) -> str:
         return self.colors[kind.value] if self.with_color else Display.no_color
 
-    def print(
-        self, kind_or_color: Kind | str, msg: str, prompt: str = None, icon_output: bool = None
-    ) -> None:
+    def print(self, kind_or_color: Kind | str, msg: str, prompt: str = None, icon_output: bool = None) -> None:
         if self.mute_all:
             return
 
@@ -167,9 +171,7 @@ class Display:
             start_color = self.color_for_kind(kind)
         else:
             start_color = (
-                Display.no_color
-                if is_str_none_or_empty(kind_or_color) or not self.with_color
-                else kind_or_color
+                Display.no_color if is_str_none_or_empty(kind_or_color) or not self.with_color else kind_or_color
             )
 
         # _finalize_color = Display.no_color if se
@@ -181,15 +183,18 @@ class Display:
                 return f"{open_color}{text}{Display.reset_color}"
 
         _prompt = self.prompt if prompt is None else str(prompt)
-        start_text = '' if is_str_none_or_empty(_prompt) else _colorfy(Display.Kind.PROMPT, _prompt)
+        start_text = "" if is_str_none_or_empty(_prompt) else _colorfy(Display.Kind.PROMPT, _prompt)
+        elapsed = self.elapsed()
+
         if self.elapsed_output:
-            start_text = f"{start_text}{_colorfy(Display.Kind.ELAPSED, self.elapsed())} "
+            start_text = f"{start_text}{_colorfy(Display.Kind.ELAPSED, elapsed)} "
 
         _icon_output = self.icon_output if icon_output is None else bool(icon_output)
 
         icon = self.icons[kind.value] if _icon_output else ""
         end_color = Display.no_color if start_color == Display.no_color else Display.reset_color
         print(f"{start_text}{start_color}{icon}{msg}{end_color}")
+        self.echo(kind, f"{elapsed}{icon} {msg}")
 
     def simple(self, msg: str, prompt: str = None, icon_output: bool = None) -> None:
         self.print(Display.Kind.SIMPLE, msg, prompt, icon_output)
@@ -206,9 +211,12 @@ class Display:
     def debug(self, msg: str, prompt: str = None, icon_output: bool = None) -> None:
         self.print(Display.Kind.DEBUG, msg, prompt, icon_output)
 
+    def fatal(self, msg: str, prompt: str = None, icon_output: bool = None) -> None:
+        self.print(Display.Kind.FATAL, msg, prompt, icon_output)
+
     def set_prompt(self, value: str) -> str:
         p = self.prompt
-        self.prompt = '' if is_str_none_or_empty(value) else str(value)
+        self.prompt = "" if is_str_none_or_empty(value) else str(value)
         return p
 
     def set_icon_output(self, value: bool) -> bool:

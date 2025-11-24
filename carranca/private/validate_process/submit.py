@@ -69,9 +69,7 @@ def _store_report_result(
                 report_warns = report["warnings"]
                 report_tests = report["tests"]
                 if len(rd) > 1:
-                    sidekick.display.warn(
-                        _local_result(f"{len(rd)} data matched. Expected only 1.")
-                    )
+                    sidekick.display.warn(_local_result(f"{len(rd)} data matched. Expected only 1."))
 
     except Exception as e:
         result_json_str = _local_result(f"Extraction error [{e}], result [{result}].")
@@ -91,9 +89,7 @@ def _store_report_result(
                 report_tests=report_tests,
             )
         except Exception as e:
-            sidekick.app_log.error(
-                f"Error saving data_validate result: {result_json_str}: [{e}]."
-            )
+            sidekick.display.error(f"Error saving data_validate result: {result_json_str}: [{e}].")
 
 
 def submit(cargo: Cargo) -> Cargo:
@@ -139,14 +135,10 @@ def submit(cargo: Cargo) -> Cargo:
         batch_has_run_permission = True
         if not path.isfile(batch_full_name):  # TODO send to check module
             task_code += 1  # 3
-            raise Exception(
-                f"The `{_cfg.dv_app.ui_name}` module caller [{batch_full_name}] was not found."
-            )
+            raise Exception(f"The `{_cfg.dv_app.ui_name}` module caller [{batch_full_name}] was not found.")
         elif OS_IS_LINUX and not access(batch_full_name, X_OK):
             batch_has_run_permission = False
-            sidekick.display.warn(
-                f"Account doesn't have the necessary permissions to execute '{batch_full_name}'."
-            )
+            sidekick.display.warn(f"Account doesn't have the necessary permissions to execute '{batch_full_name}'.")
 
         result_ext = _cfg.output_file.ext  # ⚠️ keep always the same case (all lower)
         final_report_file_name = f"{_cfg.output_file.name}{result_ext}"
@@ -178,12 +170,14 @@ def submit(cargo: Cargo) -> Cargo:
         task_code += 1  # 7
         if not path.exists(final_report_full_name):
             task_code += 1  # 8
+
             def _x(std_str: str) -> str:
                 return f"\n'{std_str}'" if std_str else "'<empty>.'"
+
             raise Exception(
                 f"\n{sidekick.app_name}: Report was not found."
                 + (
-                    f"\nCheck `x` permission on {batch_full_name}"
+                    f"\nCheck eXec permission: `ls -l {batch_full_name}`\nUse `chmocd ..d +x {batch_full_name}` if missing."
                     if not batch_has_run_permission
                     else ""
                 )
@@ -203,9 +197,7 @@ def submit(cargo: Cargo) -> Cargo:
             # with the same name as the uploaded file,
             # But with extension `result_ext`
             #  (important so later the file can be found):
-            user_report_full_name = change_file_ext(
-                cargo.pd.working_file_full_name(), result_ext
-            )
+            user_report_full_name = change_file_ext(cargo.pd.working_file_full_name(), result_ext)
             task_code += 3  # 10
             shutil.move(final_report_full_name, user_report_full_name)
             task_code += 1  # 11
@@ -214,7 +206,7 @@ def submit(cargo: Cargo) -> Cargo:
         error_code = task_code + ModuleErrorCode.RECEIVE_FILE_SUBMIT.value
         msg_exception = str(e)
         sidekick.display.error(msg_exception)
-        sidekick.app_log.fatal(msg_exception, exc_info=error_code)
+        sidekick.fatal(msg_exception, exc_info=error_code)
     finally:
         _store_report_result(
             _cfg.dv_app.ui_name,
@@ -223,23 +215,22 @@ def submit(cargo: Cargo) -> Cargo:
             std_out_str,
         )
         try:
-            def _remove_folder(folder: str ):
+
+            def _remove_folder(folder: str):
                 msg = f"The intermediate process folder '{folder}' was "
                 if path.exists(folder) and path.isdir(folder):
                     shutil.rmtree(folder)
-                    sidekick.app_log.info(msg + "removed.")
+                    sidekick.display.info(msg + "removed.")
                 else:
-                    sidekick.app_log.warning(msg + "not found.")
+                    sidekick.display.warning(msg + "not found.")
 
             if cargo.receive_file_cfg.remove_tmp_files:
                 _remove_folder(_path_read)
                 _remove_folder(_path_write)
             else:
-                sidekick.app_log.info(
-                    "The intermediate process folders contents was *not* removed, as requested."
-                )
+                sidekick.display.info("The intermediate process folders contents was *not* removed, as requested.")
         except e:
-            sidekick.app_log.warning(
+            sidekick.display.warning(
                 f"The intermediate process folders contents were *not* removed because of an error [{e}]."
             )
 
@@ -249,7 +240,7 @@ def submit(cargo: Cargo) -> Cargo:
             f"submit: The unzipped files were submitted to '{_cfg.dv_app.ui_name}' and a report was generated."
         )
     else:
-        sidekick.app_log.error(
+        sidekick.display.error(
             f"There was a problem submitting the files to '{_cfg.dv_app.ui_name}'. Error code [{error_code}] and Exit code [{exit_code}]."
         )
 

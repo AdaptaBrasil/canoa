@@ -41,7 +41,7 @@ def __prepare_img_files(html_images: list[str], db_images: list[str], img_local_
             missing_files.remove(file_name)  # this img is not missing.
 
     if not folder_must_exist(img_local_path):
-        sidekick.app_log.error(f"Cannot create folder [{img_local_path}] to keep the HTML's images.")
+        sidekick.display.error(f"Cannot create folder [{img_local_path}] to keep the HTML's images.")
         return False
 
     # folder for images & a list of missing_files, are ready.
@@ -56,7 +56,7 @@ def __prepare_img_files(html_images: list[str], db_images: list[str], img_local_
         q = len(missing_files)
         qtd = "One" if q == 1 else f"{q}"
         p = "" if q == 1 else "s"
-        sidekick.app_log.warning(
+        sidekick.display.warning(
             f"{qtd} image record{p} missing for [sectorSpecifications] in database: {', '.join(missing_files)}."
         )
         return True  # some files missing, but I can't fix it :-(
@@ -69,7 +69,7 @@ def __prepare_img_files(html_images: list[str], db_images: list[str], img_local_
                 with open(os.path.join(img_local_path, file), "wb") as file:
                     file.write(image_data)
         except Exception as e:
-            sidekick.app_log.error(f"Error writing image [{file}] in folder {img_local_path}. Message [{str(e)}]")
+            sidekick.display.error(f"Error writing image [{file}] in folder {img_local_path}. Message [{str(e)}]")
 
     return True
 

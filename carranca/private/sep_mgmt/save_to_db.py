@@ -31,18 +31,14 @@ def save_data(
     msg_success = None
     msg_error = None
     try:
-        msg_error, remove, assign, task_code = _prepare_data_to_save(
-            grid_response, ui_db_texts, task_code
-        )
+        msg_error, remove, assign, task_code = _prepare_data_to_save(grid_response, ui_db_texts, task_code)
         if not is_str_none_or_empty(msg_error):
             return "", msg_error, task_code
         elif len(remove) + len(assign) == 0:
             return ui_db_texts["tasksNothing"], "", task_code
 
         task_code += 1  # 561
-        _, msg_error, task_code = _save_data_to_db(
-            remove, assign, batch_code, ui_db_texts, task_code
-        )
+        _, msg_error, task_code = _save_data_to_db(remove, assign, batch_code, ui_db_texts, task_code)
         task_code += 1  # 565
         if is_str_none_or_empty(msg_error):
             msg_success = ui_db_texts.format("tasksSuccess", len(remove), len(assign))
@@ -120,9 +116,7 @@ def _save_data_to_db(
                     user_sep.assigned_by = assigned_by
                     user_sep.batch_code = batch_code
                 else:
-                    sidekick.app_log.error(
-                        f"{__name__}: SEP with ID {id} not found, cannot update."
-                    )
+                    sidekick.display.error(f"{__name__}: SEP with ID {id} not found, cannot update.")
                     user_not_found.append(id)
 
             # TODO auto remove reassignment
@@ -132,9 +126,7 @@ def _save_data_to_db(
 
             task_code += 1  # 566
             for row in update:  # then update
-                __set_sep_new_user(
-                    row[SepMgmtGridCols.sep_id], row[SepMgmtGridCols.usr_new]
-                )
+                __set_sep_new_user(row[SepMgmtGridCols.sep_id], row[SepMgmtGridCols.usr_new])
 
             task_code += 1
             db_session.commit()
@@ -142,7 +134,7 @@ def _save_data_to_db(
             db_session.rollback()
             saveError = ui_db_texts.format("saveError", task_code)
             msg_error = try_get_mgd_msg(e, saveError)
-            sidekick.app_log.error(str(e))
+            sidekick.display.error(str(e))
 
     return "", msg_error, task_code
 

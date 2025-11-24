@@ -166,7 +166,7 @@ class UserDataFiles(SQLABaseTable):
                 db_session.rollback()
                 operation = "update" if isUpdate else "insert to"
                 msg_error = f"Cannot {operation} {UserDataFiles.__tablename__}.ticket = {uTicket} | Error {e}."
-                sidekick.app_log.error(msg_error)
+                sidekick.display.error(msg_error)
                 raise DatabaseError(msg_error)
         return None
 
@@ -368,7 +368,7 @@ class Sep(SQLABaseTable):
                 icon_content = SepIconMaker.empty_content() if is_empty else sep.icon_svg
             except Exception as e:
                 icon_content = SepIconMaker.error_content()
-                sidekick.app_log.error(f"Error retrieving icon content of SEP {id}: [{e}].")
+                sidekick.display.error(f"Error retrieving icon content of SEP {id}: [{e}].")
             return icon_content
 
         e, msg_error, icon_content = db_fetch_rows(_get_data)

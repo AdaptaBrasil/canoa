@@ -12,8 +12,8 @@ from typing import Optional
 
 
 def file_full_name_parse(file_full_name: str) -> tuple[str, str, str]:
-    ''' split full path into 3 components:
-        drive, path, filename '''
+    """split full path into 3 components:
+    drive, path, filename"""
     drive, path = os.path.splitdrive(file_full_name)
     _, filename = os.path.split(path)
     return (drive, path, filename)
@@ -57,9 +57,7 @@ def is_first_param_newer(newer_full_name: str, older_full_name: str) -> Optional
         return newer_stat.st_mtime > older_stat.st_mtime
 
 
-def file_must_exist(
-    file_full_name: str, source_full_name: str, replace_if_newer: bool = False
-) -> bool:
+def file_must_exist(file_full_name: str, source_full_name: str, replace_if_newer: bool = False) -> bool:
     """
     Checks if a file exists and optionally replaces it if newer.
 
@@ -88,7 +86,7 @@ def file_must_exist(
     except OSError as e:
         from ..common.app_context_vars import sidekick
 
-        sidekick.app_log.error(
+        sidekick.display.error(
             f"Error {('replacing' if done else 'copying file')} [{source_full_name}] to [{file_full_name}]: {e}')"
         )
     finally:
@@ -106,7 +104,7 @@ def folder_must_exist(full_path: str) -> bool:
         from ..common.app_context_vars import sidekick
 
         done = False
-        sidekick.app_log.error(f"Error creating folder {full_path}, {e}")
+        sidekick.display.error(f"Error creating folder {full_path}, {e}")
 
     return done
 

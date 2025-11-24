@@ -146,9 +146,7 @@ def get_user_role_abbr(user_id: int, user_role_id: int) -> RolesAbbr:
             except Exception as e:
                 from ..common.app_context_vars import sidekick
 
-                sidekick.app_log.error(
-                    f"Error retrieving user {user_id} role {user_role_id}: [{e}]."
-                )
+                sidekick.display.error(f"Error retrieving user {user_id} role {user_role_id}: [{e}].")
 
     return abbr
 
@@ -167,7 +165,7 @@ def get_user_where(**filter: Any) -> User:
             # user =  db_session.execute(stmt).scalar_one_or_none()
             user = db_session.query(User).options(joinedload(User.role)).filter_by(**filter).first()
         except Exception as e:
-            sidekick.app_log.error(f"Error retrieving user {filter}: [{e}].")
+            sidekick.display.error(f"Error retrieving user {filter}: [{e}].")
 
     return user
 
@@ -183,7 +181,7 @@ def persist_user(record: any, task_code: int = 1) -> None:
         try:
             task_code += 1
             if db_session.object_session(record) is not None:
-                sidekick.app_log.debug("User record needs an expunge.")
+                sidekick.debug("User record needs an expunge.")
                 task_code += 2
                 db_session.expunge(record)
             task_code = 3
@@ -210,9 +208,7 @@ def user_loader(id):
 @global_login_manager.request_loader
 def request_loader(request):
     username = "" if len(request.form) == 0 else request.form.get("username", "")
-    user = (
-        None if is_str_none_or_empty(username) else User.get_where(username_lower=username.lower())
-    )
+    user = None if is_str_none_or_empty(username) else User.get_where(username_lower=username.lower())
     return user
 
 

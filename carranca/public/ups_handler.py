@@ -109,8 +109,8 @@ def ups_handler(
         ui_texts[UITextsKeys.Form.icon_url] = icon_url("icons", file_name)
 
     # before logout
-    sidekick.app_log.error(e)
-    sidekick.app_log.debug(error_msg)
+    sidekick.display.error(e)
+    sidekick.display.fatal(error_msg)
 
     # TODO: send email
     if logout and is_someone_logged():

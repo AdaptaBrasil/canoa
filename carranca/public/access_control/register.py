@@ -76,8 +76,8 @@ def register():
     except Exception as e:
         # TODO: ups
         msg = add_msg_final("errorRegister", texts, task_code)
-        sidekick.app_log.error(e)
-        sidekick.app_log.debug(msg)
+        sidekick.display.error(e)
+        sidekick.display.debug(msg)
 
     return render_template(
         tmpl_rfn,

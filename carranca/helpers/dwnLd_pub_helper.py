@@ -59,9 +59,7 @@ def download_public_file(url, filename, guess_extension_if_not_provided=True) ->
         status = f"Status: {response.status_code}, "
         response.raise_for_status()  # Raise an exception for error HTTP statuses
     except requests.exceptions.RequestException as e:
-        sidekick.app_log.error(
-            f"Could not get file from link [{url}]: {status}code {task_code}, error [{e}]."
-        )
+        sidekick.display.error(f"Could not get file from link [{url}]: {status}code {task_code}, error [{e}].")
         return task_code
 
     try:
@@ -91,9 +89,7 @@ def download_public_file(url, filename, guess_extension_if_not_provided=True) ->
 
         return 0
     except Exception as e:
-        sidekick.app_log.error(
-            f"Could not get file from link [{url}]: {status}code {task_code}, error [{e}]."
-        )
+        sidekick.display.error(f"Could not get file from link [{url}]: {status}code {task_code}, error [{e}].")
         return task_code
 
 
@@ -117,9 +113,7 @@ def get_file_id_from_url(url: str) -> str:
     return id
 
 
-def download_response(
-    response: requests.Response, filename: str, rename_it: bool
-) -> int:
+def download_response(response: requests.Response, filename: str, rename_it: bool) -> int:
 
     task_code = 1
     _, file_ext = path.splitext(filename)
@@ -134,12 +128,8 @@ def download_response(
                     task_code = 6
                     f.write(chunk)
                     task_code = 8
-                    ext_by_magic = (
-                        ext_by_magic if ext_found else puremagic.what(None, chunk)
-                    )
-                    ext_found = ext_found or bool(
-                        ext_by_magic
-                    )  # just try to find extension with the first `chunk`
+                    ext_by_magic = ext_by_magic if ext_found else puremagic.what(None, chunk)
+                    ext_found = ext_found or bool(ext_by_magic)  # just try to find extension with the first `chunk`
 
         if rename_it and not is_same_file_name(to_str(ext_by_magic), file_ext):
             task_code = 9
@@ -148,7 +138,7 @@ def download_response(
 
         return 0
     except Exception as e:
-        sidekick.app_log.error(f"Could save file  [{filename}], error [{e}].")
+        sidekick.display.error(f"Could save file  [{filename}], error [{e}].")
         return task_code
 
 
@@ -165,9 +155,7 @@ def download_public_google_file(file_id, file_folder):
         "canoa-download-key.json",
     )
 
-    credentials = Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE, scopes=SCOPES
-    )
+    credentials = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
 
     service = build("drive", "v3", credentials=credentials)
 
@@ -185,9 +173,7 @@ def download_public_google_file(file_id, file_folder):
         done = False
         while done is False:
             status, done = downloader.next_chunk()
-            sidekick.display.debug(
-                "download: progress %d%%." % int(status.progress() * 100)
-            )
+            sidekick.display.debug("download: progress %d%%." % int(status.progress() * 100))
     finally:
         fh.close()
 

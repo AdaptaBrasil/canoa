@@ -97,7 +97,6 @@ def do_login():
                 task_code += 1  # 18
                 msg = f"{user.username} (with id {user.id} & role '{user.role.name}') just logged in {now_as_iso()}"
                 sidekick.display.info(msg)
-                sidekick.app_log.info(msg)
                 # user obj is lost here
                 task_code += 1  # 19
                 persist_user(user, task_code)

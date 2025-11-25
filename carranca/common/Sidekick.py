@@ -53,7 +53,9 @@ class Sidekick:
     """
 
     def __init__(self, config: BaseConfig, display: Display):
-        from ..config.DynamicConfig import DynamicConfig  # Avoid Circular 2025.12.03
+        from ..config.DynamicConfig import DynamicConfig  # Avoid Circular 2024.11.03
+
+        # from ..models.public import User # Avoid early access
 
         self.config: DynamicConfig = config
         self.app_name = self.config.APP_NAME
@@ -72,6 +74,10 @@ class Sidekick:
     @property
     def app(self) -> Flask:
         return current_app
+
+    @property
+    def user(self) -> "User":
+        return current_user
 
     @property
     def app_log(self) -> Logger:

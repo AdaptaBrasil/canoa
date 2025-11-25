@@ -55,11 +55,11 @@ class Cargo:
         """ Timestamp indicating when each process module begins its execution """
         self.received_at = received_at
         self.process_started_at = now()
-        self.check_started_at = None
-        self.unzip_started_at = None
-        self.report_ready_at = None
-        self.submit_started_at = None
-        self.email_started_at = None
+        self.check_started_at: datetime | None = None
+        self.unzip_started_at: datetime | None = None
+        self.report_ready_at: datetime | None = None
+        self.submit_started_at: datetime | None = None
+        self.email_started_at: datetime | None = None
         """ same as file ticket, a unique key in table UserDataFiles """
         self.table_udf_key = None
 

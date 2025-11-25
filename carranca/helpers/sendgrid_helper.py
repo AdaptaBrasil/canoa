@@ -44,7 +44,7 @@ from .ui_db_texts_helper import get_section
 def _send_email(
     send_to_or_dic: RecipientsListStr | RecipientsDic,
     texts_or_section: dict | str,
-    email_body_params: Optional[dict] = None,
+    body_params: Optional[dict] = None,
     file_to_send_full_name: Optional[str] = None,
     file_to_send_type: Optional[str] = None,
 ) -> bool:
@@ -56,7 +56,7 @@ def _send_email(
         » Sends an email, handling both: string and dictionary formats for the recipient.
 
         » Takes the body text from the `vw_ui_texts` (view ui_texts_section) and
-          replace it with email_body_params dictionary.
+          replace it with body_params dictionary.
 
         » Sends an attached file when its path is specified `file_to_send_path`. If extension is is NOT a common
           file type (pdf, json, xlsx, txt, csv), please inform it in `file_to_send_type`
@@ -70,7 +70,7 @@ def _send_email(
             Expected dict Keys:
                 subject=texts["subject"],
                 html_content=texts["content"],
-        email_body_params: Optional[ Dict[key: str, value: str] ]
+        body_params: Optional[ Dict[key: str, value: str] ]
             values to sSubstitute {key} in the content
         file_to_send_full_name: Optional[str]
             full path and name of file to attach to the mail

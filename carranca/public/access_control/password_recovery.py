@@ -64,8 +64,8 @@ def password_recovery():
             task_code = 0
     except Exception as e:  # TODO: log
         msg = add_msg_final("errorPasswordRecovery", texts, task_code)
-        sidekick.display.error(e)
         sidekick.display.debug(msg)
+        sidekick.display.error(e)
 
     return render_template(tmpl_rfn, form=form, **texts)
 

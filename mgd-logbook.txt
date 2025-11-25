@@ -70,6 +70,8 @@
 
 
 ------- 2025 - November ----------
+2025-11-24 Fixes on vadidate email vβ 5.13c
+
 2025-11-24 Fix a sidekick.display bug vβ 5.13b
 
 2025-11-24 Update data_validate launcher script rema.sh vβ 5.12

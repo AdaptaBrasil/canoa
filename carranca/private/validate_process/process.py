@@ -97,7 +97,7 @@ def process(
     msg_exception = ""
     elapsed_output = sidekick.display.set_elapsed_output(True)
 
-    _display("The validation process has started")
+    _display("The validation process has begun")
 
     """
         Process Loop

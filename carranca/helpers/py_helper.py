@@ -8,6 +8,7 @@ mgd 2025-02-04
 """
 
 # cSpell:ignore latin CCITT
+
 import re
 import json
 import base64

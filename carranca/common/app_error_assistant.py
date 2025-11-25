@@ -9,7 +9,7 @@ Equipe da Canoa  2024 — 2025
 mgd
 """
 
-# type: ignore[reportUnknownMemberType]
+# cSpell:ignore SMPT
 
 from enum import IntEnum, StrEnum
 from typing import Optional
@@ -92,6 +92,7 @@ class ModuleErrorCode(IntEnum):
     # Jinja Helper
     TEMPLATE_ERROR = 174
     TEMPLATE_BUG = 176
+    SEND_EMAIL = 180
 
     # RECEIVE_FILE_* =: [200... 270] + 100
     RECEIVE_FILE_ADMIT = 200

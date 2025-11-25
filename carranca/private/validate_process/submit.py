@@ -38,58 +38,76 @@ def _store_report_result(
         error_encoded = json.dumps(error)
         return f'{{"{ui_name}": {{"local_error": "{error_encoded}."}}}}'
 
-    result_json_str = ""
-    val_version = "?"
+    # ---- defaults (safe for DB update) ----
+    dv_version = "?"
     report_errors = None
     report_warns = None
     report_tests = None
-    result = ""
+    result_json_str = ""
+    result_obj = None
+
     try:
+        # basic validation
         if is_str_none_or_empty(stdout_result_pattern):
             result_json_str = _local_result("empty regex pattern")
+
         elif is_str_none_or_empty(std_out_str):
             result_json_str = _local_result("empty standard output")
+
         else:
+            # extract JSON substring
             rd = re.findall(stdout_result_pattern, std_out_str)
-            if len(rd) == 0:
-                result_json_str = f"{_local_result(f"no data matched regex: [{stdout_result_pattern}]")}\n'std_out_str': [{std_out_str}]"
+
+            if not rd:
+                msg = _local_result(f"no data matched regex: [{stdout_result_pattern}]")
+                result_json_str = f"{msg}\n'std_out_str': [{std_out_str}]"
 
             else:
+                # take first match (you warn if >1)
                 result_json_str = rd[0][1:-1]
-                result = ""
-                try:
-                    result = json.loads(result_json_str)
-                except:
-                    result_json_str = result_json_str.replace("'", '"')
-                    result = json.loads(result_json_str)
 
-                val_version = result["data_validate"]["version"]
-                report = result["data_validate"]["report"]
-                report_errors = report["errors"]
-                report_warns = report["warnings"]
-                report_tests = report["tests"]
+                # try to parse JSON
+                try:
+                    result_obj = json.loads(result_json_str)
+                except json.JSONDecodeError:
+                    # fallback: replace quotes
+                    sanitized = result_json_str.replace("'", '"')
+                    result_obj = json.loads(sanitized)
+                    result_json_str = sanitized
+
+                # extract fields
+                dv = result_obj.get("data_validate", {})
+                rep = dv.get("report", {})
+
+                dv_version = dv.get("version", "?")
+                report_errors = rep.get("errors")
+                report_warns = rep.get("warnings")
+                report_tests = rep.get("tests")
+
+                # warn if more than one match
                 if len(rd) > 1:
                     sidekick.display.warn(_local_result(f"{len(rd)} data matched. Expected only 1."))
 
     except Exception as e:
-        result_json_str = _local_result(f"Extraction error [{e}], result [{result}].")
+        # produce a meaningful, short, DB-safe fallback string
+        result_json_str = _local_result(f"Extraction error: {e}, result: {result_obj}")
 
     finally:
+        # --- DB update ---
         try:
             UserDataFiles.update(
                 cargo.table_udf_key,
                 e_unzip_started_at=cargo.unzip_started_at,
                 f_submit_started_at=cargo.submit_started_at,
                 g_report_ready_at=cargo.report_ready_at,
-                # local info
-                validator_version=val_version,
+                validator_version=dv_version,
                 validator_result=result_json_str,
                 report_errors=report_errors,
                 report_warns=report_warns,
                 report_tests=report_tests,
             )
         except Exception as e:
-            sidekick.display.error(f"Error saving data_validate result: {result_json_str}: [{e}].")
+            sidekick.display.error(f"Error saving data_validate result: {result_json_str} [{e}]")
 
 
 def submit(cargo: Cargo) -> Cargo:

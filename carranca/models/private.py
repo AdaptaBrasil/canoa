@@ -90,7 +90,7 @@ class UserDataFiles(SQLABaseTable):
     g_report_ready_at = Column(DateTime)
 
     ## submit
-    validator_version = Column(String(8))
+    validator_version = Column(String(16))
     validator_result = Column(String(280))
     report_errors = Column(Integer)
     report_warns = Column(Integer)
@@ -158,6 +158,7 @@ class UserDataFiles(SQLABaseTable):
                 else:  # isUpdate
                     for attr, value in kwargs.items():
                         if value is not None:
+                            sidekick.display.warn(f"{attr} <= {value}")
                             setattr(record_to_ins_or_upd, attr, value)
 
                 db_session.commit()

@@ -70,7 +70,14 @@
 
 
 ------- 2025 - November ----------
-2025-11-24 Fixes on vadidate email vβ 5.13c
+2025-11-24 Fixes on DB updates from dv vβ 5.13d
+    - data_validate's validator_version grow to > 8
+         => TYPE varchar(16)
+    - fix
+        result_json_str =
+            f"{_local_result(f"no data matched regex: [{stdout_result_pattern}]")}\n'std_out_str': [{std_out_str}]"
+
+2025-11-24 Fixes on validate email vβ 5.13c
 
 2025-11-24 Fix a sidekick.display bug vβ 5.13b
 

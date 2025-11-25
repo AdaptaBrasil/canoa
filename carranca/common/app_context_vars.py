@@ -80,7 +80,6 @@ def __get_scoped_var(var_name: str, do_var_creator: Callable[[], Any]) -> Any:
         with _locks[var_name]:
             if hasattr(g, var_name):
                 var_value = getattr(g, var_name)
-                print(f"{var_name} data found, using sema.")
                 if var_value is _CREATION_FAILED:
                     raise RuntimeError(f"Previous attempt to create `{var_name}` failed.")
                 return var_value
@@ -108,7 +107,6 @@ def __get_scoped_var(var_name: str, do_var_creator: Callable[[], Any]) -> Any:
         return var_value
     else:
         var_value = getattr(g, var_name)
-        print(f"{var_name} data found.")
         return var_value
 
 

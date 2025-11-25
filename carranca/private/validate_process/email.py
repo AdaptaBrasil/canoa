@@ -55,7 +55,7 @@ def email(cargo: Cargo, user_report_full_name) -> Cargo:
     except Exception as e:
         task_code += 5
         msg_exception = str(e)
-        Sidekick.display.fatal(f"There was a problem sending the results email: {msg_exception}.", exc_info=task_code)
+        sidekick.display.fatal(f"There was a problem sending the results email: {msg_exception}.")
 
     error_code = 0 if task_code == 0 else ModuleErrorCode.RECEIVE_FILE_EMAIL.value + task_code
     return cargo.update(error_code, "uploadFileEmail_failed", msg_exception)

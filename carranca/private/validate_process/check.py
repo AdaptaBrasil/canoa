@@ -84,8 +84,7 @@ def check(cargo: Cargo, file_data: object | str, valid_ext: list[str]) -> Cargo:
         # is the highest possible (see ModuleErrorCode.RECEIVE_FILE_CHECK.value + 1)
         task_code = 19
         sidekick.display.fatal(
-            f"Exception [{e}], code {task_code}, occurred in module `check` while validating the {receive_method} file [{cs.received_original_name}].",
-            exc_info=task_code,
+            f"Exception [{e}], code {task_code}, occurred in module `check` while validating the {receive_method} file [{cs.received_original_name}]."
         )
 
     # goto module register.py

@@ -70,7 +70,7 @@
 
 
 ------- 2025 - November ----------
-2025-11-24 Fix a sidekick.display bug vβ 5.13
+2025-11-24 Fix a sidekick.display bug vβ 5.13b
 
 2025-11-24 Update data_validate launcher script rema.sh vβ 5.12
     - send sidekick print to log (improve debugging info)

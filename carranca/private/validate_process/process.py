@@ -145,12 +145,10 @@ def process(
             except Exception as e:
                 error_code = ModuleErrorCode.RECEIVE_FILE_PROCESS.value + 1
                 fatal_msg = f"An error occurred while updating the final process record: [{e}]."
-                sidekick.display.error(fatal_msg)
-                Sidekick.display.fatal(fatal_msg)
+                sidekick.display.fatal(fatal_msg)
         else:
             fatal_msg = f"Processing {('downloaded' if cargo.pd.file_was_downloaded else 'uploaded')} file [{cargo.pd.received_file_name}] raised error code {error_code} in module '{current_module_name}'."
-            sidekick.display.error(fatal_msg)
-            Sidekick.display.fatal(fatal_msg)
+            sidekick.display.fatal(fatal_msg)
             try:
                 UserDataFiles.update(
                     cargo.table_udf_key,
@@ -170,13 +168,11 @@ def process(
                 error_code = ModuleErrorCode.RECEIVE_FILE_PROCESS.value + 2
                 msg_exception = _get_msg_exception(e, msg_exception, error_code)
                 sidekick.display.error(msg_exception)
-                Sidekick.display.fatal(msg_exception, exc_info=error_code)
 
     except Exception as e:
         error_code = ModuleErrorCode.RECEIVE_FILE_PROCESS.value + 3
         msg_exception = _get_msg_exception(e, msg_exception, error_code)
-        sidekick.display.error(msg_exception)
-        Sidekick.display.fatal(msg_exception, exc_info=error_code)
+        sidekick.display.fatal(msg_exception)
 
     finally:
         _display(f"The validation process end with error code [{error_code}]")

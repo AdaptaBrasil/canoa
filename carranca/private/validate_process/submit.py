@@ -205,8 +205,7 @@ def submit(cargo: Cargo) -> Cargo:
     except Exception as e:
         error_code = task_code + ModuleErrorCode.RECEIVE_FILE_SUBMIT.value
         msg_exception = str(e)
-        sidekick.display.error(msg_exception)
-        Sidekick.display.fatal(msg_exception, exc_info=error_code)
+        sidekick.display.fatal(msg_exception)
     finally:
         _store_report_result(
             _cfg.dv_app.ui_name,

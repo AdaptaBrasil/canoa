@@ -1,7 +1,7 @@
 """
  Private Models
-    vw_udf_latest_file
-    view with the latest upload file per Sep
+    vw_export_files
+    view with the user files to export
 
 mgd
 Equipe da Canoa -- 2025.09.02
@@ -28,7 +28,7 @@ from ...helpers.db_records.DBRecords import DBRecords
 
 class ExportGrid(SQLABaseTable):
     # Latest user data file by SEP view ()
-    __tablename__ = "vw_udf_latest_file"
+    __tablename__ = "vw_export_data_files"
 
     id = Column(Integer, primary_key=True)
     sep_id = Column(Integer)

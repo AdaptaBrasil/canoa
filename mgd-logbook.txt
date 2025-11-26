@@ -70,6 +70,14 @@
 
 
 ------- 2025 - November ----------
+2025-11-24 Review of Export tables and views vβ 5.14 DB v4.70
+    - Review DB
+        » user_data_files
+        » vw_user_data_files
+        » vw_export_data_files (old vw_udf_latest_file)
+    - Refactor the DB models involved.
+    - Database version 4.70
+
 2025-11-24 Fixes on DB updates from dv vβ 5.13d
     - data_validate's validator_version grow to > 8
          => TYPE varchar(16)
@@ -81,7 +89,7 @@
 
 2025-11-24 Fix a sidekick.display bug vβ 5.13b
 
-2025-11-24 Update data_validate launcher script rema.sh vβ 5.12
+2025-11-24 Update data_validate launcher script run_validate.sh vβ 5.12
     - send sidekick print to log (improve debugging info)
     - Update local copy of (keep it with x attribute)
         ../canoa/run_validate.sh

@@ -158,7 +158,6 @@ class UserDataFiles(SQLABaseTable):
                 else:  # isUpdate
                     for attr, value in kwargs.items():
                         if value is not None:
-                            sidekick.display.warn(f"{attr} <= {value}")
                             setattr(record_to_ins_or_upd, attr, value)
 
                 db_session.commit()
@@ -509,42 +508,18 @@ class ReceivedFiles(SQLABaseTable):
     report_warns = Column(Integer)
 
     user_receipt = Column(String(15))
-    email_sent = Column(Boolean)  # index (email_sent, had_reception_error, user_id, registered_at)
-    had_reception_error = Column(Boolean)  # index (email_sent, had_reception_error, user_id, registered_at)
 
     @staticmethod
-    def get_records(
-        file_id: int,
-        user_id: int,
-        email_sent: bool = True,
-        had_reception_error: bool = False,
-    ) -> DBRecords:
+    def get_records(file_id: int | None, user_id: int | None) -> DBRecords:
 
         def _get_data(db_session: Session) -> DBRecords:
-            """
-            ----------------------------------------------
-            | ⚠️ Attention
-            -------------------------------------------------
-                There is an index on the underlying table
-                (email_sent, had_reception_error, user_id, registered_at)
-                so if you are going change the where clause, be sure
-                to include these fields.
-            """
+            # see index user_data_files__id_users__registered_ix
             stmt = select(ReceivedFiles)
             if file_id is not None:
                 # For download, one file's id
                 stmt = stmt.where(ReceivedFiles.id == file_id)
-            else:
-                # For grid
-                stmt = stmt.where(
-                    # 2025.11.11 debuging ReceivedFiles.had_reception_error == had_reception_error,
-                    # and_( # and_(  mgd-bug-2025-10-01
-                    #     ReceivedFiles.email_sent == email_sent,
-                    #     ReceivedFiles.had_reception_error == had_reception_error,
-                    # )
-                )
-                if user_id is not None:
-                    stmt = stmt.where(ReceivedFiles.user_id == user_id)
+            elif user_id is not None:
+                stmt = stmt.where(ReceivedFiles.user_id == user_id)
 
             rows = db_session.execute(stmt).all()
             recs = DBRecords(stmt, rows)

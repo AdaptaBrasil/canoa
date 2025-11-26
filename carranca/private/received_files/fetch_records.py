@@ -44,7 +44,7 @@ def fetch_record_s(
         return DBRecords(), "", ""
 
     file_full_name = ""
-    received_recs = ReceivedFiles.get_records(file_id=rec_id, user_id=user_id)
+    received_recs = ReceivedFiles.get_records(rec_id, user_id)
     report_ext = ValidateProcessConfig(False).output_file.ext
     grid_rows: list[UsualDict] = []
     if received_recs:

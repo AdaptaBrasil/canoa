@@ -59,7 +59,13 @@ var btnExport;
 /** @type {Object} */
 var gridContainer;
 
-/** @type {Object} */
+
+/**
+ * @typedef {Object} gridColParams
+ * @property {Object} api
+ * @property {Object} data
+*/
+/** @type {gridColParams} */
 var params;
 
 /**

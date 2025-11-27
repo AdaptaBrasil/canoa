@@ -120,7 +120,10 @@ mgd
       return reticuleOrder;
    }
    const gridInitialOrder = getReticuleOrder();
-   const gridRows = {{ grid_data | tojson | safe }};
+   const gridRows = ({{ grid_data | tojson | safe }}).map(item => {
+        item.uploaded = item.uploaded ? new Date(item.uploaded) : null;
+        return item;
+    });
    const colMeta = {{ grid_col_meta | tojson | safe }};
    const colCode = colMeta[0].n;
    const colSep = colMeta[1].n;

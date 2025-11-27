@@ -15,7 +15,7 @@ let removeCount = 0;
 //-------------
 // == Ag Grid
 const gridOptions = {
-    rowSelection: 'single',
+    rowSelection: { mode: 'singleRow', checkboxes: false },
     onGridReady: (params) => {
         const firstRow = params.api.getDisplayedRowAtIndex(cargo[cargoKeys.row_index]);
         if (firstRow) {

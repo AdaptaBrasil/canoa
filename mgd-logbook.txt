@@ -61,21 +61,24 @@
 
    	A user can not be disabled if it has a SEP, cannot be assigned a sep if is disabled
 
-    Schema LOG
 
-
-        ui_texts: Dict=  UIDbTexts
-        with
-        ui_db_text
 
 
 ------- 2025 - November ----------
-2025-11-24 Review of Export tables and views vβ 5.14 DB v4.70
+    - todo:
+        Standardize grid-body.html.j2 height
+        user_data_files. LOG
+
+2025-11-26 Upgrade ag-grid cols vβ 5.14
+    - Upgrade ag-grid griOption to v32.2.1
+    - Standardize datetime columns
+
+2025-11-25--26 Review of Export tables and views vβ 5.14 DB v4.70
     - Review DB
         » user_data_files
         » vw_user_data_files
         » vw_export_data_files (old vw_udf_latest_file)
-    - Refactor the DB models involved.
+    - Refactor the involved DB models
     - Database version 4.70
 
 2025-11-24 Fixes on DB updates from dv vβ 5.13d

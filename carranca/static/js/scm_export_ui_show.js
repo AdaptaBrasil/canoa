@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
 //-------------
 // == Ag Grid
 const gridOptions = {
-   rowSelection: 'single',
+   rowSelection: { mode: 'singleRow', checkboxes: false },
    onGridReady: (params) => {
       const firstRow = cargo ? params.api.getDisplayedRowAtIndex(cargo[cargoKeys.row_index]) : null;
       setTimeout(() => { firstRow?.setSelected(true); setActiveRow(firstRow, firstRow?.rowIndex) }, 20);
@@ -91,16 +91,23 @@ const gridOptions = {
    }
    , rowData: gridRows
    , columnDefs: [
-      { field: colCode, flex: 1, hide: true },
-      { field: colSep, flex: 1, hide: true },
-      { field: colScm, flex: 1, hide: true },
-      { field: colMeta[3].n, headerName: colMeta[3].h, hide: true, flex: 1 },
-      { field: colMeta[4].n, headerName: colMeta[4].h, hide: false, flex: 4 },
+      { field: colCode, hide: true },
+      { field: colSep, hide: true },
+      { field: colScm, hide: true },
+      { field: colMeta[3].n, headerName: colMeta[3].h, hide: true},
+
+      { field: colMeta[4].n, headerName: colMeta[4].h, flex: 4 },
       {
-         field: colMeta[5].n, headerName: colMeta[5].h, hide: false, flex: 3,
-         valueFormatter: params => new Date(params.value).toLocaleString(dateFormat),
+         field: colMeta[5].n
+         , headerName: colMeta[5].h
+         , valueFormatter: params => (params.value ? params.value.toLocaleDateString(dateFormat) : '')
+         , flex: 2
       },
-      { field: colMeta[6].n, headerName: colMeta[6].h, hide: false, flex: 2 }
+      { field: colMeta[6].n
+         , headerName: colMeta[6].h
+         , flex: 1
+         , type: 'rightAligned',
+      }
    ]
 }; // gridOptions
 

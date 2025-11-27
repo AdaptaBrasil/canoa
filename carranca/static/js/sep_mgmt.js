@@ -28,7 +28,7 @@ const icon = /** @type {HTMLImageElement} */(document.getElementById(iconID))
 //-------------
 // == Basic Grid
 const gridOptions = {
-    rowSelection: 'single',
+    rowSelection: { mode: 'singleRow', checkboxes: false },
     onGridReady: (params) => {
         const api = params.api
         const firstRowNode = api.getDisplayedRowAtIndex(0);
@@ -88,7 +88,7 @@ const gridOptions = {
         {
             field: colMeta[5].n
             , headerName: colMeta[5].h
-            , valueFormatter: params => (params.data[colMeta[5].n] ? params.data[colMeta[5].n].toLocaleDateString(dateFormat) : '')
+            , valueFormatter: params => params.value ? params.value.toLocaleDateString(dateFormat) : ''
             , flex: 2
         },
         {

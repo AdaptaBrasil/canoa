@@ -22,7 +22,7 @@ Then, inside screen, start your app normally
 
 ```
 
-## Detach from screen (leave it running)
+## Detach from screen (leave it running: stay detached)
 Press: Ctrl + A then D
 
 ## List screen sessions

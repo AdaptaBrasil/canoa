@@ -59,7 +59,7 @@ class FileAvailableFilter {
 // == Basic Grid
 const stats_width = Math.round(parseFloat(getComputedStyle(document.documentElement).fontSize) * (colMeta[8].h).length);
 const gridOptions = {
-    rowSelection: 'single',
+    rowSelection: { mode: 'singleRow', checkboxes: false },
     onGridReady: (params) => {
         const firstRow = params.api.getDisplayedRowAtIndex(0);
         if (firstRow) { setTimeout(() => { setActiveRow(firstRow); firstRow.setSelected(true); }, 20); }
@@ -77,13 +77,13 @@ const gridOptions = {
         { // scm/sep
             field: colMeta[4].n,
             headerName: colMeta[4].h,
-            flex: 2,
+            flex: 3,
             cellClassRules: { 'grid-item-none': params => params.value == itemNone },
         },
         { // file name
             field: colMeta[5].n,
             headerName: colMeta[5].h,
-            flex: 3,
+            flex: 2,
             cellClassRules: {
                 'grid-item-none': params => {
                     const rowNode = params.api.getRowNode(params.rowIndex);
@@ -94,13 +94,15 @@ const gridOptions = {
         },
         { field: colMeta[6].n, headerName: colMeta[6].h, flex: 0 },
         {
-            field: colMeta[7].n, headerName: colMeta[7].h, flex: 0,
-            valueFormatter: params => (params.value ? new Date(params.value).toLocaleString(dateFormat) : ''),
-            filter: true,
+            field: colMeta[7].n
+            , headerName: colMeta[7].h
+            , flex: 0
+            , valueFormatter: params => params.value ? new Date(params.value).toLocaleString(dateFormat) : ''
+            , filter: true
         },
         {
             field: colMeta[8].n, headerName: colMeta[8].h,
-            // Use 3rem for width: compute at runtime based on root font-size
+            // Use 3rem for width: computed at runtime based on root font-size
             width: stats_width,
             maxWidth: stats_width,
             type: 'rightAligned',

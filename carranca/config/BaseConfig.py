@@ -116,7 +116,7 @@ class BaseConfig(Config):
     # account credentials (e.g., 'canoa-gmail-key.json'), and other secrets that
     # must never be exposed in the codebase.
     # -- there is a backup on Google Drive --
-    LOCAL_STORAGE_PATH = path.join(COMMON_PATH, LOCAL_STORAGE_FOLDER)
+    LOCAL_STORAGE_PATH = path.join(path_remove_last_folder(COMMON_PATH), LOCAL_STORAGE_FOLDER)
 
     # My address service is SERVER_EXTERNAL_IP is empty
     # (used to send recovery email confirmation, etc)

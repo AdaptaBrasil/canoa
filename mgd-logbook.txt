@@ -69,6 +69,10 @@
         Standardize grid-body.html.j2 height
         user_data_files. LOG
 
+2025-11-27 Move local-storage outside git repo - v5.16b
+    - Moved local-storage folder (API keys, tokens, etc.) one level up
+    - Previously kept untracked via .gitignore, now outside repo entirely
+
 2025-11-27 Adjustments is SMTP email vβ 5.16
 
 2025-11-26 Upgrade ag-grid cols vβ 5.15

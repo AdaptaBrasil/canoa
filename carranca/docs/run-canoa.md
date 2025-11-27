@@ -50,10 +50,6 @@ ps aux | grep flask
 kill -9 <PID>
 ```
 
-## Start a fresh Canoa instance
-```
-screen -S canoa
-flask run
-```
+
 
 #

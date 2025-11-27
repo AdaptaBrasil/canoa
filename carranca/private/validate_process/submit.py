@@ -120,6 +120,7 @@ def submit(cargo: Cargo) -> Cargo:
         except the parameters needed to call 'main.py'
     """
 
+    proc = "[submit]: "
     user_report_full_name = "<not produced>"
     msg_error = "receiveFileSubmit_error"
     error_code = 0
@@ -142,10 +143,10 @@ def submit(cargo: Cargo) -> Cargo:
 
     _path_read = cargo.pd.path.data_tunnel_user_read
     _path_write = cargo.pd.path.data_tunnel_user_write
+    _cfg = cargo.receive_file_cfg
     try:
         task_code += 1  # 2
         # shortcuts
-        _cfg = cargo.receive_file_cfg
         _path = cargo.pd.path
 
         batch_full_name = _path.batch_full_name
@@ -156,7 +157,9 @@ def submit(cargo: Cargo) -> Cargo:
             raise Exception(f"The `{_cfg.dv_app.ui_name}` module caller [{batch_full_name}] was not found.")
         elif OS_IS_LINUX and not access(batch_full_name, X_OK):
             batch_has_run_permission = False
-            sidekick.display.warn(f"Account doesn't have the necessary permissions to execute '{batch_full_name}'.")
+            sidekick.display.warn(
+                f"{proc}Account doesn't have the necessary permissions to execute '{batch_full_name}'."
+            )
 
         result_ext = _cfg.output_file.ext  # ⚠️ keep always the same case (all lower)
         final_report_file_name = f"{_cfg.output_file.name}{result_ext}"
@@ -179,7 +182,7 @@ def submit(cargo: Cargo) -> Cargo:
             task_code += 1  # 6
         except Exception as e:
             msg_exception = str(e)
-            raise Exception(e)
+            raise
 
         # Ok, final report should be waiting for us ;—)
 
@@ -223,7 +226,7 @@ def submit(cargo: Cargo) -> Cargo:
     except Exception as e:
         error_code = task_code + ModuleErrorCode.RECEIVE_FILE_SUBMIT.value
         msg_exception = str(e)
-        sidekick.display.fatal(msg_exception)
+        sidekick.display.fatal(f"{proc}{msg_exception}")
     finally:
         _store_report_result(
             _cfg.dv_app.ui_name,
@@ -237,28 +240,30 @@ def submit(cargo: Cargo) -> Cargo:
                 msg = f"The intermediate process folder '{folder}' was "
                 if path.exists(folder) and path.isdir(folder):
                     shutil.rmtree(folder)
-                    sidekick.display.info(msg + "removed.")
+                    sidekick.display.info(proc + msg + "removed.")
                 else:
-                    sidekick.display.warning(msg + "not found.")
+                    sidekick.display.warning(proc + msg + "not found.")
 
             if cargo.receive_file_cfg.remove_tmp_files:
                 _remove_folder(_path_read)
                 _remove_folder(_path_write)
             else:
-                sidekick.display.info("The intermediate process folders contents was *not* removed, as requested.")
-        except e:
+                sidekick.display.info(
+                    f"{proc}The intermediate process folders contents was *not* removed, as requested."
+                )
+        except Exception as e:
             sidekick.display.warning(
-                f"The intermediate process folders contents were *not* removed because of an error [{e}]."
+                f"{proc}The intermediate process folders contents were *not* removed because of an error [{e}]."
             )
 
     # goto email.py
     if error_code == 0:
         sidekick.display.info(
-            f"submit: The unzipped files were submitted to '{_cfg.dv_app.ui_name}' and a report was generated."
+            f"{proc}The unzipped files were submitted to '{_cfg.dv_app.ui_name}' and a report was successfully generated."
         )
     else:
         sidekick.display.error(
-            f"There was a problem submitting the files to '{_cfg.dv_app.ui_name}'. Error code [{error_code}] and Exit code [{exit_code}]."
+            f"{proc}There was a problem submitting the files to '{_cfg.dv_app.ui_name}'. Error code [{error_code}] and Exit code [{exit_code}]."
         )
 
     return cargo.update(

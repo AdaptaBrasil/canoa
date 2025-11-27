@@ -12,19 +12,22 @@
 │   ├── run_validate.sh        # Launches the data_validate app
 │   ├── README.md
 │   │
-│   ├── carranca/             # Flask/Jinja application code
+│   ├── carranca/              # Flask/Jinja application code
 │   │
-│   ├── user_files/           # User-uploaded files
+│   ├── exported_data/         # Working folder for exporting schemas
 │   │
-│   └── LocalStorage/         # Keys & tokens (to be renamed)
+│   └── user_files/            # User-uploaded files
 │
-├── canoa_stage/              # Paused staging version of Canoa
+├── canoa_stage/               # Paused staging version of Canoa
 │
-├── data_validate/            # External validation app
+├── data_validate/             # External validation app
 │   # Source: https://github.com/AdaptaBrasil/data_validate
 │
-└── data_tunnel/              # Temporary folder for shared files
-                              # used by: Canoa ↔ data_validate
+├── local-storage/             # Api Keys & tokens
+│
+│
+└── data_tunnel/               # Temporary folder for shared files
+                               # used by: Canoa ↔ data_validate
 ```
 
 # rema.sh

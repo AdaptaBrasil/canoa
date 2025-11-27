@@ -47,11 +47,11 @@ def unzip(cargo: Cargo) -> Cargo:
                 zip_file.extractall(unzip_folder)
                 msg_error = ""
 
-        sidekick.display.info(f"unzip: The file was unpacked in [{unzip_folder}].")
+        sidekick.display.info(f"[unzip]: The file was unpacked in [{unzip_folder}].")
     except Exception as e:
         msg_exception = str(e)
         error_code = task_code + ModuleErrorCode.RECEIVE_FILE_UNZIP.value
-        sidekick.display.fatal(f"Error unzipping file [{zip_full_name}] in [{unzip_folder}]: [{e}].")
+        sidekick.display.fatal(f"[unzip]: Error unzipping file [{zip_full_name}] in [{unzip_folder}]: [{e}].")
 
     # goto module submit.py
     return cargo.update(error_code, msg_error, msg_exception)

@@ -23,6 +23,7 @@ mgd
 """
 
 # cSpell:ignore ext
+# pyright: reportAttributeAccessIssue=false
 
 from datetime import datetime
 from typing import Tuple
@@ -58,7 +59,7 @@ def process(
 
     current_module_name = __name__.split(".")[-1]
 
-    def _get_next_params(cargo: Cargo) -> Tuple[object, dict]:
+    def _get_next_params(cargo: Cargo) -> Tuple[Cargo, dict]:
         """
         Extracts the parameters of the next procedure,
         initialize cargo and returns to the loop
@@ -70,20 +71,19 @@ def process(
         """prepares a complete exception message for the db & log"""
         return f"process: Exception: [{e}]; {current_module_name}.Exception: [{msg_exc}], Code [{code}]."
 
-    def _display(msg):
-        sidekick.display.info(f"process: {msg}.")
-        return
+    def _log(msg):
+        return f"[process]: {msg}."
 
     def _updated(code):
         msg_ok = "The process ended without error and t" if code == 0 else "T"
         msg_error = "" if code == 0 else f" although the process ended with error_code= [{code}]"
-        _display(f"{msg_ok}he DB record was updated successfully{msg_error}")
+        sidekick.display.info(_log(f"{msg_ok}he DB record was updated successfully{msg_error}"))
         return
 
     # Create Cargo, with the parameters for the first procedure (check) of the Loop Process
     # "2025.02.05",  # process version, 22 new column user_files.sep_id
     cargo = Cargo(
-        "2025.05.03",  # process version, user can have [0—n] sep.
+        "2025.11.27",  # process version, user can have [0—n] sep.
         sidekick.debugging,
         app_user,
         sep_data,
@@ -97,7 +97,7 @@ def process(
     msg_exception = ""
     elapsed_output = sidekick.display.set_elapsed_output(True)
 
-    _display("The validation process has begun")
+    sidekick.display.info(_log("The validation process has begun"))
 
     """
         Process Loop
@@ -129,10 +129,10 @@ def process(
             current_module_name = "UserDataFiles.update"
         msg_success = cargo.final.get("msg_success", None)
 
-        _display("Preparing to update the data validation process db record.")
+        sidekick.display.info(_log("Preparing to update the data validation process db record"))
         process_ended = now()
         if is_str_none_or_empty(cargo.table_udf_key):
-            _display("No record was inserted")
+            sidekick.display.info(_log("No record was inserted"))
         elif error_code == 0:
             try:
                 UserDataFiles.update(
@@ -145,10 +145,10 @@ def process(
             except Exception as e:
                 error_code = ModuleErrorCode.RECEIVE_FILE_PROCESS.value + 1
                 fatal_msg = f"An error occurred while updating the final process record: [{e}]."
-                sidekick.display.fatal(fatal_msg)
+                sidekick.display.fatal(_log(fatal_msg))
         else:
             fatal_msg = f"Processing {('downloaded' if cargo.pd.file_was_downloaded else 'uploaded')} file [{cargo.pd.received_file_name}] raised error code {error_code} in module '{current_module_name}'."
-            sidekick.display.fatal(fatal_msg)
+            sidekick.display.fatal(_log(fatal_msg))
             try:
                 UserDataFiles.update(
                     cargo.table_udf_key,
@@ -167,15 +167,15 @@ def process(
             except Exception as e:
                 error_code = ModuleErrorCode.RECEIVE_FILE_PROCESS.value + 2
                 msg_exception = _get_msg_exception(e, msg_exception, error_code)
-                sidekick.display.error(msg_exception)
+                sidekick.display.error(_log(msg_exception))
 
     except Exception as e:
         error_code = ModuleErrorCode.RECEIVE_FILE_PROCESS.value + 3
         msg_exception = _get_msg_exception(e, msg_exception, error_code)
-        sidekick.display.fatal(msg_exception)
+        sidekick.display.fatal(_log(msg_exception))
 
     finally:
-        _display(f"The validation process end with error code [{error_code}]")
+        sidekick.display.info(_log(f"The validation process end with error code [{error_code}]"))
         sidekick.display.set_elapsed_output(elapsed_output)
 
     return error_code, msg_error, msg_exception

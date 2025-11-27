@@ -33,6 +33,7 @@ async def run_validator(
     sep_data: UserSep,
     debug_validator: bool = False,
 ):
+    proc = "[launcher]: "
     #  This function knows quite a lot of how to run [data_validate]
     run_command = [
         batch_full_name,
@@ -55,9 +56,9 @@ async def run_validator(
 
     if debug_validator and not is_str_none_or_empty(d_v.flag_debug):
         run_command.append(d_v.flag_debug)
-        sidekick.display.info(" ".join(run_command))  # LOG
+        sidekick.display.info(proc + " ".join(run_command))  # LOG
     else:
-        sidekick.display.debug(" ".join(run_command))  # DEBUG
+        sidekick.display.debug(proc + " ".join(run_command))  # DEBUG
 
     # Run the script command asynchronously
     stdout = None
@@ -73,9 +74,11 @@ async def run_validator(
 
         # Get the exit code of the process
         exit_code = process.returncode
+        sidekick.display.debug(f"{proc}{d_v.ui_name} ended with code {exit_code}.")
+    
 
     except Exception as e:
-        err_msg = f"{d_v.ui_name}.running: {e}, Code [{exit_code}]."
+        err_msg = f"{proc}{d_v.ui_name}.running: {e}, Code [{exit_code}]."
         sidekick.display.fatal(err_msg)
         return "", err_msg, exit_code
 

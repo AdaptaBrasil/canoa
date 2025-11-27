@@ -69,6 +69,15 @@
         Standardize grid-body.html.j2 height
         user_data_files. LOG
 
+
+
+
+2025-11-27 Fix a typo in submit.py - v5.16c
+    - The typo `Except e` in submit.py war introduced in:
+      f7ea249 2025-11-08 --09 Gemini A v β 5.06
+    - dds the process name to the validation process log to
+      facilitate debugging.
+
 2025-11-27 Move local-storage outside git repo - v5.16b
     - Moved local-storage folder (API keys, tokens, etc.) one level up
     - Previously kept untracked via .gitignore, now outside repo entirely

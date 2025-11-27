@@ -30,6 +30,7 @@ def check(cargo: Cargo, file_data: object | str, valid_ext: list[str]) -> Cargo:
     cs = cargo.pd
     cargo.check_started_at = now()
     receive_method = "downloaded" if cs.file_was_downloaded else "uploaded"
+    proc = "[check]: "
     try:
         file_name_max_len = get_str_field_length(UserDataFiles, "file_name")
 
@@ -69,14 +70,14 @@ def check(cargo: Cargo, file_data: object | str, valid_ext: list[str]) -> Cargo:
         if task_code == 0:
             if not is_same_file_name(cs.received_original_name, cs.received_file_name):
                 sidekick.display.info(
-                    f"The {receive_method} file [{cs.received_original_name}] has been renamed to [{cs.received_file_name}]."
+                    f"{proc}The {receive_method} file [{cs.received_original_name}] has been renamed to [{cs.received_file_name}]."
                 )
             sidekick.display.info(
-                f"check: The {receive_method} file [{cs.received_file_name}] was successfully verified."
+                f"{proc}The {receive_method} file [{cs.received_file_name}] was successfully verified."
             )
         else:
             sidekick.display.error(
-                f"The {receive_method} file [{cs.received_file_name}] failed in module `check` with code {task_code}."
+                f"{proc}The {receive_method} file [{cs.received_file_name}] failed in module `check` with code {task_code}."
             )
 
     except Exception as e:
@@ -84,7 +85,7 @@ def check(cargo: Cargo, file_data: object | str, valid_ext: list[str]) -> Cargo:
         # is the highest possible (see ModuleErrorCode.RECEIVE_FILE_CHECK.value + 1)
         task_code = 19
         sidekick.display.fatal(
-            f"Exception [{e}], code {task_code}, occurred in module `check` while validating the {receive_method} file [{cs.received_original_name}]."
+            f"{proc}Exception [{e}], code {task_code}, occurred in module `check` while validating the {receive_method} file [{cs.received_original_name}]."
         )
 
     # goto module register.py

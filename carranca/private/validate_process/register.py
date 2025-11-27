@@ -87,7 +87,7 @@ def register(cargo: Cargo, file_data: object | str) -> Cargo:
         # After registered, table_udf_key has a value, set in cargo.file_registered
         # so process.end knows what to do (update or skip)
         file_registered = cargo.file_registered(user_dataFiles_key)
-        sidekick.display.info("register: The file information was inserted into the database.")
+        sidekick.display.info("[register]: The file information was inserted into the database.")
     except Exception as e:
         error_code = ModuleErrorCode.RECEIVE_FILE_REGISTER.value + task_code
         msg_exception = str(e)
@@ -96,7 +96,7 @@ def register(cargo: Cargo, file_data: object | str) -> Cargo:
         if file_saved and not file_registered:
             remove(work_fname)
             msg_deleted = " (so it was locally deleted)"
-        sidekick.display.fatal(f"{msg_fatal}{msg_deleted}. Error: [{msg_exception}].")
+        sidekick.display.fatal(f"[register]: {msg_fatal}{msg_deleted}. Error: [{msg_exception}].")
 
     # goto module unzip
     return cargo.update(error_code, "", msg_exception, {}, {})

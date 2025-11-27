@@ -267,11 +267,9 @@ def ignite_app(app_name, start_at) -> Tuple[Sidekick, str, bool]:
 
     no_email_text = "The email {0} for the app is not defined. The app will not be able to send emails."
 
-    no_email = not hasattr(config, "EMAIL_PROVIDER_VALUE") or (
-        config.EMAIL_PROVIDER_VALUE == EmailProvider.NO_EMAIL.value
-    )
+    no_email = not hasattr(config, "EMAIL_PROVIDER") or (config.EMAIL_PROVIDER == EmailProvider.NO_EMAIL.value)
     if no_email:
-        config.EMAIL_PROVIDER_VALUE = EmailProvider.NO_EMAIL.value
+        config.EMAIL_PROVIDER = EmailProvider.NO_EMAIL.value
     else:
         if is_str_none_or_empty(config.EMAIL_API_KEY_PW):
             warns += 1

@@ -224,7 +224,8 @@ def _register_mail(app: Flask, cfg: BaseConfig):
 
     mail = Mail()
     mail.init_app(app)
-    _info(f"The Flask SMTP email server has been successfully initialized. The sender is <{cfg.EMAIL_ORIGINATOR}>.")
+    _info("The Flask SMTP email server has been successfully initialized.")
+    global_sidekick.display.debug(f"The email sender is <{cfg.EMAIL_ORIGINATOR}>")
 
     return
 
@@ -318,7 +319,7 @@ def create_app():
     _info("The Login Manager has been successfully initialized and attached to the app.")
 
     # -- create the SMTP provider
-    if gcfg.EMAIL_PROVIDER_VALUE == EmailProvider.SMTP.value:
+    if gcfg.EMAIL_PROVIDER == EmailProvider.SMTP.value:
         _register_mail(app, gcfg)
 
     # -- Register SQLAlchemy
@@ -334,7 +335,8 @@ def create_app():
     # -- Jinja2
     _register_jinja(app, gcfg.DEBUG_TEMPLATES, APP_NAME, APP_VERSION)
     sd = f"(with debug_templates as {gcfg.DEBUG_TEMPLATES})"
-    _info(f"All Jinja functions of this app have been successfully attached to 'jinja_env.globals' {sd}.")
+    _info(f"All Jinja functions of this app have been successfully attached.")
+    global_sidekick.display.debug("attached to 'jinja_env.globals' {sd}.")
 
     # config sidekick.display
     if display_mute_after_init:

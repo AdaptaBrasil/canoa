@@ -69,7 +69,9 @@
         Standardize grid-body.html.j2 height
         user_data_files. LOG
 
-2025-11-26 Upgrade ag-grid cols vβ 5.14
+2025-11-27 Adjustments is SMTP email vβ 5.16
+
+2025-11-26 Upgrade ag-grid cols vβ 5.15
     - Upgrade ag-grid griOption to v32.2.1
     - Standardize datetime columns
 
@@ -119,7 +121,7 @@
     - Issue #74 solved
     - gmail com SMTP
     - as SendGrid, Google API estão disponíveis
-      EMAIL_PROVIDER_VALUE = EmailProvider.SMTP.value
+      EMAIL_PROVIDER = EmailProvider.SMTP.value
 
 2025-11-20 Issue #78
     - Issue #78 solved

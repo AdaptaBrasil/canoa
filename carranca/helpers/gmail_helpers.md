@@ -15,7 +15,7 @@ The project uses three modular files to manage the email functionality, promotin
 * **`gmail_dwd_helper.py`:**
     Handles the **Domain-Wide Delegation (DWD)** authentication logic using the Service Account key.
 * **`gmail_oauth_helper.py`:**
-    Handles the **OAuth 2.0** flow, which requires user consent and manages the `token.json` lifecycle.
+    Handles the **OAuth 2.0** flow, which requires user consent and manages the `canoa-gmail-token.json` lifecycle.
 
 ---
 
@@ -27,7 +27,7 @@ The authentication method used at runtime is determined by which credential file
 | :--- | :--- | :--- |
 | **`canoa-gmail-key.json`** | **Service Account (DWD)** | Your **private key** used for automated, server-to-server tasks that impersonate a user in a Google Workspace domain. |
 | **`canoa-gmail-oauth.json`** | **OAuth 2.0 Client Secrets** | The file used to initiate the interactive user login flow (Client Secrets). |
-| **`token.json`** | **OAuth 2.0 Token** | The **refresh token** generated after the first successful user login, allowing subsequent, non-interactive use. |
+| **`canoa-gmail-token.json`** | **OAuth 2.0 Token** | The **refresh token** generated after the first successful user login, allowing subsequent, non-interactive use. |
 
 ---
 

@@ -1,7 +1,7 @@
 # oauth_client.py
 """
 OAuth 2.0 authentication handler for the Gmail API.
-This module manages user credentials (token.json), refreshing them if expired,
+This module manages user credentials (canoa-gmail-canoa-gmail-token.json), refreshing them if expired,
 or initiating a new authorization flow if tokens are missing.
 """
 from os import path
@@ -22,8 +22,8 @@ except ImportError as e:
 
 # --- Configuration Constants ---
 SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
-CLIENT_SECRETS_FILENAME = "canoa-gmail-oauth.json" # The client_secrets file downloaded from GCP
-TOKEN_FILENAME = "token.json"
+CLIENT_SECRETS_FILENAME = "canoa-gmail-oauth.json"  # The client_secrets file downloaded from GCP
+TOKEN_FILENAME = "canoa-gmail-token.json"
 
 
 def _get_credentials(json_path: str) -> Credentials:
@@ -31,7 +31,7 @@ def _get_credentials(json_path: str) -> Credentials:
     Manages the lifecycle of user credentials (token, refresh, flow).
 
     Args:
-        json_path: The directory path where token.json and the client secrets file reside.
+        json_path: The directory path where canoa-gmail-token.json and the client secrets file reside.
 
     Returns:
         A valid Google Credentials object.
@@ -68,6 +68,7 @@ def _get_credentials(json_path: str) -> Credentials:
 
     return creds
 
+
 def get_gmail_service_oauth(config_path: str) -> Type[build]:
     """
     Authenticates using OAuth 2.0 and returns the Gmail API service object.
@@ -81,5 +82,6 @@ def get_gmail_service_oauth(config_path: str) -> Type[build]:
     creds = _get_credentials(config_path)
     # The 'build' function is imported globally for clarity in this file
     return build("gmail", "v1", credentials=creds)
+
 
 # eof

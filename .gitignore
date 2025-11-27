@@ -8,10 +8,11 @@ __pycache__/
 *.pytest_cache
 .coverage
 
-# database & logs
-*.db
+# database, config & logs
 *.sqlite3
+.flake8
 *.log
+*.db
 
 # venv
 .venv/
@@ -34,14 +35,14 @@ instance/*
 .webassets-cache
 
 ## Canoa per git's user
-carranca/static/sep_icons
-carranca/static/docs/
+carranca/static/sep_icons/
 carranca/log_files
-user_files/
-uploaded_files/
 downloaded_files/
-LocalStorage/
+uploaded_files/
+local_storage/
+exported-data/
 data_tunnel/
+user_files/
 
 ## Canoa Linux
 mount-win.sh

@@ -97,7 +97,7 @@ class BaseConfig(Config):
     EMAIL_ORIGINATOR = ""  # from os_environment
     EMAIL_API_KEY_PW = ""  # from os_environment
     EMAIL_ORIGINATOR_NAME = f"e-mail de {APP_NAME}"
-    EMAIL_PROVIDER_VALUE = EmailProvider.SMTP.value
+    EMAIL_PROVIDER = EmailProvider.SMTP.value
     EMAIL_DEBUG = False
     # Flask Mail info
     FLASK_MAIL = {"server": "smtp.gmail.com", "port": 587, "use_tls": True}
@@ -109,12 +109,13 @@ class BaseConfig(Config):
     COMMON_PATH = path_remove_last_folder(app_folder)
 
     # The name of the folder for storing sensitive, non-versioned files.
-    LOCAL_STORAGE_FOLDER = "LocalStorage"
+    LOCAL_STORAGE_FOLDER = "local_storage"
     # ⚠️ CRITICAL: This path points to a directory for sensitive, non-versioned files.
     # It MUST NOT be committed to Git or any other version control system. This
     # directory is intended for confidential information such as API keys, service
     # account credentials (e.g., 'canoa-gmail-key.json'), and other secrets that
     # must never be exposed in the codebase.
+    # -- there is a backup on Google Drive --
     LOCAL_STORAGE_PATH = path.join(COMMON_PATH, LOCAL_STORAGE_FOLDER)
 
     # My address service is SERVER_EXTERNAL_IP is empty

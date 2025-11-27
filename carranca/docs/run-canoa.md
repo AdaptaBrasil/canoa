@@ -11,7 +11,7 @@ It allows you to:
 GNU Screen is not a windowing system nor physical terminal. It is a software tool that creates “virtual terminals” inside your real terminal.
 
 ## Start Canoa (in a screen session)
-```
+``` Start canoa
 screen -S canoa
 ```
 

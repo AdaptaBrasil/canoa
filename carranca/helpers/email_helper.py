@@ -101,7 +101,7 @@ def send_email(
 ) -> bool:
     from ..common.app_context_vars import sidekick
 
-    match sidekick.config.EMAIL_PROVIDER_VALUE:
+    match sidekick.config.EMAIL_PROVIDER:
         case EmailProvider.SENDGRID.value:
             from .sendgrid_helper import _send_email
 
@@ -121,7 +121,7 @@ def send_email(
             sidekick.display.debug("No email provider. Cannot sent email.")
 
         case _:
-            raise KeyError(f"Unknown email provider [{sidekick.config.EMAIL_PROVIDER_VALUE}].")
+            raise KeyError(f"Unknown email provider [{sidekick.config.EMAIL_PROVIDER}].")
 
 
 # eof

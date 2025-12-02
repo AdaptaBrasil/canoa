@@ -45,7 +45,7 @@ from werkzeug.local import LocalProxy
 from threading import Lock
 
 if TYPE_CHECKING:
-    from ..private.UserSep import UserSepList, UserSepDict, UserSepsRtn
+    from ..private.UserSep import UserSepList, UserSepsRtn
     from ..private.AppUser import AppUser
     from ..private.JinjaUser import JinjaUser
 
@@ -148,6 +148,7 @@ def __prepare_user_seps() -> "UserSepsRtn":
     from ..private.sep_icon import do_icon_get_url
     from ..helpers.pw_helper import is_someone_logged
     from ..helpers.py_helper import class_to_dict
+    from ..helpers.types_helper import UsualDict
 
     user_id: int = current_user.id if is_someone_logged() else -1
 
@@ -158,7 +159,7 @@ def __prepare_user_seps() -> "UserSepsRtn":
         except Exception as e:
             return str(e)
 
-        seps: List["UserSepDict"] = []
+        seps: List[UsualDict] = []
         for sep_row in sep_usr_rows:
             item = UserSep(**sep_row)
             item.icon_url = do_icon_get_url(item.icon_file_name, item.id)

@@ -59,7 +59,8 @@ class FileAvailableFilter {
 // == Basic Grid
 const stats_width = Math.round(parseFloat(getComputedStyle(document.documentElement).fontSize) * (colMeta[8].h).length);
 const gridOptions = {
-    rowSelection: { mode: 'singleRow', checkboxes: false },
+    // rowSelection: { mode: 'singleRow', checkboxes: false },
+    rowSelection: 'single',
     onGridReady: (params) => {
         const firstRow = params.api.getDisplayedRowAtIndex(0);
         if (firstRow) { setTimeout(() => { setActiveRow(firstRow); firstRow.setSelected(true); }, 20); }

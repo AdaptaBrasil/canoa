@@ -26,7 +26,7 @@ USER_RECEIPT = "receipt"
 
 def fetch_record_s(
     no_sep: str, rec_id: Optional[int] = ALL_USER_RECS, user_id: Optional[int] = IGNORE_USER
-) -> Tuple[DBRecords, str, str]:
+) -> Tuple[DBRecords, str, str, str]:
     """Fetch received files records from the view vw_user_data_files
 
     no_sep: str: text to show when the record has an empty SEP
@@ -36,14 +36,15 @@ def fetch_record_s(
                 - has value, ignore user_id and fetch the record with the given id & return file full_name too
     user_id: int  user id to fetch records for
 
-    return: DBRecords: records fetched and the last record's file full_name
+    return: DBRecords: records fetched and the last record's file full_name and uploaded_name
 
     """
 
     if rec_id is ALL_USER_RECS and user_id is IGNORE_USER:
-        return DBRecords(), "", ""
+        return DBRecords(), "", "", ""
 
     file_full_name = ""
+    uploaded_file_name = ""
     received_recs = ReceivedFiles.get_records(rec_id, user_id)
     report_ext = ValidateProcessConfig(False).output_file.ext
     grid_rows: list[UsualDict] = []
@@ -55,6 +56,9 @@ def fetch_record_s(
         for record in received_recs:
             folder = uf.uploaded if record.file_origin == "L" else uf.downloaded
             file_full_name: str = path.join(folder, user_folder, record.stored_file_name)
+
+            _, ext = path.splitext(file_full_name)
+            uploaded_file_name = change_file_ext(record.file_name, ext)
             # Copy specific fields to a new object 'row'
             row = {
                 "id": record.id,
@@ -70,7 +74,12 @@ def fetch_record_s(
             }
             grid_rows.append(row)
 
-    return grid_rows, file_full_name, report_ext
+    return (
+        grid_rows,
+        file_full_name,
+        uploaded_file_name,
+        report_ext,
+    )
 
 
 # eof

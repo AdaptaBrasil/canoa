@@ -28,7 +28,8 @@ const icon = /** @type {HTMLImageElement} */(document.getElementById(iconID))
 //-------------
 // == Basic Grid
 const gridOptions = {
-    rowSelection: { mode: 'singleRow', checkboxes: false },
+    // rowSelection: { mode: 'singleRow', checkboxes: false },
+    rowSelection: 'single',
     onGridReady: (params) => {
         const api = params.api
         const firstRowNode = api.getDisplayedRowAtIndex(0);

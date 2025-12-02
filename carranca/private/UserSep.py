@@ -14,10 +14,8 @@ from typing import TYPE_CHECKING, List, Dict, Any
 from .IdToCode import IdToCode
 from ..helpers.types_helper import ErrorMessage
 
-
 if TYPE_CHECKING:
     type UserSepList = List["UserSep"]
-    type UserSepDict = Dict[str, Any]
     type UserSepsRtn = UserSepList | ErrorMessage
 
 

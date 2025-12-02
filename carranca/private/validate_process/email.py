@@ -15,7 +15,7 @@ from ...models.private import UserDataFiles
 from ...common.app_context_vars import sidekick
 from ...common.app_error_assistant import ModuleErrorCode
 from ...helpers.py_helper import now_as_text, now
-from ...helpers.email_helper import RecipientsDic, RecipientsListStr, send_email
+from ...helpers.email_helper import RecipientsDic, RecipientsList, send_email
 
 
 def email(cargo: Cargo, user_report_full_name) -> Cargo:
@@ -36,8 +36,8 @@ def email(cargo: Cargo, user_report_full_name) -> Cargo:
         }
         send_file = user_report_full_name
         recipients = RecipientsDic(
-            to=RecipientsListStr(cargo.user.email, cargo.user.name),
-            cc=RecipientsListStr(cargo.receive_file_cfg.cc_recipients.cc),
+            to=RecipientsList(cargo.user.email, cargo.user.name),
+            cc=RecipientsList(cargo.receive_file_cfg.cc_recipients.cc),
         )
 
         task_code += 1  # 2

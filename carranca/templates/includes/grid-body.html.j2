@@ -15,4 +15,33 @@ and place {% include %} inside the block."
 {% include "./includes/backend-msg.html.j2" %}
 <div id='{{ grid_id }}' class="ag-theme-quartz" style="height: 400px"></div>
 
+{# const gridOptions = {
+    // ✅ New API for single row selection
+    rowSelection: {
+        mode: 'singleRow',
+        checkboxes: false,      // disable row checkboxes
+        headerCheckbox: false   // disable header checkbox
+    },
+
+    // ✅ Prevent the dark-blue focus highlight
+    suppressCellFocus: true,
+
+    // ✅ Handle selection instead of focus
+    onRowSelected: (event) => {
+        if (event.node.isSelected()) {
+            // update your active row state here
+            setActiveRow(event.node);
+        } else {
+            setActiveRow(null);
+        }
+    }
+
+
+}
+//deixa o nome do esquema com no mínimo 2 caracteres
+
+
+
+#}
+
 {# eof #}

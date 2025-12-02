@@ -64,14 +64,20 @@
 
 
 
-------- 2025 - November ----------
+------- 2025 - December ----------
     - todo:
         Standardize grid-body.html.j2 height
         user_data_files. LOG
 
 
+2025-12-02 Undo upgrade ag-grid vβ 5.17
+    - Undo : Upgrade ag-grid cols v5.16c
+        // rowSelection: { mode: 'singleRow', checkboxes: false },
+        rowSelection: 'single',
+        RecipientsListStr => renamed: RecipientsList
+        cc_recipients re-activated
 
-
+------- 2025 - November ----------
 2025-11-27 Fix a typo in submit.py - v5.16c
     - The typo `Except e` in submit.py war introduced in:
       f7ea249 2025-11-08 --09 Gemini A v β 5.06
@@ -700,7 +706,7 @@
     - Published in Windows & Linux Sever
     - create app_request_scoped_vars.py
     - Bug with logger_user class lifetime (now is request_scoped)
-    - Bug when sending validation email (introduced by the new class RecipientsListStr)
+    - Bug when sending validation email (introduced by the new class RecipientsList)
 
 
 2025-01-17 β 3.44 [Arquivos Validados] Prepare records for ui grid
@@ -727,7 +733,7 @@
         difficult do fix.
         - new file tasks.json (win)
         - new file with envvars .Canoa\..\..\prepareEnviron.bat
-        - new class RecipientsListStr
+        - new class RecipientsList
         - new class RecipientsDic
         - del settings.json
         - new envvar EMAIL_REPORT_CC
@@ -751,7 +757,7 @@
     - new file: app_constants.py (finally a good solution)
     - new envvar EMAIL_REPORT_CC  (to hide emails)
     - envvars went to launch.json file (remove from Windows' envvars)
-    - create class RecipientsListDic & type RecipientsListStr
+    - create class RecipientsListDic & type RecipientsList
     - 12 minor fixes
 
 -- For Linux

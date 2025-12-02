@@ -36,8 +36,8 @@ def _send_email(
     Sends an email using the Flask-Mail SMTP service.
 
     Args:
-        send_to_or_dic: (RecipientsListStr or RecipientsDic): The recipient information.
-            If a RecipientsListStr is used, it's assumed to be the "to" recipient.
+        send_to_or_dic: (RecipientsList or RecipientsDic): The recipient information.
+            If a RecipientsList is used, it's assumed to be the "to" recipient.
         texts_or_section: (dict or str)
             if str, is an entry of .ui_texts_helper.get_section that returns a dict
             if Dict[str, str], it is used directly.

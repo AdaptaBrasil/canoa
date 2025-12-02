@@ -16,9 +16,9 @@
 
 // https://www.ag-grid.com/javascript-data-grid/column-definitions/
 // == Ag Grid
-// rowSelection: { type: 'singleRow' }
 const gridOptions = {
-    rowSelection: 'single'
+    // rowSelection: { mode: 'singleRow', checkboxes: false },
+    rowSelection: 'single',
     , suppressRowDeselection: true
     , onGridReady: (params) => {
         const firstRow = params.api.getDisplayedRowAtIndex(cargo[cargoKeys.row_index]);

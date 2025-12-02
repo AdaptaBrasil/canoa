@@ -58,9 +58,8 @@ if sidekick.config.APP_DISPLAY_DEBUG_MSG:
 
 # Tell everybody how quick we are
 elapsed = (time.perf_counter() - started) * 1000
-sidekick.display.info(
-    f"{APP_NAME} version {APP_VERSION} is now ready for the journey. It took {elapsed:,.0f} ms to create and initialize it."
-)
+sidekick.display.info(f"{APP_NAME} version {APP_VERSION} is now ready for the journey.")
+sidekick.display.debug(f"It took {elapsed:,.0f} ms to create and initialize it.")
 
 # -------------------------------------------
 # (i)

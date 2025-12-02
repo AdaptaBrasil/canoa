@@ -21,7 +21,7 @@ from carranca import global_sqlalchemy_scoped_session
 from ...models.private import MgmtEmailSep
 from ...common.UIDBTexts import UIDBTexts
 from ...helpers.types_helper import SepMgmtReturn, OptStr
-from ...helpers.email_helper import RecipientsDic, RecipientsListStr, send_email
+from ...helpers.email_helper import RecipientsDic, RecipientsList, send_email
 from ...common.app_context_vars import sidekick
 
 from ...common.app_error_assistant import proper_user_exception
@@ -46,7 +46,7 @@ def mgmt_notify(batch_code: str, ui_db_texts: UIDBTexts, task_code: int) -> SepM
             def _send_email(content_key: str, email: str, to_user: str, sep: str) -> OptStr:
                 msg_error = ""  # maybe is a second try to send email, so clear it
                 try:
-                    recipients = RecipientsDic(to=RecipientsListStr(email, to_user))
+                    recipients = RecipientsDic(to=RecipientsList(email, to_user))
                     # Prezado {0},<br><br>A partir desta data, o Setor Estratégico '{1}' ...
                     content = ui_db_texts.format(content_key, to_user, sep)
                     subject = ui_db_texts["emailSubject"]

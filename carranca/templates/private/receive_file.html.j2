@@ -72,7 +72,7 @@ mgd
         option.textContent = text;
         select.appendChild(option);
     }
-    seps.forEach(sep => add_item(sep.id, sep.fullname));
+    seps.forEach(sep => add_item(sep.code, sep.fullname));
     select.selectedIndex = 0;
     select.addEventListener('change', () => { icon.src = seps[select.selectedIndex].icon_url; });
 </script>

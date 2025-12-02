@@ -18,7 +18,7 @@ from typing import Callable, Optional, Type
 from base64 import b64encode
 
 from .py_helper import is_str_none_or_empty
-from .email_helper import RecipientsDic, RecipientsListStr, mime_types
+from .email_helper import RecipientsDic, RecipientsList, mime_types
 from .ui_db_texts_helper import get_section
 
 # https://docs.sendgrid.com/pt-br/for-developers/sending-email/api-getting-started
@@ -42,7 +42,7 @@ from .ui_db_texts_helper import get_section
 
 
 def _send_email(
-    send_to_or_dic: RecipientsListStr | RecipientsDic,
+    send_to_or_dic: RecipientsList | RecipientsDic,
     texts_or_section: dict | str,
     body_params: Optional[dict] = None,
     file_to_send_full_name: Optional[str] = None,
@@ -62,8 +62,8 @@ def _send_email(
           file type (pdf, json, xlsx, txt, csv), please inform it in `file_to_send_type`
 
     Args:
-        send_to_or_dic: (RecipientsListStr or RecipientsDic): The recipient information.
-            If a RecipientsListStr is used, it's assumed to be the "to" recipient.
+        send_to_or_dic: (RecipientsList or RecipientsDic): The recipient information.
+            If a RecipientsList is used, it's assumed to be the "to" recipient.
         texts_or_section: (dict or str)
             if str, is an entry of .ui_texts_helper.get_section that returns a dict
             if Dict[str, str], it is used directly.
@@ -109,12 +109,12 @@ def _send_email(
         # Get a RecipientsDic from `send_to_or_dic` param
         task = "getting recipients"
         recipients: RecipientsDic = None
-        if isinstance(send_to_or_dic, RecipientsListStr):  # RecipientsListStr
+        if isinstance(send_to_or_dic, RecipientsList):  # RecipientsList
             recipients = RecipientsDic(to=send_to_or_dic.as_str)
         elif isinstance(send_to_or_dic, RecipientsDic):
             recipients = send_to_or_dic
         else:
-            error = f"Unknown `send_to_or_dic` param's datatype {type(recipients)}, expected is [{RecipientsDic.__name__}|{RecipientsListStr.__name__}]. Cannot send email."
+            error = f"Unknown `send_to_or_dic` param's datatype {type(recipients)}, expected is [{RecipientsDic.__name__}|{RecipientsList.__name__}]. Cannot send email."
             raise ValueError(error)
 
         # Attachment type
@@ -166,7 +166,7 @@ def _send_email(
 
         # Add recipients (generic way)
         def _addRecipients(
-            recipientsStr: RecipientsListStr,
+            recipientsStr: RecipientsList,
             fAdd: Callable[[str, str], None],
             recipient_class: Type,
         ) -> int:

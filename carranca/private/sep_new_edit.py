@@ -221,7 +221,6 @@ def do_sep_edit(data: str) -> str:
                 sep_row.visible = True
                 sep_row.id_schema = id_schema
                 sep_row.ins_by = app_user.id
-                sep_row.ins_at = func.now()
             else:
                 icon_old_file_name: str = sep_row.icon_file_name
                 sep_row.edt_by = app_user.id

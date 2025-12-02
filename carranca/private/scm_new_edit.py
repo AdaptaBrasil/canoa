@@ -113,7 +113,6 @@ def do_scm_edit(data: str) -> str:
 
             if is_insert:
                 scm_row.ins_by = app_user.id
-                scm_row.ins_at = func.now()
                 task_code += 1
                 return _save_and_go()
             elif form_modified:

@@ -9,7 +9,7 @@ mgd 2025.10.29 -- 11.08
 
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.jinja_helper import process_template
-from ..helpers.email_helper import RecipientsDic, RecipientsListStr, send_email
+from ..helpers.email_helper import RecipientsDic, RecipientsList, send_email
 from ..helpers.route_helper import get_private_response_data, init_response_vars
 from ..common.app_context_vars import sidekick
 from ..common.app_error_assistant import ModuleErrorCode
@@ -23,7 +23,7 @@ def confirm_email(email: str, name: str = "") -> str:
     try:
         tmpl_rfn, _, db_texts = get_private_response_data("ConfirmEmail")
         task_code += 1
-        recipients = RecipientsDic(RecipientsListStr(email, name))
+        recipients = RecipientsDic(RecipientsList(email, name))
         task_code += 1
         success = send_email(recipients, "confirmEmail", {"user": sidekick.user.username})
         task_code += 1

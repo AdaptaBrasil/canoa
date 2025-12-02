@@ -67,7 +67,7 @@ def download_rec() -> Response:
         else:
             task_code += 3  # 5
             no_sep = ui_db_texts["itemNone"]
-            db_records, download_file_name, report_ext = fetch_record_s(no_sep, rec_id, IGNORE_USER)
+            db_records, download_file_name, uploaded_name, report_ext = fetch_record_s(no_sep, rec_id, IGNORE_USER)
             if len(db_records) != 1:
                 msg = add_msg_error("noRecord", ui_db_texts)
                 _raise(msg, HTTPStatus.NOT_FOUND)
@@ -75,9 +75,10 @@ def download_rec() -> Response:
             if rec_type == DNLD_R:
                 # This is a Report
                 download_file_name = change_file_ext(download_file_name, report_ext)
+                file_name = change_file_ext(file_name, report_ext)
 
             if path.isfile(download_file_name):
-                file_response = send_file(download_file_name)
+                file_response = send_file(download_file_name, as_attachment=True, download_name=uploaded_name)
                 http_status_code = HTTPStatus.OK
             else:  # deleted just now :-(
                 msg = f"{add_msg_error("fileNotFound", ui_db_texts)} {_get_receipt(db_records[0])}"

@@ -53,13 +53,11 @@ def init_grid(for_user: int) -> JinjaTemplate:
                 )
                 for user in users
             ]
-            users_list.insert(
-                0, ("", ui_db_texts[("noneUser" if len(users_list) == 0 else "selectUser")], True)
-            )
+            users_list.insert(0, ("", ui_db_texts[("noneUser" if len(users_list) == 0 else "selectUser")], True))
             task_code += 1  # 6
-            ui_db_texts[UITextsKeys.Form.title] = ui_db_texts[
-                UITextsKeys.Form.title + "Power"
-            ].format(request_user.user_name)
+            ui_db_texts[UITextsKeys.Form.title] = ui_db_texts[UITextsKeys.Form.title + "Power"].format(
+                request_user.user_name
+            )
             user_id = request_user.user_id
         else:  # ignore `for_user`
             task_code += 4  # 6
@@ -68,7 +66,7 @@ def init_grid(for_user: int) -> JinjaTemplate:
 
         # TODO check empty received_files
         task_code += 1  # 7
-        file_recs, _, _ = fetch_record_s(ui_db_texts["itemNone"], ALL_USER_RECS, user_id)
+        file_recs, _, _, _ = fetch_record_s(ui_db_texts["itemNone"], ALL_USER_RECS, user_id)
         col_names = file_recs[0].keys() if file_recs else []
         task_code += 1  # 8
         js_ui_dict = js_ui_dictionary(ui_db_texts["colMetaInfo"], col_names, task_code)

@@ -196,6 +196,9 @@ class Display:
         print(f"{start_text}{start_color}{icon}{msg}{end_color}")
         self.echo(kind, f"{elapsed}{icon} {msg}")
 
+    def type(self, kind: Kind, msg: str, prompt: str = "", icon_output: bool | None = None) -> None:
+        self.print(kind, msg, prompt, icon_output)
+
     def simple(self, msg: str, prompt: str = None, icon_output: bool = None) -> None:
         self.print(Display.Kind.SIMPLE, msg, prompt, icon_output)
 

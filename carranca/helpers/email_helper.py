@@ -40,7 +40,7 @@ class EmailProvider(Enum):
     SMTP = "SMTP"
 
 
-class RecipientsListStr:
+class RecipientsList:
     """
     email_or_recipients_list_items:
         email:
@@ -50,10 +50,10 @@ class RecipientsListStr:
 
     """
 
-    def __init__(self, email_or_recipients_list_items: str, name: str = None):
+    def __init__(self, email_or_recipients_list_items: str, name: str = ""):
         # TODO check if value has, at least, one e@mail.c
         param = ""
-        if name is None:
+        if not name:
             items = email_or_recipients_list_items
             param = items
         else:
@@ -75,17 +75,17 @@ class RecipientsListStr:
 
 class RecipientsDic:
     """
-    Recipients to, cc, bcc as RecipientsListStr
+    Recipients to, cc, bcc as RecipientsList
     """
 
-    def __init__(self, to: RecipientsListStr = None, cc: RecipientsListStr = None, bcc: RecipientsListStr = None):
-        def _set(rls: Optional[RecipientsListStr | str]):
-            if isinstance(rls, RecipientsListStr):
+    def __init__(self, to: RecipientsList | str = "", cc: RecipientsList | str = "", bcc: RecipientsList | str = ""):
+        def _set(rls: RecipientsList | str):
+            if isinstance(rls, RecipientsList):
                 return rls
             elif isinstance(rls, str):
-                return RecipientsListStr(rls)
+                return RecipientsList(rls)
             else:
-                return RecipientsListStr("")
+                return RecipientsList("")
 
         self.to = _set(to)
         self.cc = _set(cc)
@@ -93,7 +93,7 @@ class RecipientsDic:
 
 
 def send_email(
-    send_to_or_dic: RecipientsListStr | RecipientsDic,
+    send_to_or_dic: RecipientsList | RecipientsDic,
     texts_or_section: dict | str,
     body_params: Optional[dict] = None,
     file_to_send_full_name: Optional[str] = None,

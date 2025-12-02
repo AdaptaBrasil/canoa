@@ -11,6 +11,7 @@ mgd 2024-08-01
 # cSpell:ignore puremagic surl googleapiclient gserviceaccount chunksize
 
 import requests
+from carranca.helpers.types_helper import UsualDict
 import puremagic
 import urllib.parse
 from os import path, remove, rename
@@ -105,7 +106,7 @@ def download_public_google_file(
     file_name_format: str = "",
     del_file_if_exists: bool = True,
     debug: bool = False,
-) -> tuple[int, str]:
+) -> tuple[int, str, UsualDict]:
     """Downloads a public Google file.
     Args:
         url_or_file_id: The URL or file ID of the Google file.
@@ -230,7 +231,7 @@ def download_public_google_file(
     except Exception as e:
         msg_error = f"An error occurred while downloading the file. Task code {task_code}, message '{e}'.)"
         sidekick.display.error(msg_error)
-    return task_code, gdFile_name, gdFile_md
+    return task_code, gdFile_name,  gdFile_md
 
 
 # if __name__ == "__main__":

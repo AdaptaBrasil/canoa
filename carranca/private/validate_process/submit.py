@@ -263,7 +263,7 @@ def submit(cargo: Cargo) -> Cargo:
         )
     else:
         sidekick.display.error(
-            f"{proc}There was a problem submitting the files to '{_cfg.dv_app.ui_name}'. Error code [{error_code}] and Exit code [{exit_code}]."
+            f"{proc}There was a problem submitting the files to '{_cfg.dv_app.ui_name}'. Error code [{error_code}] and exit code [{exit_code}]."
         )
 
     return cargo.update(

@@ -18,7 +18,7 @@ from typing import Dict, List
 from .common.Sidekick import Sidekick
 
 # App Global variables
-global_sidekick: Sidekick | None = None
+global_sidekick: Sidekick = None
 global_login_manager: LoginManager = None
 global_sqlalchemy_scoped_session: scoped_session = None
 global_ui_texts_cache: Dict[str, str] = {}
@@ -284,7 +284,6 @@ def _create_app_and_log_file(app_name: str):
 # ============================================================================ #
 # App + helpers
 def create_app():
-    import json
     from .common.igniter import ignite_app
     from .helpers.email_helper import EmailProvider
     from .common.app_constants import APP_NAME, APP_VERSION
@@ -299,7 +298,7 @@ def create_app():
     # === Check if all mandatory information is ready === #
     global_sidekick, APP_DB_VERSION, display_mute_after_init = ignite_app(APP_NAME, started)
     _info(f"[{global_sidekick}] instance is now ready to assist you.")
-    gcfg = global_sidekick.config  # shorcut
+    gcfg = global_sidekick.config  # shortcut
 
     # == 2/3 Global Scoped SQLAlchemy Session
     global global_sqlalchemy_scoped_session
@@ -333,10 +332,10 @@ def create_app():
     _info("The blueprint routes were collected and registered within the app.")
 
     # -- Jinja2
-    _register_jinja(app, gcfg.DEBUG_TEMPLATES, APP_NAME, APP_VERSION)
+    _register_jinja(app, bool(gcfg.DEBUG_TEMPLATES), APP_NAME, APP_VERSION)
     sd = f"(with debug_templates as {gcfg.DEBUG_TEMPLATES})"
-    _info(f"All Jinja functions of this app have been successfully attached.")
-    global_sidekick.display.debug("attached to 'jinja_env.globals' {sd}.")
+    _info("All Jinja functions of this app have been successfully attached.")
+    global_sidekick.display.debug(f"..attached to 'jinja_env.globals' {sd}.")
 
     # config sidekick.display
     if display_mute_after_init:

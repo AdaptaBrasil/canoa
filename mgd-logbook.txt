@@ -68,6 +68,15 @@
     - todo:
         Standardize grid-body.html.j2 height
         user_data_files. LOG
+        Form do resultado do Submit sem icon_refresh
+        O nome do arquivo baixado não volto au normal
+        DNLD_R -> DNLD_RReport
+        make log file by user
+
+
+2025-12-03 minor fixes  vβ 5.18
+    - fix download PDF file (missing variable)
+    - Len miniamo do Nome do Esquema é 2 (requisição Pedro 1/12)
 
 
 2025-12-02 Undo upgrade ag-grid vβ 5.17

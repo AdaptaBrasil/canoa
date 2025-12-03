@@ -36,9 +36,7 @@ from ..common.app_context_vars import sidekick
 
 # Private form
 class ReceiveFileForm(FlaskForm):
-    schema_sep = SelectField(
-        "", validators=[DataRequired()], render_kw={"class": "form-select"}
-    )
+    schema_sep = SelectField("", validators=[DataRequired()], render_kw={"class": "form-select"})
     uploadfile = FileField("", render_kw={"class": "form-control", "accept": ".zip"})
     urlname = StringField("", validators=[URL()], render_kw={"class": "form-control"})
 
@@ -197,7 +195,7 @@ class ScmEdit(FlaskForm):
         "",
         validators=[
             InputRequired(),
-            Length(min=5, max=140),
+            Length(min=2, max=140),
         ],  # TODO sidekick.config.DB_len_val_for_sep
         render_kw={
             "class": "form-control",

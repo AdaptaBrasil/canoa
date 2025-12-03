@@ -161,8 +161,9 @@ def submit(cargo: Cargo) -> Cargo:
                 f"{proc}Account doesn't have the necessary permissions to execute '{batch_full_name}'."
             )
 
-        result_ext = _cfg.output_file.ext  # ⚠️ keep always the same case (all lower)
+        result_ext = _cfg.output_file.ext.lower()  # ⚠️ keep always the same case (all lower)
         final_report_file_name = f"{_cfg.output_file.name}{result_ext}"
+        sidekick.display.info(f"{proc}Preparing to submit file '{final_report_file_name}'.")
         final_report_full_name = path.join(_path_read, final_report_file_name)
         try:
             task_code = 5  # 5

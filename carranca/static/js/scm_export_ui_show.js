@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // == Ag Grid
 const gridOptions = {
     // rowSelection: { mode: 'singleRow', checkboxes: false },
-    rowSelection: 'single',
+   rowSelection: 'single',
    onGridReady: (params) => {
       const firstRow = cargo ? params.api.getDisplayedRowAtIndex(cargo[cargoKeys.row_index]) : null;
       setTimeout(() => { firstRow?.setSelected(true); setActiveRow(firstRow, firstRow?.rowIndex) }, 20);

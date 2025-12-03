@@ -18,7 +18,7 @@
 // == Ag Grid
 const gridOptions = {
     // rowSelection: { mode: 'singleRow', checkboxes: false },
-    rowSelection: 'single',
+    rowSelection: 'single'
     , suppressRowDeselection: true
     , onGridReady: (params) => {
         const firstRow = params.api.getDisplayedRowAtIndex(cargo[cargoKeys.row_index]);

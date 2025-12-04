@@ -161,7 +161,7 @@ class ScmEdit(FlaskForm):
         "",
         validators=[
             InputRequired(),
-            Length(min=5, max=140),
+            Length(min=2, max=140),
         ],  # TODO sidekick.config.DB_len_val_for_sep
         render_kw={
             "class": "form-control",

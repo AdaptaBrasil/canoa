@@ -35,6 +35,11 @@ screen -ls
 screen -r canoa
 ```
 
+## Attach to an attached (by someone else: Detach-Reattach) screen session
+```
+screen -dr 123456.canoa
+```
+
 ## Kill a screen session
 Outside screen:
 ```

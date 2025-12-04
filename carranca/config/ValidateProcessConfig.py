@@ -64,9 +64,9 @@ class ValidateProcessConfig:
         _debug = ValidateProcessConfig._debug_process  # hard coded debug flag
         self.debug_process = debug if _debug is None else bool(_debug)
         self.stdout_result_pattern = r"<\{\"data_validate\":.*?}>"
-        if _cc := get_envvar("EMAIL_REPORT_CC"):
-            # reports's email cc recipients
-            self.cc_recipients = RecipientsDic(cc=_cc)
+        # reports's email cc recipients
+        if cc := get_envvar("EMAIL_REPORT_CC"):
+            self.report_email_cc = cc
 
 
 # eof

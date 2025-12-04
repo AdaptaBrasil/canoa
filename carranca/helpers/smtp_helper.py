@@ -11,8 +11,9 @@ from typing import Optional
 from flask_mail import Message
 
 from .py_helper import is_str_none_or_empty
-from .email_helper import RecipientsDic
+from .email_helper import RecipientsDic, RecipientsList
 from .ui_db_texts_helper import get_section
+from ..common.app_constants import APP_NAME
 from ..common.app_context_vars import sidekick
 from ..common.app_error_assistant import ModuleErrorCode
 
@@ -87,13 +88,13 @@ def _send_email(
                         sidekick.display.error(f"Missing placeholder {e} in params.")
 
         task_code += 1
+        sender = RecipientsList(sidekick.config.EMAIL_ORIGINATOR, APP_NAME).parse("")
         msg = Message(
-            subject=db_texts.get("subject", "Subject"),
-            sender=sidekick.config.EMAIL_ORIGINATOR,  # Uses the configured MAIL_USERNAME as sender
-            # Flask-Mail accepts lists of emails directly for recipients
-            recipients=[recipients.to.parse(item)[0] for item in recipients.to.list()],
-            cc=[recipients.cc.parse(item)[0] for item in recipients.cc.list()] if recipients.cc.list() else None,
-            bcc=[recipients.bcc.parse(item)[0] for item in recipients.bcc.list()] if recipients.bcc.list() else None,
+            subject=db_texts.get("subject", APP_NAME),
+            sender=sender,
+            recipients=[recipients.to.parse(item) for item in recipients.to.list()],
+            cc=[recipients.cc.parse(item) for item in recipients.cc.list()] if recipients.cc.list() else None,
+            bcc=[recipients.bcc.parse(item) for item in recipients.bcc.list()] if recipients.bcc.list() else None,
             html=db_texts["content"],  # Uses the 'content' as the HTML body
             # Note: If you need a plain text body, you'd add: body="Plain text fallback"
         )
@@ -117,7 +118,6 @@ def _send_email(
 
         # Get the initialized Mail object from the app context
         mail_ext = sidekick.app.extensions["mail"]
-
         mail_ext.send(msg)
 
     except Exception as e:

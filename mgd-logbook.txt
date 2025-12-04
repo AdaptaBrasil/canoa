@@ -74,6 +74,12 @@
         make log file by user
 
 
+2025-12-03 Send email with cc vβ 5.18a
+    - Send email with copies to
+      ValidateProcessConfig.cc
+      after validation process
+
+
 2025-12-03 minor fixes  vβ 5.18
     - fix download PDF file (missing variable)
     - Len miniamo do Nome do Esquema é 2 (requisição Pedro 1/12)

@@ -254,7 +254,7 @@ def clean_text(text: str, not_allowed: str = ""):
     return check_3
 
 
-def strip_and_ignore_empty(s: str, sep: Optional[str] = ",", max_split: Optional[int] = -1) -> list[str]:
+def strip_and_ignore_empty(s: str, sep: str = ",", max_split: int = -1) -> list[str]:
     """
     Returns a list of the striped items created by splitting s and ignoring empty items
     """

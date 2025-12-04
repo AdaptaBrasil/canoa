@@ -66,8 +66,10 @@ class RecipientsList:
         return [] if is_str_none_or_empty(self.as_str) else strip_and_ignore_empty(self.as_str, ";")
 
     def parse(self, item: str):
-        email, name = (item + ", ").split(",")[:2]
-        return as_str_strip(email), as_str_strip(name)
+        email_name = item if item else self.as_str
+        email, name = (email_name + ", ").split(",")[:2]
+        return f"{as_str_strip(name)} <{as_str_strip(email)}>"
+        # return as_str_strip(email), as_str_strip(name)
 
     def __str__(self):
         return str(self.as_str)

@@ -32,6 +32,7 @@ def confirm_email(email: str, name: str = "") -> str:
         else:
             add_msg_error("emailSentError", db_texts)
 
+        task_code += 1
         jHtml = process_template(tmpl_rfn, **db_texts.dict())
 
     except Exception as e:

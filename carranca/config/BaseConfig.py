@@ -62,10 +62,17 @@ class BaseConfig(Config):
 
     APP_NAME = APP_NAME
     APP_VERSION = APP_VERSION
+    APP_ROOT = ""  #  f"/{APP_NAME.lower()}"
 
     """ Canoa Configurations
         --------------------------
     """
+    # This is used for generating URLs outside the
+    # context of a request
+    APPLICATION_ROOT = APP_ROOT
+    SESSION_COOKIE_PATH = APP_ROOT
+    REMEMBER_COOKIE_PATH = APP_ROOT
+
     # This is the final debug state of the app.
     #  See _get_debug_2 & Fuse
     APP_DEBUGGING: TrueInDebug = None

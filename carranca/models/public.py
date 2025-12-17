@@ -10,6 +10,7 @@ mgd
 
 from carranca import global_sqlalchemy_scoped_session, global_login_manager
 
+from flask import Request
 from typing import Optional, Any, List
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import Session
@@ -88,7 +89,7 @@ class User(SQLABaseTable, UserMixin):
         Select a user by a unique filter
         """
 
-        def _get_data(db_session: Session) -> "User":
+        def _get_data(db_session: Session):
             user = db_session.query(User).options(joinedload(User.role)).filter_by(**filter).first()
             return user
 
@@ -132,12 +133,12 @@ class Role(SQLABaseTable):
     users = relationship("User", back_populates="role")
 
 
-def get_user_role_abbr(user_id: int, user_role_id: int) -> RolesAbbr:
+def get_user_role_abbr(user_id: int, user_role_id: int) -> RolesAbbr | None:
     """
     Retrieves and checks a user role against enum
     """
 
-    abbr = None
+    abbr: RolesAbbr | None = None
     if not user_role_id is None:
         with global_sqlalchemy_scoped_session() as db_session:
             try:
@@ -181,7 +182,7 @@ def persist_user(record: any, task_code: int = 1) -> None:
         try:
             task_code += 1
             if db_session.object_session(record) is not None:
-                sidekick.debug("User record needs an expunge.")
+                sidekick.display.debug("User record needs an expunge.")
                 task_code += 2
                 db_session.expunge(record)
             task_code = 3
@@ -198,15 +199,33 @@ def persist_user(record: any, task_code: int = 1) -> None:
 
 
 @global_login_manager.user_loader
-def user_loader(id):
-    # current_user #
-    user = User.get_where(id=id)
+def user_loader(id: str) -> UserMixin | None:
+    """
+    Flask-Login user_loader callback.
+
+    Parameters
+    ----------
+    user_id : str
+        The user ID stored in the session (always passed as a string).
+        (it can be e-mail or username or PK id, depending on your implementation)
+
+    Returns
+    -------
+    UserMixin | None
+        The user object corresponding to the given ID, or None if not found.
+    """
+    try:
+        user_id = int(id)  # convert to int if your DB uses Integer PKs
+    except ValueError:
+        return None
+
+    user = User.get_where(id=user_id)
     return user
 
 
 # TODO, seems that this make a user name before log process has finished
 @global_login_manager.request_loader
-def request_loader(request):
+def request_loader(request: Request) -> UserMixin | None:
     username = "" if len(request.form) == 0 else request.form.get("username", "")
     user = None if is_str_none_or_empty(username) else User.get_where(username_lower=username.lower())
     return user

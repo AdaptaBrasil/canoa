@@ -23,12 +23,10 @@ from ..models.private_1.ExportGrid import ExportGrid
 
 def scm_export_ui_show(uiact_rsp: UiActResponse) -> JinjaTemplate:
 
-    task_code = ModuleErrorCode.SCM_EXPORT_UI_SHOW
-    jHtml, _, ui_db_texts = init_response_vars()
-
+    jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SCM_EXPORT_UI_SHOW)
     try:
         task_code += 1
-        tmpl_rfn, _, ui_db_texts = get_private_response_data("scmExportUiShow")
+        tmpl_ffn, _, ui_db_texts = get_private_response_data("scmExportUiShow")
 
         task_code += 1
         scm_cols = ["name", "color"]
@@ -48,7 +46,7 @@ def scm_export_ui_show(uiact_rsp: UiActResponse) -> JinjaTemplate:
 
         task_code += 1
         jHtml = process_template(
-            tmpl_rfn,
+            tmpl_ffn,
             schemas=schema_data.schemas,
             grid_data=grid_data.to_list(),
             empty_icon=empty_icon,

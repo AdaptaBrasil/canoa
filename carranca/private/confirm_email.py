@@ -18,25 +18,24 @@ from ..helpers.ui_db_texts_helper import add_msg_success, add_msg_error
 
 def confirm_email(email: str, name: str = "") -> str:
 
-    task_code = ModuleErrorCode.CONFIRM_EMAIL
-    jHtml, _, db_texts = init_response_vars()
+    jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.CONFIRM_EMAIL)
     try:
-        tmpl_rfn, _, db_texts = get_private_response_data("ConfirmEmail")
+        tmpl_ffn, _, ui_db_texts = get_private_response_data("ConfirmEmail")
         task_code += 1
         recipients = RecipientsDic(RecipientsList(email, name))
         task_code += 1
         success = send_email(recipients, "confirmEmail", {"user": sidekick.user.username})
         task_code += 1
         if success:
-            add_msg_success("emailSentSuccess", db_texts)
+            add_msg_success("emailSentSuccess", ui_db_texts)
         else:
-            add_msg_error("emailSentError", db_texts)
+            add_msg_error("emailSentError", ui_db_texts)
 
         task_code += 1
-        jHtml = process_template(tmpl_rfn, **db_texts.dict())
+        jHtml = process_template(tmpl_ffn, **ui_db_texts.dict())
 
     except Exception as e:
-        jHtml = get_ups_jHtml("emailSentException", db_texts, task_code, e)
+        jHtml = get_ups_jHtml("emailSentException", ui_db_texts, task_code, e)
 
     return jHtml
 

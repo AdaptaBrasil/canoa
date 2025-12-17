@@ -36,14 +36,13 @@ def do_login():
 
     from ..wtforms import LoginForm
 
-    task_code = ModuleErrorCode.ACCESS_CONTROL_LOGIN.value
-    jHtml, is_get, ui_db_texts = init_response_vars()
+    jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.ACCESS_CONTROL_LOGIN)
+    fform = LoginForm()
 
     try:
         task_code += 1  # 1
-        form = LoginForm(request.form)
         task_code += 1  # 2
-        tmpl_rfn, is_get, ui_db_texts = get_account_response_data("login")
+        tmpl_ffn, is_get, ui_db_texts = get_account_response_data("login")
         task_code += 1  # 3
         if is_get and is_someone_logged():
             internal_logout()
@@ -105,8 +104,8 @@ def do_login():
                 return redirect_to(home_route())
 
         jHtml = process_template(
-            tmpl_rfn,
-            form=form,
+            tmpl_ffn,
+            form=fform,
             **ui_db_texts.dict(),
         )
     except Exception as e:

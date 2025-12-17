@@ -16,16 +16,6 @@ from typing import List
 from platform import uname
 from ..helpers.py_helper import is_str_none_or_empty, OS_IS_WINDOWS
 
-# Alternative
-# def __init__(self, **kwargs):
-#     self.prompt = kwargs.get('prompt', "")
-#     self.mute = kwargs.get('mute_all', False)
-#     self.debug_output = kwargs.get('debug_output', False)
-#     self.icon_output = kwargs.get('icon_output', True)
-#     self.colors = kwargs.get('colors', [])
-#     self.icons = kwargs.get('icons', [])
-#     self.with_color = kwargs.get('with_color', None)
-
 
 class Display:
     class Default:
@@ -35,22 +25,22 @@ class Display:
             mute_all=False,
             debug_output=False,
             icon_output=True,
-            colors=None,
-            icons=None,
+            colors=[],
+            icons=[],
             with_color=None,
         ):
             self.prompt = prompt
             self.mute = mute_all
             self.debug_output = debug_output
             self.icon_output = icon_output
-            self.colors = colors
-            self.icons = icons
+            self.colors: List[str] = colors
+            self.icons: List[str] = icons
             self.with_color = with_color
 
     class Kind(Enum):
         PROMPT = 0
         ELAPSED = 1
-        SIMPLE = 2
+        USER = 2
         INFO = 3
         WARN = 4
         ERROR = 5
@@ -60,10 +50,11 @@ class Display:
     #  EXCEPT = 7 # todo, call
 
     # https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters
-    def code(color_code: int):
+    @staticmethod
+    def code(color_code: int | None) -> str:
         #       reset                 return ESC only        valid Set foreground color code
-        if not ((color_code == 0) or (color_code is None) or (color_code in range(30, 37))):
-            ValueError("Invalid color code, valid values are in [30, 37].")
+        if not (color_code in (None, 0) or (color_code in range(30, 37))):
+            ValueError("Invalid color code, valid values are in [30, 37] | 0 | None.")
 
         return "\033[" + ("" if color_code is None else f"{color_code}m")
 
@@ -71,16 +62,6 @@ class Display:
     reset_color = code(0)
     ESC = code(None)
     elapsed_format = [f"{{:0{i}}}" for i in range(1, 6)]
-    with_color = True
-
-    try:
-        # https://en.wikipedia.org/wiki/ANSI_escape_code#DOS_and_Windows
-        # Since 2016! Windows 10 version 1511 -> Windows has colors
-        # Sommelier > Windows v 6.2.9200
-        with_color = (int(uname().version.split(".")[0]) > 9) if OS_IS_WINDOWS else True
-    except:
-        with_color = not OS_IS_WINDOWS
-
     default = Default(
         # keep same order as Display.__init__
         "",
@@ -91,7 +72,7 @@ class Display:
             # https://en.wikipedia.org/wiki/ANSI_escape_code#3-bit_and_4-bit
             code(36),  # Prompt gray
             code(90),  # elapsed 999:ss:mm
-            no_color,  # Simple
+            no_color,  # User Color
             code(32),  # Info green
             code(33),  # Warn yellow
             code(31),  # Error red
@@ -99,9 +80,10 @@ class Display:
             code(91),  # Bright Red
         ],
         [
+            # Icons
             "",  # Prompt
             "",  # elapsed format
-            "",  # Simple
+            "[☺] ",  # User Color
             "[i] ",  # Info
             "[▲] ",  # Warn
             "[!] ",  # Error
@@ -111,24 +93,36 @@ class Display:
         None,  # with_color (bool, use color)
     )
 
-    def debug_output() -> bool:
-        return Display.default.debug_output
+    # def debug_output() -> bool:
+    #     return Display.default.debug_output
 
-    def icon_output() -> bool:
-        return Display.default.icon_output
+    # def icon_output() -> bool:
+    #     return Display.default.icon_output
 
     def __init__(
         self,
         # keep same order as Display.Default
-        prompt: str = None,
+        prompt: str | None = None,
         mute_all: bool = False,
-        debug_output: bool = None,
-        icon_output: bool = None,
-        elapsed_from: float = None,
-        colors: List[str] = None,
-        icons: List[str] = None,
-        with_color: bool = None,
+        debug_output: bool | None = None,
+        icon_output: bool | None = None,
+        elapsed_from: float | None = None,
+        colors: List[str] | None = None,
+        icons: List[str] | None = None,
+        with_color: bool | None = None,
     ):
+        from ..helpers.py_helper import OS_IS_WINDOWS
+
+        _with_color = True
+        try:
+            # https://en.wikipedia.org/wiki/ANSI_escape_code#DOS_and_Windows
+            # Since 2016! Windows 10 version 1511 -> Windows has colors
+            # Sommelier > Windows v 6.2.9200
+
+            _with_color = (int(uname().version.split(".")[0]) > 9) if OS_IS_WINDOWS else True
+        except:
+            _with_color = not OS_IS_WINDOWS
+
         _d = Display.default  # value is None => use default
         self.echo = lambda kind, text: None  # Default no-op function
 
@@ -140,7 +134,7 @@ class Display:
         self.elapsed_from = elapsed_from if self.elapsed_output else time.perf_counter()
         self.colors = _d.colors if colors is None else colors
         self.icons = _d.icons if icons is None else icons
-        self.with_color = Display.with_color if with_color is None else bool(with_color)
+        self.with_color = _with_color if with_color is None else bool(with_color)
         k_error = "Parameter '{0}' must be a list of Display.Kind items."
         if colors is not None and not (len(colors) == len(Display.Kind) or len(colors) == 0):
             raise ValueError(k_error.format("colors"))
@@ -151,28 +145,32 @@ class Display:
     def color_for_kind(self, kind: Kind) -> str:
         return self.colors[kind.value] if self.with_color else Display.no_color
 
-    def print(self, kind_or_color: Kind | str, msg: str, prompt: str = None, icon_output: bool = None) -> None:
+    def print(
+        self,
+        kind_or_user_color: Kind | str,
+        msg: str,
+        prompt: str | None = None,
+        icon_output: bool | None = None,
+    ) -> None:
         if self.mute_all:
             return
 
         start_color = Display.no_color
-        is_kind = isinstance(kind_or_color, Display.Kind)
-        kind = kind_or_color if is_kind else Display.Kind.SIMPLE.value
-        if is_str_none_or_empty(msg):
+        is_kind = isinstance(kind_or_user_color, Display.Kind)
+        kind = kind_or_user_color if is_kind else Display.Kind.USER
+        if not msg:
             print(msg)  # perhaps a command
             return
-        elif not (is_kind or (kind_or_color is None) or isinstance(kind_or_color, str)):
+        elif not (is_kind or (kind_or_user_color is None) or isinstance(kind_or_user_color, str)):
             return
-        elif is_kind and (kind_or_color == Display.Kind.DEBUG) and not self.debug_output:
+        elif is_kind and (kind_or_user_color == Display.Kind.DEBUG) and not self.debug_output:
             return
-        elif kind_or_color is None:
+        elif kind_or_user_color is None:
             start_color = Display.no_color
         elif is_kind:
             start_color = self.color_for_kind(kind)
         else:
-            start_color = (
-                Display.no_color if is_str_none_or_empty(kind_or_color) or not self.with_color else kind_or_color
-            )
+            start_color = kind_or_user_color if kind_or_user_color and self.with_color else Display.no_color
 
         # _finalize_color = Display.no_color if se
         def _colorfy(kind: Display.Kind, text: str) -> str:
@@ -183,7 +181,7 @@ class Display:
                 return f"{open_color}{text}{Display.reset_color}"
 
         _prompt = self.prompt if prompt is None else str(prompt)
-        start_text = "" if is_str_none_or_empty(_prompt) else _colorfy(Display.Kind.PROMPT, _prompt)
+        start_text = "" if not _prompt else _colorfy(Display.Kind.PROMPT, _prompt)
         elapsed = self.elapsed()
 
         if self.elapsed_output:
@@ -199,27 +197,27 @@ class Display:
     def type(self, kind: Kind, msg: str, prompt: str = "", icon_output: bool | None = None) -> None:
         self.print(kind, msg, prompt, icon_output)
 
-    def simple(self, msg: str, prompt: str = None, icon_output: bool = None) -> None:
-        self.print(Display.Kind.SIMPLE, msg, prompt, icon_output)
+    def simple(self, msg: str, prompt: str | None = None, icon_output: bool | None = None) -> None:
+        self.print(Display.Kind.USER, msg, prompt, icon_output)
 
-    def info(self, msg: str, prompt: str = None, icon_output: bool = None) -> None:
+    def info(self, msg: str, prompt: str | None = None, icon_output: bool | None = None) -> None:
         self.print(Display.Kind.INFO, msg, prompt, icon_output)
 
-    def warn(self, msg: str, prompt: str = None, icon_output: bool = None) -> None:
+    def warn(self, msg: str, prompt: str | None = None, icon_output: bool | None = None) -> None:
         self.print(Display.Kind.WARN, msg, prompt, icon_output)
 
-    def error(self, msg: str, prompt: str = None, icon_output: bool = None) -> None:
+    def error(self, msg: str, prompt: str | None = None, icon_output: bool | None = None) -> None:
         self.print(Display.Kind.ERROR, msg, prompt, icon_output)
 
-    def debug(self, msg: str, prompt: str = None, icon_output: bool = None) -> None:
+    def debug(self, msg: str, prompt: str | None = None, icon_output: bool | None = None) -> None:
         self.print(Display.Kind.DEBUG, msg, prompt, icon_output)
 
-    def fatal(self, msg: str, prompt: str = None, icon_output: bool = None) -> None:
+    def fatal(self, msg: str, prompt: str | None = None, icon_output: bool | None = None) -> None:
         self.print(Display.Kind.FATAL, msg, prompt, icon_output)
 
     def set_prompt(self, value: str) -> str:
         p = self.prompt
-        self.prompt = "" if is_str_none_or_empty(value) else str(value)
+        self.prompt = str(value) if value else ""
         return p
 
     def set_icon_output(self, value: bool) -> bool:
@@ -227,7 +225,7 @@ class Display:
         self.icon_output = bool(value)
         return b
 
-    def set_elapsed_output(self, value: bool, elapsed_from: float = None) -> bool:
+    def set_elapsed_output(self, value: bool, elapsed_from: float | None = None) -> bool:
         was_active = self.elapsed_output
         self.elapsed_output = bool(value)
         if elapsed_from is not None:
@@ -239,7 +237,7 @@ class Display:
 
         return was_active
 
-    def elapsed(self, elapsed_to: float = None) -> str:
+    def elapsed(self, elapsed_to: float | None = None) -> str:
         if self.elapsed_from is None:
             return ""
 

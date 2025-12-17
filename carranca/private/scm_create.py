@@ -23,17 +23,16 @@ from ..helpers.db_records.DBRecords import ListOfDBRecords
 
 def do_scm_create() -> JinjaTemplate:
 
-    task_code = ModuleErrorCode.SCM_GRID.value
-    tmpl, is_get, ui_texts = init_response_vars()
+    tmpl, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SCM_GRID)
     scm_data: ListOfDBRecords = []
 
     try:
         task_code += 1  # 1
-        tmpl_rfn, is_get, ui_texts = get_private_response_data("scmGrid")
+        tmpl_ffn, is_get, ui_db_texts = get_private_response_data("scmGrid")
 
         task_code += 1  # 3
         col_names = ["id", "name", "color", "visible", "sep_v2t"]
-        js_ui_dict = js_ui_dictionary(ui_texts[js_grid_col_meta_info], col_names, task_code)
+        js_ui_dict = js_ui_dictionary(ui_db_texts[js_grid_col_meta_info], col_names, task_code)
 
         scm_data = []
         if is_get:
@@ -43,17 +42,17 @@ def do_scm_create() -> JinjaTemplate:
             raise AppStumbled("Unexpected route method.")
 
         tmpl = process_template(
-            tmpl_rfn,
+            tmpl_ffn,
             scm_data=scm_data.to_list(),
             cargo_keys=class_to_dict(UiActResponseKeys),
-            **ui_texts,
+            **ui_db_texts.dict(),
             **js_ui_dict,
         )
 
     except Exception as e:
-        msg = add_msg_final("gridException", ui_texts, task_code)
-        _, tmpl_rfn, ui_texts = ups_handler(task_code, msg, e)
-        tmpl = process_template(tmpl_rfn, **ui_texts)
+        msg = add_msg_final("gridException", ui_db_texts, task_code)
+        _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)
+        tmpl = process_template(tmpl_ffn, **ui_db_texts.dict())
 
     return tmpl
 

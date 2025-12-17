@@ -41,8 +41,8 @@ def get_ups_jHtml(
     ui_item_error_key: str, ui_db_texts: UIDBTexts, task_code: int, e: Exception | None = None, *args
 ) -> JinjaGeneratedHtml:
     msg = add_msg_final(ui_item_error_key, ui_db_texts, *args)
-    _, tmpl_rfn, ui_texts = ups_handler(task_code, msg, e)
-    jHTML = process_template(tmpl_rfn, **ui_texts)
+    _, tmpl_ffn, ui_texts = ups_handler(task_code, msg, e)
+    jHTML = process_template(tmpl_ffn, **ui_texts)
     return jHTML
 
 
@@ -59,7 +59,9 @@ def ups_handler(
     def _get_tech_msg():
         tech_msg = getattr(e, "tech_info", "")
         return (
-            tech_msg if tech_msg else local_ui_texts(AuxTexts.section)[AuxTexts.techIntro].format(sidekick.log_filename)
+            tech_msg
+            if tech_msg
+            else local_ui_texts(AuxTexts.section)[AuxTexts.techIntro].format(sidekick.log_filename)
         )
 
     tech_msg = ""
@@ -92,7 +94,9 @@ def ups_handler(
     }
 
     def _should_update(key: str, value: Any) -> bool:
-        return not is_str_none_or_empty(value) and (key not in ui_texts or is_str_none_or_empty(ui_texts.get(key)))
+        return not is_str_none_or_empty(value) and (
+            key not in ui_texts or is_str_none_or_empty(ui_texts.get(key))
+        )
 
     # Add `context_texts` if the key is missing from ui_texts or its value is empty.
     for key, value in context_texts.items():
@@ -105,7 +109,9 @@ def ups_handler(
             ui_texts[key] = value
 
     # set the url for the icon IF a file name exists
-    if (file_name := ui_texts.get(UITextsKeys.Form.icon_file)) and not ui_texts.get(UITextsKeys.Form.icon_url):
+    if (file_name := ui_texts.get(UITextsKeys.Form.icon_file)) and not ui_texts.get(
+        UITextsKeys.Form.icon_url
+    ):
         ui_texts[UITextsKeys.Form.icon_url] = icon_url("icons", file_name)
 
     # before logout

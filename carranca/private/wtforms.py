@@ -25,6 +25,20 @@ from ..common.app_context_vars import sidekick
 # Text here has no relevance, the ui_text table is actually used.
 
 
+class EmptyForm(FlaskForm):
+    """
+    Empty form class used for:
+        Variable initialization of forms
+        CSRF (Cross-Site Request Forgery) protection.
+
+    This form contains no fields and serves only to validate CSRF tokens,
+    ensuring that state-changing requests originate from the application itself
+    and not from external sources.
+    """
+    # This is an empty form for CSRF protection only
+    pass
+
+
 # _ ⚠️ _________________________________________________
 #  Keep "name" and "id" the same string
 #  or don't specified "id"
@@ -32,7 +46,6 @@ from ..common.app_context_vars import sidekick
 #  Because {{ schema_sep.id }} will render the name
 #  But {{ schema_sep.render_kw.id }} will write the id.
 # ________________________________________________________
-
 
 # Private form
 class ReceiveFileForm(FlaskForm):
@@ -71,8 +84,9 @@ class SepEdit(FlaskForm):
         set value to those that will not change throw tha app
         see:
             carranca/private/sep_new_edit.py
-                tmpl_form = SepNew(request.form) if is_new
-                            else SepEdit(request.form)
+                fform = SepNew(request.form) if is_new
+                        else
+                        SepEdit(request.form)
     ------------------------------------------------------------
         like:
           lang, disabled, readonly, required
@@ -150,8 +164,9 @@ class ScmEdit(FlaskForm):
         set value to those that will not change throw tha app
         see:
             carranca/private/sep_new_edit.py
-                tmpl_form = SepNew(request.form) if is_new
-                            else SepEdit(request.form)
+                fform = SepNew(request.form) if is_new
+                        else
+                        SepEdit(request.form)
     ------------------------------------------------------------
         like:
           lang, disabled, readonly, required

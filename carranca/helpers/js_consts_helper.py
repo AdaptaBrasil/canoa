@@ -63,7 +63,15 @@ def js_form_sec_check(value: Optional[str] = None) -> str:
     return msg_error
 
 
-def js_ui_dictionary(col_meta_info_txt: str = "", col_names: List[str] = [], task_code: int = 1) -> JsConstants:
+def js_ui_dictionary(
+    col_meta_info_txt: str = "", col_names: List[str] = [], task_code: int = 1
+) -> JsConstants:
+    """
+    col_meta_info_txt -> json text from table 'ui_items' key= [section]'colMetaInfo'
+       eg-> {"id":"", "name":"Nome", "color":"Cor", "visible":"Visível", "sep_v2t":"SEPs (visível/total)" }
+    col_names -> list of column names that must be present in col_meta_info_txt
+
+    """
 
     js_ui_dict: JsConstants = {}
 

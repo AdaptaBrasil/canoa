@@ -33,12 +33,10 @@ def get_sep_grid() -> JinjaGeneratedHtml:
 
         return sep_usr_rows
 
-    task_code = ModuleErrorCode.SEP_GRID.value
-    jHtml, is_get, ui_db_texts = init_response_vars()
-
+    jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SEP_GRID)
     try:
         task_code += 1  # 1
-        tmpl_rfn, is_get, ui_db_texts = get_private_response_data("sepGrid")
+        tmpl_ffn, is_get, ui_db_texts = get_private_response_data("sepGrid")
 
         task_code += 1  # 2
         if not is_get:
@@ -58,7 +56,7 @@ def get_sep_grid() -> JinjaGeneratedHtml:
 
         task_code += 1  # 6
         jHtml = process_template(
-            tmpl_rfn,
+            tmpl_ffn,
             sep_data=sep_data.to_list(),
             cargo_keys=class_to_dict(UiActResponseKeys),
             **ui_db_texts.dict(),

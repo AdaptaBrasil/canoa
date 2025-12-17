@@ -24,12 +24,10 @@ SepUiOrder: TypeAlias = List[Tuple[int, int]]
 def scm_export_ui_save(uiact_rsp: UiActResponse) -> JinjaTemplate:
     from ..models.private import Sep
 
-    task_code = ModuleErrorCode.SCM_EXPORT_UI_SAVE
-    jHtml, _, ui_db_texts = init_response_vars()
-
+    jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SCM_EXPORT_UI_SAVE)
     try:
         task_code += 1
-        tmpl_rfn, _, ui_db_texts = get_private_response_data("scmExportUiSave")
+        tmpl_ffn, _, ui_db_texts = get_private_response_data("scmExportUiSave")
 
         task_code += 1
         config = ExportProcessConfig()
@@ -59,7 +57,9 @@ def scm_export_ui_save(uiact_rsp: UiActResponse) -> JinjaTemplate:
         add_msg_success("saveSuccess", ui_db_texts)
 
         task_code += 1
-        jHtml = process_template(tmpl_rfn, cargo_keys=class_to_dict(UiActResponseKeys), **ui_db_texts.dict())
+        jHtml = process_template(
+            tmpl_ffn, cargo_keys=class_to_dict(UiActResponseKeys), **ui_db_texts.dict()
+        )
     except Exception as e:
         jHtml = get_ups_jHtml("saveException", ui_db_texts, task_code, e)
 

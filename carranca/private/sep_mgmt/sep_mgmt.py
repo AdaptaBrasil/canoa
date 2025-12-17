@@ -25,7 +25,12 @@ from ...helpers.user_helper import get_batch_code
 from ...helpers.jinja_helper import process_template
 from ...helpers.types_helper import SepMgmtReturn, CargoList
 from ...helpers.route_helper import get_private_response_data, init_response_vars
-from ...helpers.js_consts_helper import js_form_sec_check, js_ui_dictionary, js_form_cargo_id, js_grid_col_meta_info
+from ...helpers.js_consts_helper import (
+    js_form_sec_check,
+    js_ui_dictionary,
+    js_form_cargo_id,
+    js_grid_col_meta_info,
+)
 from ...helpers.ui_db_texts_helper import add_msg_final, add_msg_error, UITextsKeys
 from ...helpers.db_records.DBRecords import DBRecords, ListOfDBRecords
 
@@ -35,15 +40,15 @@ from .keys_values import SepMgmtGridCols, CargoKeys
 
 
 def sep_mgmt() -> str:
-    task_code = ModuleErrorCode.SEP_MGMT.value
-    tmpl, is_get, ui_db_texts = init_response_vars()
 
     sep_data: ListOfDBRecords = []
     user_list = []
     msg_error_save_and_email: str = ""
+    jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SEP_MGMT)
+
     try:
         task_code += 1  # 1
-        tmpl_rfn, is_get, ui_db_texts = get_private_response_data("sepMgmt")
+        tmpl_ffn, is_get, ui_db_texts = get_private_response_data("sepMgmt")
 
         task_code += 1  # 2
         ui_db_texts[UITextsKeys.Form.icon_url] = SepIconMaker.get_url(SepIconMaker.none_file)
@@ -66,7 +71,9 @@ def sep_mgmt() -> str:
             task_code += 3  # 6
             txt_response = request.form.get(js_form_cargo_id)
             json_response: Dict[str, str] = json.loads(txt_response)
-            msg_success, msg_error_save_and_email, task_code = _save_and_email(json_response, ui_db_texts, task_code)
+            msg_success, msg_error_save_and_email, task_code = _save_and_email(
+                json_response, ui_db_texts, task_code
+            )
             sep_data, user_list = _sep_data_fetch(item_none, col_names)
 
             task_code += 1  # ?
@@ -75,8 +82,8 @@ def sep_mgmt() -> str:
             elif not is_str_none_or_empty(msg_error_save_and_email):
                 ui_db_texts[UITextsKeys.Msg.error] = msg_error_save_and_email
 
-        tmpl = process_template(
-            tmpl_rfn,
+        jHtml = process_template(
+            tmpl_ffn,
             sep_data=sep_data.to_list(),
             user_list=user_list,
             cargo_keys=class_to_dict(CargoKeys),
@@ -85,15 +92,15 @@ def sep_mgmt() -> str:
         )
 
     except AppStumbled as e:
-        _, tmpl_rfn, ui_db_texts = ups_handler(task_code, "", e)
-        tmpl = process_template(tmpl_rfn, **ui_db_texts.dict())
+        _, tmpl_ffn, ui_db_texts = ups_handler(task_code, "", e)
+        jHtml = process_template(tmpl_ffn, **ui_db_texts.dict())
 
     except Exception as e:
         msg = add_msg_final("gridException", ui_db_texts, task_code)
-        _, tmpl_rfn, ui_db_texts = ups_handler(task_code, msg, e)
-        tmpl = process_template(tmpl_rfn, **ui_db_texts.dict())
+        _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)
+        jHtml = process_template(tmpl_ffn, **ui_db_texts.dict())
 
-    return tmpl
+    return jHtml
 
 
 def _sep_data_fetch(_item_none: str, col_names: List[str]) -> Tuple[DBRecords, List[str]]:

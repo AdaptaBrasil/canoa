@@ -22,11 +22,8 @@ from ..models.private_1.SchemaGrid import SchemaGrid
 
 def get_scm_grid() -> JinjaGeneratedHtml:
 
-    task_code = ModuleErrorCode.SCM_GRID.value
-    jHtml, is_get, ui_db_texts = init_response_vars()
-
+    jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SCM_GRID)
     try:
-
         def _scm_data_fetch(col_names: List[str]) -> List[SchemaGrid]:
             scm_rows = SchemaGrid.get_schemas(col_names)
             for record in scm_rows:
@@ -35,7 +32,7 @@ def get_scm_grid() -> JinjaGeneratedHtml:
             return scm_rows
 
         task_code += 1  # 1
-        tmpl_rfn, is_get, ui_db_texts = get_private_response_data("scmGrid")
+        tmpl_ffn, is_get, ui_db_texts = get_private_response_data("scmGrid")
 
         task_code += 1  # 2
         if not is_get:
@@ -51,7 +48,7 @@ def get_scm_grid() -> JinjaGeneratedHtml:
 
         task_code += 1  # 5
         jHtml = process_template(
-            tmpl_rfn,
+            tmpl_ffn,
             scm_data=scm_data.to_list(),
             cargo_keys=class_to_dict(UiActResponseKeys),
             **ui_db_texts.dict(),

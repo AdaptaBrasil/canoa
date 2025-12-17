@@ -29,12 +29,10 @@ from .constants import DNLD_F, DNLD_R
 
 def init_grid(for_user: int) -> JinjaTemplate:
 
-    task_code = ModuleErrorCode.RECEIVED_FILES_MGMT.value
-    tmpl, _, ui_db_texts = init_response_vars()
-
+    jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.RECEIVED_FILES_MGMT)
     try:
         task_code += 1  # 1
-        tmpl_rfn, is_get, ui_db_texts = get_private_response_data("receivedFilesMgmt")
+        tmpl_ffn, is_get, ui_db_texts = get_private_response_data("receivedFilesMgmt")
         if not is_get:
             raise AppStumbled(MTD_UNEXPECTED_ERROR)
         task_code += 1  # 2
@@ -53,7 +51,9 @@ def init_grid(for_user: int) -> JinjaTemplate:
                 )
                 for user in users
             ]
-            users_list.insert(0, ("", ui_db_texts[("noneUser" if len(users_list) == 0 else "selectUser")], True))
+            users_list.insert(
+                0, ("", ui_db_texts[("noneUser" if len(users_list) == 0 else "selectUser")], True)
+            )
             task_code += 1  # 6
             ui_db_texts[UITextsKeys.Form.title] = ui_db_texts[UITextsKeys.Form.title + "Power"].format(
                 request_user.user_name
@@ -79,8 +79,8 @@ def init_grid(for_user: int) -> JinjaTemplate:
         task_code += 1  # 10
         js_ui_dict["sel_id"] = "usr-list-id"
         task_code += 1  # 11 611
-        tmpl = process_template(
-            tmpl_rfn,
+        jHtml = process_template(
+            tmpl_ffn,
             files_rec=file_recs,
             users_list=users_list,
             **ui_db_texts.dict(),
@@ -89,10 +89,10 @@ def init_grid(for_user: int) -> JinjaTemplate:
 
     except Exception as e:
         msg = add_msg_final("gridException", ui_db_texts, task_code)
-        _, tmpl_rfn, ui_db_texts = ups_handler(task_code, msg, e)
-        tmpl = process_template(tmpl_rfn, **ui_db_texts.dict())
+        _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)
+        jHtml = process_template(tmpl_ffn, **ui_db_texts.dict())
 
-    return tmpl
+    return jHtml
 
 
 # eof

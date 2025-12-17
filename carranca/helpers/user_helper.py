@@ -10,6 +10,7 @@ Equipe da Canoa -- 2024
 from os import path
 
 from .py_helper import ms_since_midnight, to_base, to_code, now, crc16
+from ..private.received_files.constants import FILE_ORIGIN_LOCAL
 
 _user_code_shift_id = 903
 _ticket_receipt_sep = "_"
@@ -19,11 +20,13 @@ class UserFolders:
     common_folder = None
     downloaded = None
     uploaded = None
+    user_id = None
 
-    def __init__(self):
+    def __init__(self, user_id: int | None = None):
         from ..common.app_context_vars import sidekick
 
         UserFolders.common_folder = sidekick.config.COMMON_PATH
+        self.user_id = user_id
 
         def _common_user_folder(folder: str) -> str:
             return path.join(
@@ -41,6 +44,12 @@ class UserFolders:
     base_downloaded = "downloaded"
     # this is a local for uploaded, downloaded & others users files
     base_user_files = "user_files"
+
+    def file_full_name(self, file_origin: str, stored_file_name: str) -> str:
+        folder = self.uploaded if file_origin == FILE_ORIGIN_LOCAL else self.downloaded
+        user_folder = get_user_folder(self.user_id)
+        file_full_name = path.join(folder, user_folder, stored_file_name)
+        return file_full_name
 
 
 def get_user_code(id: int) -> str:

@@ -15,8 +15,8 @@ from typing import TYPE_CHECKING, List
 from werkzeug.utils import secure_filename
 
 
-from ..public.ups_handler import ups_handler
 from ..common.Display import Display
+from ..public.ups_handler import ups_handler
 from ..common.app_context_vars import sidekick, app_user
 from ..common.app_error_assistant import ModuleErrorCode
 from ..config.ValidateProcessConfig import ValidateProcessConfig
@@ -26,8 +26,8 @@ from .wtforms import ReceiveFileForm
 from ..helpers.py_helper import now, is_str_none_or_empty
 from ..helpers.file_helper import folder_must_exist
 from ..helpers.jinja_helper import process_template
-from ..helpers.types_helper import JinjaTemplate, UsualDict
-from ..helpers.route_helper import get_private_response_data, get_form_input_value
+from ..helpers.types_helper import JinjaTemplate, UsualDict, JinjaGeneratedHtml
+from ..helpers.route_helper import get_private_response_data, get_form_input_value, init_response_vars
 from ..helpers.dwnLd_goo_helper import is_gd_url_valid, download_public_google_file
 from ..helpers.js_consts_helper import js_ui_dictionary
 from ..helpers.ui_db_texts_helper import (
@@ -52,16 +52,16 @@ def _do_sep_placeholderOption(fullname: str) -> "UserSep":
     from .SepIconMaker import SepIconMaker
     from .UserSep import UserSep
 
-    sep_fake = UserSep(-1, "", "", fullname, "", False, SepIconMaker.none_file, do_icon_get_url(""))  # empty
+    sep_fake = UserSep(
+        -1, "", "", fullname, "", False, SepIconMaker.none_file, do_icon_get_url("")
+    )  # empty
     return sep_fake
 
 
 def receive_file() -> JinjaTemplate:
-    tmpl_rfn, is_get, ui_db_texts = get_private_response_data("receiveFile")
-    tmpl_form = ReceiveFileForm(request.form)
 
     # utils
-    def _get_template(error_code: int) -> JinjaTemplate:
+    def _get_template(error_code: int) -> JinjaGeneratedHtml:
         seps: "UserSepList" = []
         ui_db_texts[UITextsKeys.Msg.tech] = ""
         ui_db_texts[UITextsKeys.Msg.info] = ""
@@ -78,10 +78,14 @@ def receive_file() -> JinjaTemplate:
         seps_list: List[UsualDict] = [
             {"code": sep.code, "fullname": sep.fullname, "icon_url": sep.icon_url} for sep in seps
         ]
-        tmpl = process_template(tmpl_rfn, form=tmpl_form, seps=seps_list, **ui_db_texts.dict(), **js_ui_dictionary())
+        tmpl = process_template(
+            tmpl_ffn, form=fform, seps=seps_list, **ui_db_texts.dict(), **js_ui_dictionary()
+        )
         return tmpl
 
-    def _log_issue(msg_type: Display.Kind, error_code: int, msg_id: str, task_code: int, msg_arg: str = "") -> int:
+    def _log_issue(
+        msg_type: Display.Kind, error_code: int, msg_id: str, task_code: int, msg_arg: str = ""
+    ) -> int:
         local_error = ModuleErrorCode.RECEIVE_FILE_ADMIT.value + task_code
         show_code = f"{local_error}" if error_code == 0 else f"{error_code}:{task_code}"
 
@@ -96,23 +100,26 @@ def receive_file() -> JinjaTemplate:
         sidekick.display.type(msg_type, msg_arg)
         return local_error
 
-    task_code = 1
+    jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.LEGACY_STYLE)
+    fform = ReceiveFileForm()
+
     try:
+        tmpl_ffn, is_get, ui_db_texts = get_private_response_data("receiveFile")
 
         if is_get:
             return _get_template(0)
 
         received_at = now()
         # Find out what was kind of data was sent: an uploaded file or an URL (download)
-        file_obj = request.files[tmpl_form.uploadfile.name] if len(request.files) > 0 else None
+        file_obj = request.files[fform.uploadfile.name] if len(request.files) > 0 else None
         task_code += 1  # 2
-        url_str = get_form_input_value(tmpl_form.urlname.name)
+        url_str = get_form_input_value(fform.urlname.name)
         task_code += 1  # 3
         has_file = (file_obj is not None) and not is_str_none_or_empty(file_obj.filename)
         task_code += 1  # 4
         has_url = not is_str_none_or_empty(url_str)
         task_code += 1  # 5
-        sep_code = get_form_input_value(tmpl_form.schema_sep.name)
+        sep_code = get_form_input_value(fform.schema_sep.name)
 
         # file_data holds a 'str' or an 'obj'
         task_code += 1  # 6
@@ -200,15 +207,15 @@ def receive_file() -> JinjaTemplate:
         else:
             _log_issue(Display.Kind.FATAL, error_code, msg_id, task_code, "")
 
-        tmpl = _get_template(error_code)
+        jHtml = _get_template(error_code)
     except Exception as e:
-        error_code = _log_issue(RECEIVE_FILE_DEFAULT_ERROR, task_code + 1, "", True)
+        error_code = _log_issue(Display.Kind.fatal, task_code + 1, "", True)
         sidekick.display.fatal(f"{RECEIVE_FILE_DEFAULT_ERROR}: Code {error_code}, Message: {e}.")
         msg = add_msg_final("receiveFileException", ui_db_texts, task_code)
-        _, tmpl_rfn, ui_db_texts = ups_handler(task_code, msg, e)
-        tmpl = process_template(tmpl_rfn, **ui_db_texts.dict())
+        _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)
+        jHtml = process_template(tmpl_ffn, **ui_db_texts.dict())
 
-    return tmpl
+    return jHtml
 
 
 # eof

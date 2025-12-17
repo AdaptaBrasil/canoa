@@ -59,7 +59,7 @@ class Sidekick:
 
         self.config: DynamicConfig = config
         self.app_name = self.config.APP_NAME
-        self.debugging = self.config.APP_DEBUGGING
+        self.debugging = True if self.config.APP_DEBUGGING else False
         self.log_text = self.config.SIDEKICK_LOG
         self.display = display
         self.started_at = datetime.now()

@@ -13,7 +13,7 @@ from ...models.private import ReceivedFiles
 from ...common.app_context_vars import app_user
 from ...config.ValidateProcessConfig import ValidateProcessConfig
 
-from ...helpers.user_helper import UserFolders, get_user_folder
+from ...helpers.user_helper import UserFolders
 from ...helpers.file_helper import change_file_ext
 from ...helpers.types_helper import UsualDict
 from ...helpers.db_records.DBRecords import DBRecords
@@ -50,13 +50,15 @@ def fetch_record_s(
     grid_rows: list[UsualDict] = []
     if received_recs:
         """Adapt the records to the local environment"""
-        uf = UserFolders()
-        user_folder = get_user_folder(user_id) if user_id else app_user.folder  # app_user.folder
+        uf = UserFolders(user_id)
+
+        # improving UserFolders
+        # user_folder = get_user_folder(user_id) if user_id else app_user.folder  # app_user.folder
 
         for record in received_recs:
-            folder = uf.uploaded if record.file_origin == "L" else uf.downloaded
-            file_full_name: str = path.join(folder, user_folder, record.stored_file_name)
-
+            # folder = uf.uploaded if record.file_origin == "L" else uf.downloaded
+            # file_full_name: str = path.join(folder, user_folder, record.stored_file_name)
+            file_full_name = uf.file_full_name(record.file_origin, record.stored_file_name)
             _, ext = path.splitext(file_full_name)
             uploaded_file_name = change_file_ext(record.file_name, ext)
             # Copy specific fields to a new object 'row'

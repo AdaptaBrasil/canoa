@@ -12,6 +12,7 @@ from os import path
 from flask import redirect, request, url_for
 from typing import Tuple, Optional
 
+from ..config import BaseConfig
 from .py_helper import is_str_none_or_empty, camel_to_snake, clean_text
 from .html_helper import URL_PATH_SEP
 
@@ -20,8 +21,8 @@ from .jinja_helper import TemplateFileFullName
 from .types_helper import JinjaGeneratedHtml
 from ..common.UIDBTexts import UIDBTexts
 from .ui_db_texts_helper import get_db_texts
+from ..common.app_error_assistant import ModuleErrorCode
 
-from ..config import BaseConfig
 
 ResponseData = Tuple[JinjaGeneratedHtml, bool, UIDBTexts]
 
@@ -54,7 +55,9 @@ def _route(base: str, page: str, **params) -> str:
         address = f"{bp_name(base)}.{page}"
         url = url_for(address, **params)
     except:
-        raise Exception(f"An error occurred while constructing the following address: [{base}.{page}/{params}]")
+        raise Exception(
+            f"An error occurred while constructing the following address: [{base}.{page}/{params}]"
+        )
     return url
 
 
@@ -141,8 +144,9 @@ def get_tmpl_full_file_name(tmpl: str, folder: str) -> TemplateFileFullName:
 def _get_response_data(ui_db_section: str, tmpl_file_name: str, folder: str) -> ResponseData:
     from ..common.app_context_vars import sidekick
 
-    tmpl_full_file_name, is_get, ui_db_texts = init_response_vars()
+    tmpl_full_file_name, is_get, ui_db_texts, _ = init_response_vars(ModuleErrorCode.LEGACY_STYLE)
     try:
+
         tmpl_file_name = tmpl_file_name if tmpl_file_name else camel_to_snake(ui_db_section)
         tmpl_full_file_name = get_tmpl_full_file_name(tmpl_file_name, folder)
 
@@ -184,12 +188,12 @@ def get_account_response_data(ui_texts_section: str, tmpl_base_name: str = "") -
     return _get_response_data(ui_texts_section, tmpl_base_name, "accounts")
 
 
-def init_response_vars() -> ResponseData:
+def init_response_vars(error_code: ModuleErrorCode) -> Tuple[*ResponseData, int]:
     """
     returns JinjaTemplate, is_get, ui_db_texts
     """
     is_get = is_method_get()
-    return "", is_get, UIDBTexts({}, False)
+    return "", is_get, UIDBTexts({}, False), (error_code.value if error_code else 1)
 
 
 def redirect_to(route: str, message: Optional[str] = None) -> str:

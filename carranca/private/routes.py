@@ -78,8 +78,8 @@ def sep_mgmt():
 
 
 def create_ups_tmpl(error: str, code: int = 0):
-    _, tmpl_rfn, ui_texts = ups_handler(code, error)
-    tmpl = process_template(tmpl_rfn, **ui_texts)
+    _, tmpl_ffn, ui_texts = ups_handler(code, error)
+    tmpl = process_template(tmpl_ffn, **ui_texts)
     return tmpl
 
 
@@ -125,8 +125,8 @@ def uiact_response(code: str) -> Tuple[JinjaTemplate, UiActResponse]:  # | None]
 
     except Exception as e:
         uiact_rsp = None
-        _, tmpl_rfn, ui_texts = ups_handler(0, str(e), e)
-        error_tmpl = process_template(tmpl_rfn, **ui_texts)
+        _, tmpl_ffn, ui_texts = ups_handler(0, str(e), e)
+        error_tmpl = process_template(tmpl_ffn, **ui_texts)
 
     return error_tmpl, uiact_rsp
 

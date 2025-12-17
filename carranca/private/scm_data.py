@@ -40,8 +40,8 @@ def get_scm_data(task_code: int, encode64: bool, config: ExportProcessConfig) ->
     sep_id = Sep.id.name
 
     task_code += 1
-    scm_cols = config.scm_cols.copy()
-    sep_cols = config.sep_cols.copy()
+    scm_cols = config.scm_cols
+    sep_cols = config.sep_cols
 
     # check if need PK => FK where selected
     task_code += 1

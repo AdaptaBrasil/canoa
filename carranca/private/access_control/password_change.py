@@ -32,19 +32,20 @@ from ...helpers.route_helper import (
 
 
 def do_change_password():
-    task_code = ModuleErrorCode.ACCESS_CONTROL_PW_CHANGE.value
-    jHtml, is_get, ui_db_texts = init_response_vars()
+    jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.ACCESS_CONTROL_PW_CHANGE)
+    fform = ChangePassword()
 
     try:
         task_code += 1  # 1
-        tmpl_rfn, is_get, ui_db_texts = get_account_response_data("passwordChange", "password_reset_or_change")
+        tmpl_ffn, is_get, ui_db_texts = get_account_response_data(
+            "passwordChange", "password_reset_or_change"
+        )
         password = "" if is_get else get_form_input_value("password")
         task_code += 1  # 2
         confirm_password = "" if is_get else get_form_input_value("confirm_password")
         task_code += 1  # 3
         user = None if is_get else get_user_where(id=current_user.id)
         task_code += 1  # 4
-        flask_form = ChangePassword(request.form)
 
         if is_get:
             pass
@@ -75,7 +76,7 @@ def do_change_password():
             task_code += 1  # 8
             internal_logout()
 
-        jHtml = process_template(tmpl_rfn, form=flask_form, **ui_db_texts.dict())
+        jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.dict())
     except Exception as e:
         jHtml = get_ups_jHtml("errorPasswordChange", ui_db_texts, task_code, e)
 

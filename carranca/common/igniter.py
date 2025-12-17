@@ -17,8 +17,7 @@
 # It is only run once.
 
 import time, os.path as path
-from typing import Tuple, NamedTuple, Optional, Any
-from urllib.parse import urlparse
+from typing import Tuple, Optional
 
 
 from .Args import Args
@@ -54,7 +53,7 @@ class Fuse:
         if is_str_none_or_empty(args.app_mode):
             self.app_mode = app_mode_development
         else:
-            self.app_mode = self.args.app_mode
+            self.app_mode: str = str(self.args.app_mode)
 
 
 # ---------------------------------------------------------------------------- #
@@ -80,14 +79,14 @@ def _get_debug_2() -> bool:
 
 
 # ---------------------------------------------------------------------------- #
-def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple["Fuse|None", str]:
+def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple[Fuse, str]:
     """
     Create the 'fuse' that will assists the initializations of classes
     """
     import json
 
     msg_error = ""
-    _fuse: Optional[Fuse] = None
+    _fuse: Fuse | None = None
     try:
         from .Display import Display
 
@@ -99,7 +98,9 @@ def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple["Fuse|N
             started_from,
         )
         _fuse = Fuse(app_name, display, args)
-        _fuse.display.info(f"The 'fuse' was started in {_fuse.app_mode} mode (and now we have how to print pretty).")
+        _fuse.display.info(
+            f"The 'fuse' was started in {_fuse.app_mode} mode (and now we have how to print pretty)."
+        )
         s_args = f"{app_name}'s args: {{0}}"
         if _fuse.debugging:
             _args = f"\n{json.dumps(_fuse.args.__dict__, indent=3, sort_keys=True)}"
@@ -117,12 +118,12 @@ def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple["Fuse|N
 from ..config.DynamicConfig import DynamicConfig, app_mode_development, app_mode_stage
 
 
-def _ignite_config(fuse: Fuse) -> Tuple[DynamicConfig, str]:
+def _ignite_config(fuse: Fuse) -> Tuple[DynamicConfig | None, str]:
     """
     Select the config, based in the app_mode (production or debug)
     WARNING: Don't run with debug turned on in production!
     """
-    config = None  # this config will later be shared by sidekick
+    config: DynamicConfig | None = None  # this config will later be shared by sidekick
     msg_error = ""
     try:
         from ..config.DynamicConfig import get_config_for_mode
@@ -135,10 +136,12 @@ def _ignite_config(fuse: Fuse) -> Tuple[DynamicConfig, str]:
             raise Exception("main.py file not found in the app folder. Check BaseConfig.APP_FOLDER.")
 
         config.APP_DEBUGGING = True if fuse.debugging else config.APP_DEBUG
-        config.APP_ARGS = fuse.args
+        # REMOVE config.APP_ARGS = fuse.args
         fuse.display.info(f"The app config, in '{fuse.app_mode}' mode, was ignited.")
     except Exception as e:
-        msg_error = _ERROR_MSG.format(__name__, f"initializing the app config in mode '{fuse.app_mode}'", str(e))
+        msg_error = _ERROR_MSG.format(
+            __name__, f"initializing the app config in mode '{fuse.app_mode}'", str(e)
+        )
 
     return config, msg_error
 
@@ -176,13 +179,15 @@ def _check_mandatory_keys(config, fDisplay) -> str:
         )
 
     except Exception as e:
-        msg_error = _ERROR_MSG.format(__name__, f"checking mandatory keys of config[`{config.APP_MODE}`]", e)
+        msg_error = _ERROR_MSG.format(
+            __name__, f"checking mandatory keys of config[`{config.APP_MODE}`]", e
+        )
 
     return msg_error
 
 
 # ---------------------------------------------------------------------------- #
-def _ignite_sql_connection(uri: str) -> Tuple[str, str]:
+def _ignite_sql_connection(fuse: Fuse, uri: str) -> Tuple[str, str]:
     """
     Establish a connection to the database and retrieve the database version.
 
@@ -196,7 +201,7 @@ def _ignite_sql_connection(uri: str) -> Tuple[str, str]:
     from sqlalchemy.exc import OperationalError
 
     error = ""
-    db_version: str = ""
+    db_version: str = "?"
     fuse.display.debug("Connecting to the database.")  # this may take a while
     error_msg = "{} error: Unable to connect to the database. Error details: [{}]."
     try:
@@ -249,7 +254,7 @@ def ignite_app(app_name, start_at) -> Tuple[Sidekick, str, bool]:
     fuse.display.debug("All mandatory configuration keys were informed.")
 
     # Check DB connection, stop if not debugging
-    error, db_version = _ignite_sql_connection(config.SQLALCHEMY_DATABASE_URI)
+    error, db_version = _ignite_sql_connection(fuse, config.SQLALCHEMY_DATABASE_URI)
     if not error:
         fuse.display.info("SQLAlchemy engine was created and the db connection was successfully tested.")
     elif RaiseIf.ignite_no_sql_conn:
@@ -267,7 +272,9 @@ def ignite_app(app_name, start_at) -> Tuple[Sidekick, str, bool]:
 
     no_email_text = "The email {0} for the app is not defined. The app will not be able to send emails."
 
-    no_email = not hasattr(config, "EMAIL_PROVIDER") or (config.EMAIL_PROVIDER == EmailProvider.NO_EMAIL.value)
+    no_email = not hasattr(config, "EMAIL_PROVIDER") or (
+        config.EMAIL_PROVIDER == EmailProvider.NO_EMAIL.value
+    )
     if no_email:
         config.EMAIL_PROVIDER = EmailProvider.NO_EMAIL.value
     else:
@@ -283,14 +290,18 @@ def ignite_app(app_name, start_at) -> Tuple[Sidekick, str, bool]:
     # Final message
 
     fuse.display.print(
-        (Display.Kind.INFO if warns + errors == 0 else (Display.Kind.WARN if errors == 0 else Display.Kind.ERROR)),
-        f"{__name__} module completed with {errors} errors and {warns} warnings.",
+        (
+            Display.Kind.INFO
+            if warns + errors == 0
+            else (Display.Kind.WARN if errors == 0 else Display.Kind.ERROR)
+        ),
+        f"'[{__name__}] module completed with {errors} error{'' if errors == 1 else 's'} and {warns} warning{'' if warns == 1 else 's'} .",
     )
-    display_mute_after_init = fuse.args.display_mute_after_init
+    mute_display_after_init = fuse.args.display_mute_after_init
 
     del fuse  # clean up fuse to prevent memory leaks
 
-    return sidekick, db_version, display_mute_after_init
+    return sidekick, db_version, mute_display_after_init
 
 
 # eof

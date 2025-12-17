@@ -16,8 +16,6 @@ mgd
 import os
 import base64
 
-from flask import render_template
-
 from ..common.UIDBTexts import UIDBTexts
 from ..helpers.py_helper import is_str_none_or_empty
 from ..public.ups_handler import get_ups_jHtml
@@ -30,8 +28,10 @@ from ..common.app_error_assistant import ModuleErrorCode, AppStumbled
 from ..helpers.ui_db_texts_helper import add_msg_error, get_section, UITextsKeys
 
 
-def __prepare_img_files(html_images: list[str], db_images: list[str], img_local_path: str, section: str) -> bool:
-    from ..helpers.ui_db_texts_helper import retrieve_text
+def __prepare_img_files(
+    html_images: list[str], db_images: list[str], img_local_path: str, section: str
+) -> bool:
+    from ..helpers.ui_db_texts_helper import db_retrieve_text
 
     is_img_local_path_ready = os.path.exists(img_local_path)
     missing_files = html_images.copy()  # missing files from folder, assume all
@@ -63,13 +63,15 @@ def __prepare_img_files(html_images: list[str], db_images: list[str], img_local_
 
     for file in available_files:
         try:
-            b64encoded = retrieve_text(file, section)
+            b64encoded = db_retrieve_text(file, section)
             if not is_str_none_or_empty(b64encoded):
                 image_data = base64.b64decode(b64encoded)
                 with open(os.path.join(img_local_path, file), "wb") as file:
                     file.write(image_data)
         except Exception as e:
-            sidekick.display.error(f"Error writing image [{file}] in folder {img_local_path}. Message [{str(e)}]")
+            sidekick.display.error(
+                f"Error writing image [{file}] in folder {img_local_path}. Message [{str(e)}]"
+            )
 
     return True
 
@@ -81,10 +83,10 @@ def __prepare_img_files(html_images: list[str], db_images: list[str], img_local_
 
 
 def display_html(docName: str):
-    task_code = ModuleErrorCode.DISPLAY_HTML_DOC
-    tmpl_rfn = "./home/document.html.j2"
+
+    tmpl_ffn = "./home/document.html.j2"
     section = docName
-    jHtml, _, ui_db_texts = init_response_vars()
+    jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.DISPLAY_HTML_DOC)
 
     try:
 
@@ -121,7 +123,9 @@ def display_html(docName: str):
         )  # list of img names in db
 
         task_code += 1  # 173
-        html_images = [] if is_str_none_or_empty(body) else sorted(img_filenames(body))  # list of img tags in HTML
+        html_images = (
+            [] if is_str_none_or_empty(body) else sorted(img_filenames(body))
+        )  # list of img tags in HTML
 
         task_code += 1
         img_folders = ["static", "docs", section, "images"]
@@ -147,7 +151,7 @@ def display_html(docName: str):
 
         doc_body = jinja_pre_template(body)
         doc_texts[body_key] = doc_body
-        jHtml = process_template(tmpl_rfn, **doc_texts.dict())
+        jHtml = process_template(tmpl_ffn, **doc_texts.dict())
 
     except Exception as e:
         jHtml = get_ups_jHtml("displayDocException", ui_db_texts, task_code, e, task_code)

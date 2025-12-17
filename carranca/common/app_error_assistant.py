@@ -28,7 +28,10 @@ def proper_user_exception(e: Exception, task_code: int) -> str:
         str: A detailed error message for support/administrative users, or a
              code (e-code) that is searchable in the log
     """
-    from .app_context_vars import app_user, sidekick  # global_sidekick is not ready yet when this module is used
+    from .app_context_vars import (
+        app_user,
+        sidekick,
+    )  # global_sidekick is not ready yet when this module is used
 
     error_str = str(e)
     code = crc16(error_str)
@@ -78,6 +81,8 @@ class AppStumbled(Exception):
 
 
 class ModuleErrorCode(IntEnum):
+    # legacy
+    LEGACY_STYLE = 1
 
     # Public Access Control Processes
     ACCESS_CONTROL_LOGIN = 100  # 1-14

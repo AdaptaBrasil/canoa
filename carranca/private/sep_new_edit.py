@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
-from .wtforms import SepEdit, SepNew
+from .wtforms import SepEdit, SepNew, EmptyForm
 from .sep_icon import icon_refresh
 from .SepIconMaker import SepIconMaker
 from .sep_icon_data import get_icon_data, IconData
@@ -60,7 +60,9 @@ def do_sep_edit(data: str) -> str:
 
     if action is not None:  # called from sep_grid
         # TODO use: window.history.back() in JavaScript.
-        process_on_end = private_route("sep_grid", code=UiActResponseProxy.show)  # TODO selected Row, ix=row_index)
+        process_on_end = private_route(
+            "sep_grid", code=UiActResponseProxy.show
+        )  # TODO selected Row, ix=row_index)
         form_on_close = {"dlg_close_action_url": process_on_end}
     else:  # standard routine
         code = data
@@ -86,9 +88,9 @@ def do_sep_edit(data: str) -> str:
     if sep_id is None or sep_id < 0:
         return redirect_to(process_on_end)
 
-    task_code = ModuleErrorCode.SEP_EDIT.value
-    jHtml, is_get, ui_db_texts = init_response_vars()
-    tmpl_rfn = ""
+    fform = EmptyForm()
+    jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCodeSEP_EDIT)
+    tmpl_ffn = ""
 
     # &#8209 is a `nobreak-hyphen`, &hyphen does not work.
     sep_fullname = f"SPC&#8209;{code}"
@@ -104,7 +106,9 @@ def do_sep_edit(data: str) -> str:
                 icon_data.file_name = icon_data.storage.filename
             return icon_data
 
-        def _was_form_sep_modified(sep_row: Sep, form: SepNew | SepEdit) -> Tuple[bool, bool, str, int, int]:
+        def _was_form_sep_modified(
+            sep_row: Sep, form: SepNew | SepEdit
+        ) -> Tuple[bool, bool, str, int, int]:
             if is_get:
                 return (False, False, "", -1, -1)
 
@@ -127,7 +131,9 @@ def do_sep_edit(data: str) -> str:
                     form_modified = True
                     sep_modified = True
                 case SepEditMode.SIMPLE_EDIT:
-                    form_modified = (frm_visible != sep_row.visible) or (frm_description != sep_row.description)
+                    form_modified = (frm_visible != sep_row.visible) or (
+                        frm_description != sep_row.description
+                    )
                     sep_modified = False
                 case SepEditMode.FULL_EDIT:
                     form_modified = (
@@ -150,29 +156,33 @@ def do_sep_edit(data: str) -> str:
             return
 
         task_code += 1  # 1
-        tmpl_rfn, is_get, ui_db_texts = get_private_response_data("sepNewEdit")
+        tmpl_ffn, is_get, ui_db_texts = get_private_response_data("sepNewEdit")
         if True:  # prepare ui_db_texts & insert & edit form
             no_manager = NoManager(name=ui_db_texts["mng_placeholderOption"])
 
             ui_db_texts["formForNew"] = edit_full_or_ins
-            ui_db_texts["formTitle"] = ui_db_texts[f"formTitle{('New' if editMode == SepEditMode.INSERT else 'Edit')}"]
+            ui_db_texts["formTitle"] = ui_db_texts[
+                f"formTitle{('New' if editMode == SepEditMode.INSERT else 'Edit')}"
+            ]
             task_code += 1  # 2
-            form = SepNew(request.form) if edit_full_or_ins else SepEdit(request.form)
+            fform = SepNew() if edit_full_or_ins else SepEdit()
             # Personalized template for this user (see tmpl_form.sep_name for more info):
             input_disabled = not app_user.is_power
-            form.sep_name.render_kw["disabled"] = input_disabled
-            form.sep_name.render_kw["required"] = not input_disabled
-            form.sep_name.render_kw["lang"] = app_user.lang
-            form.description.render_kw["lang"] = app_user.lang
+            fform.sep_name.render_kw["disabled"] = input_disabled
+            fform.sep_name.render_kw["required"] = not input_disabled
+            fform.sep_name.render_kw["lang"] = app_user.lang
+            fform.description.render_kw["lang"] = app_user.lang
 
         task_code += 1  # 3
         sep_row, ui_select_lists, sep_fullname = get_sep_data(
-            task_code, editMode, no_manager, ui_db_texts, form, sep_id, sep_fullname
+            task_code, editMode, no_manager, ui_db_texts, fform, sep_id, sep_fullname
         )
 
         task_code = ModuleErrorCode.SEP_EDIT.value + 10  # 510
-        icon_data = _init_icon_data(form)
-        form_modified, sep_modified, sep_name, id_schema, id_manager = _was_form_sep_modified(sep_row, form)
+        icon_data = _init_icon_data(fform)
+        form_modified, sep_modified, sep_name, id_schema, id_manager = _was_form_sep_modified(
+            sep_row, fform
+        )
         if is_get:
             task_code += 1
             if sep_id and sep_row.icon_crc:
@@ -187,7 +197,9 @@ def do_sep_edit(data: str) -> str:
             raise AppStumbled(msg_error, task_code, True, True)
         elif (
             scm_name := (
-                next((scm["name"] for scm in ui_select_lists[SCHEMA_LIST_KEY] if scm["id"] == id_schema), "?")
+                next(
+                    (scm["name"] for scm in ui_select_lists[SCHEMA_LIST_KEY] if scm["id"] == id_schema), "?"
+                )
                 if edit_full_or_ins
                 else ""
             )
@@ -200,7 +212,11 @@ def do_sep_edit(data: str) -> str:
             # msg {ext} [{hint}-{code}]
             raise Exception(
                 add_msg_error(
-                    "sepEditInvalidFormat", ui_db_texts, SepIconMaker.ext, icon_data.error_hint, icon_data.error_code
+                    "sepEditInvalidFormat",
+                    ui_db_texts,
+                    SepIconMaker.ext,
+                    icon_data.error_hint,
+                    icon_data.error_code,
                 )
             )
 
@@ -211,8 +227,8 @@ def do_sep_edit(data: str) -> str:
         else:
             task_code += 1  # 511
             sep_row.name = sep_name
-            sep_row.visible = bool(form.visible.data)
-            sep_row.description = get_form_input_value(form.description.name)
+            sep_row.visible = bool(fform.visible.data)
+            sep_row.description = get_form_input_value(fform.description.name)
             batch_code = get_batch_code()
 
             if editMode == SepEditMode.INSERT:
@@ -265,15 +281,15 @@ def do_sep_edit(data: str) -> str:
                 add_msg_final(item, ui_db_texts, sep_fullname, task_code)
 
         jHtml = process_template(
-            tmpl_rfn,
-            form=form,
+            tmpl_ffn,
+            form=fform,
             **ui_db_texts.dict(),
             **ui_select_lists,
             **form_on_close,
         )
 
     except JumpOut:
-        jHtml = process_template(tmpl_rfn, **ui_db_texts.dict())
+        jHtml = process_template(tmpl_ffn, **ui_db_texts.dict())
 
     except Exception as e:
         jHtml = get_ups_jHtml("sepEditException", ui_db_texts, task_code, e, task_code, sep_fullname)

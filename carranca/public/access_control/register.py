@@ -32,14 +32,13 @@ def register():
         user = None if not records or records.count() == 0 else records.first()
         return user is not None
 
-    task_code = ModuleErrorCode.ACCESS_CONTROL_REGISTER.value
-    tmpl_rfn, is_get, texts = init_response_vars()
+    task_code, tmpl_ffn, is_get, ui_db_texts = init_response_vars(ModuleErrorCode.ACCESS_CONTROL_REGISTER)
+    fform = RegisterForm()
 
     try:
         task_code += 1  # 1
-        flask_form = RegisterForm(request.form)
+        tmpl_ffn, is_get, ui_db_texts = get_account_response_data("register")
         task_code += 1  # 2
-        tmpl_rfn, is_get, texts = get_account_response_data("register")
         user_name = "" if is_get else get_form_input_value("username")
         task_code += 1  # 3
 
@@ -48,20 +47,20 @@ def register():
         elif is_get:
             pass
         elif __exists_user_where(username_lower=user_name.lower()):
-            add_msg_error("userAlreadyRegistered", texts)
+            add_msg_error("userAlreadyRegistered", ui_db_texts)
         elif __exists_user_where(email=get_form_input_value("email").lower()):
-            add_msg_error("emailAlreadyRegistered", texts)
+            add_msg_error("emailAlreadyRegistered", ui_db_texts)
         elif not sidekick.config.DB_len_val_for_pw.check(get_form_input_value("password")):
             add_msg_error(
                 "invalidPassword",
-                texts,
+                ui_db_texts,
                 sidekick.config.DB_len_val_for_pw.min,
                 sidekick.config.DB_len_val_for_pw.max,
             )
         elif not sidekick.config.DB_len_val_for_uname.check(user_name):
             add_msg_error(
                 "invalidUserName",
-                texts,
+                ui_db_texts,
                 sidekick.config.DB_len_val_for_uname.min,
                 sidekick.config.DB_len_val_for_uname.max,
             )
@@ -71,18 +70,18 @@ def register():
             task_code += 1  # 5
             persist_user(user_record_to_insert, task_code)
             task_code += 1  # 6
-            add_msg_success("welcome", texts)
+            add_msg_success("welcome", ui_db_texts)
 
     except Exception as e:
         # TODO: ups
-        msg = add_msg_final("errorRegister", texts, task_code)
+        msg = add_msg_final("errorRegister", ui_db_texts, task_code)
         sidekick.display.error(e)
         sidekick.display.debug(msg)
 
     return render_template(
-        tmpl_rfn,
-        form=flask_form,
-        **texts,
+        tmpl_ffn,
+        form=fform,
+        **ui_db_texts.dict(),
     )
 
 

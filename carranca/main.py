@@ -44,7 +44,7 @@ elif m := _get_minify():
     sidekick.display.info(f"Flask-Minify initialized: [html: {m.html}, js: {m.js}, cssless: {m.cssless}].")
 else:
     sidekick.display.error("Configuration error: Flask-Minify is enabled but not installed.")
-    sidekick.display.info("Install with 'pip install Flask-Minify' or set APP_MINIFY_OFF=False in config.")
+    sidekick.display.info("Install with 'pip install Flask-Minify' or set APP_MINIFY_OFF=True in config.")
 
 
 sidekick.display.info("The app is ready to run!")
@@ -72,7 +72,9 @@ app_debug = sidekick.config.APP_DEBUG
 app_reload = sidekick.config.APP_AUTO_RELOAD
 if __name__ != "__main__":
     sidekick.display.info("Using configuration from `.vscode/launch.json`.")
-    sidekick.display.warn("This module is *not* running as `__main__`, so the app will not automatically run.")
+    sidekick.display.warn(
+        "This module is *not* running as `__main__`, so the app will not automatically run."
+    )
 else:
     app.run(debug=app_debug)
 

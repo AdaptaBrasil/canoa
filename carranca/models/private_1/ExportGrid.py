@@ -11,6 +11,7 @@ Equipe da Canoa -- 2025.09.02
 #
 # cSpell:ignore: nullable sqlalchemy sessionmaker sep ssep scm sepsusr usrlist SQLA duovigesimal
 
+from typing import List
 from sqlalchemy import (
     DateTime,
     Integer,
@@ -31,8 +32,10 @@ class ExportGrid(SQLABaseTable):
     __tablename__ = "vw_export_data_files"
 
     id = Column(Integer, primary_key=True)
+    user_id = Column(Integer)
     sep_id = Column(Integer)
     scm_id = Column(Integer)
+    file_origin = Column(String(1))
     file_name = Column(String(180))
     sep_fullname = Column(String(180))
     uploaded = Column(DateTime)
@@ -40,7 +43,7 @@ class ExportGrid(SQLABaseTable):
 
     @staticmethod
     def get_data(
-        col_names: OptListOfStr = None,
+        col_names: List[str] = [],
     ) -> DBRecords:
         """
         Returns:

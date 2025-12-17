@@ -73,7 +73,9 @@ def nobody_is_logged() -> bool:
 def internal_logout():
     from flask_login import logout_user
 
-    logout_user()
+    if is_someone_logged():
+        logout_user()
+        
     return
 
 

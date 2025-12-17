@@ -17,10 +17,10 @@ from sqlalchemy.orm import scoped_session
 from typing import Dict, List
 from .common.Sidekick import Sidekick
 
-# App Global variables
-global_sidekick: Sidekick = None
-global_login_manager: LoginManager = None
-global_sqlalchemy_scoped_session: scoped_session = None
+# App Global variables: TODO: app_g.sidekick, etc
+global_sidekick: Sidekick | None = None
+global_login_manager: LoginManager | None = None
+global_sqlalchemy_scoped_session: scoped_session | None = None
 global_ui_texts_cache: Dict[str, str] = {}
 APP_DB_VERSION: str = "?"
 

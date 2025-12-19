@@ -16,10 +16,10 @@ from sqlalchemy.engine import CursorResult
 
 # from psycopg2.errors import ProgrammingError as psycopg2_ProgrammingError
 
-from .py_helper import is_str_none_or_empty, to_str
-from .types_helper import DBTexts
 from .. import global_sqlalchemy_scoped_session
 from ..config import BaseConfig
+from .py_helper import is_str_none_or_empty, to_str
+from .types_helper import DBTexts
 
 # Avoid importing sidekick during app initialization
 # from ..common.app_context_vars import sidekick
@@ -97,7 +97,9 @@ def db_fetch_rows(
 
         # TODO LOG to log
         err_code = f"[{e.code}]" if hasattr(e, "code") else ""
-        sidekick.display.error(f"[{func_or_query}]: '{msg}'; Table: [{table_name}]; Error{err_code} details: {e}.")
+        sidekick.display.error(
+            f"[{func_or_query}]: '{msg}'; Table: [{table_name}]; Error{err_code} details: {e}."
+        )
 
         if table_name:
             db_ups_error(e, msg, table_name)
@@ -108,8 +110,8 @@ def db_fetch_rows(
         db_session: Session
         with global_sqlalchemy_scoped_session() as db_session:
             if callable(func_or_query):
-                returned = func_or_query(db_session, *args, **kwargs)
-                return None, None, returned
+                records = func_or_query(db_session, *args, **kwargs)
+                return None, None, records
             elif isinstance(func_or_query, str):
                 query = text(func_or_query)
                 cursor: CursorResult = db_session.execute(query)

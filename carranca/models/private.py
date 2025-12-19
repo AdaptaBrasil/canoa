@@ -165,7 +165,9 @@ class UserDataFiles(SQLABaseTable):
             except Exception as e:
                 db_session.rollback()
                 operation = "update" if isUpdate else "insert to"
-                msg_error = f"Cannot {operation} {UserDataFiles.__tablename__}.ticket = {uTicket} | Error {e}."
+                msg_error = (
+                    f"Cannot {operation} {UserDataFiles.__tablename__}.ticket = {uTicket} | Error {e}."
+                )
                 sidekick.display.error(msg_error)
                 raise DatabaseError(msg_error)
         return None
@@ -386,7 +388,6 @@ class Sep(SQLABaseTable):
         db_session: Session
         sep_id = -1
         with global_sqlalchemy_scoped_session() as db_session:
-
             try:
                 for sep_id, new_index in items:
                     db_session.query(Sep).filter_by(id=sep_id).update({"ui_order": new_index})
@@ -395,7 +396,7 @@ class Sep(SQLABaseTable):
 
             except Exception as e:
                 db_session.rollback()
-                raise AppStumbled("Error save Schema ui-order.", task_code, False, e)
+                raise AppStumbled("Error saving Schema's ui-order.", task_code, False, e)
 
         return True
 
@@ -442,7 +443,9 @@ class Sep(SQLABaseTable):
 
         def _get_data(db_session: Session) -> SvgContent:
             # see sep__sch_name_lower_uix
-            stmt = select(Sep.name_lower).where(Sep.id_schema == id_schema, Sep.name_lower == func.lower(sep_name))
+            stmt = select(Sep.name_lower).where(
+                Sep.id_schema == id_schema, Sep.name_lower == func.lower(sep_name)
+            )
             name_exists = db_session.query(exists(stmt)).scalar()
             return name_exists
 
@@ -467,7 +470,11 @@ class Sep(SQLABaseTable):
 
         def _get_data(db_session: Session) -> List[Sep]:
             sel_cols = col_names_to_columns(col_names, Sep.__table__.columns)
-            stmt = select(*sel_cols).where(and_(Sep.id_schema == scm_id, Sep.visible == True)).order_by(Sep.ui_order)
+            stmt = (
+                select(*sel_cols)
+                .where(and_(Sep.id_schema == scm_id, Sep.visible == True))
+                .order_by(Sep.ui_order)
+            )
             rows = db_session.execute(stmt).all()
             recs = DBRecords(stmt, rows)
             return recs

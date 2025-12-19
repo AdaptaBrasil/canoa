@@ -15,7 +15,7 @@ from os import path
 from http import HTTPStatus
 from flask import send_file, request, Response, abort
 
-from .constants import DNLD_R, DNLD_F
+from .constants import DOWNLOAD_REPORT, DOWNLOAD_ZIPFILE
 from .fetch_records import fetch_record_s, IGNORE_USER, USER_RECEIPT
 from ...helpers.py_helper import is_str_none_or_empty, to_int
 from ...public.ups_handler import ups_handler
@@ -28,7 +28,7 @@ from ...helpers.ui_db_texts_helper import add_msg_error
 
 
 def download_rec() -> Response:
-    
+
     _, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.RECEIVED_FILES_MGMT)
 
     file_response: Response = ""
@@ -59,7 +59,7 @@ def download_rec() -> Response:
             task_code += 1  # 3
             msg = add_msg_error(msg_key, ui_db_texts)
             _raise(msg, HTTPStatus.UNAUTHORIZED)
-        elif not ((rec_id > 0) and rec_type in [DNLD_R, DNLD_F]):
+        elif not ((rec_id > 0) and rec_type in [DOWNLOAD_REPORT, DOWNLOAD_ZIPFILE]):
             task_code += 2  # 4
             msg = add_msg_error("secKeyViolation", ui_db_texts)
             _raise(msg, HTTPStatus.BAD_REQUEST, True)
@@ -73,7 +73,7 @@ def download_rec() -> Response:
                 msg = add_msg_error("noRecord", ui_db_texts)
                 _raise(msg, HTTPStatus.NOT_FOUND)
 
-            if rec_type == DNLD_R:
+            if rec_type == DOWNLOAD_REPORT:
                 # This is a Report (PDF)
                 download_file_name = change_file_ext(download_file_name, report_ext)
                 uploaded_name = change_file_ext(uploaded_name, report_ext)

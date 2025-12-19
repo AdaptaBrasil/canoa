@@ -25,22 +25,25 @@ class ExportProcessConfig:
     output_folder = "exported_data"
     output_path = ""
     # see json.dumps
-    json = {"ensure_ascii": False, "indent": 0}
+    json_cfg = {"ensure_ascii": False, "indent": 0}
+    seps_key = "seps"
 
     _header = None
     _full_file_name = None
     _started = None
     # view vw_schema_grid columns
-    _scm_cols = ["name", "color", "title", "v_sep_count", "ui_order"]
+    _scm_cols = ["name", "color", "title", "v_sep_count", "ui_order", "mgmt_users_id"]
     # table Sep
     _sep_cols = ["name", "description", "icon_svg", "icon_file_name", "ui_order"]
     scm_cols = []
     sep_cols = []
     coder: IdToCode
+    encode_data = False
 
-    def __init__(self, scm_cols: OptListOfStr = [], sep_cols: OptListOfStr = []):
+    def __init__(self, encode_data: bool = False, scm_cols: OptListOfStr = [], sep_cols: OptListOfStr = []):
         self.scm_cols = scm_cols.copy() if scm_cols else ExportProcessConfig._scm_cols.copy()
         self.sep_cols = sep_cols.copy() if sep_cols else ExportProcessConfig._sep_cols.copy()
+        self.encode_data = encode_data
         self._started = now()
         self.output_path = path.join(sidekick.config.COMMON_PATH, ExportProcessConfig.output_folder)
         self.coder = IdToCode(7)  #  obfuscate PKs when sent to UI

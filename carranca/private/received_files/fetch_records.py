@@ -50,12 +50,15 @@ def fetch_record_s(
     grid_rows: list[UsualDict] = []
     if received_recs:
         """Adapt the records to the local environment"""
-        uf = UserFolders(user_id)
 
         # improving UserFolders
         # user_folder = get_user_folder(user_id) if user_id else app_user.folder  # app_user.folder
 
+        userFolder = UserFolders(user_id) if user_id else None
+
         for record in received_recs:
+            uf = userFolder if userFolder else UserFolders(record.user_id if rec_id else app_user.id)
+
             # folder = uf.uploaded if record.file_origin == "L" else uf.downloaded
             # file_full_name: str = path.join(folder, user_folder, record.stored_file_name)
             file_full_name = uf.file_full_name(record.file_origin, record.stored_file_name)

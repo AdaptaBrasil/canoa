@@ -31,10 +31,10 @@ def scm_export_ui_show(uiact_rsp: UiActResponse) -> JinjaTemplate:
         task_code += 1
         scm_cols = ["name", "color"]
         sep_cols = ["name", "icon_file_name", "mgmt_users_id", "ui_order"]
-        config = ExportProcessConfig(scm_cols, sep_cols)
+        config = ExportProcessConfig(False, scm_cols, sep_cols)
 
         task_code += 1
-        schema_data, task_code = get_scm_data(task_code, False, config)
+        schema_data, task_code = get_scm_data(task_code, config, False)
         task_code += 1
         grid_data = ExportGrid.get_data()
         task_code += 1

@@ -62,7 +62,7 @@ def icon_ready(file_full_name: str) -> bool:
 
 def do_icon_get_url(icon_file_name: str | None, sep_id: Optional[int] = None) -> str:
     """
-    ⚠️ This is can be resources heavy routine
+    ⚠️  This routine may be resource-intensive.
 
     Creates a file with the SEP's svg data (if necessary) and
     returns the file's url

@@ -24,7 +24,7 @@ from ...common.app_error_assistant import ModuleErrorCode
 
 from .fetch_users import fetch_user_s
 from .fetch_records import fetch_record_s, ALL_USER_RECS
-from .constants import DNLD_F, DNLD_R
+from .constants import DOWNLOAD_ZIPFILE, DOWNLOAD_REPORT
 
 
 def init_grid(for_user: int) -> JinjaTemplate:
@@ -73,8 +73,8 @@ def init_grid(for_user: int) -> JinjaTemplate:
 
         task_code += 1  # 9
         js_ui_dict["user_is_power"] = app_user.is_power
-        js_ui_dict["dnld_F"] = DNLD_F  # Download File
-        js_ui_dict["dnld_R"] = DNLD_R  # Download Report
+        js_ui_dict["dnld_F"] = DOWNLOAD_ZIPFILE
+        js_ui_dict["dnld_R"] = DOWNLOAD_REPORT 
 
         task_code += 1  # 10
         js_ui_dict["sel_id"] = "usr-list-id"

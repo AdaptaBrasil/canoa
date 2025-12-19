@@ -20,7 +20,6 @@ from sqlalchemy import (
     select,
 )
 from sqlalchemy.orm import Session
-from typing import List
 
 from ...models import SQLABaseTable
 from ...private.IdToCode import IdToCode

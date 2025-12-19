@@ -70,14 +70,17 @@
         user_data_files. LOG
         Form do resultado do Submit sem icon_refresh
         O nome do arquivo baixado não voltou ao normal
-        DNLD_R -> DNLD_RReport
         make log file by user
         display sep log
         export: click on sep -> select grid row
         jHtml <= (nice empty html), is_get, ui_db_texts, task_code = init_response_vars(Mo
 
 
-2025-12-03 Export v1 vβ 6.00
+2025-12-19 Export Schema vβ 6.01
+    - Export Schemas data
+
+
+2025-12-16 Export v1 vβ 6.00
     - Export Schema data version 1
     - requirements.txt checked/updated
     - revision for HTTPS (need checks)

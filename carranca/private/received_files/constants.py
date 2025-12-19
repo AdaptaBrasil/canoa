@@ -7,11 +7,9 @@ Equipe da Canoa -- 2025
 mgd 2025-01-14 & 03-18
 """
 
-# cSpell: words dnld
-
 # Don't repeat constants
-DNLD_R = "R"  # Report
-DNLD_F = "F"  # File
+DOWNLOAD_REPORT = "R"   # Report
+DOWNLOAD_ZIPFILE = "F"  # File
 
 # see column user_data_files.file_origin:char(1)
 #  » Indicates the source of the uploaded file, with

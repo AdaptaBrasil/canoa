@@ -7,7 +7,7 @@ mgd
 Equipe da Canoa -- 2025.09.02
 """
 
-# Equipe da Canoa -- 2024
+# Equipe da Canoa -- 2025
 #
 # cSpell:ignore: nullable sqlalchemy sessionmaker sep ssep scm sepsusr usrlist SQLA duovigesimal
 
@@ -23,7 +23,6 @@ from sqlalchemy.orm import Session
 
 from ...models import SQLABaseTable
 from ...helpers.db_helper import db_fetch_rows, col_names_to_columns
-from ...helpers.types_helper import OptListOfStr
 from ...helpers.db_records.DBRecords import DBRecords
 
 

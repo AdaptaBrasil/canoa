@@ -79,7 +79,7 @@ def password_reset(token):
         sidekick.display.error(e)
         sidekick.display.debug(msg)
 
-    return process_template(tmpl_ffn, form=fform, **ui_db_texts.dict())
+    return process_template(tmpl_ffn, form=fform, **ui_db_texts.data())
 
 
 # eof

@@ -31,6 +31,7 @@ class JinjaUser:
             self.role = app_user.role_name
             self.debug = app_user.is_support or app_user.debug
             self.power = app_user.is_power
+            self.email_confirmed = app_user.email_confirmed
         else:
             sidekick.display.debug(f"{self.__class__.__name__} was reset.")
             self.lang = APP_LANG  # locale.getdefaultlocale()[0]  # TODO, check if available
@@ -38,6 +39,7 @@ class JinjaUser:
             self.role = ""
             self.debug = False
             self.power = False
+            self.email_confirmed = False
 
     def __repr__(self):
         user_info = "Unknown" if not self.ready else f"{self.name} [{self.lang}]"

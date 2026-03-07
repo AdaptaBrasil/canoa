@@ -1,8 +1,8 @@
 """
-Tests and confirms that the email and sending functionality
-is configured and working correctly.
+Sends a validation token to confirm that the user has access
+to the provided email
 
-mgd 2025.10.29 -- 11.08
+mgd 2026.01.11
 """
 
 # cSpell:ignore SMPT
@@ -16,15 +16,17 @@ from ..common.app_error_assistant import ModuleErrorCode
 from ..helpers.ui_db_texts_helper import add_msg_success, add_msg_error
 
 
-def confirm_email(email: str, name: str = "") -> str:
+def verify_email(email: str, name: str = "") -> str:
 
-    jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.CONFIRM_EMAIL)
+    jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.EMAIL_CHECK)
     try:
-        tmpl_ffn, _, ui_db_texts = get_private_response_data("ConfirmEmail")
+        ui_section = "verifyEmail"
+        task_code += 1
+        tmpl_ffn, _, ui_db_texts = get_private_response_data(ui_section)
         task_code += 1
         recipients = RecipientsDic(RecipientsList(email, name))
         task_code += 1
-        success = send_email(recipients, "confirmEmail", {"user": sidekick.user.username})
+        success = send_email(recipients, ui_section, {"user": sidekick.user.username})
         task_code += 1
         if success:
             add_msg_success("emailSentSuccess", ui_db_texts)
@@ -32,7 +34,7 @@ def confirm_email(email: str, name: str = "") -> str:
             add_msg_error("emailSentError", ui_db_texts)
 
         task_code += 1
-        jHtml = process_template(tmpl_ffn, **ui_db_texts.dict())
+        jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
 
     except Exception as e:
         jHtml = get_ups_jHtml("emailSentException", ui_db_texts, task_code, e)

@@ -3,21 +3,22 @@
 Part of Private Access Control & `File Validation` Processes
 
 Equipe da Canoa -- 2024
-mgd 2024-04-09,27; 06-22
+mgd 2024-04-09,27; 06-22, 2026-01
 """
 
 # cSpell:ignore: wtforms urlname iconfilename uploadfile tmpl RRGGBB
 
 from flask_wtf import FlaskForm
 from wtforms import (
-    PasswordField,
     FileField,
     StringField,
     SelectField,
     BooleanField,
+    IntegerField,
     TextAreaField,
+    PasswordField,
 )
-from wtforms.validators import InputRequired, DataRequired, Length, URL
+from wtforms.validators import NumberRange, InputRequired, DataRequired, Length, URL
 
 from ..common.app_context_vars import sidekick
 
@@ -35,6 +36,7 @@ class EmptyForm(FlaskForm):
     ensuring that state-changing requests originate from the application itself
     and not from external sources.
     """
+
     # This is an empty form for CSRF protection only
     pass
 
@@ -46,6 +48,19 @@ class EmptyForm(FlaskForm):
 #  Because {{ schema_sep.id }} will render the name
 #  But {{ schema_sep.render_kw.id }} will write the id.
 # ________________________________________________________
+
+
+# Private form
+class EmailTokenForm(FlaskForm):
+    x = sidekick.config.email_verify_token_digit_count
+    min = int("1" + "0" * (x - 1))  # e.g., 100000 for 6 digits
+    max = int("9" * x)  # e.g., 999999 for 6 digits
+    token = IntegerField(
+        "",
+        validators=[DataRequired(), NumberRange(min=min, max=max)],
+        render_kw={"class": "form-control"},
+    )
+
 
 # Private form
 class ReceiveFileForm(FlaskForm):

@@ -1,0 +1,46 @@
+{#
+----------------------------------
+./private/email_verify.html.j2
+----------------------------------
+This dialog request the user to provide the verification code sent to the user's registered email address
+in order to verify email ownership and complete the email verification process.
+
+mgd
+--------------------------------------- #}
+{# cSpell:ignore #}
+{% extends "./layouts/form.html.j2" %}
+
+{# ╒═════════════════════ Inputs ═════════════════════════╕ #}
+{% block frm_blc_inputs %}
+
+{# [token #}
+<div class="form-group">
+    <label class="form-label" inert for="{{ form.token.id }}">{{ tokenLabel }}</label>
+    <div class="input-group">
+        <span class="input-group-text">
+            <i class="fas fa-envelope-circle-check" aria-hidden="true"></i>
+        </span>
+        {{ form.token() }}
+    </div>
+</div>
+{# token ] #}
+
+{% endblock frm_blc_inputs %}
+
+{% block frm_blc_script %}
+<script>
+    Canoa.submitImmediately = false;
+</script>
+{% endblock frm_blc_script %}
+
+{# ╒════════════════ Dialog Forms ════════════════╕ #}
+{% block dlg_blc_forms %}
+
+{% from "includes/_action_forms_and_btns.html.j2" import action_form__submit_cargo %}
+{{ action_form__submit_cargo(dlg_submit_form_id, private_route('auto_email_user')) }}
+
+{% endblock dlg_blc_forms %}
+{# ╘═════════════════ Dialog Forms ════════════════╛ #}
+
+
+<!-- eof -->

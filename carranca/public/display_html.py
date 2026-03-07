@@ -56,7 +56,7 @@ def __prepare_img_files(
         q = len(missing_files)
         qtd = "One" if q == 1 else f"{q}"
         p = "" if q == 1 else "s"
-        sidekick.display.warning(
+        sidekick.display.warn(
             f"{qtd} image record{p} missing for [sectorSpecifications] in database: {', '.join(missing_files)}."
         )
         return True  # some files missing, but I can't fix it :-(
@@ -151,7 +151,7 @@ def display_html(docName: str):
 
         doc_body = jinja_pre_template(body)
         doc_texts[body_key] = doc_body
-        jHtml = process_template(tmpl_ffn, **doc_texts.dict())
+        jHtml = process_template(tmpl_ffn, **doc_texts.data())
 
     except Exception as e:
         jHtml = get_ups_jHtml("displayDocException", ui_db_texts, task_code, e, task_code)

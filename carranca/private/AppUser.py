@@ -22,6 +22,7 @@ from ..helpers.types_helper import ErrorMessage
 if TYPE_CHECKING:
     from .UserSep import UserSepList
 
+
 # App needed information of the logged user.
 class AppUser:
     def __init__(self):
@@ -38,6 +39,7 @@ class AppUser:
             self.id = -1
             self.disabled = True
             self.email = ""
+            self.email_confirmed = False
             self.code = "0"
             self.folder = ""
             self.path = ""
@@ -54,6 +56,7 @@ class AppUser:
             self.id = current_user.id
             self.disabled = current_user.disabled
             self.email = current_user.email
+            self.email_confirmed = current_user.email_confirmed
             self.code = get_user_code(current_user.id)
             self.folder = get_user_folder(current_user.id)
             self.path = SepIconMaker.local_path

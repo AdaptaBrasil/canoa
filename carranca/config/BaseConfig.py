@@ -129,8 +129,8 @@ class BaseConfig(Config):
     # (used to send recovery email confirmation, etc)
     EXTERNAL_IP_SERVICE = "https://checkip.amazonaws.com"
     # satelier.dev.br -> "177.43.119.39"
-    SERVER_EXTERNAL_IP = ""
-    SERVER_EXTERNAL_PORT = ""
+    SERVER_EXTERNAL_IP: str = ""
+    SERVER_EXTERNAL_PORT: str = ""
 
     """ Flask Configuration
         --------------------------

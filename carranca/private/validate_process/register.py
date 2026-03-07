@@ -28,9 +28,9 @@ def register(cargo: Cargo, file_data: object | str) -> Cargo:
         """saves on local disk the uploaded file"""
         # create the uploaded_file, from file_obj
         with open(full_name, "wb") as file:
-            bytes = file_obj.read()
-            file_crc32 = crc32(bytes)
-            file_size = file.write(bytes)
+            content = file_obj.read()
+            file_crc32 = crc32(content)
+            file_size = file.write(content)
         return file_size, file_crc32
 
     def _crc_from_downloaded_file(full_name: str) -> tuple[int, int]:

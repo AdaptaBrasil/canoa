@@ -203,7 +203,7 @@ def _ignite_sql_connection(fuse: Fuse, uri: str) -> Tuple[str, str]:
     error = ""
     db_version: str = "?"
     fuse.display.debug("Connecting to the database.")  # this may take a while
-    error_msg = "{} error: Unable to connect to the database. Error details: [{}]."
+    error_msg = "{} error: Unable to connect to the database.{}\nError details:\n[{}]."
     try:
         engine = create_engine(uri)
         start_time = time.time()
@@ -213,9 +213,9 @@ def _ignite_sql_connection(fuse: Fuse, uri: str) -> Tuple[str, str]:
             elap = f"{(time.time() - start_time)    * 1000:,.2f}"
             fuse.display.info(f"Connected to database version {db_version} successfully in {elap} ms.")
     except OperationalError as e:
-        error = error_msg.format("Operational", e)
+        error = error_msg.format("Operational", f"\nuri: [{uri}]", e)
     except Exception as e:
-        error = error_msg.format("Unexpected", e)
+        error = error_msg.format("Unexpected", "", e)
 
     return error, db_version
 

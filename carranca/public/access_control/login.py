@@ -14,7 +14,7 @@ from flask_login import login_user
 
 from ...models.public import persist_user
 from ...helpers.py_helper import is_str_none_or_empty, now_as_iso, to_str
-from ...helpers.pw_helper import internal_logout, is_someone_logged, verify_pass
+from ...helpers.pw_helper import internal_logout, is_anyone_logged, verify_pass
 from ...private.RolesAbbr import RolesAbbr
 from ...public.ups_handler import get_ups_jHtml
 from ...helpers.jinja_helper import process_template
@@ -41,15 +41,14 @@ def do_login():
 
     try:
         task_code += 1  # 1
-        task_code += 1  # 2
         tmpl_ffn, is_get, ui_db_texts = get_account_response_data("login")
-        task_code += 1  # 3
-        if is_get and is_someone_logged():
+        task_code += 1  # 2
+        if is_get and is_anyone_logged():
             internal_logout()
         elif is_get:
             pass
         elif not is_str_none_or_empty(msg_error_key := js_form_sec_check()):
-            task_code += 1
+            task_code += 1  # 3
             msg_error = add_msg_error(msg_error_key, ui_db_texts)
             raise AppStumbled(msg_error, task_code, True, True)
         else:
@@ -106,7 +105,7 @@ def do_login():
         jHtml = process_template(
             tmpl_ffn,
             form=fform,
-            **ui_db_texts.dict(),
+            **ui_db_texts.data(),
         )
     except Exception as e:
         jHtml = get_ups_jHtml("errorLogin", ui_db_texts, task_code, e)

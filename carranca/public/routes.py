@@ -14,7 +14,7 @@ from flask import Blueprint, render_template
 
 # from flask_login import LoginManager
 from carranca import global_login_manager
-from ..helpers.pw_helper import internal_logout, is_someone_logged
+from ..helpers.pw_helper import internal_logout, is_anyone_logged
 from ..helpers.route_helper import (
     MTD_BOTH,
     bp_name,
@@ -42,7 +42,7 @@ def route_default():
             if logged -> to `home`
             else -> to `index`.
     """
-    return redirect_to(home_route() if is_someone_logged() else index_route())
+    return redirect_to(home_route() if is_anyone_logged() else index_route())
 
 
 @bp_public.route("/index")
@@ -66,7 +66,7 @@ def register():
     a visitor into a user,
     if he fills in a form correctly.
     """
-    if is_someone_logged():
+    if is_anyone_logged():
         return redirect_to(login_route())
     else:
         from .access_control.register import register as do_register
@@ -86,7 +86,7 @@ def login():
       [register] and
       the usual documents.
     """
-    if is_method_get() and is_someone_logged():
+    if is_method_get() and is_anyone_logged():
         return redirect_to(home_route())
     else:
         from .access_control.login import do_login
@@ -103,7 +103,7 @@ def password_reset(token=None):
     and confirm their new password.
     mgd 2024.03.21
     """
-    if is_someone_logged():
+    if is_anyone_logged():
         internal_logout()
         return unauthorized_handler()
     else:
@@ -122,7 +122,7 @@ def password_recovery():
     *The user should not be authenticated*
     """
 
-    if is_someone_logged():
+    if is_anyone_logged():
         return redirect_to(private_route("change_password"))
     else:
         from .access_control.password_recovery import password_recovery

@@ -52,7 +52,7 @@ def scm_export_ui_show(uiact_rsp: UiActResponse) -> JinjaTemplate:
             empty_icon=empty_icon,
             cargo_keys=class_to_dict(UiActResponseKeys),
             cargo=uiact_rsp.initial(),
-            **ui_db_texts.dict(),
+            **ui_db_texts.data(),
             **js_ui_dict,
         )
     except Exception as e:

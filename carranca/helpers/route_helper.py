@@ -11,8 +11,8 @@ import requests
 from os import path
 from flask import redirect, request, url_for
 from typing import Tuple, Optional
+from werkzeug import Response
 
-from ..config import BaseConfig
 from .py_helper import is_str_none_or_empty, camel_to_snake, clean_text
 from .html_helper import URL_PATH_SEP
 
@@ -20,6 +20,7 @@ from .html_helper import URL_PATH_SEP
 from .jinja_helper import TemplateFileFullName
 from .types_helper import JinjaGeneratedHtml
 from ..common.UIDBTexts import UIDBTexts
+from ..config.BaseConfig import BaseConfig
 from .ui_db_texts_helper import get_db_texts
 from ..common.app_error_assistant import ModuleErrorCode
 
@@ -196,7 +197,7 @@ def init_response_vars(error_code: ModuleErrorCode) -> Tuple[*ResponseData, int]
     return "", is_get, UIDBTexts({}, False), (error_code.value if error_code else 1)
 
 
-def redirect_to(route: str, message: Optional[str] = None) -> str:
+def redirect_to(route: str, message: Optional[str] = None) -> Response:
     # TODO: display message 'redirecting to ...
     return redirect(route)
 

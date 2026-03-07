@@ -11,7 +11,8 @@ Extends
 mgd 2024.03
 --------------------------------------- #}
 
-{% set dlg_var_v_centered= True %}
+{% set dlg_var_v_centered= is_anyone_logged() %}
+{# so documents are displayed at the same height than login/register/password_.. forms (se the forms footer) #}
 {% set dlg_var_scroll= True %}
 {% set dlg_cls_size= 'modal-lg' %}
 {% set dlg_cls_body= 'document_cls_body' %}

@@ -1,9 +1,9 @@
 {#
 ----------------------------------
-./private/scm_export_ui_save.htm.j2
+./private/email_confirm.html.j2
 ----------------------------------
-This dialog display the result of the
-Schemas & Seps Database export (Create/Update)
+This dialog confirms that a test email has been sent to the user's registered email address,
+verifying email deliverability and sending engine functionality.
 
 mgd
 --------------------------------------- #}
@@ -26,10 +26,10 @@ mgd
 {# ╒════════════════ Dialog Footer ═══════════════╛ #}
 {% block dlg_blc_footer_buttons %}
 
-   <div class="col-auto">
-      {% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
-      {{ btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, form_close_btn_text) }}
-   </div>
+<div class="col-auto">
+    {% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
+    {{ btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, form_close_btn_text) }}
+</div>
 
 {% endblock dlg_blc_footer_buttons %}
 {# ╘════════════════ Dialog Footer ═══════════════╛ #}

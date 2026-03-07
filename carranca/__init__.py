@@ -54,7 +54,7 @@ from flask_sqlalchemy import SQLAlchemy
 from .helpers.py_helper import crc16
 from .private.JinjaUser import JinjaUser
 from .config.BaseConfig import BaseConfig
-from .helpers.pw_helper import is_someone_logged
+from .helpers.pw_helper import is_anyone_logged
 from .helpers.file_helper import file_full_name_parse
 
 # 1/3 This line produce the sidekick-incident, moved to the _register_jinja
@@ -114,7 +114,7 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
 
     def __get_app_menu(sub_menu_name: str) -> DBTexts:
         sub_menu: DBTexts = {}
-        if not is_someone_logged():
+        if not is_anyone_logged():
             return sub_menu
 
         from .helpers.ui_db_texts_helper import get_app_menu
@@ -127,17 +127,20 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
         return sub_menu
 
     def __get_jinja_user() -> JinjaUser | None:
-        if is_someone_logged():  # 'import jinja_user' only when a user is logged
+        if is_anyone_logged():  # 'import jinja_user' only when a user is logged
             from .common.app_context_vars import jinja_user
 
             return jinja_user
         else:
             return None
 
+    def __is_anyone_logged() -> bool:
+        return is_anyone_logged()
+
     def __get_user_sep_menu_list() -> List[Dict]:
         # Provides de sep menu
         sep_list: List[Dict] = []
-        if is_someone_logged():  # 'import jinja_user' only when a user is logged
+        if is_anyone_logged():  # 'import jinja_user' only when a user is logged
             from .common.app_context_vars import app_user
 
             sep_list = [{"code": user.code, "name": user.fullname} for user in app_user.seps]
@@ -146,18 +149,6 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
 
     def __get_scm_menu_list() -> List[Dict]:
         scm_list: List[Dict] = []
-        # mgd 2025.11.09
-        # if is_someone_logged():  # 'import jinja_user' only when a user is logged
-        #     from .common.app_context_vars import jinja_user
-
-        #     if jinja_user.power:
-        #         from .models.private import Schema
-
-        #         scms = Schema.get_schemas(["id", "name"])
-        #         scm_list = [
-        #             {"id": scm.id, "name": scm.name} for scm in scms
-        #         ]  # TODO app_user.scms]
-
         return scm_list
 
     def __do_btn_id(action: str, data: str) -> str:
@@ -175,6 +166,7 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
         public_route=public_route,
         do_btn_id=__do_btn_id,
         jinja_user=__get_jinja_user,
+        is_anyone_logged=__is_anyone_logged,
         app_menu=__get_app_menu,
         sep_menu=__get_user_sep_menu_list,
         scm_menu=__get_scm_menu_list,
@@ -264,7 +256,9 @@ def _create_app_and_log_file(app_name: str):
         g_sk.config.LOG_FILE_STATUS = "off"
     else:
         cfg = g_sk.config
-        error, full_name, level = do_log_file(app, cfg.LOG_FILE_NAME, cfg.LOG_FILE_FOLDER, cfg.LOG_MIN_LEVEL)
+        error, full_name, level = do_log_file(
+            app, cfg.LOG_FILE_NAME, cfg.LOG_FILE_FOLDER, cfg.LOG_MIN_LEVEL
+        )
         info = f"file '{full_name}' levels '{level}' and above"
         if not error:
             _info(f"Logging to {info}.")

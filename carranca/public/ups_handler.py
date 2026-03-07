@@ -27,14 +27,15 @@ from typing import Tuple, Any
 
 from ..common.UIDBTexts import UIDBTexts
 from ..helpers.py_helper import is_str_none_or_empty
-from ..helpers.pw_helper import internal_logout, is_someone_logged
+from ..helpers.pw_helper import internal_logout, is_anyone_logged
 from ..helpers.html_helper import icon_url
 from ..helpers.types_helper import JinjaGeneratedHtml
 from ..helpers.jinja_helper import process_template
 from ..helpers.route_helper import get_tmpl_full_file_name
 from ..config.local_ui_texts import AuxTexts, local_ui_texts, local_form_texts
+from ..helpers.ui_db_texts_helper import get_section
 from ..common.app_error_assistant import AppStumbled
-from ..helpers.ui_db_texts_helper import DBTexts, UITextsKeys, add_msg_final, get_section
+from ..helpers.ui_db_texts_helper import DBTexts, UITextsKeys, add_msg_final
 
 
 def get_ups_jHtml(
@@ -87,10 +88,10 @@ def ups_handler(
         UITextsKeys.Msg.tech: tech_msg,
         UITextsKeys.Msg.warn: user_msg,
         UITextsKeys.Msg.error: error_msg,
-        UITextsKeys.Msg.display_only_msg: True,
+        UITextsKeys.Msg.display_msg_only: True,
         UITextsKeys.Fatal.code: error_code,
         UITextsKeys.Fatal.where: caller_function,
-        UITextsKeys.Fatal.http_code: 500,
+        UITextsKeys.Fatal.http_code: "500",
     }
 
     def _should_update(key: str, value: Any) -> bool:
@@ -119,7 +120,7 @@ def ups_handler(
     sidekick.display.fatal(error_msg)
 
     # TODO: send email
-    if logout and is_someone_logged():
+    if logout and is_anyone_logged():
         internal_logout()
 
     ups_tmpl_file_name = get_tmpl_full_file_name("ups_page", "home")

@@ -74,7 +74,7 @@ def init_grid(for_user: int) -> JinjaTemplate:
         task_code += 1  # 9
         js_ui_dict["user_is_power"] = app_user.is_power
         js_ui_dict["dnld_F"] = DOWNLOAD_ZIPFILE
-        js_ui_dict["dnld_R"] = DOWNLOAD_REPORT 
+        js_ui_dict["dnld_R"] = DOWNLOAD_REPORT
 
         task_code += 1  # 10
         js_ui_dict["sel_id"] = "usr-list-id"
@@ -83,14 +83,14 @@ def init_grid(for_user: int) -> JinjaTemplate:
             tmpl_ffn,
             files_rec=file_recs,
             users_list=users_list,
-            **ui_db_texts.dict(),
+            **ui_db_texts.data(),
             **js_ui_dict,
         )
 
     except Exception as e:
         msg = add_msg_final("gridException", ui_db_texts, task_code)
         _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)
-        jHtml = process_template(tmpl_ffn, **ui_db_texts.dict())
+        jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
 
     return jHtml
 

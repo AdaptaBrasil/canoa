@@ -12,6 +12,7 @@ mgd 2025-02-04
 import re
 import json
 import base64
+import string
 import os, time, platform
 
 from sys import argv
@@ -41,7 +42,7 @@ def get_envvar_prefix() -> str:
     return f"{APP_NAME}_".upper()
 
 
-def get_envvar(name: str, default: Optional[str] = "") -> str:
+def get_envvar(name: str, default: Optional[str] = "") -> str | None:
     value = "" if is_str_none_or_empty(name) else os.getenv(f"{get_envvar_prefix()}{name}")
     return default if is_str_none_or_empty(value) else value
 
@@ -62,11 +63,14 @@ def now_as_iso() -> str:
 
 
 def iso_to_datetime(value) -> datetime:
-    timestamp = None
-    try:
-        timestamp = datetime.fromisoformat(value)
-    except (ValueError, TypeError):
-        timestamp = None
+    timestamp = datetime.fromisoformat(value)
+    # don't hide exceptions, let the caller handle them
+    # mgd 2026-03-06
+    # timestamp = None
+    # try:
+    #     timestamp = datetime.fromisoformat(value)
+    # except (ValueError, TypeError):
+    #     timestamp = None
 
     return timestamp
 
@@ -84,9 +88,9 @@ def encode64_utf8(data: str) -> OptStr:
         pass
     else:
         try:
-            bytes = data.encode("utf-8")
-            encoded = base64.b64encode(bytes).decode(CODE_UTF_8)
-        except (base64.binascii.Error, UnicodeDecodeError):
+            decoded_bytes = data.encode("utf-8")
+            encoded = base64.b64encode(decoded_bytes).decode(CODE_UTF_8)
+        except (ValueError, UnicodeDecodeError):
             encoded = None
 
     return encoded
@@ -101,9 +105,9 @@ def decode64_utf8(data_encoded: str) -> OptStr:
         pass
     else:
         try:
-            bytes = base64.b64decode(data_encoded)
-            data = bytes.decode(CODE_UTF_8)
-        except (base64.binascii.Error, UnicodeDecodeError):
+            decoded_bytes = base64.b64decode(data_encoded)
+            data = decoded_bytes.decode(CODE_UTF_8)
+        except (ValueError, UnicodeDecodeError):
             data = None
 
     return data
@@ -166,11 +170,11 @@ def is_str_none_or_empty(s: str | None) -> bool:
     return (s is None) or not isinstance(s, str) or (as_str_strip(s) == "")
 
 
-def is_list_none_or_empty(list: List) -> bool:
+def is_list_none_or_empty(check: List) -> bool:
     """
     Returns True if the argument is None, not a List, or an empty List
     """
-    return (list is None) or not isinstance(list, list) or len(list) == 0
+    return (check is None) or not isinstance(check, list) or len(check) == 0
 
 
 def get_init_params(from_instance: Any, From_class=None) -> dict:
@@ -231,10 +235,10 @@ def to_str(s: str) -> str:
     return "" if is_str_none_or_empty(s) else as_str_strip(s)
 
 
-def as_bool(val: Any, val_if_none: Optional[bool] = False) -> bool:
+def as_bool(val: Any, val_if_none: bool = False) -> bool:
     # initialize special attributes
     # fmt: off
-    return (val_if_none if val is None else str(val).lower() in ["1", "t", str(True).lower(),])
+    return (val_if_none if val is None else str(val).lower() in ["1", "t", str(True).lower()])
     # fmt: on
 
 
@@ -495,6 +499,25 @@ def json_to_obj(json_str: str) -> Any:
 def dict_to_obj(dic: Dict) -> Any:
     obj = JSONObject(dic)
     return obj
+
+
+def get_params(content: str) -> list:
+    """
+    Extracts all named placeholders from a Python format string (without duplicates).
+
+    # Example usage:
+    content = "Hello {user}, nice to see you en {my_app}!"
+    params = get_params(content)
+    print(params)  # Output: ['user', 'my_app']
+
+    """
+    formatter = string.Formatter()
+    params = list(
+        dict.fromkeys(
+            field_name for _, field_name, _, _ in formatter.parse(content) if field_name is not None
+        )
+    )
+    return params
 
 
 # eof

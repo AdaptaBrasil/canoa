@@ -87,18 +87,18 @@ def sep_mgmt() -> str:
             sep_data=sep_data.to_list(),
             user_list=user_list,
             cargo_keys=class_to_dict(CargoKeys),
-            **ui_db_texts.dict(),
+            **ui_db_texts.data(),
             **js_ui_dict,
         )
 
     except AppStumbled as e:
         _, tmpl_ffn, ui_db_texts = ups_handler(task_code, "", e)
-        jHtml = process_template(tmpl_ffn, **ui_db_texts.dict())
+        jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
 
     except Exception as e:
         msg = add_msg_final("gridException", ui_db_texts, task_code)
         _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)
-        jHtml = process_template(tmpl_ffn, **ui_db_texts.dict())
+        jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
 
     return jHtml
 

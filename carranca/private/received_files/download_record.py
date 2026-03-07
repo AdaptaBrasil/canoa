@@ -22,7 +22,7 @@ from ...public.ups_handler import ups_handler
 from ...helpers.file_helper import change_file_ext
 from ...helpers.types_helper import UsualDict
 from ...helpers.route_helper import MTD_GET, get_private_response_data, init_response_vars
-from ...common.app_error_assistant import HTTPStatusCode, ModuleErrorCode, AppStumbled
+from ...common.app_error_assistant import HTTP_StatusCode, ModuleErrorCode, AppStumbled
 from ...helpers.js_consts_helper import js_form_sec_check, js_form_cargo_id, js_grid_col_meta_info
 from ...helpers.ui_db_texts_helper import add_msg_error
 
@@ -48,7 +48,7 @@ def download_rec() -> Response:
             return f"{caption}: [{db_record[USER_RECEIPT]}]."
 
         if is_get:
-            msg = f"{add_msg_error(HTTPStatusCode.CODE_405.value, ui_db_texts)} (Requested: ${MTD_GET}.)"
+            msg = f"{add_msg_error(HTTP_StatusCode.CODE_405.value, ui_db_texts)} (Requested: ${MTD_GET}.)"
             _raise(msg, HTTPStatus.METHOD_NOT_ALLOWED)
 
         task_code += 1  # 2

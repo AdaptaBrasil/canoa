@@ -92,7 +92,9 @@ def __get_scoped_var(var_name: str, do_var_creator: Callable[[], Any]) -> Any:
                     return var_value
                 except Exception as e:
                     setattr(g, var_name, _CREATION_FAILED)
-                    raise RuntimeError(f"Scoped variable creator {do_var_creator} raised an exception [{e}].")
+                    raise RuntimeError(
+                        f"Scoped variable creator {do_var_creator} raised an exception [{e}]."
+                    )
 
     elif not hasattr(g, var_name):
         try:
@@ -113,13 +115,13 @@ def __get_scoped_var(var_name: str, do_var_creator: Callable[[], Any]) -> Any:
 # App User
 # -----------
 def __get_app_user() -> Optional["AppUser"]:
-    from ..helpers.pw_helper import is_someone_logged
+    from ..helpers.pw_helper import is_anyone_logged
     from ..private.AppUser import AppUser
 
     """
     Info of the logged user or None if no one is logged
     """
-    if is_someone_logged():
+    if is_anyone_logged():
         return __get_scoped_var("_app_user", AppUser)
     else:
         return None
@@ -146,11 +148,11 @@ def __prepare_user_seps() -> "UserSepsRtn":
     from ..models.private import MgmtSepsUser
     from ..private.UserSep import UserSep
     from ..private.sep_icon import do_icon_get_url
-    from ..helpers.pw_helper import is_someone_logged
+    from ..helpers.pw_helper import is_anyone_logged
     from ..helpers.py_helper import class_to_dict
     from ..helpers.types_helper import UsualDict
 
-    user_id: int = current_user.id if is_someone_logged() else -1
+    user_id: int = current_user.id if is_anyone_logged() else -1
 
     try:
         try:
@@ -218,5 +220,7 @@ def __getattr__(name):
 # Keep __setattr__ to enforce read-only status
 def __setattr__(name, value):
     if name == "sidekick":
-        raise AttributeError(f"Cannot assign to attribute '{name}' of module '{__name__}'. It is read-only.")
+        raise AttributeError(
+            f"Cannot assign to attribute '{name}' of module '{__name__}'. It is read-only."
+        )
     globals()[name] = value

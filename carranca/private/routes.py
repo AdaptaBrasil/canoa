@@ -41,7 +41,7 @@ bp_private = Blueprint(bp_name(base_route_private), base_route_private, url_pref
 # === Test _ route ========================================
 @bp_private.route("/test_route")
 def test_route():
-    return
+    return "OK"
 
 
 # === Private Routes =======================================
@@ -58,7 +58,7 @@ def home():
         return redirect_to(login_route())
 
     template, _, ui_db_texts = get_private_response_data("home")
-    return process_template(template, **ui_db_texts.dict())
+    return process_template(template, **ui_db_texts.data())
 
 
 @login_required
@@ -293,9 +293,9 @@ def received_files_mgmt():
         id = current_user.id if rid is None else rid
         from .received_files.init_grid import init_grid
 
-        html = init_grid(id)
+        jHtml = init_grid(id)
 
-        return html
+        return jHtml
 
 
 @login_required
@@ -310,29 +310,35 @@ def received_file_download():
     else:
         from .received_files.download_record import download_rec
 
-        html = download_rec()
-        return html
+        rsp = download_rec()
+        return rsp
 
 
 @login_required
-@bp_private.route("/confirm_user_email", methods=[MTD_GET])
-def confirm_user_email():
+@bp_private.route("/auto_email_user", methods=MTD_BOTH)
+def auto_email_user() -> JinjaGeneratedHtml:
     """
     Sends a test email to the user's registered address to verify
     email deliverability and sending engine functionality.
     """
+    jHtml = ""
     if nobody_is_logged():
         return redirect_to(login_route())
+
+    elif current_user.email_confirmed:
+        from .email_token_process import email_test_email
+
+        jHtml = email_test_email(current_user.email, current_user.username)
+    elif is_method_get():
+        from .email_token_process import email_send_token
+
+        jHtml = email_send_token(current_user.email, current_user.username)
     else:
-        from .confirm_email import confirm_email
+        from .email_token_process import email_verify_token
 
-        # from ..common.app_context_vars import __prepare_user_seps
-        # # get_user_sep TEST
-        # seps = __prepare_user_seps()
-        # print(seps)
+        jHtml = email_verify_token(current_user.email, current_user.username)
 
-        tmpl = confirm_email(current_user.email, current_user.username)
-        return tmpl
+    return jHtml
 
 
 @login_required

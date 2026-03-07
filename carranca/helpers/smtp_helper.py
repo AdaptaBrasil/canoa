@@ -10,7 +10,8 @@ from typing import Optional
 
 from flask_mail import Message
 
-from .py_helper import is_str_none_or_empty
+from .py_helper import is_str_none_or_empty, get_params
+from .types_helper import UsualDict
 from .email_helper import RecipientsDic, RecipientsList
 from .ui_db_texts_helper import get_section
 from ..common.app_constants import APP_NAME
@@ -24,8 +25,8 @@ from ..common.app_error_assistant import ModuleErrorCode
 
 def _send_email(
     recipients: RecipientsDic,
-    texts_or_section: dict | str,
-    body_params: Optional[dict] = None,
+    texts_or_section: UsualDict | str,
+    text_values: Optional[UsualDict] = None,
     file_to_send_full_name: str = "",
     file_to_send_type: str = "",
 ) -> bool:
@@ -37,21 +38,26 @@ def _send_email(
     Sends an email using the Flask-Mail SMTP service.
 
     Args:
-        send_to_or_dic: (RecipientsList or RecipientsDic): The recipient information.
+        recipients: The recipient information.
             If a RecipientsList is used, it's assumed to be the "to" recipient.
+
         texts_or_section: (dict or str)
             if str, is an entry of .ui_texts_helper.get_section that returns a dict
             if Dict[str, str], it is used directly.
             Expected dict Keys:
+                # NOTE:
                 subject=texts["subject"],
                 html_content=texts["content"],
-        body_params: Optional[ Dict[key: str, value: str] ]
-            values to sSubstitute {key} in the content
+
+        text_values: Optional[ Dict[key: str, value: str] ]
+            values to substitute {key} in the content, subject
+            As usual, use double curly braces {{key}} in the .ui_texts to avoid early substitution by str.format().
+
         file_to_send_full_name: Optional[str]
             full path and name of file to attach to the mail
 
     Returns:
-        A success message string (e.g., "Email queued successfully").
+        Bool: True if the email was sent successfully, False otherwise.
 
     Raises:
         ValueError: If a required configuration (like MAIL_USERNAME) is missing.
@@ -75,28 +81,45 @@ def _send_email(
         if isinstance(texts_or_section, dict):
             task_code += 1
             db_texts = texts_or_section.copy()
-
         elif not is_str_none_or_empty(texts_or_section):
-            task_code += 1
+            task_code += 2
             db_texts = get_section(texts_or_section)
-            task_code += 1
-            for key, value in db_texts.items():
-                if not is_str_none_or_empty(value):
-                    try:
-                        db_texts[key] = value.format(**body_params)
-                    except KeyError as e:
-                        sidekick.display.error(f"Missing placeholder {e} in params.")
+        else:
+            task_code += 3
+
+        email_text = db_texts.get("text", "")  # no HTML content, just text
+        email_content = db_texts.get("content", "")
+        email_subject = db_texts.get("subject", APP_NAME)
+
+        params = get_params(email_text) + get_params(email_content) + get_params(email_subject)
+        # if collision, text_values take precedence over db_texts
+        available = {**(db_texts or {}), **(text_values or {})}
+        missing = [p for p in params if p not in available]
+        if missing:
+            sidekick.display.error(f"Missing placeholders in body_values &| db_texts: {missing}")
+
+        email_text = email_text.format(**available)
+        email_content = email_content.format(**available)
+        email_subject = email_subject.format(**available)
 
         task_code += 1
         sender = RecipientsList(sidekick.config.EMAIL_ORIGINATOR, APP_NAME).parse("")
         msg = Message(
-            subject=db_texts.get("subject", APP_NAME),
+            subject=email_subject,
             sender=sender,
             recipients=[recipients.to.parse(item) for item in recipients.to.list()],
-            cc=[recipients.cc.parse(item) for item in recipients.cc.list()] if recipients.cc.list() else None,
-            bcc=[recipients.bcc.parse(item) for item in recipients.bcc.list()] if recipients.bcc.list() else None,
-            html=db_texts["content"],  # Uses the 'content' as the HTML body
-            # Note: If you need a plain text body, you'd add: body="Plain text fallback"
+            cc=(
+                [recipients.cc.parse(item) for item in recipients.cc.list()]
+                if recipients.cc.list()
+                else None
+            ),
+            bcc=(
+                [recipients.bcc.parse(item) for item in recipients.bcc.list()]
+                if recipients.bcc.list()
+                else None
+            ),
+            html=email_content,
+            body=email_text,
         )
 
         # 3. Handle Attachment (Simplified)

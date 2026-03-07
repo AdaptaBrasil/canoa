@@ -60,6 +60,7 @@ class RegisterForm(FlaskForm):
     password = PasswordField(
         "",
         validators=[InputRequired(), Length(**sidekick.config.DB_len_val_for_pw.wtf_val())],
+        render_kw={"class": "form-control"},
     )
     disabled = BooleanField("Disabled")
 

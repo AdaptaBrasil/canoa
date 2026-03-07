@@ -70,6 +70,9 @@ class Sidekick:
             echo = " and is echoing to the log file."
         display.debug(f"{self.__class__.__name__} was created{echo}.")
 
+    def now(self) -> datetime:
+        return datetime.now()
+
     # TODO remove almost unused
     @property
     def app(self) -> Flask:
@@ -88,7 +91,13 @@ class Sidekick:
             # Todo create a buffer
             return
 
-        text = f"{(current_user.id if current_user else 0):03d}|{log_text}"
+        try:
+            user_id = f"{(current_user.id if current_user.is_active else 0):03d}"
+        except Exception as e:
+            user_id = "usr!"
+
+        text = f"{user_id}|{log_text}"
+
         match kind:
             case Display.Kind.INFO:
                 self.app_log.info(text)

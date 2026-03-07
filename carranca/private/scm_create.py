@@ -45,14 +45,14 @@ def do_scm_create() -> JinjaTemplate:
             tmpl_ffn,
             scm_data=scm_data.to_list(),
             cargo_keys=class_to_dict(UiActResponseKeys),
-            **ui_db_texts.dict(),
+            **ui_db_texts.data(),
             **js_ui_dict,
         )
 
     except Exception as e:
         msg = add_msg_final("gridException", ui_db_texts, task_code)
         _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)
-        tmpl = process_template(tmpl_ffn, **ui_db_texts.dict())
+        tmpl = process_template(tmpl_ffn, **ui_db_texts.data())
 
     return tmpl
 

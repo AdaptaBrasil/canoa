@@ -11,19 +11,20 @@ mgd
 from typing import Any
 from flask import render_template, request
 
-from ...common.app_context_vars import sidekick
+from ..wtforms import RegisterForm
+from ...models.public import User
 from ...models.public import persist_user
-from ...helpers.pw_helper import internal_logout, is_someone_logged
+from ...helpers.pw_helper import internal_logout, is_anyone_logged
+from ...public.ups_handler import get_ups_jHtml
+from ...helpers.jinja_helper import process_template
+from ...common.app_context_vars import sidekick
+from ...helpers.ui_db_texts_helper import add_msg_success, add_msg_error, add_msg_final
 from ...common.app_error_assistant import ModuleErrorCode
 from ...helpers.route_helper import (
     get_account_response_data,
     get_form_input_value,
     init_response_vars,
 )
-from ...helpers.ui_db_texts_helper import add_msg_success, add_msg_error, add_msg_final
-
-from ..wtforms import RegisterForm
-from ...models.public import User
 
 
 def register():
@@ -32,7 +33,7 @@ def register():
         user = None if not records or records.count() == 0 else records.first()
         return user is not None
 
-    task_code, tmpl_ffn, is_get, ui_db_texts = init_response_vars(ModuleErrorCode.ACCESS_CONTROL_REGISTER)
+    jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.ACCESS_CONTROL_REGISTER)
     fform = RegisterForm()
 
     try:
@@ -42,7 +43,7 @@ def register():
         user_name = "" if is_get else get_form_input_value("username")
         task_code += 1  # 3
 
-        if is_get and is_someone_logged():
+        if is_get and is_anyone_logged():
             internal_logout()
         elif is_get:
             pass
@@ -71,18 +72,18 @@ def register():
             persist_user(user_record_to_insert, task_code)
             task_code += 1  # 6
             add_msg_success("welcome", ui_db_texts)
+            # todo welcome e-mail with Token for email confirmation and login after confirmation
+
+        jHtml = process_template(
+            tmpl_ffn,
+            form=fform,
+            **ui_db_texts.data(),
+        )
 
     except Exception as e:
-        # TODO: ups
-        msg = add_msg_final("errorRegister", ui_db_texts, task_code)
-        sidekick.display.error(e)
-        sidekick.display.debug(msg)
+        jHtml = get_ups_jHtml("errorRegister", ui_db_texts, task_code, e)
 
-    return render_template(
-        tmpl_ffn,
-        form=fform,
-        **ui_db_texts.dict(),
-    )
+    return jHtml
 
 
 # eof

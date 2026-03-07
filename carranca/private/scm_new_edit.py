@@ -42,7 +42,6 @@ def do_scm_edit(data: str) -> str:
             "scm_grid", code=UiActResponseProxy.show
         )  # TODO selected Row, ix=row_index)
         form_on_close = {"dlg_close_action_url": process_on_end}
-
     else:  # standard routine
         code = data
         action = None
@@ -57,11 +56,12 @@ def do_scm_edit(data: str) -> str:
     scm_id = new_scm_id if is_insert else Schema.to_id(code)
 
     jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SCM_EDIT)
-    fform = ScmEdit()
 
     tmpl_ffn = ""
     try:
         task_code += 1
+        fform = ScmEdit()
+        task_code += 1  # 2
         tmpl_ffn, is_get, ui_db_texts = get_private_response_data("scmNewEdit")
 
         if (scm_row := Schema() if is_insert else Schema.get_row(scm_id)) is None:
@@ -69,9 +69,9 @@ def do_scm_edit(data: str) -> str:
             # Someone deleted just now?
             raise JumpOut(add_msg_final("scmEditNotFound", ui_db_texts), task_code + 1)
 
-        task_code += 1
+        task_code += 1  # 3
         ui_db_texts["formTitle"] = ui_db_texts[f"formTitle{'New' if is_insert else 'Edit'}"]
-        task_code += 1  # 2
+        task_code += 1  # 4
 
         fform.name.render_kw["lang"] = app_user.lang
         fform.name.render_kw["pattern"] = ui_db_texts["nameInputPattern"]
@@ -82,16 +82,20 @@ def do_scm_edit(data: str) -> str:
         fform.title.render_kw["lang"] = app_user.lang
 
         if is_get and is_insert:
+            task_code += 1  # 5
             scm_row.id = None
             scm_row.visible = False
             scm_row.color = ui_db_texts["colorDefaultValue"]  # "#00000"  # RR GG BB
         elif is_get and is_edit:
+            task_code += 2  # 6
             for field in fform:
                 if hasattr(scm_row, field.name):
                     field.data = getattr(scm_row, field.name)
         else:  # is_post
+            task_code += 3  # 7
 
-            def _modified(input, field, is_mod):
+            #  helpers
+            def __modified(input, field, is_mod):
                 ui_value = (
                     get_form_input_value(input.name, None)
                     if input.type == StringField.__name__
@@ -103,36 +107,38 @@ def do_scm_edit(data: str) -> str:
 
                 return is_mod or _mod
 
-            # TODO make a helper
-            form_modified = is_insert
-            for field in fform:
-                if hasattr(scm_row, field.name):
-                    form_modified = _modified(field, getattr(scm_row, field.name), form_modified)
-
-            def _save_and_go():
+            def __save_and_go():
                 fform.populate_obj(scm_row)
                 #  scm_row.visible = scm_row.visible == "y"  # TODO
                 scm_row.color = scm_row.color.upper()
                 Schema.save(scm_row)
                 return redirect_to(process_on_end)
 
+            # TODO make a helper
+            form_modified = is_insert
+            for field in fform:
+                if hasattr(scm_row, field.name):
+                    form_modified = __modified(field, getattr(scm_row, field.name), form_modified)
+
             if is_insert:
+                task_code += 1  # 8
                 scm_row.ins_by = app_user.id
-                task_code += 1
-                return _save_and_go()
+                return __save_and_go()
             elif form_modified:
+                task_code += 2  # 9
                 scm_row.edt_by = app_user.id
                 scm_row.edt_at = func.now()
-                task_code += 2
-                return _save_and_go()
+                return __save_and_go()
             else:
+                task_code += 1  # 10
                 return redirect_to(home_route())
 
-        jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.dict(), **form_on_close)
+        task_code += 12  # ?
+        jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.data(), **form_on_close)
 
     except JumpOut:
         # in an extreme case, tmpl_ffn can be empty
-        jHtml = process_template(tmpl_ffn, **ui_db_texts.dict())
+        jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
 
     except Exception as e:
         jHtml = get_ups_jHtml("scmEditException", ui_db_texts, task_code, e)

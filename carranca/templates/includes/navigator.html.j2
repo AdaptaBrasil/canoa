@@ -103,10 +103,10 @@ cSpell:ignore semi-words: formul estrat gicos sess tojson jinja nbsp endfor j_us
                 </li>
 
                 {# ╒════════════════════ Menu: Esquema ══════════════════════════════╕ #}
-                {% if j_user.power  %}
+                {% if j_user.power %}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}"
-                        href="#" id="menu-se" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-se"
+                        role="button" data-bs-toggle="dropdown">
                         {{menu_header['Schema']}}
                     </a>
                     {# ╒════════ schema menu ════════╕ #}
@@ -195,12 +195,11 @@ cSpell:ignore semi-words: formul estrat gicos sess tojson jinja nbsp endfor j_us
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{private_route('confirm_user_email')}}"
-                                title="Lhe envia um e-mail de teste">
-                                Confirmar e-mail
+                            <a class="dropdown-item" href="{{private_route('auto_email_user')}}"
+                                title="{{ 'Lhe envia um e-mail de teste' if j_user.email_confirmed else 'Inicia o processo de verificação de e-mail' }}">
+                                {{ 'Confirma envio de e-mail' if j_user.email_confirmed else 'Verifica e-mail atual' }}
                             </a>
                         </li>
-
                         <li>
                             <hr class="dropdown-divider">
                         </li>

@@ -58,7 +58,7 @@ def scm_export_ui_save(uiact_rsp: UiActResponse) -> JinjaTemplate:
 
         task_code += 1
         jHtml = process_template(
-            tmpl_ffn, cargo_keys=class_to_dict(UiActResponseKeys), **ui_db_texts.dict()
+            tmpl_ffn, cargo_keys=class_to_dict(UiActResponseKeys), **ui_db_texts.data()
         )
     except Exception as e:
         jHtml = get_ups_jHtml("saveException", ui_db_texts, task_code, e)

@@ -16,10 +16,8 @@ screen -S canoa
 ```
 
 Then, inside screen, start your app normally
-(see )
 ```
 /home/desenv/canoa/carranca$ ../rema.sh
-
 ```
 
 ## Detach from screen (leave it running: stay detached)
@@ -55,6 +53,18 @@ ps aux | grep flask
 kill -9 <PID>
 ```
 
+## Kill running Canoa processes
 
 
-#
+# Power of Linux
+
+## Working over SSH, current shell session:
+```
+    exit
+    `or Ctrl + D
+```
+## Power off immediately
+```
+logout && sudo shutdown -h now
+```
+

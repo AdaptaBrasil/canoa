@@ -119,14 +119,14 @@ class ModuleErrorCode(IntEnum):
     SCM_EXPORT_UI_SHOW = 800
     SCM_EXPORT_UI_SAVE = 820
     SCM_EXPORT_DB = 840
-    CONFIRM_EMAIL = 850
+    EMAIL_CHECK = 850
 
     DB_FETCH_ROWS = 590  # only on
 
     RECEIVED_FILES_MGMT = 700
 
 
-class HTTPStatusCode(StrEnum):
+class HTTP_StatusCode(StrEnum):
     # this are key for table ui_items.name = <key>, section= 2 (secError)
     CODE_400 = "HTTP-400"  # 400 Bad Request:
     CODE_404 = "HTTP-404"  # 404 Not Found

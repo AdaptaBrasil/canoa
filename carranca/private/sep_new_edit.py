@@ -89,7 +89,7 @@ def do_sep_edit(data: str) -> str:
         return redirect_to(process_on_end)
 
     fform = EmptyForm()
-    jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCodeSEP_EDIT)
+    jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SEP_EDIT)
     tmpl_ffn = ""
 
     # &#8209 is a `nobreak-hyphen`, &hyphen does not work.
@@ -222,7 +222,7 @@ def do_sep_edit(data: str) -> str:
 
         elif not (form_modified or icon_data.ready):
             add_msg_warning("dataUnmodified", ui_db_texts)
-            ui_db_texts[UITextsKeys.Msg.display_only_msg] = True
+            ui_db_texts.display_msg_only = True
 
         else:
             task_code += 1  # 511
@@ -283,13 +283,13 @@ def do_sep_edit(data: str) -> str:
         jHtml = process_template(
             tmpl_ffn,
             form=fform,
-            **ui_db_texts.dict(),
+            **ui_db_texts.data(),
             **ui_select_lists,
             **form_on_close,
         )
 
     except JumpOut:
-        jHtml = process_template(tmpl_ffn, **ui_db_texts.dict())
+        jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
 
     except Exception as e:
         jHtml = get_ups_jHtml("sepEditException", ui_db_texts, task_code, e, task_code, sep_fullname)

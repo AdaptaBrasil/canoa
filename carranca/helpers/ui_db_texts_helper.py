@@ -16,10 +16,11 @@ TODO:
 from flask_login import current_user
 
 from typing import TypeAlias, Optional, Tuple
-from .pw_helper import is_someone_logged
+from .pw_helper import is_anyone_logged
 from .py_helper import is_str_none_or_empty
 from .types_helper import DBTexts, OptStr
 from ..common.UIDBTexts import UIDBTexts
+from ..common.UITextsKeys import UITextsKeys
 from ..common.app_constants import APP_LANG
 
 # === Global 'constants' for HTML ui flask forms =============
@@ -27,47 +28,6 @@ from .. import global_ui_texts_cache  # it is used, ignore warn
 
 
 # ==== UI Texts Constants ====================================
-class UITextsKeys:
-
-    class Msg:
-        info = "msgInfo"
-        warn = "msgWarn"
-        error = "msgError"
-        success = "msgSuccess"
-        fatal = "msgFatal"
-        tech = "msgTech"
-        # display only message, no form, inputs/buttons (see .carranca/templates/layouts/form.html.j2 & dialog.html.j2)
-        display_only_msg = "msgOnly"
-
-    class Page:
-        title = "pageTitle"
-
-    class Form:  # & dialog
-        title = "formTitle"
-        icon_file = "iconFile"  # only the icon's name
-        icon_url = "iconFileUrl"  # url of an png/svg icon dlg_var_icon_url = iconFileUrl, dlg-var-icon-id
-        icon_css = ""  # TODO
-        date_format = "userDateFormat"
-        # This button is only visible when msg_only is True OR is a Dialog/Document (see document.html.j2)
-        btn_close = "btnCloseForm"
-
-    class Fatal:
-        no_db_conn = "NoDBConnection"
-        code = "UpsErrorCode"
-        where = "UpsOffendingDef"
-        http_code = "UpsHttpCode"
-
-    class Section:
-        """See table ui_sections.nameThis two sections are special (id=1 & id=2):
-        as they group all msg error and msgs success"""
-
-        error = "secError"
-        success = "secSuccess"
-        # this is a special key that has the name of the section loaded in db_Texts,
-        # see  get_section
-        name = "__section_name__"
-
-
 cache_key: TypeAlias = Tuple[str, str, Optional[str]]
 
 
@@ -125,7 +85,7 @@ class MsgNotFound:
 
 # === current user's locale  ================================
 def ui_texts_locale() -> str:
-    locale = current_user.lang if is_someone_logged() else APP_LANG
+    locale = current_user.lang if is_anyone_logged() else APP_LANG
     return locale
 
 
@@ -133,7 +93,9 @@ def ui_texts_locale() -> str:
 def __get_ui_texts_query(cols: str, table_search: UITexts_TableSearch) -> str:
     # returns Select query for locale, section and, eventually, for only one item.
     # Use SQL lower(item) is better than item.lower because uses db locale.
-    optional_item_filter = "" if table_search.item is None else f" and (item_lower = lower('{table_search.item}'))"
+    optional_item_filter = (
+        "" if table_search.item is None else f" and (item_lower = lower('{table_search.item}'))"
+    )
 
     # ** ⚠️ ******************************************************************
     #  don't use <schema>.table_name. Must set
@@ -279,7 +241,7 @@ def get_db_texts(section_name: str) -> DBTexts:
             UITextsKeys.Msg.warn,
             UITextsKeys.Msg.error,
             UITextsKeys.Msg.fatal,
-            UITextsKeys.Msg.display_only_msg,
+            UITextsKeys.Msg.display_msg_only,
         ]:
             if k in db_texts:  # DEBUG
                 print(f"Unexpected item en section {section_name}: {k}.")
@@ -308,12 +270,12 @@ def add_msg_success(item: str, ui_db_texts: UIDBTexts, *args) -> str:
     (of the vw_ui_texts wonderful view)
     and adds the pair to `texts` => texts.add(text, 'msgSuccess')
 
-    Finally sets texts[UITxtKey.Msg.display_only_msg] = True, so the form only displays
+    Finally sets ui_db_texts.Msg.display_msg_only = True, so the form only displays
     the message (no other form inputs)
 
     """
     msg = _add_msg(item, UITextsKeys.Section.success, UITextsKeys.Msg.success, ui_db_texts, *args)
-    ui_db_texts[UITextsKeys.Msg.display_only_msg] = True
+    ui_db_texts.display_msg_only = True
     return msg
 
 
@@ -321,17 +283,12 @@ def add_msg_final(item: str, ui_db_texts: UIDBTexts, *args) -> str:
     """
     TODO: fatal
     Same as add_msg_error, but sets
-    texts[UITxtKey.Msg.display_only_msg] = True,
+    ui_db_texts.display_msg_only = True,
     so the form only displays the message (no other form inputs)
     """
     msg = add_msg_error(item, ui_db_texts, *args)
-    ui_db_texts[UITextsKeys.Msg.display_only_msg] = True
+    ui_db_texts.display_msg_only = True
     return msg
-
-
-# def get _msg_error(item: str, ui_db_texts: UIDBTexts) -> str:
-#     # returns text for the item/'sec_Error' pair
-#     return add_msg_error(item, ui_db_texts)
 
 
 # eof

@@ -55,7 +55,7 @@ def scm_export_db(uiact_rsp: UiActResponse) -> JinjaGeneratedHtml:
 
         task_code += 1
         _schemas = schema_data.schemas
-        for file  in file_data.records:
+        for file in file_data.records:
             ffn = UserFolders(file.user_id).file_full_name(file.file_origin, file.file_name)
             if (scm := next((item for item in _schemas if item["id"] == file.scm_id), None)) is None:
                 scm_missing.append(f"{file.scm_id}")
@@ -95,7 +95,7 @@ def scm_export_db(uiact_rsp: UiActResponse) -> JinjaGeneratedHtml:
             return file_response
 
         task_code += 1
-        jHtml = process_template(tmpl_ffn, **ui_db_texts.dict())
+        jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
 
     except Exception as e:
         jHtml = get_ups_jHtml("exportException", ui_db_texts, task_code, e, task_code)

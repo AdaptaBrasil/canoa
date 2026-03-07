@@ -37,6 +37,12 @@ Spell:ignore endmacro preid onclick
 {# -- Submit Button -- #}
 {% macro btn_submit(form_id, btn_id, caption, extra='') %}
 <button type="submit" form="{{form_id}}" id="{{btn_id}}" class="form-main-btn form-submit" {{extra}}>
+    {# --
+        The default caption is in English:
+            it is understandable for the user
+            and also indicates that
+            the button is awaiting a value from the developer.
+      -- #}
     {{caption | default('Save')}}
 </button>
 {% endmacro %}

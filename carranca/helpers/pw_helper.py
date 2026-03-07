@@ -52,30 +52,32 @@ def verify_pass(provided_password: str, stored_password: str) -> bool:
     return stored_pwd_hashed == provided_pwd_hashed
 
 
-def is_someone_logged() -> bool:
+def is_anyone_logged() -> bool:
     # mgd:
     # in some context, current_user is an 'invalid pointer'
     # from flask_login import current_user
 
-    logged = False
+    anyone_logged = False
     try:
-        logged = False if current_user is None else current_user.is_authenticated and (current_user.id > 0)
+        anyone_logged = (
+            False if current_user is None else current_user.is_authenticated and (current_user.id > 0)
+        )
     except:
-        logged = False
+        anyone_logged = False
 
-    return logged
+    return anyone_logged
 
 
 def nobody_is_logged() -> bool:
-    return not is_someone_logged()
+    return not is_anyone_logged()
 
 
 def internal_logout():
     from flask_login import logout_user
 
-    if is_someone_logged():
+    if is_anyone_logged():
         logout_user()
-        
+
     return
 
 

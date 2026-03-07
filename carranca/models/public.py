@@ -26,7 +26,7 @@ from sqlalchemy import (
     ForeignKey,
     LargeBinary,
 )
-from sqlalchemy.orm import relationship, joinedload
+from sqlalchemy.orm import relationship, joinedload, Mapped, mapped_column
 from flask_login import UserMixin
 
 from ..helpers.db_records.DBRecords import DBRecords
@@ -45,27 +45,40 @@ class User(SQLABaseTable, UserMixin):
     __tablename__ = "users"
 
     # https://docs.sqlalchemy.org/en/13/core/type_basics.html
+    # 2026-02-20:
+    # `mapped_column` is used to avoid the need of type annotations in the class properties,
+    #     which are already defined by the Column() calls
+    # see carranca\public\access_control\password_recovery.py
+    # for example of how it simplifies the code and avoids mistakes in type annotations
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     id_role = Column(Integer, ForeignKey("roles.id"))
     lang = Column(String(8), default=APP_LANG)
     username = Column(String(100), unique=True)
     username_lower = Column(String(100), Computed(""))
     email = Column(String(64), unique=True)
-    disabled = Column(Boolean, default=False)
+    disabled: Mapped[bool] = mapped_column(Boolean, default=False)
 
     password = Column(LargeBinary)
     # OBSOLETE
     # mgmt_sep_id = Column(Integer, unique=True)
     last_login_at = Column(DateTime, nullable=True)
-    recover_email_token = Column(String(100), nullable=True, unique=True)
+    # this columns names are confusing, they are for password recovery process, not for email confirmation
+    # It should be renamed to "recover_pw_token" and "recover_pw_token_at"
+    recover_email_token: Mapped[str] = mapped_column(String(100), nullable=True, unique=True)
     recover_email_token_at = Column(DateTime, Computed(""))
+    # this columns names are confusing, they are for login failures
     password_failures = Column(Integer, default=0)
     password_failed_at = Column(DateTime)
 
-    email_confirmed = Column(Boolean, Computed("email_confirmed", persisted=True))
+    # 2026-01
+    verify_email_token = Column(String(8), nullable=True, unique=False)
+    verify_email_sent_at = Column(DateTime, nullable=True)
+
+    email_confirmed: Mapped[bool] = mapped_column(Boolean, Computed("email_confirmed", persisted=True))
 
     role = relationship("Role", back_populates="users")
-    debug = Column(Boolean, default=False)
+    debug: Mapped[bool] = mapped_column(Boolean, default=False)
 
     def __init__(self, **kwargs):
         for property, value in kwargs.items():

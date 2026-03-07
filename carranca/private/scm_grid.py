@@ -16,7 +16,7 @@ from ..helpers.jinja_helper import JinjaGeneratedHtml, process_template
 from ..helpers.route_helper import MTD_POST, get_private_response_data, init_response_vars
 from ..helpers.js_consts_helper import js_grid_col_meta_info, js_ui_dictionary
 from ..helpers.ui_db_texts_helper import add_msg_final
-from ..common.app_error_assistant import ModuleErrorCode, AppStumbled, HTTPStatusCode
+from ..common.app_error_assistant import ModuleErrorCode, AppStumbled, HTTP_StatusCode
 from ..models.private_1.SchemaGrid import SchemaGrid
 
 
@@ -24,6 +24,7 @@ def get_scm_grid() -> JinjaGeneratedHtml:
 
     jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SCM_GRID)
     try:
+
         def _scm_data_fetch(col_names: List[str]) -> List[SchemaGrid]:
             scm_rows = SchemaGrid.get_schemas(col_names)
             for record in scm_rows:
@@ -36,7 +37,7 @@ def get_scm_grid() -> JinjaGeneratedHtml:
 
         task_code += 1  # 2
         if not is_get:
-            msg = f"{add_msg_final(HTTPStatusCode.CODE_405.value, ui_db_texts)} (Requested: ${MTD_POST}.)"
+            msg = f"{add_msg_final(HTTP_StatusCode.CODE_405.value, ui_db_texts)} (Requested: ${MTD_POST}.)"
             raise AppStumbled(msg, task_code, False, True)
 
         task_code += 1  # 3
@@ -51,7 +52,7 @@ def get_scm_grid() -> JinjaGeneratedHtml:
             tmpl_ffn,
             scm_data=scm_data.to_list(),
             cargo_keys=class_to_dict(UiActResponseKeys),
-            **ui_db_texts.dict(),
+            **ui_db_texts.data(),
             **js_ui_dict,
         )
 

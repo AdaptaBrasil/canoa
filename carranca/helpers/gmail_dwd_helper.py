@@ -1,8 +1,15 @@
-# gmail_dwd_helper.py
 """
+Google Domain-Wide Delegation
+is configured and working correctly.
+
+mgd 2025.10.
+
 Service Account authentication handler with Domain-Wide Delegation (DWD) for the Gmail API.
 This module uses a key file to impersonate a user within a Google Workspace domain.
 """
+
+# cSpell: ignore googleapiclient creds
+
 from os import path
 from typing import Type
 
@@ -20,9 +27,7 @@ except ImportError as e:
 SERVICE_ACCOUNT_FILENAME = "canoa-gmail-key.json"
 
 
-def get_gmail_service_dwd(
-    storage_path: str, sender_email: str, scopes: list[str]
-) -> Type[build]:
+def get_gmail_service_dwd(storage_path: str, sender_email: str, scopes: list[str]) -> Type[build]:
     """
     Authenticates using Service Account with DWD and returns the Gmail API service object.
 
@@ -48,18 +53,15 @@ def get_gmail_service_dwd(
     service_account_file = path.join(storage_path, SERVICE_ACCOUNT_FILENAME)
 
     if not path.isfile(service_account_file):
-        raise FileNotFoundError(
-            f"Gmail service account key not found at {service_account_file}"
-        )
+        raise FileNotFoundError(f"Gmail service account key not found at {service_account_file}")
 
     # Core DWD logic: The 'subject' parameter specifies the user to impersonate.
-    creds = Credentials.from_service_account_file(
-        service_account_file, scopes=scopes, subject=sender_email
-    )
+    creds = Credentials.from_service_account_file(service_account_file, scopes=scopes, subject=sender_email)
 
     # Build the Gmail API service
     service = build("gmail", "v1", credentials=creds)
 
     return service
 
-#eof
+
+# eof

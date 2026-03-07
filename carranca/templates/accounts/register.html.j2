@@ -15,13 +15,14 @@ mgd
 {% set dlg_cls_size= '' %}
 {% extends "./layouts/form.html.j2" %}
 
+{# ╒════════════════ Inputs ════════════════╕ #}
 {% block frm_blc_inputs %}
-{% if form_display_ui %}
+
 <!-- { User Name -->
 <div class="form-group">
     <label class="form-label" inert for="{{form.username.name}}">{{ userLabel }}</label>
     <div class="input-group">
-        <span class="input-group-text"> <i class="fas fa-user"></i></span>
+        <span class="input-group-text"><i class="fas fa-user"></i></span>
         {{ form.username() }}
     </div>
 </div>
@@ -31,9 +32,7 @@ mgd
 <div class="form-group mt-3">
     <label class="form-label" inert for="user_email">{{ emailLabel }}</label>
     <div class="input-group">
-        <span class="input-group-text">
-            <i class="fas fa-envelope"></i>
-        </span>
+        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
         {{ form.email(class="form-control", type="email", id="user_email") }}
     </div>
 </div>
@@ -41,17 +40,23 @@ mgd
 
 <!-- { Password  -->
 <div class="form-group mt-3">
-    <label class="form-label" inert for="password">{{ passwordLabel }}</label>
+    <label class="form-label" inert for="{{form.password.name}}">{{ passwordLabel }}</label>
     <div class="input-group">
-        <span class="input-group-text">
-            <i class="fas fa-unlock-alt"></i>
-        </span>
-        {{ form.password(class="form-control", type="password", id="password") }}
+        <span class="input-group-text"><i class="fas fa-unlock-alt"></i></span>
+        {{ form.password() }}
     </div>
 </div>
 <!-- Password } -->
 
-<div class="row mt-3">
+
+{% endblock frm_blc_inputs %}
+{# ╘════════════════ Inputs ════════════════╛ #}
+
+{# ╒════════════════ Options ═══════════════╕ #}
+{% block dlg_blc_footer_options %}
+{# Replaced Bootstrap class= "row" with style= "display: flex; flex-wrap: wrap;" to avoid gutter #}
+
+<div style="display: flex; flex-wrap: wrap;" class="row mt-0 ps-0 pe-0">
     <div class="col-1" style="width: 1px">
         <input class="form-check-btn" type="checkbox" id="id-termsAccepted" required>
     </div>
@@ -63,12 +68,12 @@ mgd
         <a href="docs/privacyPolicy" class="form-link">{{ privacyPolicy }}</a>
     </div>
 
-    <div class="col-3 text-right">
+    <div class="col-3 text-end">
         <a class="form-link" href="{{ public_route('login') }}">{{ gotoLogin }}</a>
     </div>
 </div>
+{% endblock dlg_blc_footer_options %}
+{# ╘════════════════ Options ═══════════════╛ #}
 
-{% endif %}
-{% endblock frm_blc_inputs %}
 
 {# eof #}

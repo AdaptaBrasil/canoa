@@ -25,6 +25,7 @@ structure:
 mgd
 --------------------------------------- -#}
 {#- cSpell:ignore endwith fontawesome stylesheet endfor jinja -#}
+
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -75,7 +76,7 @@ mgd
     </header>
 
     <nav>
-        {% if jinja_user() %}
+        {% if is_anyone_logged() %}
         {# ╒═══════════════ Base Navigator ═══════════════╕ #}
         {% set _nav_button_state= nav_button_state | default('disabled') %}
         {% set _nav_sub_menu = nav_sub_menu | default(False) %}

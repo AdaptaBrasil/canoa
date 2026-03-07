@@ -34,6 +34,7 @@
           so it can only be used once. See
           helpers\ui_db_texts_helper.py_add_msg
         » ui_texts: ui_texts[UITextsKeys.Msg.error] stays fix
+        » remove _msg_not_found()
 
         » Dialog
             - ups_handler dependes of dialog.html.j2 (if it has error...)
@@ -52,7 +53,15 @@
             - drop columns log_user_sep.sep_new, id_sep_old
             - SchemaSEP
 
+        » Flask 2026.02.20
+            {% if dlg_forms_post_route } # New eg  private_route('auto_email_user')
+                {% block dlg_blc_forms %}
 
+                    {% from "includes/_action_forms_and_btns.html.j2" import action_form__submit_cargo %}
+                    {{ action_form__submit_cargo(dlg_submit_form_id,  dlg_forms_post_route ) }}
+
+                {% endblock dlg_blc_forms %}
+            {% endif %}
 
 -----------------------------------------------------------
   Logbook
@@ -60,8 +69,21 @@
 -----------------------------------------------------------
 
    	A user can not be disabled if it has a SEP, cannot be assigned a sep if is disabled
+    Check  carranca\templates\private\sep_mgmt.html.j2
+      if too many params {{ action_form__submit_cargo(dlg_submit_form_id, private_route('sep_mgmt'), 'post', "onsubmit='return doGridCargo()'")}}
+    todo:
+        
 
-
+------- 2026 - January -------------
+    - Verified email issue #2
+        Users Table
+        columns renamed:
+            current_email_changed_at => email_changed_at
+            current_email_confirmed_at => email_confirmed_at
+        new columns
+            verify_email_token
+            verify_email_sent_at
+    - Review tables 'users' trigger ( fix => if (x <> y) then )
 
 
 ------- 2025 - December ----------
@@ -297,7 +319,7 @@
 2025-08-26 β 4.75 [Published] Check all menu procedures
     - Check all menu procedures:
        · Correct selected row in Schema Edit Grid
-       · Google Api may have a mismatch module (further stud, needed)
+       · Google Api may have a mismatch module (further study needed)
          google-api-python-client
        · View vw_mgmt_email_sep 'lost' edit permission (?)
          granted again

@@ -79,7 +79,7 @@ def receive_file() -> JinjaTemplate:
             {"code": sep.code, "fullname": sep.fullname, "icon_url": sep.icon_url} for sep in seps
         ]
         tmpl = process_template(
-            tmpl_ffn, form=fform, seps=seps_list, **ui_db_texts.dict(), **js_ui_dictionary()
+            tmpl_ffn, form=fform, seps=seps_list, **ui_db_texts.data(), **js_ui_dictionary()
         )
         return tmpl
 
@@ -213,7 +213,7 @@ def receive_file() -> JinjaTemplate:
         sidekick.display.fatal(f"{RECEIVE_FILE_DEFAULT_ERROR}: Code {error_code}, Message: {e}.")
         msg = add_msg_final("receiveFileException", ui_db_texts, task_code)
         _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)
-        jHtml = process_template(tmpl_ffn, **ui_db_texts.dict())
+        jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
 
     return jHtml
 

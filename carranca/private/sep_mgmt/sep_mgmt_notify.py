@@ -20,14 +20,14 @@ from sqlalchemy.orm import Session
 from carranca import global_sqlalchemy_scoped_session
 from ...models.private import MgmtEmailSep
 from ...common.UIDBTexts import UIDBTexts
-from ...helpers.types_helper import SepMgmtReturn, OptStr
+from ...helpers.types_helper import Sep_mgmt_return, Opt_str
 from ...helpers.email_helper import RecipientsDic, RecipientsList, send_email
 from ...common.app_context_vars import sidekick
 
 from ...common.app_error_assistant import proper_user_exception
 
 
-def mgmt_notify(batch_code: str, ui_db_texts: UIDBTexts, task_code: int) -> SepMgmtReturn:
+def mgmt_notify(batch_code: str, ui_db_texts: UIDBTexts, task_code: int) -> Sep_mgmt_return:
     """
     Send an email for each user with a
     'new' SEP or if it was removed
@@ -43,18 +43,19 @@ def mgmt_notify(batch_code: str, ui_db_texts: UIDBTexts, task_code: int) -> SepM
             if not mgmt_email_list:
                 return None, ui_db_texts["emailNone"], task_code
 
-            def _send_email(content_key: str, email: str, to_user: str, sep: str) -> OptStr:
+            def _send_email(content_key: str, email: str, to_user: str, sep: str) -> Opt_str:
                 msg_error = ""  # maybe is a second try to send email, so clear it
                 try:
-                    recipients = RecipientsDic(to=RecipientsList(email, to_user))
+                    recipients = RecipientsDic(RecipientsList(email, to_user))
                     # Prezado {0},<br><br>A partir desta data, o Setor Estratégico '{1}' ...
-                    content = ui_db_texts.format(content_key, to_user, sep)
-                    subject = ui_db_texts["emailSubject"]
-                    if not send_email(recipients, subject, content):
+                    data = {
+                        "subject": ui_db_texts["emailSubject"],
+                        "content": ui_db_texts.format(content_key, to_user, sep),
+                    }
+                    if not send_email(recipients, data):
                         msg_error = ui_db_texts["emailSilentError"]
 
                 except Exception as e:
-                    # error_count += 1
                     msg_error = str(e)
                 return msg_error
 
@@ -62,9 +63,8 @@ def mgmt_notify(batch_code: str, ui_db_texts: UIDBTexts, task_code: int) -> SepM
                 return f"{email}:[{(error if error else 'OK')}]/n"
 
             for item in mgmt_email_list:
+                new_error, old_error = (None, None)
                 item.email_at = func.now()
-                new_error = None
-                old_error = None
                 sep = item.sep_fullname
                 if item.new_user_name is not None:
                     new_error = _send_email("emailSetNew", item.new_user_email, item.new_user_name, sep)
@@ -77,14 +77,19 @@ def mgmt_notify(batch_code: str, ui_db_texts: UIDBTexts, task_code: int) -> SepM
                 elif new_error is None and old_error is None:
                     item.email_error = None
                 else:
-                    item.email_error = (_e(item.new_user_email, new_error) + _e(item.old_user_email, old_error)).strip()
+                    item.email_error = (
+                        _e(item.new_user_email, new_error) + _e(item.old_user_email, old_error)
+                    ).strip()
 
+            task_code += 1
             db_session.commit()
 
         except Exception as e:
+            # TODO: get_ups_jHtml
             db_session.rollback()
             msg_error = ui_db_texts.format(
                 "emailException",
+                batch_code,
                 task_code,
                 proper_user_exception(e, task_code),
             )

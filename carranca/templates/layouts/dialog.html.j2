@@ -56,9 +56,9 @@ mgd
 
 {% set dlg_icon_size= dlg_icon_size | default('32px') %}
 {#
-   SepIconConfig.content_for() is a function that determines the default
-   size for icons based on application settings.
-   Ensure this matches the expected dimensions for dialog icons.
+SepIconConfig.content_for() is a function that determines the default
+size for icons based on application settings.
+Ensure this matches the expected dimensions for dialog icons.
 #}
 
 {% set dlg_bke_only_msg= msgOnly or False %}
@@ -67,7 +67,8 @@ mgd
 
 {# ╒═════════════════════════════ Main ═════════════════════════════╕ #}
 {% block base_blc_main %}
-<div id="{{dlg_main_id}}" style="{{ dlg_var_style|default('display: block;') }}" class="modal {% if not (dlg_var_v_centered | default(False)) %}{{ dlg_cls_top | default('mt-5') }}{% endif -%}">
+<div id="{{dlg_main_id}}" style="{{ dlg_var_style|default('display: block;') }}"
+    class="modal {% if not (dlg_var_v_centered | default(False)) %}{{ dlg_cls_top | default('mt-5') }}{% endif -%}">
 
     {# ╒════════════════════════ Dialog ════════════════════════════╕ #}
     <div class="modal-dialog {{ dlg_cls_size|default('dlg-width') }}
@@ -75,113 +76,116 @@ mgd
         {%- if dlg_var_scroll %} modal-dialog-scrollable {% endif %}
     ">
 
-    {# ╒════════════════════════ Content ═══════════════════════════╕ #}
-    <div class="modal-content">
-        {# ╒════════════════════ Pillow ════════════════════════════╕ #}
-        <div id="{{dlg_sleep_id}}"></div>
-        {# ╘════════════════════ Pillow ════════════════════════════╛ #}
+        {# ╒════════════════════════ Content ═══════════════════════════╕ #}
+        <div class="modal-content">
+            {# ╒════════════════════ Pillow ════════════════════════════╕ #}
+            <div id="{{dlg_sleep_id}}"></div>
+            {# ╘════════════════════ Pillow ════════════════════════════╛ #}
 
-        {# ╒════════════════════ Header ════════════════════════════╕ #}
-        <div class="modal-header dlg-header">
-            <h5 class="modal-title dlg-title">
-                {% if dlg_var_icon_url %}
-                    <span class="{%- if 'sep_icons' in dlg_var_icon_url %}dlg-sep_icon-back{% else %}dlg-icon-back{% endif %}">
-                        <img id="{{dlg_icon_id}}" src="{{dlg_var_icon_url}}" alt="[!]&nbsp;" height="{{dlg_icon_size}}" width="{{dlg_icon_size}}">
+            {# ╒════════════════════ Header ════════════════════════════╕ #}
+            <div class="modal-header dlg-header">
+                <h5 class="modal-title dlg-title">
+                    {% if dlg_var_icon_url %}
+                    <span
+                        class="{%- if 'sep_icons' in dlg_var_icon_url %}dlg-sep_icon-back{% else %}dlg-icon-back{% endif %}">
+                        <img id="{{dlg_icon_id}}" src="{{dlg_var_icon_url}}" alt="[!]&nbsp;" height="{{dlg_icon_size}}"
+                            width="{{dlg_icon_size}}">
                     </span>
+                    {% endif %}
+                    <span inert>{{formTitle|default(app_name)}}</span>
+                </h5>
+                {% if dlg_close_btn_visible %}
+                <button type="submit" title="Fechar" id="{{dlg_close_x_id}}" form="{{dlg_close_form_id}}"
+                    class="btn-close"></button>
                 {% endif %}
-                <span inert>{{formTitle|default(app_name)}}</span>
-            </h5>
-            {% if dlg_close_btn_visible %}
-                <button type="submit" title="Fechar" id="{{dlg_close_x_id}}" form="{{dlg_close_form_id}}" class="btn-close"></button>
-            {% endif %}
-        </div>
-        {# ╘════════════════════ Header ════════════════════════════╛ #}
-
-        {# ╒═════════════════════ Body ═════════════════════════════╕ #}
-        <div class="modal-body dlg-body {% block dlg_blc_body_cls_tweak %}{% endblock %}">
-            {# ╒═════════ Dialog Body ═════════╕ #}
-            {% block dlg_blc_body %}{% endblock %}
-            {# ╘═════════ Dialog Body ═════════╛ #}
-        </div>
-        {# ╘═════════════════════ Body ═════════════════════════════╛ #}
-
-        {# ╒═════════════════════ Dialog Footer ════════════════════╕ #}
-        {% block dlg_blc_footer %}
-        <div class="modal-footer justify-content-center align-items-center py-2 dlg-footer">
-
-            {# ╒═════════ Dialog Footer Buttons═════════╕ #}
-            <div id="{{dlg_btns_container_id}}" class="row justify-content-center g-2">
-            {% block dlg_blc_footer_buttons %}{% endblock %}
             </div>
-            {# ╘═════════ Dialog Footer Buttons═════════╛ #}
+            {# ╘════════════════════ Header ════════════════════════════╛ #}
 
-            {# ╒════════ Dialog Footer Option ══════════╕ #}
-            <div id="{{dlg_options_container_id}}" class="row justify-content-center mt-1 w-100">
-            {% block dlg_blc_footer_options %}{% endblock %}
+            {# ╒═════════════════════ Body ═════════════════════════════╕ #}
+            <div class="modal-body dlg-body {% block dlg_blc_body_cls_tweak %}{% endblock %}">
+                {# ╒═════════ Dialog Body ═════════╕ #}
+                {% block dlg_blc_body %}{% endblock %}
+                {# ╘═════════ Dialog Body ═════════╛ #}
             </div>
-            {# ╘════════ Dialog Footer Option ══════════╛ #}
+            {# ╘═════════════════════ Body ═════════════════════════════╛ #}
+
+            {# ╒═════════════════════ Dialog Footer ════════════════════╕ #}
+            {% block dlg_blc_footer %}
+            <div class="modal-footer justify-content-center align-items-center py-2 dlg-footer">
+
+                {# ╒═════════ Dialog Footer Buttons═════════╕ #}
+                <div id="{{dlg_btns_container_id}}" class="row justify-content-center g-2">
+                    {% block dlg_blc_footer_buttons %}{% endblock %}
+                </div>
+                {# ╘═════════ Dialog Footer Buttons═════════╛ #}
+
+                {# ╒════════ Dialog Footer Option ══════════╕ #}
+                <div id="{{dlg_options_container_id}}" class="row justify-content-center mt-1 w-100">
+                    {% block dlg_blc_footer_options %}{% endblock %}
+                </div>
+                {# ╘════════ Dialog Footer Option ══════════╛ #}
+
+            </div>
+            {% endblock dlg_blc_footer %}
+            {# ╘═════════════════════ Dialog Footer ════════════════════╛ #}
 
         </div>
-        {% endblock dlg_blc_footer %}
-        {# ╘═════════════════════ Dialog Footer ════════════════════╛ #}
-
     </div>
-</div>
-{% endblock base_blc_main %}
+    {% endblock base_blc_main %}
 
 
-{% block base_blc_body_js %}
-<script id="before_page_close">
-    /** @type {CanoaGlobal} */
-    window.Canoa = {
-        dataModified: false,
-        submitImmediately: false,
-    }
-    const dlgm = document.getElementById("{{ dlg_main_id }}");
-
-    const sleep = (wait) => {
-        wait = wait ?? 80;
-        document.body.style.cursor = "wait";
-        const dlgs = document.getElementById("{{ dlg_sleep_id }}");
-        dlgs?.classList.add('dlg-sleep');
-        if (wait){
-            setTimeout(() => {dlgm.style.display = 'none';}, wait);
+    {% block base_blc_body_js %}
+    <script id="before_page_close">
+        /** @type {CanoaGlobal} */
+        window.Canoa = {
+            dataModified: false,
+            submitImmediately: false,
         }
-    }
+        const dlgm = document.getElementById("{{ dlg_main_id }}");
 
-    window.addEventListener('beforeunload', (event) => {
-        {# TODO: sessionStorage.getItem("canoa_session_started") #}
-        if (Canoa.dataModified) {
-            event.preventDefault();
+        const sleep = (wait) => {
+            wait = wait ?? 80;
+            document.body.style.cursor = "wait";
+            const dlgs = document.getElementById("{{ dlg_sleep_id }}");
+            dlgs?.classList.add('dlg-sleep');
+            if (wait) {
+                setTimeout(() => { dlgm.style.display = 'none'; }, wait);
+            }
         }
-    });
 
-    document.getElementById("{{dlg_submit_form_id}}")?.addEventListener('submit', (e) => {
-        sleep((Canoa.submitImmediately? 10: 600));
-    });
+        window.addEventListener('beforeunload', (event) => {
+            {# TODO: sessionStorage.getItem("canoa_session_started") # }
+            if (Canoa.dataModified) {
+                event.preventDefault();
+            }
+        });
 
-    document.getElementById("{{dlg_close_form_id}}")?.addEventListener('submit', (e) => {
-        if (e.submitter.id == '{{dlg_close_x_id}}') {
-            sleep();
-        } else if (!Canoa.dataModified || confirm("Perder as alterações?")) {
-            sleep();
-        } else {
-            e.preventDefault();
-        }
-    });
-</script>
+        document.getElementById("{{dlg_submit_form_id}}")?.addEventListener('submit', (e) => {
+            sleep((Canoa.submitImmediately ? 10 : 600));
+        });
 
-{# ╒═════════════ Dialog JS ══════════════╕ #}
-{% block dlg_blc_javascript %}{% endblock %}
-{# ╘═════════════ Dialog JS ══════════════╛ #}
+        document.getElementById("{{dlg_close_form_id}}")?.addEventListener('submit', (e) => {
+            if (e.submitter.id == '{{dlg_close_x_id}}') {
+                sleep();
+            } else if (!Canoa.dataModified || confirm("Perder as alterações?")) {
+                sleep();
+            } else {
+                e.preventDefault();
+            }
+        });
+    </script>
 
-{% endblock base_blc_body_js %}S
+    {# ╒═════════════ Dialog JS ══════════════╕ #}
+    {% block dlg_blc_javascript %}{% endblock %}
+    {# ╘═════════════ Dialog JS ══════════════╛ #}
 
-{% block base_blc_forms %}
+    {% endblock base_blc_body_js %}S
+
+    {% block base_blc_forms %}
     <form action="{{dlg_close_action_url}}" method="get" id="{{dlg_close_form_id}}"></form>
     {# ╒════════════ Dialog Forms ═════════╕ #}
     {% block dlg_blc_forms %}{% endblock %}
     {# ╘════════════ Dialog Forms ═════════╛ #}
-{% endblock base_blc_forms %}
+    {% endblock base_blc_forms %}
 
-{# eof #}
+    {# eof #}

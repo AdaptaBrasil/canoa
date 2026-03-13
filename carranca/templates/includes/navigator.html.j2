@@ -12,6 +12,7 @@ TODO Selected menu class-> active
 
 cSpell:ignore unselectable labelledby haspopup noopener noreferrer onclick elif
 cSpell:ignore semi-words: formul estrat gicos sess tojson jinja nbsp endfor j_user inser
+cSpell:ignore &ç ã gico endere
 --------------------------------------- #}
 <nav id="navbar-main" class="navbar fixed-top navbar-expand-sm shadow-sm px-2">
     {% set menu_header= app_menu('menuHeaders') %}
@@ -71,7 +72,7 @@ cSpell:ignore semi-words: formul estrat gicos sess tojson jinja nbsp endfor j_us
                         {# ╒════════ admin sep menu ═══════╕ #}
                         <li>
                             <a class="dropdown-item" href="{{private_route('sep_mgmt')}}"
-                                title="Abre grid de atribuiç&atilde;o de gestores a setores estrat&eacute;gicos">
+                                title="Abre grid de atribui&ccedil;&atilde;o de gestores a setores estrat&eacute;gicos">
                                 Gest&atilde;o
                             </a>
                         </li>
@@ -196,8 +197,8 @@ cSpell:ignore semi-words: formul estrat gicos sess tojson jinja nbsp endfor j_us
                         </li>
                         <li>
                             <a class="dropdown-item" href="{{private_route('auto_email_user')}}"
-                                title="{{ 'Lhe envia um e-mail de teste' if j_user.email_confirmed else 'Inicia o processo de verificação de e-mail' }}">
-                                {{ 'Confirma envio de e-mail' if j_user.email_confirmed else 'Verifica e-mail atual' }}
+                                title="{{ 'Lhe envia um e-mail de teste' if j_user.email_verified else 'Inicia o processo de verifica&ccedil;&atilde;o de e-mail' }}">
+                                {{ 'Confirma envio de e-mail' if j_user.email_verified else 'Verifica endere&ccedil;o de e-mail' }}
                             </a>
                         </li>
                         <li>

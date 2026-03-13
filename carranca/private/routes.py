@@ -10,21 +10,28 @@ mgd
 # cSpell: ignore werkzeug wtforms tmpl mgmt jscmd
 from flask import Blueprint, request
 from flask_login import login_required, current_user
+from werkzeug.exceptions import NotFound
 
 from typing import Tuple, Callable
-
+from ..models.public import get_user_where
 from ..helpers.py_helper import is_str_none_or_empty
 from ..helpers.pw_helper import internal_logout, nobody_is_logged
 from ..public.ups_handler import ups_handler
 from ..helpers.uiact_helper import UiActResponse, UiActResponseProxy, UiActResponseKeys
 from ..helpers.jinja_helper import process_template
-from ..helpers.types_helper import JinjaGeneratedHtml, JinjaTemplate, JsonText
+from ..helpers.types_helper import (
+    NEW_FLASK_RESPONSE,
+    Jinja_generated_html,
+    FlaskResponse,
+    Json_text,
+    Route_response,
+)
 from ..helpers.js_consts_helper import js_form_cargo_id, js_form_sec_check
 from ..helpers.route_helper import (
     get_private_response_data,
     base_route_private,
     private_route,
-    is_method_get,
+    is_method_post,
     login_route,
     redirect_to,
     get_method,
@@ -77,18 +84,20 @@ def sep_mgmt():
         return sep_mgmt()
 
 
-def create_ups_tmpl(error: str, code: int = 0):
+def create_ups_jHtml(error: str, code: int = 0) -> Jinja_generated_html:
     _, tmpl_ffn, ui_texts = ups_handler(code, error)
-    tmpl = process_template(tmpl_ffn, **ui_texts)
-    return tmpl
+    jHtml = process_template(tmpl_ffn, **ui_texts)
+    return jHtml
 
 
-def uiact_response(code: str) -> Tuple[JinjaTemplate, UiActResponse]:  # | None]: Too many warns with None
+def uiact_response(
+    code: str,
+) -> Tuple[Jinja_generated_html, UiActResponse | None]:  # | None]: Too many warns with None
     """
     This func decodes a uiact response
     """
 
-    error_tmpl = ""
+    jHtml: Jinja_generated_html = ""
     uiact_rsp = None
     try:
         rqs_method = get_method()
@@ -96,42 +105,42 @@ def uiact_response(code: str) -> Tuple[JinjaTemplate, UiActResponse]:  # | None]
         def _get_error(param: str) -> str:
             return f"Unexpected uiact route parameter [{param}]."
 
-        def _get_result() -> Tuple[JinjaTemplate, UiActResponse | None]:
+        def _get_result() -> Tuple[Jinja_generated_html, UiActResponse | None]:
             uiact_rsp = None
-            error_tmpl: JinjaTemplate = ""
-            cmd_text: JsonText = (
+            jHtmlError: Jinja_generated_html = ""
+            cmd_text: Json_text = (
                 request.args.get(js_form_cargo_id, "")
                 if rqs_method == MTD_GET
                 else request.form.get(js_form_cargo_id, "")
             )
             if is_str_none_or_empty(cmd_text):
-                error_tmpl = create_ups_tmpl(_get_error("empty"))
+                jHtmlError = create_ups_jHtml(_get_error("empty"))
             elif not (uiact_rsp := UiActResponse(cmd_text)):
-                error_tmpl = create_ups_tmpl(_get_error("none"))
+                jHtmlError = create_ups_jHtml(_get_error("none"))
             elif is_str_none_or_empty(uiact_rsp.action):
-                error_tmpl = create_ups_tmpl(_get_error("action: ''"))
+                jHtmlError = create_ups_jHtml(_get_error("action: ''"))
 
-            return error_tmpl, uiact_rsp
+            return jHtmlError, uiact_rsp
 
         if rqs_method == MTD_POST and not is_str_none_or_empty(msg_error_key := js_form_sec_check()):
-            error_tmpl = create_ups_tmpl(msg_error_key)
+            jHtml = create_ups_jHtml(msg_error_key)
         elif code == js_form_cargo_id:
             # the code is send via a html form's input or on the parameter
-            error_tmpl, uiact_rsp = _get_result()
+            jHtml, uiact_rsp = _get_result()
         elif not is_str_none_or_empty(code):
             uiact_rsp = UiActResponse(code)
         else:
-            error_tmpl, uiact_rsp = _get_result()
+            jHtml, uiact_rsp = _get_result()
 
     except Exception as e:
         uiact_rsp = None
         _, tmpl_ffn, ui_texts = ups_handler(0, str(e), e)
-        error_tmpl = process_template(tmpl_ffn, **ui_texts)
+        jHtml = process_template(tmpl_ffn, **ui_texts)
 
-    return error_tmpl, uiact_rsp
+    return jHtml, uiact_rsp
 
 
-def grid_route(code: str, editor: str, show_grid: Callable) -> JinjaTemplate:
+def grid_route(code: str, editor: str, show_grid: Callable[[], Jinja_generated_html]) -> Route_response:
     """
     This func routes calls from a grid or to a grid. 8—|
     see sep_grid & scm_grid
@@ -140,16 +149,16 @@ def grid_route(code: str, editor: str, show_grid: Callable) -> JinjaTemplate:
     if nobody_is_logged():
         return redirect_to(login_route())
 
-    jHtml: JinjaGeneratedHtml = ""
-    error_tmpl, uiact_rsp = uiact_response(code)
+    jHtmlOrResp: Route_response = NEW_FLASK_RESPONSE
+    jHtmlError, uiact_rsp = uiact_response(code)
 
-    if error_tmpl:
-        jHtml = error_tmpl
+    if jHtmlError:
+        jHtmlOrResp = jHtmlError
     elif uiact_rsp and uiact_rsp.code == UiActResponseProxy.show:
-        jHtml = show_grid()
+        jHtmlOrResp = show_grid()
     elif uiact_rsp:
 
-        def _goto(item_code: str) -> str:
+        def _goto(item_code: str) -> FlaskResponse:
             url = private_route(editor, code=item_code)
             return redirect_to(url)
 
@@ -158,13 +167,13 @@ def grid_route(code: str, editor: str, show_grid: Callable) -> JinjaTemplate:
                 return _goto(UiActResponseProxy.add)
             case UiActResponseKeys.edit:
                 data = uiact_rsp.encode()
-                jHtml = _goto(data)
+                jHtmlOrResp = _goto(data)
             case UiActResponseKeys.delete:
-                jHtml = create_ups_tmpl("The `delete` procedure is under development.")
+                jHtmlOrResp = create_ups_jHtml("The `delete` procedure is under development.")
             case _:
-                jHtml = create_ups_tmpl(f"Unknown route action '{uiact_rsp.action}'.")
+                jHtmlOrResp = create_ups_jHtml(f"Unknown route action '{uiact_rsp.action}'.")
 
-    return jHtml
+    return jHtmlOrResp
 
 
 @login_required
@@ -204,9 +213,11 @@ def scm_export(code: str = "?"):
     if nobody_is_logged():
         return redirect_to(login_route())
 
-    error_tmpl, uiact_rsp = uiact_response(code)
-    if not is_str_none_or_empty(error_tmpl):
-        return error_tmpl
+    jHtmlError, uiact_rsp = uiact_response(code)
+    if not is_str_none_or_empty(jHtmlError) or uiact_rsp is None:
+        # `uiact_rsp is None`` is for typing hints
+        return jHtmlError
+
     elif uiact_rsp.code == UiActResponseProxy.show:
         from .scm_export_ui_show import scm_export_ui_show
 
@@ -286,7 +297,7 @@ def received_files_mgmt():
 
     if nobody_is_logged():
         return redirect_to(login_route())
-    elif not is_method_get():
+    elif is_method_post():
         return redirect_to(login_route())
     else:
         rid = request.args.get("id", type=int)  # Get 'id' from Request
@@ -316,27 +327,51 @@ def received_file_download():
 
 @login_required
 @bp_private.route("/auto_email_user", methods=MTD_BOTH)
-def auto_email_user() -> JinjaGeneratedHtml:
+def auto_email_user() -> Route_response:
     """
     Sends a test email to the user's registered address to verify
     email deliverability and sending engine functionality.
     """
-    jHtml = ""
+    from .email_token_process import token_has_expired
+
+    def _is_token_ready_to_verify(email: str) -> bool:
+        # get very fresh info
+        user_rec = get_user_where(email=email)
+        if not user_rec:
+            return False
+        elif user_rec.email_verified:
+            return True
+        elif is_str_none_or_empty(user_rec.verify_email_token):
+            return False
+        elif token_has_expired(user_rec.verify_email_sent_at):
+            return False
+        else:
+            return True
+
+    jHtml: Jinja_generated_html = ""
     if nobody_is_logged():
         return redirect_to(login_route())
 
-    elif current_user.email_confirmed:
+    elif current_user.email_verified:
+        # send a email to test process & address
         from .email_token_process import email_test_email
 
         jHtml = email_test_email(current_user.email, current_user.username)
-    elif is_method_get():
-        from .email_token_process import email_send_token
 
-        jHtml = email_send_token(current_user.email, current_user.username)
+    elif not _is_token_ready_to_verify(current_user.email):
+        # Start the process with an e-mail
+        from .email_token_process import send_token_and_verify
+
+        jHtml = send_token_and_verify(current_user.email, current_user.username)
+
+    elif is_method_post() and not is_str_none_or_empty(token_entered := request.form.get("token", "")):
+        from .email_token_process import verify_sent_token
+
+        jHtml = verify_sent_token(current_user.email, token_entered)
+
     else:
-        from .email_token_process import email_verify_token
-
-        jHtml = email_verify_token(current_user.email, current_user.username)
+        raise NotFound("The requested route or resource state is invalid.")
+        # invalid route
 
     return jHtml
 
@@ -361,7 +396,7 @@ def change_password():
 
 
 @bp_private.route("/logout")
-def logout():
+def logout() -> FlaskResponse:
     """
     Logout the current user
     and the page is redirect to

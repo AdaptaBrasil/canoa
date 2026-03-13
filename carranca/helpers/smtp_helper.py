@@ -11,9 +11,9 @@ from typing import Optional
 from flask_mail import Message
 
 from .py_helper import is_str_none_or_empty, get_params
-from .types_helper import UsualDict
+from .types_helper import Usual_dict
 from .email_helper import RecipientsDic, RecipientsList
-from .ui_db_texts_helper import get_section
+from .ui_db_texts_class import get_section
 from ..common.app_constants import APP_NAME
 from ..common.app_context_vars import sidekick
 from ..common.app_error_assistant import ModuleErrorCode
@@ -25,8 +25,8 @@ from ..common.app_error_assistant import ModuleErrorCode
 
 def _send_email(
     recipients: RecipientsDic,
-    texts_or_section: UsualDict | str,
-    text_values: Optional[UsualDict] = None,
+    texts_or_section: Usual_dict | str,
+    text_values: Optional[Usual_dict] = None,
     file_to_send_full_name: str = "",
     file_to_send_type: str = "",
 ) -> bool:
@@ -81,26 +81,32 @@ def _send_email(
         if isinstance(texts_or_section, dict):
             task_code += 1
             db_texts = texts_or_section.copy()
-        elif not is_str_none_or_empty(texts_or_section):
+        elif not isinstance(texts_or_section, str):
             task_code += 2
-            db_texts = get_section(texts_or_section)
-        else:
+            raise ValueError("`texts_or_section` must be either a dict or a str section name.")
+        elif is_str_none_or_empty(texts_or_section):
             task_code += 3
+            raise ValueError("`texts_or_section` must have value.")
+        else:
+            task_code += 4
+            db_texts = get_section(texts_or_section)
 
+        task_code += 5
         email_text = db_texts.get("text", "")  # no HTML content, just text
         email_content = db_texts.get("content", "")
         email_subject = db_texts.get("subject", APP_NAME)
 
         params = get_params(email_text) + get_params(email_content) + get_params(email_subject)
-        # if collision, text_values take precedence over db_texts
-        available = {**(db_texts or {}), **(text_values or {})}
-        missing = [p for p in params if p not in available]
-        if missing:
-            sidekick.display.error(f"Missing placeholders in body_values &| db_texts: {missing}")
+        if len(params) > 0:
+            # if collision, text_values take precedence over db_texts
+            available = {**(db_texts or {}), **(text_values or {})}
+            missing = [p for p in params if p not in available]
+            if missing:
+                sidekick.display.error(f"Missing placeholders in body_values &| db_texts: {missing}")
 
-        email_text = email_text.format(**available)
-        email_content = email_content.format(**available)
-        email_subject = email_subject.format(**available)
+            email_text = email_text.format(**available)
+            email_content = email_content.format(**available)
+            email_subject = email_subject.format(**available)
 
         task_code += 1
         sender = RecipientsList(sidekick.config.EMAIL_ORIGINATOR, APP_NAME).parse("")

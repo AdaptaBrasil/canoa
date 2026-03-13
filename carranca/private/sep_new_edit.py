@@ -15,9 +15,7 @@ status
 from flask import request
 from typing import Tuple, cast
 from sqlalchemy import func  # func.now() == server time
-from dataclasses import dataclass
 from werkzeug.utils import secure_filename
-from werkzeug.datastructures import FileStorage
 
 from .wtforms import SepEdit, SepNew, EmptyForm
 from .sep_icon import icon_refresh
@@ -41,7 +39,7 @@ from ..helpers.route_helper import (
     login_route,
     redirect_to,
 )
-from ..helpers.ui_db_texts_helper import (
+from ..helpers.ui_db_texts_class import (
     UITextsKeys,
     add_msg_success,
     add_msg_error,
@@ -212,7 +210,7 @@ def do_sep_edit(data: str) -> str:
             # msg {ext} [{hint}-{code}]
             raise Exception(
                 add_msg_error(
-                    "sepEditInvalidFormat",
+                    "sepInvalidFormat",
                     ui_db_texts,
                     SepIconMaker.ext,
                     icon_data.error_hint,
@@ -292,7 +290,7 @@ def do_sep_edit(data: str) -> str:
         jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
 
     except Exception as e:
-        jHtml = get_ups_jHtml("sepEditException", ui_db_texts, task_code, e, task_code, sep_fullname)
+        jHtml = get_ups_jHtml("sepEditException", ui_db_texts, task_code, e, sep_fullname)
 
     return jHtml
 

@@ -39,12 +39,15 @@ Sidekick
 # cSpell:ignore sqlalchemy mgd appcontext
 
 from flask import Flask, current_app
+from typing import TYPE_CHECKING
 from logging import Logger
 from datetime import datetime
 from flask_login import current_user
-
 from .Display import Display
-from ..config.BaseConfig import BaseConfig
+
+if TYPE_CHECKING:
+    from ..config.DynamicConfig import DynamicConfig  # Avoid Circular 2024.11.03
+    from ..private.AppUser import AppUser
 
 
 class Sidekick:
@@ -52,8 +55,7 @@ class Sidekick:
     A handy hub for sidekick objects for flask + Python (ƒ+py)
     """
 
-    def __init__(self, config: BaseConfig, display: Display):
-        from ..config.DynamicConfig import DynamicConfig  # Avoid Circular 2024.11.03
+    def __init__(self, config: "DynamicConfig", display: Display):
 
         # from ..models.public import User # Avoid early access
 

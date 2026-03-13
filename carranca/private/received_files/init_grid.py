@@ -9,8 +9,8 @@ mgd 2025-01-14 & 03-18
 
 # cSpell: ignore samp rqst dnld rprt
 
-from ...public.ups_handler import ups_handler, AppStumbled
-from ...helpers.types_helper import JinjaTemplate
+from ...public.ups_handler import get_ups_jHtml, AppStumbled
+from ...helpers.types_helper import Jinja_template
 from ...helpers.jinja_helper import process_template
 from ...helpers.route_helper import (
     get_private_response_data,
@@ -19,7 +19,7 @@ from ...helpers.route_helper import (
 )
 from ...common.app_context_vars import app_user
 from ...helpers.js_consts_helper import js_ui_dictionary
-from ...helpers.ui_db_texts_helper import UITextsKeys, add_msg_final
+from ...helpers.ui_db_texts_class import UITextsKeys
 from ...common.app_error_assistant import ModuleErrorCode
 
 from .fetch_users import fetch_user_s
@@ -27,7 +27,7 @@ from .fetch_records import fetch_record_s, ALL_USER_RECS
 from .constants import DOWNLOAD_ZIPFILE, DOWNLOAD_REPORT
 
 
-def init_grid(for_user: int) -> JinjaTemplate:
+def init_grid(for_user: int) -> Jinja_template:
 
     jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.RECEIVED_FILES_MGMT)
     try:
@@ -88,9 +88,7 @@ def init_grid(for_user: int) -> JinjaTemplate:
         )
 
     except Exception as e:
-        msg = add_msg_final("gridException", ui_db_texts, task_code)
-        _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)
-        jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
+        jHtml = get_ups_jHtml("gridException", ui_db_texts, task_code, e)
 
     return jHtml
 

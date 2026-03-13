@@ -12,6 +12,7 @@ from carranca import global_sqlalchemy_scoped_session, global_login_manager
 
 from flask import Request
 from typing import Optional, Any, List
+from datetime import datetime
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import ColumnExpressionArgument
@@ -65,17 +66,18 @@ class User(SQLABaseTable, UserMixin):
     last_login_at = Column(DateTime, nullable=True)
     # this columns names are confusing, they are for password recovery process, not for email confirmation
     # It should be renamed to "recover_pw_token" and "recover_pw_token_at"
-    recover_email_token: Mapped[str] = mapped_column(String(100), nullable=True, unique=True)
+    recover_email_token: Mapped[str | None] = mapped_column(String(100), nullable=True, unique=True)
     recover_email_token_at = Column(DateTime, Computed(""))
     # this columns names are confusing, they are for login failures
     password_failures = Column(Integer, default=0)
     password_failed_at = Column(DateTime)
 
     # 2026-01
-    verify_email_token = Column(String(8), nullable=True, unique=False)
-    verify_email_sent_at = Column(DateTime, nullable=True)
+    verify_email_token: Mapped[str | None] = mapped_column(String(8), nullable=True, unique=False)
+    verify_email_sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
-    email_confirmed: Mapped[bool] = mapped_column(Boolean, Computed("email_confirmed", persisted=True))
+    email_verified: Mapped[bool] = mapped_column(Boolean, Computed("email_verified", persisted=True))
+    # is is hidden column email_verified_at = Column(DateTime, nullable=True)
 
     role = relationship("Role", back_populates="users")
     debug: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -179,12 +181,13 @@ def get_user_where(**filter: Any) -> User:
             # user =  db_session.execute(stmt).scalar_one_or_none()
             user = db_session.query(User).options(joinedload(User.role)).filter_by(**filter).first()
         except Exception as e:
+            user = None
             sidekick.display.error(f"Error retrieving user {filter}: [{e}].")
 
     return user
 
 
-def persist_user(record: any, task_code: int = 1) -> None:
+def persist_user(record: User, task_code: int = 1) -> None:
     """
     Updates a user's record
     """

@@ -34,8 +34,8 @@ from ..models import SQLABaseTable
 from ..helpers.db_helper import db_fetch_rows, col_names_to_columns
 from ..helpers.py_helper import is_str_none_or_empty
 from ..helpers.user_helper import get_user_code
-from ..helpers.types_helper import OptListOfStr
-from ..private.SepIconMaker import SepIconMaker, SvgContent
+from ..helpers.types_helper import Opt_list_of_str
+from ..private.SepIconMaker import SepIconMaker, Svg_content
 from ..common.app_context_vars import sidekick, app_user
 from ..helpers.db_records.DBRecords import DBRecords
 
@@ -230,7 +230,7 @@ class Schema(SQLABaseTable):
         return row
 
     @staticmethod
-    def get_schemas(col_names: OptListOfStr = None, order_by: str = "") -> DBRecords:
+    def get_schemas(col_names: Opt_list_of_str = None, order_by: str = "") -> DBRecords:
         """
         Returns:
           All records from Schema table, optional of selected fields, order by the order_by, eg 'name ASC'
@@ -357,12 +357,12 @@ class Sep(SQLABaseTable):
         return sep_row
 
     @staticmethod
-    def get_content(id: int) -> Optional[SvgContent]:
+    def get_content(id: int) -> Optional[Svg_content]:
         """
         Returns the content of the icon_svg (useful for creating a file)
         """
 
-        def _get_data(db_session: Session) -> SvgContent:
+        def _get_data(db_session: Session) -> Svg_content:
             try:
                 stmt = select(Sep).where(Sep.id == id)
                 sep = db_session.execute(stmt).scalar_one_or_none()
@@ -441,7 +441,7 @@ class Sep(SQLABaseTable):
     @staticmethod
     def full_name_exists(id_schema: int, sep_name: str) -> bool:
 
-        def _get_data(db_session: Session) -> SvgContent:
+        def _get_data(db_session: Session) -> Svg_content:
             # see sep__sch_name_lower_uix
             stmt = select(Sep.name_lower).where(
                 Sep.id_schema == id_schema, Sep.name_lower == func.lower(sep_name)

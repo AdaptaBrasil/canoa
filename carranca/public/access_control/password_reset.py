@@ -15,7 +15,7 @@ from ...helpers.pw_helper import hash_pass
 from ...helpers.py_helper import now, to_str
 from ...helpers.jinja_helper import process_template
 from ...common.app_error_assistant import ModuleErrorCode
-from ...helpers.ui_db_texts_helper import add_msg_error, add_msg_success, add_msg_final
+from ...helpers.ui_db_texts_class import add_msg_error, add_msg_success, add_msg_final
 from ...helpers.route_helper import (
     get_form_input_value,
     init_response_vars,
@@ -57,7 +57,12 @@ def password_reset(token):
         elif is_get:
             pass
         elif not sidekick.config.DB_len_val_for_pw.check(password):
-            add_msg_error("invalidPassword", ui_db_texts)
+            add_msg_error(
+                "invalidPasswordLength",
+                ui_db_texts,
+                sidekick.config.DB_len_val_for_pw.min,
+                sidekick.config.DB_len_val_for_pw.max,
+            )
         elif password != confirm_password:
             add_msg_error("passwordsAreDifferent", ui_db_texts)
         else:

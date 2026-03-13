@@ -14,7 +14,7 @@ from typing import cast
 from ..helpers.py_helper import to_str
 from ..helpers.html_helper import url_join
 from ..helpers.route_helper import static_route
-from ..helpers.types_helper import SvgContent
+from ..helpers.types_helper import Svg_content
 
 
 class class_property(property):
@@ -60,7 +60,7 @@ class SepIconMaker:
         stroke_width: int = 2,
         fill_opacity: str = "1",
         stroke_opacity: str = "1",
-    ) -> SvgContent:
+    ) -> Svg_content:
         return (
             "<svg width='64' height='64' xmlns='http://www.w3.org/2000/svg'>"
             f"<rect width='100%' height='100%' fill='{fill_color}' fill-opacity='{fill_opacity}' stroke='black' stroke-opacity='{stroke_opacity}' stroke-width='{stroke_width}' />"
@@ -69,15 +69,15 @@ class SepIconMaker:
         )
 
     @classmethod
-    def empty_content(cls) -> SvgContent:
+    def empty_content(cls) -> Svg_content:
         return cls.content_for("white", "", 1, "0.1", "0.1")
 
     @classmethod
-    def error_content(cls) -> SvgContent:
+    def error_content(cls) -> Svg_content:
         return cls.content_for("firebrick", "!")
 
     @classmethod
-    def none_content(cls) -> SvgContent:
+    def none_content(cls) -> Svg_content:
         return cls.content_for("darkgrey", "?", stroke_opacity="0.45")
 
 

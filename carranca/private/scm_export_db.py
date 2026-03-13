@@ -9,7 +9,7 @@ mgd 2025.10
 import os
 import json
 import zipfile
-from flask import send_file
+from flask import Response, send_file
 from typing import List
 from dataclasses import dataclass
 
@@ -19,15 +19,15 @@ from ..public.ups_handler import get_ups_jHtml
 from ..helpers.user_helper import UserFolders
 from ..helpers.uiact_helper import UiActResponse
 from ..helpers.jinja_helper import process_template
-from ..helpers.types_helper import JinjaGeneratedHtml
+from ..helpers.types_helper import Jinja_generated_html
 from ..helpers.route_helper import get_private_response_data, init_response_vars
-from ..helpers.ui_db_texts_helper import add_msg_error, add_msg_success
+from ..helpers.ui_db_texts_class import add_msg_error, add_msg_success
 from ..config.ExportProcessConfig import ExportProcessConfig
 from ..common.app_error_assistant import ModuleErrorCode
 from ..models.private_1.ExportGrid import ExportGrid
 
 
-def scm_export_db(uiact_rsp: UiActResponse) -> JinjaGeneratedHtml:
+def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_generated_html | Response:
 
     @dataclass
     class FileInfo:
@@ -91,6 +91,13 @@ def scm_export_db(uiact_rsp: UiActResponse) -> JinjaGeneratedHtml:
                     zipf.write(file.ffn, arcname=file.name)
 
             add_msg_success("exportSuccess", ui_db_texts)
+            # TODO:
+            # <!-- JavaScript to trigger download -->
+            # <script>
+            #     window.onload = function() {
+            #         window.location.href = "{{ download_file_url }}";
+            #     };
+            # </script>
             file_response = send_file(config.output_full_file_name, as_attachment=True)
             return file_response
 
@@ -98,7 +105,7 @@ def scm_export_db(uiact_rsp: UiActResponse) -> JinjaGeneratedHtml:
         jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
 
     except Exception as e:
-        jHtml = get_ups_jHtml("exportException", ui_db_texts, task_code, e, task_code)
+        jHtml = get_ups_jHtml("dbExportException", ui_db_texts, task_code, e, task_code)
 
     return jHtml
 

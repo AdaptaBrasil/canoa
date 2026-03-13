@@ -21,7 +21,7 @@ from ...public.ups_handler import get_ups_jHtml
 from ...helpers.email_helper import RecipientsList, send_email
 from ...helpers.jinja_helper import process_template
 from ...common.app_error_assistant import ModuleErrorCode
-from ...helpers.ui_db_texts_helper import add_msg_error, add_msg_success, add_msg_final
+from ...helpers.ui_db_texts_class import add_msg_error, add_msg_success, add_msg_final
 from ...helpers.route_helper import (
     public_route,
     get_form_input_value,
@@ -64,14 +64,14 @@ def password_recovery():
             if user_data is None:
                 code = 12
             elif user_data.disabled:
-                code = 23
+                code = 23  # how did the user is logged?
             elif user_data.password is None:
                 code = 34  # strange, better to avoid sending email if user has no password set
             elif __user_is_in_recovery_process(user_data, True):
                 code = 45  # invalid process state,
             elif __user_is_in_recovery_process(user_data, False):
                 code = 56  # user is already in a recovery process, better to avoid sending another email and creating confusion.
-            elif not user_data.email_confirmed:
+            elif not user_data.email_verified:
                 code = 67  # who knows where the email goes.
             return code
 
@@ -106,7 +106,7 @@ def password_recovery():
         jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.data())
 
     except Exception as e:
-        jHtml = get_ups_jHtml("pwRecoveryEmailSentException", ui_db_texts, task_code, e)
+        jHtml = get_ups_jHtml("emailSentException", ui_db_texts, task_code, e)
 
     return jHtml
 

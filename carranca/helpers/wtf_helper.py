@@ -1,11 +1,11 @@
 """
- Equipe da Canoa -- 2024
+Equipe da Canoa -- 2024
 
- WTForms utilities
+WTForms utilities
 
- mgd 2024-06-22
+mgd 2024-06-22
 
- """
+"""
 
 # cSpell:ignore wtforms
 
@@ -22,7 +22,7 @@ class LenValidate:
         ValueError: If `min` is not a positive integer or if `max` is less than `min`.
     """
 
-    def __init__(self, min: int, max: int = None) -> None:
+    def __init__(self, min: int, max: int | None = None) -> None:
         if not isinstance(min, int) or min <= 0:
             raise ValueError("`min` must be a positive integer.")
         if max is not None and max < min:

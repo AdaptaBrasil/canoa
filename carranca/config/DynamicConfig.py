@@ -25,9 +25,10 @@ def _get_template_folder():
     from jinja2 import Environment, FileSystemLoader
 
     # Create a Jinja2 environment using a specific template folder
-    env = Environment(loader=FileSystemLoader("templates"))
     # Access the template folder path
-    template_folder = env.loader.searchpath[0]
+    env = Environment(loader=FileSystemLoader("templates"))
+    # env.loader is of type FileSystemLoader
+    template_folder = env.loader.searchpath[0]  # pyright: ignore[reportAttributeAccessIssue]
     return template_folder
 
 

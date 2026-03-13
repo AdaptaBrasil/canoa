@@ -152,6 +152,9 @@ class UIDBTexts:
 
         self._data[key] = value
 
+    def __len__(self) -> int:
+        return len(self._data)
+
     # --- merged by mgd on 2025-11-08:
     # --  get_str() now supports an optional default parameter for missing keys ---
     # def get_str(self, key: str, default: str = "") -> str:

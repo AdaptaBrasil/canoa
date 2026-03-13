@@ -18,7 +18,7 @@ from flask import current_app
 
 from .py_helper import now
 from ..common.UIDBTexts import UIDBTexts
-from .ui_db_texts_helper import UITexts_TableSearch, ui_texts_locale
+from .ui_db_texts_class import UITexts_TableSearch, ui_texts_locale
 
 # === Global 'constants' form HTML ui ========================
 cache_key: TypeAlias = Tuple[str, str, Optional[str]]

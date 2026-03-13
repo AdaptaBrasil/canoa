@@ -120,6 +120,7 @@ class ModuleErrorCode(IntEnum):
     SCM_EXPORT_UI_SAVE = 820
     SCM_EXPORT_DB = 840
     EMAIL_CHECK = 850
+    EMAIL_VERIFY = 860
 
     DB_FETCH_ROWS = 590  # only on
 

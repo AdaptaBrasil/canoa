@@ -14,24 +14,24 @@ from pathlib import Path
 from .sep_icon import do_icon_get_url
 from ..models.public import User
 from ..models.private import Sep
-from ..helpers.py_helper import UsualDict
-from ..helpers.types_helper import OptStr
+from ..helpers.py_helper import Usual_dict
+from ..helpers.types_helper import Opt_str
 from ..config.ExportProcessConfig import ExportProcessConfig
 from ..models.private_1.SchemaGrid import SchemaGrid
 
 
 class SchemaData:
-    header: Optional[UsualDict]
-    meta_scm: UsualDict
-    meta_sep: UsualDict
-    schemas: List[UsualDict]
+    header: Optional[Usual_dict]
+    meta_scm: Usual_dict
+    meta_sep: Usual_dict
+    schemas: List[Usual_dict]
 
     def __init__(
         self,
-        header: Optional[UsualDict],
-        meta_scm: UsualDict,
-        meta_sep: UsualDict,
-        schemas: List[UsualDict],
+        header: Optional[Usual_dict],
+        meta_scm: Usual_dict,
+        meta_sep: Usual_dict,
+        schemas: List[Usual_dict],
     ):
         self.coder = None  # coder
         self.header = header
@@ -70,7 +70,7 @@ def get_scm_data(task_code: int, config: ExportProcessConfig, for_export: bool) 
 
     get_icon = Sep.icon_file_name.name in sep_cols
     task_code += 1
-    mgmt: OptStr = None
+    mgmt: Opt_str = None
     scm_col_ign = [] if for_export else [scm_id]
     sep_col_ign = [] if for_export else [sep_id]
     for scm in scm_rows:
@@ -83,7 +83,7 @@ def get_scm_data(task_code: int, config: ExportProcessConfig, for_export: bool) 
             sep.manager = mgmt if mgmt_list and (mgmt := mgmt_list.get(sep.mgmt_users_id)) else "?"
             if for_export:
                 sep.data_file_name = None
-                sep.icon_file_name =  Path(sep.icon_file_name).name
+                sep.icon_file_name = Path(sep.icon_file_name).name
             else:
                 sep.scm_code = config.coder.encode(scm.id)
                 sep.code = config.coder.encode(sep.id)

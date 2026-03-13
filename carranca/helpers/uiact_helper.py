@@ -12,10 +12,11 @@ import json
 from typing import Optional, Tuple, Any, Dict
 
 from ..helpers.py_helper import to_int
-from ..helpers.types_helper import UsualDict, JsonText
+from ..helpers.types_helper import Usual_dict, Json_text
 from ..common.app_error_assistant import AppStumbled
 
 DATA_SEPARATOR = ":"
+
 
 class UiActResponseKeys:
     # Defines the response's ui commands actions keys of `sep_grid` `scm_grid`, scm_e etc
@@ -43,7 +44,7 @@ class UiActResponse:
         value = self.data[key] if key in self.data else "?"
         return value
 
-    def __init__(self, cmd_text_or_code: str | JsonText):
+    def __init__(self, cmd_text_or_code: str | Json_text):
         try:
             ## is 'cmd_text_or_code' is json?
             self.data = json.loads(cmd_text_or_code)
@@ -52,17 +53,21 @@ class UiActResponse:
             self.row_index = to_int(self._get_value(UiActResponseKeys.row_index))
         except:
             ## No, 'cmd_text_or_code' is not json, so is s code
-            if (code:= cmd_text_or_code.strip()) in [UiActResponseProxy.add, UiActResponseProxy.null, UiActResponseProxy.show]:
+            if (code := cmd_text_or_code.strip()) in [
+                UiActResponseProxy.add,
+                UiActResponseProxy.null,
+                UiActResponseProxy.show,
+            ]:
                 # TODO: code => cmd
                 self.code = code
             else:
-                raise AppStumbled(f'Unknown UI Action Response <code>{code}</code>.')
+                raise AppStumbled(f"Unknown UI Action Response <code>{code}</code>.")
 
-    def initial(self) -> UsualDict:
+    def initial(self) -> Usual_dict:
         return {
-            "action": '',
+            "action": "",
             "row_index": self.row_index,
-            "code": '',
+            "code": "",
             "data": None,
         }
 

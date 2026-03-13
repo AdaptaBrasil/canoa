@@ -11,7 +11,7 @@ mgd 2025-03-15, 5-23
 
 # cspell:words Entendí ui_texts_locale
 
-from ..helpers.ui_db_texts_helper import ui_texts_locale, UITextsKeys
+from ..helpers.ui_db_texts_class import ui_texts_locale, UITextsKeys
 
 default_locale = "en"
 default_section = "Form"

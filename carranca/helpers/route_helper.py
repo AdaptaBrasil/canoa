@@ -11,21 +11,21 @@ import requests
 from os import path
 from flask import redirect, request, url_for
 from typing import Tuple, Optional
-from werkzeug import Response
+
 
 from .py_helper import is_str_none_or_empty, camel_to_snake, clean_text
 from .html_helper import URL_PATH_SEP
 
 # 2/3. This line produce the sidekick-incident
-from .jinja_helper import TemplateFileFullName
-from .types_helper import JinjaGeneratedHtml
+from .jinja_helper import Template_file_full_name
+from .types_helper import Jinja_generated_html, FlaskResponse
 from ..common.UIDBTexts import UIDBTexts
 from ..config.BaseConfig import BaseConfig
-from .ui_db_texts_helper import get_db_texts
+from .ui_db_texts_class import get_db_texts
 from ..common.app_error_assistant import ModuleErrorCode
 
 
-ResponseData = Tuple[JinjaGeneratedHtml, bool, UIDBTexts]
+ResponseData = Tuple[Jinja_generated_html, bool, UIDBTexts]
 
 base_route_private = "private"
 base_route_public = "public"
@@ -103,6 +103,10 @@ def get_method() -> str:
     return request.method.upper()
 
 
+def is_method_post() -> bool:
+    return not is_method_get()
+
+
 def is_method_get() -> bool:
     """
     Determine if the current request method is GET.
@@ -125,12 +129,12 @@ def get_form_input_value(name: str, not_allowed: Optional[str] = "") -> str:
     return "" if text is None else clean_text(text, not_allowed)
 
 
-def get_tmpl_full_file_name(tmpl: str, folder: str) -> TemplateFileFullName:
+def get_tmpl_full_file_name(tmpl: str, folder: str) -> Template_file_full_name:
     from ..common.app_context_vars import sidekick
 
     tmpl_file_name = f"{tmpl}.html.j2"
     # template *must* be with '/':
-    tmpl_full_file_name: TemplateFileFullName = f".{URL_PATH_SEP}{folder}{URL_PATH_SEP}{tmpl_file_name}"
+    tmpl_full_file_name: Template_file_full_name = f".{URL_PATH_SEP}{folder}{URL_PATH_SEP}{tmpl_file_name}"
     tmpl_full_name = path.join(".", sidekick.config.TEMPLATES_FOLDER, folder, tmpl_file_name)
     if tmpl_full_name in templates_found:
         pass
@@ -197,7 +201,7 @@ def init_response_vars(error_code: ModuleErrorCode) -> Tuple[*ResponseData, int]
     return "", is_get, UIDBTexts({}, False), (error_code.value if error_code else 1)
 
 
-def redirect_to(route: str, message: Optional[str] = None) -> Response:
+def redirect_to(route: str, message: Optional[str] = None) -> FlaskResponse:
     # TODO: display message 'redirecting to ...
     return redirect(route)
 

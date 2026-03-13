@@ -95,7 +95,7 @@ class RecipientsDic:
 
 
 def send_email(
-    send_to_or_dic: RecipientsList | RecipientsDic,
+    recipients: RecipientsList | RecipientsDic,
     texts_or_section: dict | str,
     body_params: Optional[dict] = None,
     file_to_send_full_name: Optional[str] = None,
@@ -112,12 +112,12 @@ def send_email(
         case EmailProvider.GOOGLE.value:
             from .gmail_api_helper import _send_email
 
-            return _send_email(send_to_or_dic, texts_or_section, body_params, file_to_send_full_name, file_to_send_type)
+            return _send_email(recipients, texts_or_section, body_params, file_to_send_full_name, file_to_send_type)
 
         case EmailProvider.SMTP.value:
             from .smtp_helper import _send_email
 
-            return _send_email(send_to_or_dic, texts_or_section, body_params, file_to_send_full_name, file_to_send_type)
+            return _send_email(recipients, texts_or_section, body_params, file_to_send_full_name, file_to_send_type)
 
         case EmailProvider.NO_EMAIL:
             sidekick.display.debug("No email provider. Cannot sent email.")

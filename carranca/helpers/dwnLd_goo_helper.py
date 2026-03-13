@@ -11,7 +11,7 @@ mgd 2024-08-01
 # cSpell:ignore puremagic surl googleapiclient gserviceaccount chunksize
 
 import requests
-from carranca.helpers.types_helper import UsualDict
+from carranca.helpers.types_helper import Usual_dict
 import puremagic
 import urllib.parse
 from os import path, remove, rename
@@ -88,7 +88,9 @@ def download_response(response: requests.Response, filename: str, rename_it: boo
                     f.write(chunk)
                     task_code = 8
                     ext_by_magic = ext_by_magic if ext_found else puremagic.what(None, chunk)
-                    ext_found = ext_found or bool(ext_by_magic)  # just try to find extension with the first `chunk`
+                    ext_found = ext_found or bool(
+                        ext_by_magic
+                    )  # just try to find extension with the first `chunk`
 
         if rename_it and not is_same_file_name(to_str(ext_by_magic), file_ext):
             task_code = 9
@@ -106,7 +108,7 @@ def download_public_google_file(
     file_name_format: str = "",
     del_file_if_exists: bool = True,
     debug: bool = False,
-) -> tuple[int, str, UsualDict]:
+) -> tuple[int, str, Usual_dict]:
     """Downloads a public Google file.
     Args:
         url_or_file_id: The URL or file ID of the Google file.
@@ -195,7 +197,9 @@ def download_public_google_file(
         else:
             gdFile_name = original_file_name + ext
 
-        file_full_path = path.join(file_folder, gdFile_name) if not is_str_none_or_empty(file_folder) else gdFile_name
+        file_full_path = (
+            path.join(file_folder, gdFile_name) if not is_str_none_or_empty(file_folder) else gdFile_name
+        )
 
         if not path.isfile(file_full_path):
             pass
@@ -231,7 +235,7 @@ def download_public_google_file(
     except Exception as e:
         msg_error = f"An error occurred while downloading the file. Task code {task_code}, message '{e}'.)"
         sidekick.display.error(msg_error)
-    return task_code, gdFile_name,  gdFile_md
+    return task_code, gdFile_name, gdFile_md
 
 
 # if __name__ == "__main__":

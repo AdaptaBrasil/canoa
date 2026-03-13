@@ -9,14 +9,14 @@ mgd
 
 # spell:ignore Mgmt
 
-from typing import TYPE_CHECKING, List, Dict, Any
+from typing import TYPE_CHECKING, List
 
 from .IdToCode import IdToCode
-from ..helpers.types_helper import ErrorMessage
+from ..helpers.types_helper import Error_message
 
 if TYPE_CHECKING:
     type UserSepList = List["UserSep"]
-    type UserSepsRtn = UserSepList | ErrorMessage
+    type UserSepsRtn = UserSepList | Error_message
 
 
 class UserSep:

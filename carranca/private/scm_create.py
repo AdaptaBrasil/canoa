@@ -8,22 +8,21 @@ mgd 2025.09
 
 # cSpell: ignore samp sepsusr usrlist
 
-from ..public.ups_handler import ups_handler
+from ..public.ups_handler import get_ups_jHtml
 from ..common.app_error_assistant import ModuleErrorCode, AppStumbled
 
 from ..helpers.py_helper import class_to_dict
 from ..helpers.uiact_helper import UiActResponseKeys
 from ..helpers.jinja_helper import process_template
-from ..helpers.types_helper import JinjaTemplate
+from ..helpers.types_helper import Jinja_template
 from ..helpers.route_helper import get_private_response_data, init_response_vars
 from ..helpers.js_consts_helper import js_grid_col_meta_info, js_ui_dictionary
-from ..helpers.ui_db_texts_helper import add_msg_final
 from ..helpers.db_records.DBRecords import ListOfDBRecords
 
 
-def do_scm_create() -> JinjaTemplate:
+def do_scm_create() -> Jinja_template:
 
-    tmpl, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SCM_GRID)
+    jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SCM_GRID)
     scm_data: ListOfDBRecords = []
 
     try:
@@ -41,7 +40,7 @@ def do_scm_create() -> JinjaTemplate:
         else:
             raise AppStumbled("Unexpected route method.")
 
-        tmpl = process_template(
+        jHtml = process_template(
             tmpl_ffn,
             scm_data=scm_data.to_list(),
             cargo_keys=class_to_dict(UiActResponseKeys),
@@ -50,11 +49,9 @@ def do_scm_create() -> JinjaTemplate:
         )
 
     except Exception as e:
-        msg = add_msg_final("gridException", ui_db_texts, task_code)
-        _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)
-        tmpl = process_template(tmpl_ffn, **ui_db_texts.data())
+        jHtml = get_ups_jHtml("gridException", ui_db_texts, task_code, e)
 
-    return tmpl
+    return jHtml
 
 
 # eof

@@ -4,6 +4,8 @@ OAuth 2.0 authentication handler for the Gmail API.
 This module manages user credentials (canoa-gmail-canoa-gmail-token.json), refreshing them if expired,
 or initiating a new authorization flow if tokens are missing.
 """
+# cSpell:words creds googleapiclient refreshable
+
 from os import path
 from typing import Type
 
@@ -50,7 +52,7 @@ def _get_credentials(json_path: str) -> Credentials:
     # 2. Check validity and refresh if needed
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            # Refresh token if expired but refreshable
+            # Refresh token if expired but is refreshable
             creds.refresh(Request())
         else:
             # Start new authorization flow if token is missing or invalid

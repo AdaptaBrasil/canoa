@@ -15,10 +15,10 @@ TODO:
 # cSpell:ignore getDictResultset connstr adaptabrasil mgmt
 from flask_login import current_user
 
-from typing import TypeAlias, Optional, Tuple
+from typing import TypeAlias, Optional, Tuple, cast
 from .pw_helper import is_anyone_logged
 from .py_helper import is_str_none_or_empty
-from .types_helper import DBTexts, OptStr
+from .types_helper import Db_texts, Opt_str
 from ..common.UIDBTexts import UIDBTexts
 from ..common.UITextsKeys import UITextsKeys
 from ..common.app_constants import APP_LANG
@@ -50,11 +50,11 @@ class UITexts_TableSearch:
     def exists(self) -> bool:
         return self.as_tuple in global_ui_texts_cache
 
-    def update(self, texts: DBTexts | str) -> None:
+    def update(self, texts: Db_texts | str) -> None:
         if self._cfg_cache_lifetime_min == 0:
             global_ui_texts_cache[self.as_tuple] = texts
 
-    def get_text(self) -> DBTexts | str | None:
+    def get_text(self) -> Db_texts | str | None:
         if not self.exists():
             return None
         value: dict | str = global_ui_texts_cache[self.as_tuple]
@@ -80,7 +80,8 @@ class UITexts_TableSearch:
 # TODO: refactor it into
 class MsgNotFound:
     cache: Optional[str] = None
-    default = "Message '{0}' (not registered §: {1})"
+    default = "The message with key '{0}' was not found in §: {1}."
+    # "Message '{0}' (not registered §: {1})"
 
 
 # === current user's locale  ================================
@@ -119,7 +120,7 @@ def __get_table_row(table_search: UITexts_TableSearch) -> tuple[str, str]:
     return ("", "") if not result else result
 
 
-def _get_query_as_dict(query) -> DBTexts:
+def _get_query_as_dict(query) -> Db_texts:
     """returns DBTexts for the item/section pair"""
     from .db_helper import retrieve_dict
 
@@ -163,8 +164,13 @@ def _add_msg(item: str, section: str, name: str, ui_db_texts: UIDBTexts, *args) 
     in the 'current' section.
 
     """
-    # new alternative, add the msg on the same section (not in a special one)
+    # new alternative, add the msg on the same section (not in a special one [secError, secSuccess])
     msg_text: str = ui_db_texts.get_str(item) if ui_db_texts else ""
+
+    if len(ui_db_texts) == 0:
+        # TODO: ui_db_texts can have no items, the next error message mask this situation. TODO:
+        print(f"Warning: ui_db_texts[{ui_db_texts.section}] has no items.")
+
     if not msg_text:
         msg_text = db_retrieve_text(item, section)
 
@@ -180,7 +186,7 @@ def _add_msg(item: str, section: str, name: str, ui_db_texts: UIDBTexts, *args) 
 
 
 # Cached Texts retrievers ==================================
-def get_section(section_name: str) -> DBTexts:
+def get_section(section_name: str) -> Db_texts:
     """
     returns a DBTexts of the 'section_name' from table vw_ui_texts
     """
@@ -204,14 +210,14 @@ def get_section(section_name: str) -> DBTexts:
         return items.copy()  # Ensures caller gets a copy, preventing cache pollution
 
 
-def db_retrieve_text(item: str, section: str, default: OptStr = None) -> str:
+def db_retrieve_text(item: str, section: str, default: Opt_str = None) -> str:
     """
     returns text for the item/section pair. if not found, a `warning message`
     """
     table_search = UITexts_TableSearch(ui_texts_locale(), section, item)
     if table_search.exists():
         text = table_search.get_text()
-        return text
+        return cast(str, text if isinstance(text, str) else "")
 
     text, _ = __get_table_row(table_search)
 
@@ -228,12 +234,12 @@ def db_retrieve_text(item: str, section: str, default: OptStr = None) -> str:
 
 
 # Texts retrievers helpers ==================================
-def get_app_menu() -> DBTexts:
+def get_app_menu() -> Db_texts:
     db_texts = get_section("appMenu")
     return db_texts
 
 
-def get_db_texts(section_name: str) -> DBTexts:
+def get_db_texts(section_name: str) -> Db_texts:
     db_texts = get_section(section_name)
     if db_texts:
         for k in [

@@ -15,7 +15,7 @@ from sqlalchemy import Row
 from sqlalchemy.types import String
 
 from ..py_helper import class_to_dict
-from ..types_helper import OptListOfStr, UsualDict
+from ..types_helper import Opt_list_of_str, Usual_dict
 
 
 from .DBRecord import DBRecord
@@ -47,27 +47,25 @@ class DBRecords:
     simple_types_filter: Tuple[type, ...] = (str, int, float, bool, datetime)
 
     col_types: List[type]
-    col_info: List[UsualDict]
+    col_info: List[Usual_dict]
 
     def __init__(
         self,
         sqla_stmt: SQLAStatement,
         sqla_records: Optional[SQLABaseRecords] = None,
-        allowed_field_names: OptListOfStr = None,
+        allowed_field_names: Opt_list_of_str = None,
         allowed_field_types: Optional[Tuple[type, ...]] = None,
         includeNone: bool = True,
     ):
         self.records: ListOfDBRecords = []
         self.table_name = ""
         self.is_select: bool = sqla_stmt.is_select
-        self.col_info: List[UsualDict] = []
+        self.col_info: List[Usual_dict] = []
 
         # Find the table Name
         if self.is_select:
             froms = sqla_stmt.columns_clause_froms
-            self.table_name = (
-                froms[0].name if len(froms) == 1 else ",".join([f.name for f in froms])
-            )
+            self.table_name = froms[0].name if len(froms) == 1 else ",".join([f.name for f in froms])
 
         if sqla_records is None:
             return
@@ -102,9 +100,7 @@ class DBRecords:
         elif self.is_select and hasattr(sqla_stmt, "selected_columns"):
             for col in sqla_stmt.selected_columns:
                 col_length = (
-                    col.type.length
-                    if isinstance(col.type, String) and hasattr(col.type, "length")
-                    else 0
+                    col.type.length if isinstance(col.type, String) and hasattr(col.type, "length") else 0
                 )
                 _add_meta(col.name, col.type.python_type.__name__, col_length)
 
@@ -116,17 +112,15 @@ class DBRecords:
         )
         # Fields values types were specified?
         self.allowed_field_types = (
-            allowed_field_types
-            if allowed_field_types is not None
-            else DBRecords.simple_types_filter
+            allowed_field_types if allowed_field_types is not None else DBRecords.simple_types_filter
         )
 
         if includeNone:
             self.allowed_field_types += (type(None),)
 
-        if (len(sqla_records) == 0):
+        if len(sqla_records) == 0:
             pass
-        elif isinstance(first_record:= sqla_records[0], Row):
+        elif isinstance(first_record := sqla_records[0], Row):
             # Handle SQLAlchemy Row objects
 
             # Get dict representation of records
@@ -141,17 +135,14 @@ class DBRecords:
                 _key = "plugin_subject"
                 if self.table_name in dict_data[0]:
                     dict_data = _step_in(self.table_name)
-                elif (
-                    tbl_c := sqla_stmt._propagate_attrs[_key].class_.__name__
-                ) and tbl_c in dict_data[0]:
+                elif (tbl_c := sqla_stmt._propagate_attrs[_key].class_.__name__) and tbl_c in dict_data[0]:
                     dict_data = _step_in(tbl_c)
             except:
                 pass
 
             # Create the records from dict_data (rows._asdict())
             self.records = [
-                DBRecord(rec, self.allowed_field_names, self.allowed_field_types)
-                for rec in dict_data
+                DBRecord(rec, self.allowed_field_names, self.allowed_field_types) for rec in dict_data
             ]
 
         elif isinstance(first_record, tuple):
@@ -174,8 +165,7 @@ class DBRecords:
         else:
             dict_data = [class_to_dict(r) for r in sqla_records]
             self.records = [
-                DBRecord(rec, self.allowed_field_names, self.allowed_field_types)
-                for rec in dict_data
+                DBRecord(rec, self.allowed_field_names, self.allowed_field_types) for rec in dict_data
             ]
 
     def __iter__(self):
@@ -194,29 +184,21 @@ class DBRecords:
     def count(self) -> int:
         return len(self)
 
-    def append(self, record_dict: UsualDict) -> None:
+    def append(self, record_dict: Usual_dict) -> None:
         """Appends a new DBRecord object based on records list."""
-        new_record = DBRecord(
-            record_dict, self.allowed_field_names, self.allowed_field_types
-        )
+        new_record = DBRecord(record_dict, self.allowed_field_names, self.allowed_field_types)
         self.records.append(new_record)
 
     def to_list(
         self,
-        exclude_fields: OptListOfStr = None,
-        include_fields: OptListOfStr = None,
-    ) -> list[UsualDict]:
+        exclude_fields: Opt_list_of_str = None,
+        include_fields: Opt_list_of_str = None,
+    ) -> list[Usual_dict]:
         exclude_fields = (exclude_fields or []) + ["__class__.__name__"]
         if include_fields is None or len(include_fields) == 0:
-            include_fields = (
-                list(self.records[0].__dict__.keys()) if self.records else []
-            )
+            include_fields = list(self.records[0].__dict__.keys()) if self.records else []
         _list = [
-            {
-                key: value
-                for key, value in record.__dict__.items()
-                if key not in exclude_fields
-            }
+            {key: value for key, value in record.__dict__.items() if key not in exclude_fields}
             for record in self.records
         ]
         return _list

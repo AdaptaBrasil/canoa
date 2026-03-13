@@ -17,7 +17,7 @@ from .RolesAbbr import RolesAbbr
 from ..common.app_constants import APP_LANG
 from ..common.app_error_assistant import AppStumbled
 from ..helpers.user_helper import get_user_code, get_user_folder
-from ..helpers.types_helper import ErrorMessage
+from ..helpers.types_helper import Error_message
 
 if TYPE_CHECKING:
     from .UserSep import UserSepList
@@ -39,7 +39,7 @@ class AppUser:
             self.id = -1
             self.disabled = True
             self.email = ""
-            self.email_confirmed = False
+            self.email_verified = False
             self.code = "0"
             self.folder = ""
             self.path = ""
@@ -56,7 +56,7 @@ class AppUser:
             self.id = current_user.id
             self.disabled = current_user.disabled
             self.email = current_user.email
-            self.email_confirmed = current_user.email_confirmed
+            self.email_verified = current_user.email_verified
             self.code = get_user_code(current_user.id)
             self.folder = get_user_folder(current_user.id)
             self.path = SepIconMaker.local_path
@@ -80,7 +80,7 @@ class AppUser:
         elif isinstance(us_list := user_seps, list):
             result: "UserSepList" = us_list
         else:
-            msg: ErrorMessage = str(us_list) if isinstance(user_seps, str) else "Error loading user SEP."
+            msg: Error_message = str(us_list) if isinstance(user_seps, str) else "Error loading user SEP."
             raise AppStumbled(msg)
 
         return result

@@ -9,12 +9,14 @@ mgd 2024-09-27,10-11,12-05
 
 # cSpell:ignore colorfy
 
+# for self.echo : Callable[[Display.Kind, str], None]
+from __future__ import annotations
+
 import time
 from math import log10, modf
 from enum import Enum
-from typing import List
+from typing import List, Callable
 from platform import uname
-from ..helpers.py_helper import is_str_none_or_empty, OS_IS_WINDOWS
 
 
 class Display:
@@ -124,7 +126,7 @@ class Display:
             _with_color = not OS_IS_WINDOWS
 
         _d = Display.default  # value is None => use default
-        self.echo = lambda kind, text: None  # Default no-op function
+        self.echo: Callable[[Display.Kind, str], None] = lambda kind, text: None  # Default no-op function
 
         self.prompt = _d.prompt if prompt is None else prompt
         self.mute_all = True if mute_all else False

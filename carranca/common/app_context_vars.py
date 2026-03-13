@@ -150,7 +150,7 @@ def __prepare_user_seps() -> "UserSepsRtn":
     from ..private.sep_icon import do_icon_get_url
     from ..helpers.pw_helper import is_anyone_logged
     from ..helpers.py_helper import class_to_dict
-    from ..helpers.types_helper import UsualDict
+    from ..helpers.types_helper import Usual_dict
 
     user_id: int = current_user.id if is_anyone_logged() else -1
 
@@ -161,7 +161,7 @@ def __prepare_user_seps() -> "UserSepsRtn":
         except Exception as e:
             return str(e)
 
-        seps: List[UsualDict] = []
+        seps: List[Usual_dict] = []
         for sep_row in sep_usr_rows:
             item = UserSep(**sep_row)
             item.icon_url = do_icon_get_url(item.icon_file_name, item.id)

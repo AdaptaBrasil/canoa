@@ -13,6 +13,7 @@ mgd
 {% set dlg_cls_size= '' %} {# default size #}
 {% extends "./layouts/form.html.j2" %}
 
+{% set display_footer_options= display_footer == 'True' %}
 {# ╒════════════════ Inputs ════════════════╕ #}
 {% block frm_blc_inputs %}
 
@@ -55,6 +56,8 @@ mgd
 
 {# ╒════════════════ Options ═══════════════╕ #}
 {% block dlg_blc_footer_options %}
+
+{% if display_footer_options %}
 {# Replaced Bootstrap class= "row" with style= "display: flex; flex-wrap: wrap;" to avoid gutter #}
 
 <div style="display: flex; flex-wrap: wrap;" class="row mt-0 ps-0 pe-0">
@@ -76,8 +79,11 @@ mgd
     </div>
 </div>
 
+{% endif %}
+
 {% endblock dlg_blc_footer_options %}
 {# ╘════════════════ Options ═══════════════╛ #}
+
 
 {% block frm_blc_script %}
 <script>

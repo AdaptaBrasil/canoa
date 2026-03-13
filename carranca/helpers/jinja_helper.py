@@ -11,7 +11,7 @@ from typing import Any, List
 
 from .py_helper import as_str_strip
 from .file_helper import file_full_name_parse
-from .types_helper import JinjaGeneratedHtml, JinjaTemplate, TemplateFileFullName
+from .types_helper import Jinja_generated_html, Jinja_template, Template_file_full_name
 from ..common.app_error_assistant import AppStumbled, ModuleErrorCode
 
 # Avoid importing sidekick during app initialization
@@ -60,13 +60,13 @@ def process_pre_templates(texts: dict, mark: str = _jinja_pre_template_mark):
     return texts
 
 
-def extract_tag(tmpl: JinjaTemplate, tag: str):
+def extract_tag(tmpl: Jinja_template, tag: str):
     pattern = rf"<{tag}>(.*?)</{tag}>"
     match = re.search(pattern, tmpl, re.IGNORECASE | re.DOTALL)
     return match.group(1).strip() if match else None
 
 
-def _get_line(tmpl: JinjaTemplate, lineno: int) -> str:
+def _get_line(tmpl: Jinja_template, lineno: int) -> str:
     lines = tmpl.splitlines()
     line = ""
     if 1 <= lineno <= len(lines):
@@ -74,7 +74,7 @@ def _get_line(tmpl: JinjaTemplate, lineno: int) -> str:
     return line
 
 
-def _validate_jinja(tmpl: JinjaTemplate, tmpl_ffn: str, raise_if_error: bool = False) -> str:
+def _validate_jinja(tmpl: Jinja_template, tmpl_ffn: str, raise_if_error: bool = False) -> str:
     error = ""
     try:
         env = Environment()
@@ -88,8 +88,8 @@ def _validate_jinja(tmpl: JinjaTemplate, tmpl_ffn: str, raise_if_error: bool = F
     return error
 
 
-def _load_template(tmpl_ffn: TemplateFileFullName) -> JinjaTemplate:
-    tmpl: JinjaTemplate = ""
+def _load_template(tmpl_ffn: Template_file_full_name) -> Jinja_template:
+    tmpl: Jinja_template = ""
     with open(tmpl_ffn, encoding="utf-8") as f:
         tmpl = f.read()
 
@@ -122,15 +122,15 @@ def _detect_jinja_runtime_errors(rendered_html: str) -> list[str]:
     return result
 
 
-def process_template(tmpl_ffn: JinjaTemplate, **context: Any) -> JinjaGeneratedHtml:
+def process_template(tmpl_ffn: Jinja_template, **context: Any) -> Jinja_generated_html:
     """
     TODO  » HTML with BeautifulSoup
     """
     # Avoid importing sidekick during app initialization
     from ..common.app_context_vars import sidekick
 
-    jHtml_to_display: JinjaGeneratedHtml = ""
-    jHtml: JinjaGeneratedHtml = ""
+    jHtml_to_display: Jinja_generated_html = ""
+    jHtml: Jinja_generated_html = ""
     validated = False
     errors: List[str] = []
     file_name = "?"
@@ -142,7 +142,7 @@ def process_template(tmpl_ffn: JinjaTemplate, **context: Any) -> JinjaGeneratedH
             _validate_jinja(jHtml, file_name, True)
             validated = True
 
-        jHtml: JinjaGeneratedHtml = render_template(tmpl_ffn, **context)
+        jHtml: Jinja_generated_html = render_template(tmpl_ffn, **context)
         jHtml_to_display = as_str_strip(jHtml)
 
         if sidekick.config.DEBUG_RENDERED_TEMPLATES:

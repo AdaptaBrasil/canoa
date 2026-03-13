@@ -20,11 +20,11 @@ from .fetch_records import fetch_record_s, IGNORE_USER, USER_RECEIPT
 from ...helpers.py_helper import is_str_none_or_empty, to_int
 from ...public.ups_handler import ups_handler
 from ...helpers.file_helper import change_file_ext
-from ...helpers.types_helper import UsualDict
+from ...helpers.types_helper import Usual_dict
 from ...helpers.route_helper import MTD_GET, get_private_response_data, init_response_vars
 from ...common.app_error_assistant import HTTP_StatusCode, ModuleErrorCode, AppStumbled
 from ...helpers.js_consts_helper import js_form_sec_check, js_form_cargo_id, js_grid_col_meta_info
-from ...helpers.ui_db_texts_helper import add_msg_error
+from ...helpers.ui_db_texts_class import add_msg_error
 
 
 def download_rec() -> Response:
@@ -42,7 +42,7 @@ def download_rec() -> Response:
             http_status_code = hsc
             raise AppStumbled(msg, task_code, log_out, True)
 
-        def _get_receipt(db_record: UsualDict):
+        def _get_receipt(db_record: Usual_dict):
             col_meta = ui_db_texts[js_grid_col_meta_info]
             caption = json.loads(col_meta)[USER_RECEIPT]
             return f"{caption}: [{db_record[USER_RECEIPT]}]."

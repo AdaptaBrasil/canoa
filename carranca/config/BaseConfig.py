@@ -104,7 +104,7 @@ class BaseConfig(Config):
     EMAIL_ORIGINATOR = ""  # from os_environment
     EMAIL_API_KEY_PW = ""  # from os_environment
     EMAIL_ORIGINATOR_NAME = f"e-mail de {APP_NAME}"
-    EMAIL_PROVIDER = EmailProvider.SMTP.value
+    EMAIL_PROVIDER: str = EmailProvider.SMTP.value
     EMAIL_DEBUG = False
     # Flask Mail info
     FLASK_MAIL = {"server": "smtp.gmail.com", "port": 587, "use_tls": True}

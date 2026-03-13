@@ -13,8 +13,8 @@ mgd
 
 from os import path
 from ..private.IdToCode import IdToCode
-from ..helpers.py_helper import UsualDict, ms_since_midnight, now
-from ..helpers.types_helper import OptListOfStr
+from ..helpers.py_helper import Usual_dict, ms_since_midnight, now
+from ..helpers.types_helper import Opt_list_of_str
 from ..helpers.file_helper import folder_must_exist
 from ..common.app_context_vars import sidekick, app_user
 
@@ -40,7 +40,9 @@ class ExportProcessConfig:
     coder: IdToCode
     encode_data = False
 
-    def __init__(self, encode_data: bool = False, scm_cols: OptListOfStr = [], sep_cols: OptListOfStr = []):
+    def __init__(
+        self, encode_data: bool = False, scm_cols: Opt_list_of_str = [], sep_cols: Opt_list_of_str = []
+    ):
         self.scm_cols = scm_cols.copy() if scm_cols else ExportProcessConfig._scm_cols.copy()
         self.sep_cols = sep_cols.copy() if sep_cols else ExportProcessConfig._sep_cols.copy()
         self.encode_data = encode_data
@@ -60,11 +62,11 @@ class ExportProcessConfig:
         return self._full_file_name
 
     @property
-    def header(self) -> UsualDict:
+    def header(self) -> Usual_dict:
         if not self._header:
             self._header = {
                 "version": self.version,
-                "when": self._started.isoformat(),
+                "when": self._started.isoformat() if self._started else now(),
                 "user": app_user.name,
                 "decoding": "Base64 -> UTF-8",
             }

@@ -21,7 +21,12 @@
     },
     // === GitHub Copilot ===
     // (Disabled or custom configuration placeholder)
-    "github.copilot.enable": { /* Copilot disabled for this workspace */},
+    "github.copilot.enable": {
+        "*": false,
+        "plaintext": false,
+        "markdown": false,
+        "scminput": false
+    },
     // === Python Analysis / Pylance Settings ===
     "python.analysis.autoSearchPaths": true,
     "python.analysis.diagnosticMode": "openFilesOnly",

@@ -15,7 +15,7 @@ from ...config.ValidateProcessConfig import ValidateProcessConfig
 
 from ...helpers.user_helper import UserFolders
 from ...helpers.file_helper import change_file_ext
-from ...helpers.types_helper import UsualDict
+from ...helpers.types_helper import Usual_dict
 from ...helpers.db_records.DBRecords import DBRecords
 
 ALL_USER_RECS = None
@@ -47,7 +47,7 @@ def fetch_record_s(
     uploaded_file_name = ""
     received_recs = ReceivedFiles.get_records(rec_id, user_id)
     report_ext = ValidateProcessConfig(False).output_file.ext
-    grid_rows: list[UsualDict] = []
+    grid_rows: list[Usual_dict] = []
     if received_recs:
         """Adapt the records to the local environment"""
 

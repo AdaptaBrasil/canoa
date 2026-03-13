@@ -17,11 +17,11 @@ from ..models.private import Sep, Schema, MgmtSepsUser
 from ..private.UserSep import UserSep
 from ..common.UIDBTexts import UIDBTexts
 from ..helpers.py_helper import to_int, clean_text
-from ..helpers.types_helper import UsualDict
+from ..helpers.types_helper import Usual_dict
 from ..helpers.route_helper import is_method_get
 from ..common.app_context_vars import app_user
 from ..common.app_error_assistant import AppStumbled, JumpOut
-from ..helpers.ui_db_texts_helper import UITextsKeys, add_msg_final
+from ..helpers.ui_db_texts_class import UITextsKeys, add_msg_final
 
 
 class SepEditMode(IntEnum):
@@ -41,8 +41,10 @@ SCHEMA_LIST_KEY = "schemaList"
 SCHEMA_LIST_VALUE = "schemaListValue"
 MANAGER_LIST_VALUE = "managerListValue"
 
+# TODO: refactor to 'modern style' jHtml/up_handler
 
-def _get_managers(no_manager: NoManager) -> list[UsualDict]:
+
+def _get_managers(no_manager: NoManager) -> list[Usual_dict]:
     user_rows = User.get_all_users(User.disabled == False)
     mng_list = [{"id": no_manager.id, "name": no_manager.name}] + [
         {"id": user.id, "name": user.username} for user in user_rows
@@ -58,11 +60,12 @@ def get_sep_data(
     form: SepNew,
     sep_id: int,
     sep_tmp_name: str,
-) -> Tuple[Sep, UsualDict, str]:
+) -> Tuple[Sep, Usual_dict, str]:
+
     is_get = is_method_get()
     load_sep_icon_content = not is_get
     sep_row = Sep() if (edit_mode == SepEditMode.INSERT) else Sep.get_row(sep_id, load_sep_icon_content)
-    ui_select_lists: UsualDict = {}
+    ui_select_lists: Usual_dict = {}
 
     def _get_ui_select_lists(no_scm: list):
         ui_db_texts[SCHEMA_LIST_VALUE] = "" if is_get else str(form.schema_list.data)
@@ -82,7 +85,7 @@ def get_sep_data(
         pass
     elif not app_user.is_power:
         # Power user only can edit more fields than description & icon
-        raise AppStumbled(add_msg_final("sepNewNotAllow", ui_db_texts), task_code + 2, True)
+        raise AppStumbled(add_msg_final("sepNewNotAllowed", ui_db_texts), task_code + 2, True)
     elif edit_mode == SepEditMode.FULL_EDIT:
         # edit Scheme (from list), sep name, description & icon
         ui_select_lists = _get_ui_select_lists([])
@@ -98,7 +101,7 @@ def get_sep_data(
             ui_db_texts["sepNewTmpName"],
         )  # = 'Novo SEP'
     else:
-        raise AppStumbled(add_msg_final("sepNewNotAllow", ui_db_texts), task_code + 5)
+        raise AppStumbled(add_msg_final("sepNewNotAllowed", ui_db_texts), task_code + 5)
     # else is_simple_edit or is_full_edit
     # ------------
     task_code += 6
@@ -117,7 +120,7 @@ def get_sep_data(
     elif not app_user.is_power:
         # current user does NOT own the sep, and he is not power user, so can *not* edit it.
         raise JumpOut(
-            add_msg_final("sepEditNotAllow", ui_db_texts, sep_tmp_name),
+            add_msg_final("sepEditNotAllowed", ui_db_texts, sep_tmp_name),
             task_code + 1,
         )
     elif (sep_usr_row := MgmtSepsUser.get_sep_row(sep_id)) is None:
@@ -127,7 +130,9 @@ def get_sep_data(
         # create a `usr_sep` and get the sep's manager (user_curr)
         usr_sep_dict = dict(sep_usr_row)
         # Remove 'user_curr' from edit_dict, because is not needed in UserSep(..)
-        sep_manager = sep_user if (sep_user := usr_sep_dict.pop("user_curr", None)) else ui_db_texts["managerNone"]
+        sep_manager = (
+            sep_user if (sep_user := usr_sep_dict.pop("user_curr", None)) else ui_db_texts["managerNone"]
+        )
         usr_sep = UserSep(**usr_sep_dict)
         usr_sep.icon_url = SepIconMaker.get_url(usr_sep.icon_file_name)
 

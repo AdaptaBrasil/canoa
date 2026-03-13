@@ -19,7 +19,7 @@ from sys import argv
 from datetime import datetime
 from typing import Any, Type, Dict, Tuple, List, Optional
 
-from .types_helper import UsualDict, OptStr
+from .types_helper import Usual_dict, Opt_str
 from ..common.app_constants import APP_NAME
 
 # https://docs.python.org/3/library/platform.html#platform.system
@@ -32,7 +32,7 @@ CODE_UTF_8 = "utf-8"
 
 
 class JSONObject:
-    def __init__(self, d: UsualDict):
+    def __init__(self, d: Usual_dict):
         for key, value in d.items():
             setattr(self, key, value)
 
@@ -79,7 +79,7 @@ def as_str_strip(s: str) -> str:
     return "" if s is None else (str(s) + "").strip()
 
 
-def encode64_utf8(data: str) -> OptStr:
+def encode64_utf8(data: str) -> Opt_str:
     # encodes srt into utf-8  => base64
     encoded = data
     if data is None:
@@ -96,7 +96,7 @@ def encode64_utf8(data: str) -> OptStr:
     return encoded
 
 
-def decode64_utf8(data_encoded: str) -> OptStr:
+def decode64_utf8(data_encoded: str) -> Opt_str:
     # decodes srt from utf-8  => base64
     data = data_encoded
     if data_encoded is None:
@@ -475,7 +475,7 @@ def copy_attributes(class_instance: Any, this_types: Optional[Tuple[Type] | Type
     return copy_instance
 
 
-def class_to_dict(from_class: Any) -> UsualDict:
+def class_to_dict(from_class: Any) -> Usual_dict:
     """
     Converts a class's non-callable, non-dunder attributes to a dictionary.
     Args:

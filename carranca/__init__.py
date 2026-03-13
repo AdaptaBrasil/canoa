@@ -107,17 +107,17 @@ def _register_blueprint_routes(app: Flask):
 
 # ---------------------------------------------------------------------------- #
 def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version: str):
-    from .helpers.types_helper import DBTexts
+    from .helpers.types_helper import Db_texts
     from .helpers.uiact_helper import UiActResponseProxy
     from .helpers.route_helper import private_route, public_route, static_route
     from .helpers.js_consts_helper import js_form_sec_key, js_form_cargo_id, js_form_sec_value
 
-    def __get_app_menu(sub_menu_name: str) -> DBTexts:
-        sub_menu: DBTexts = {}
+    def __get_app_menu(sub_menu_name: str) -> Db_texts:
+        sub_menu: Db_texts = {}
         if not is_anyone_logged():
             return sub_menu
 
-        from .helpers.ui_db_texts_helper import get_app_menu
+        from .helpers.ui_db_texts_class import get_app_menu
 
         _app_menu = get_app_menu()
         if sub_menu_name in _app_menu:

@@ -14,7 +14,7 @@ from typing import Optional
 from ..receive_file import RECEIVE_FILE_DEFAULT_ERROR
 
 from ..AppUser import AppUser
-from ...helpers.py_helper import UsualDict, is_str_none_or_empty, now
+from ...helpers.py_helper import Usual_dict, is_str_none_or_empty, now
 from ...common.app_constants import APP_VERSION
 from ...config.ValidateProcessConfig import ValidateProcessConfig
 
@@ -81,7 +81,7 @@ class Cargo:
         msg_error: str = "",
         msg_exception: str = "",
         next: Optional[dict] = {},
-        final: Optional[UsualDict] = {},
+        final: Optional[Usual_dict] = {},
     ) -> tuple[int, str, str, object]:
         """
         Updates the class with the 'next' procedure values

@@ -26,11 +26,16 @@ mgd
 {# ╒════════════════ Dialog Footer ═══════════════╛ #}
 {% block dlg_blc_footer_buttons %}
 
-   <div class="col-auto">
-      {% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
-      {{ btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, form_close_btn_text) }}
-   </div>
+<div class="col-auto">
+    {% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
+    {{ btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, form_close_btn_text) }}
+</div>
 {% endblock dlg_blc_footer_buttons %}
 {# ╘════════════════ Dialog Footer ═══════════════╛ #}
 
+{% block frm_blc_script %}
+<script>
+    Canoa.submitImmediately = true;
+</script>
+{% endblock frm_blc_script %}
 <!-- eof -->

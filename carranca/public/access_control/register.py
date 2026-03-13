@@ -18,7 +18,7 @@ from ...helpers.pw_helper import internal_logout, is_anyone_logged
 from ...public.ups_handler import get_ups_jHtml
 from ...helpers.jinja_helper import process_template
 from ...common.app_context_vars import sidekick
-from ...helpers.ui_db_texts_helper import add_msg_success, add_msg_error, add_msg_final
+from ...helpers.ui_db_texts_class import add_msg_success, add_msg_error, add_msg_final
 from ...common.app_error_assistant import ModuleErrorCode
 from ...helpers.route_helper import (
     get_account_response_data,
@@ -53,7 +53,7 @@ def register():
             add_msg_error("emailAlreadyRegistered", ui_db_texts)
         elif not sidekick.config.DB_len_val_for_pw.check(get_form_input_value("password")):
             add_msg_error(
-                "invalidPassword",
+                "invalidPasswordLength",
                 ui_db_texts,
                 sidekick.config.DB_len_val_for_pw.min,
                 sidekick.config.DB_len_val_for_pw.max,
@@ -81,7 +81,7 @@ def register():
         )
 
     except Exception as e:
-        jHtml = get_ups_jHtml("errorRegister", ui_db_texts, task_code, e)
+        jHtml = get_ups_jHtml("registerException", ui_db_texts, task_code, e)
 
     return jHtml
 

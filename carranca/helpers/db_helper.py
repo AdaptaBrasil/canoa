@@ -19,14 +19,14 @@ from sqlalchemy.engine import CursorResult
 from .. import global_sqlalchemy_scoped_session
 from ..config import BaseConfig
 from .py_helper import is_str_none_or_empty, to_str
-from .types_helper import DBTexts
+from .types_helper import Db_texts
 
 # Avoid importing sidekick during app initialization
 # from ..common.app_context_vars import sidekick
 from ..common.app_error_assistant import AppStumbled, ModuleErrorCode
 
 
-def try_get_mgd_msg(error: object, default_msg: str = None) -> str:
+def try_get_mgd_msg(error: object, default_msg: Optional[str] = None) -> str:
     """
     Extracts a custom error message (surrounded by markers)
     from the argument error string, that is typically
@@ -180,7 +180,7 @@ def retrieve_rows(query: str) -> Optional[Union[Any, Tuple]]:
         return tuple()
 
 
-def retrieve_dict(query: str) -> DBTexts:
+def retrieve_dict(query: str) -> Db_texts:
     """
     Executes the query and attempts to return the result as a dictionary,
     assuming the result consists of two columns (key, value) per row.
@@ -195,7 +195,7 @@ def retrieve_dict(query: str) -> DBTexts:
 
     data = retrieve_rows(query)
 
-    result: DBTexts = {}
+    result: Db_texts = {}
     try:
         if data and isinstance(data, tuple):
             # Check if data contains multiple rows of at least two columns

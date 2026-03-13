@@ -16,7 +16,7 @@ from ..models.private import Schema
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.jinja_helper import process_template
 from ..helpers.uiact_helper import UiActResponseProxy
-from ..helpers.ui_db_texts_helper import add_msg_final
+from ..helpers.ui_db_texts_class import add_msg_final
 from ..helpers.route_helper import (
     get_private_response_data,
     init_response_vars,

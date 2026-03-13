@@ -19,11 +19,11 @@ from ..SepIconMaker import SepIconMaker
 from ...common.UIDBTexts import UIDBTexts
 from ...public.ups_handler import ups_handler
 from ...common.app_error_assistant import ModuleErrorCode, AppStumbled
-
 from ...helpers.py_helper import is_str_none_or_empty, class_to_dict
+from ...public.ups_handler import get_ups_jHtml
 from ...helpers.user_helper import get_batch_code
 from ...helpers.jinja_helper import process_template
-from ...helpers.types_helper import SepMgmtReturn, CargoList
+from ...helpers.types_helper import Sep_mgmt_return, Cargo_list
 from ...helpers.route_helper import get_private_response_data, init_response_vars
 from ...helpers.js_consts_helper import (
     js_form_sec_check,
@@ -31,7 +31,7 @@ from ...helpers.js_consts_helper import (
     js_form_cargo_id,
     js_grid_col_meta_info,
 )
-from ...helpers.ui_db_texts_helper import add_msg_final, add_msg_error, UITextsKeys
+from ...helpers.ui_db_texts_class import add_msg_error, UITextsKeys
 from ...helpers.db_records.DBRecords import DBRecords, ListOfDBRecords
 
 from .save_to_db import save_data
@@ -96,9 +96,7 @@ def sep_mgmt() -> str:
         jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
 
     except Exception as e:
-        msg = add_msg_final("gridException", ui_db_texts, task_code)
-        _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)
-        jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
+        jHtml = get_ups_jHtml("gridException", ui_db_texts, task_code, e)
 
     return jHtml
 
@@ -117,7 +115,7 @@ def _sep_data_fetch(_item_none: str, col_names: List[str]) -> Tuple[DBRecords, L
     return sep_usr_rows, users_list
 
 
-def _save_and_email(grid_response: CargoList, ui_db_texts: UIDBTexts, task_code: int) -> SepMgmtReturn:
+def _save_and_email(grid_response: Cargo_list, ui_db_texts: UIDBTexts, task_code: int) -> Sep_mgmt_return:
     """Saves data & sends emails"""
 
     task_code += 1

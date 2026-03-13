@@ -17,7 +17,7 @@
 # It is only run once.
 
 import time, os.path as path
-from typing import Tuple, Optional
+from typing import cast, Tuple, Optional, TYPE_CHECKING
 
 
 from .Args import Args
@@ -79,7 +79,7 @@ def _get_debug_2() -> bool:
 
 
 # ---------------------------------------------------------------------------- #
-def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple[Fuse, str]:
+def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple[Fuse | None, str]:
     """
     Create the 'fuse' that will assists the initializations of classes
     """
@@ -123,7 +123,8 @@ def _ignite_config(fuse: Fuse) -> Tuple[DynamicConfig | None, str]:
     Select the config, based in the app_mode (production or debug)
     WARNING: Don't run with debug turned on in production!
     """
-    config: DynamicConfig | None = None  # this config will later be shared by sidekick
+
+    config = None
     msg_error = ""
     try:
         from ..config.DynamicConfig import get_config_for_mode
@@ -209,8 +210,9 @@ def _ignite_sql_connection(fuse: Fuse, uri: str) -> Tuple[str, str]:
         start_time = time.time()
         with engine.connect() as connection:
             result = connection.execute(text("select number from db_version order by id desc limit 1"))
-            db_version = result.scalar()
-            elap = f"{(time.time() - start_time)    * 1000:,.2f}"
+            _version: str | None = result.scalar()
+            db_version = _version if isinstance(_version, str) else "!"
+            elap = f"{(time.time() - start_time) * 1000:,.2f}"
             fuse.display.info(f"Connected to database version {db_version} successfully in {elap} ms.")
     except OperationalError as e:
         error = error_msg.format("Operational", f"\nuri: [{uri}]", e)
@@ -239,12 +241,17 @@ def ignite_app(app_name, start_at) -> Tuple[Sidekick, str, bool]:
     fuse, error = _start_fuse(app_name, args, start_at)
     if error:
         _log_and_exit(error)
+
+    assert fuse is not None  # this is  JUST for the type checker
     fuse.display.debug("The fuse was created.")
 
     # Config
     config, error = _ignite_config(fuse)
     if error:
         _log_and_exit(error)
+
+    assert config is not None  # this is  JUST for the type checker
+
     fuse.display.debug(f"Config was ignited, debugging is {config.APP_DEBUGGING}.")
 
     # Mandatory Configuration keys

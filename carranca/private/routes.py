@@ -7,13 +7,15 @@ Equipe da Canoa -- 2024
 mgd
 """
 
+from __future__ import annotations
+
 # cSpell: ignore werkzeug wtforms tmpl mgmt jscmd
 from flask import Blueprint, request
-from flask_login import login_required, current_user
-from werkzeug.exceptions import NotFound
-
 from typing import Tuple, Callable
 from ..models.public import get_user_where
+from werkzeug.exceptions import NotFound
+
+from flask_login import login_required, current_user
 from ..helpers.py_helper import is_str_none_or_empty
 from ..helpers.pw_helper import internal_logout, nobody_is_logged
 from ..public.ups_handler import ups_handler
@@ -329,49 +331,62 @@ def received_file_download():
 @bp_private.route("/auto_email_user", methods=MTD_BOTH)
 def auto_email_user() -> Route_response:
     """
-    Sends a test email to the user's registered address to verify
-    email deliverability and sending engine functionality.
-    """
-    from .email_token_process import token_has_expired
+    if user's email is verified:
+        Sends a test email to the user's registered address to verify
+        email deliverability and sending engine functionality.
+    else:
+        handles the registration email process
 
-    def _is_token_ready_to_verify(email: str) -> bool:
-        # get very fresh info
-        user_rec = get_user_where(email=email)
-        if not user_rec:
-            return False
-        elif user_rec.email_verified:
+    """
+
+    from ..models.public import User
+
+    def _send_test_email(email: str, name: str):
+        # send a email to test process & address
+        from .email_token_process import send_email_to_test_address
+
+        jHtml = send_email_to_test_address(email, name)
+
+        return jHtml
+
+    def _does_user_need_token(user_rec: User) -> bool:
+        # Does the user need a token?
+        if is_str_none_or_empty(user_rec.verify_email_token):
             return True
-        elif is_str_none_or_empty(user_rec.verify_email_token):
-            return False
-        elif token_has_expired(user_rec.verify_email_sent_at):
-            return False
-        else:
-            return True
+
+        from .email_token_process import has_token_expired
+
+        return has_token_expired(user_rec.verify_email_sent_at)
 
     jHtml: Jinja_generated_html = ""
     if nobody_is_logged():
         return redirect_to(login_route())
 
     elif current_user.email_verified:
-        # send a email to test process & address
-        from .email_token_process import email_test_email
+        # if user's email address was verified, send him and email to teste process & address
+        jHtml = _send_test_email(current_user.email, current_user.username)
 
-        jHtml = email_test_email(current_user.email, current_user.username)
+    elif not (user_rec := get_user_where(email=current_user.email)) or user_rec.disabled:
+        # Maybe just deleted | disable?  | ?
+        return redirect_to(login_route())
 
-    elif not _is_token_ready_to_verify(current_user.email):
-        # Start the process with an e-mail
+    elif user_rec.email_verified:
+        # if user's email address was verified, send him and email
+        # Why current_user.email_verified didn't know?
+        jHtml = _send_test_email(current_user.email, current_user.username)
+
+    # user NOT verified:
+    elif _does_user_need_token(user_rec):
+        # user has no token or has expired: send a new one
         from .email_token_process import send_token_and_verify
 
         jHtml = send_token_and_verify(current_user.email, current_user.username)
 
-    elif is_method_post() and not is_str_none_or_empty(token_entered := request.form.get("token", "")):
-        from .email_token_process import verify_sent_token
-
-        jHtml = verify_sent_token(current_user.email, token_entered)
-
     else:
-        raise NotFound("The requested route or resource state is invalid.")
-        # invalid route
+        # User has an active token to confirm, challenge the user ;-)
+        from .email_token_process import email_token_process
+
+        jHtml = email_token_process(user_rec.verify_email_token, user_rec.verify_email_sent_at)
 
     return jHtml
 

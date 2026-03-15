@@ -7,9 +7,14 @@ mgd 2025.10.29 -- 11.08
 
 # cSpell: ignore  formdata FlaskForm
 import random
+
+# flask_wtf is squiggly
+from datetime import datetime, timedelta
 from flask import request
 from flask_wtf import FlaskForm
-from datetime import datetime, timedelta
+from flask_login import current_user
+
+from .wtforms import EmailTokenForm
 from ..models.public import get_user_where, persist_user
 from ..helpers.py_helper import is_str_none_or_empty
 from ..public.ups_handler import get_ups_jHtml
@@ -34,7 +39,7 @@ def _get_token_expiration_date(from_dt: datetime | None) -> datetime:
     return expires_at
 
 
-def token_has_expired(from_dt: datetime | None):
+def has_token_expired(from_dt: datetime | None):
     return True if from_dt is None else sidekick.now() > _get_token_expiration_date(from_dt)
 
 
@@ -69,7 +74,11 @@ def _send_email(
     return jHtml
 
 
-def email_test_email(email: str, name: str) -> Jinja_generated_html:
+def send_email_to_test_address(email: str, name: str) -> Jinja_generated_html:
+    """
+    Sends a test email to the user's registered address to verify
+    email deliverability and sending engine functionality.
+    """
 
     fform = FlaskForm(formdata=None)
     jHtml = _send_email("emailToTestEmail", email, name, {}, True, fform)
@@ -78,7 +87,6 @@ def email_test_email(email: str, name: str) -> Jinja_generated_html:
 
 
 def send_token_and_verify(email: str, name: str) -> Jinja_generated_html:
-    from .wtforms import EmailTokenForm
 
     # AQUI FIX, se exites token, abrir input
 
@@ -108,12 +116,14 @@ def verify_sent_token(email: str, token_entered: str) -> Jinja_generated_html:
     jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.EMAIL_VERIFY)
     code = 0
     try:
+        fform = FlaskForm(formdata=None)
         tmpl_ffn, is_get, ui_db_texts = get_private_response_data("verifySentToken")
 
         why_msg = "msg_Unknown"
         code = 1
         if is_get:
-            code += 1
+            fform = EmailTokenForm()
+            code = 0
         elif is_str_none_or_empty(token_entered):
             code += 2
             why_msg = "msg_NoToken"
@@ -126,7 +136,7 @@ def verify_sent_token(email: str, token_entered: str) -> Jinja_generated_html:
         elif token_entered != token_read:
             code += 5
             why_msg = "msg_WrongToken"
-        elif token_has_expired(user_rec.verify_email_sent_at):
+        elif has_token_expired(user_rec.verify_email_sent_at):
             code += 6
             why_msg = "msg_TokenExpired"
         else:
@@ -138,15 +148,47 @@ def verify_sent_token(email: str, token_entered: str) -> Jinja_generated_html:
             if user_rec.email_verified:
                 code = 0
 
-        if code == 0:
+        if fform:
+            pass
+        elif code == 0:
             add_msg_success("msgSuccess", ui_db_texts)
         else:
             add_msg_error("msgError", ui_db_texts, task_code + code, why_msg)
 
-        jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
+        jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.data())
+
     except Exception as e:
         task_code = task_code + code
         jHtml = get_ups_jHtml("verifySentTokenException", ui_db_texts, task_code, e)
+
+    return jHtml
+
+
+def email_token_process(verify_email_token: str, verify_email_sent_at: datetime):
+    def _is_token_ready_to_be_verified(email: str) -> bool:
+        # get very fresh info
+        user_rec = get_user_where(email=email)
+        if not user_rec:
+            return False
+        elif user_rec.email_verified:
+            return False
+        elif is_str_none_or_empty(user_rec.verify_email_token):
+            return False
+        elif has_token_expired(user_rec.verify_email_sent_at):
+            return False
+        else:
+            return True
+
+    if _is_token_ready_to_be_verified(current_user.email):
+        from .email_token_process import verify_sent_token
+
+        jHtml = verify_sent_token(current_user.email, request.form.get("token", ""))
+
+    else:
+        # Start the process with an e-mail
+        from .email_token_process import send_token_and_verify
+
+        jHtml = send_token_and_verify(current_user.email, current_user.username)
 
     return jHtml
 

@@ -154,17 +154,16 @@ def _send_email(
 
         # A nice notice
         if is_str_none_or_empty(recipients.to) and not is_str_none_or_empty(recipients.bcc):
-            sidekick.display.warn(
-                "Warning: Sending email with only BCC recipient might be rejected by some servers."
-            )
+            sidekick.display.warn("Warning: Sending email with only BCC recipient might be rejected by some servers.")
 
         # Create the sendgrid mail
         task = "creating Mail data"
-        mail = sendgrid.Mail(
-            from_email=from_email,
-            subject=texts["subject"],
-            html_content=texts["content"],
-        )
+        if True:
+            mail = sendgrid.Mail(
+                from_email=from_email,
+                subject=texts["subject"],
+                html_content=texts["content"],
+            )
 
         # Add recipients (generic way)
         def _addRecipients(

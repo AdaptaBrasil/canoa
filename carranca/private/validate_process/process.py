@@ -77,7 +77,7 @@ def process(
     def _updated(code):
         msg_ok = "The process ended without error and t" if code == 0 else "T"
         msg_error = "" if code == 0 else f" although the process ended with error_code= [{code}]"
-        sidekick.display.info(_log(f"{msg_ok}he DB record was updated successfully{msg_error}"))
+        sidekick.display.info(_log(f"{msg_ok}he DB record was updated successfully{msg_error}."))
         return
 
     # Create Cargo, with the parameters for the first procedure (check) of the Loop Process

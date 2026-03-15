@@ -11,11 +11,13 @@ mgd 2025-03-15, 5-23
 
 # cspell:words Entendí ui_texts_locale
 
-from ..helpers.ui_db_texts_class import ui_texts_locale, UITextsKeys
+from ..common.UITextsKeys import UITextsKeys
+from ..helpers.ui_db_texts_class import ui_texts_locale
 
 default_locale = "en"
 default_section = "Form"
 error_text = "Text"
+
 
 class AuxTexts:
     section = "AuxTexts"
@@ -42,7 +44,7 @@ local_texts = {
         },
         AuxTexts.section: {
             AuxTexts.techIntro: "Por favor, informe este texto: '{0}'",
-        }
+        },
     },
     Locale.en: {
         default_section: {
@@ -56,7 +58,7 @@ local_texts = {
         },
         AuxTexts.section: {
             AuxTexts.techIntro: "Por favor informe este texto: '{0}'",
-        }
+        },
     },
     Locale.es: {
         default_section: {
@@ -71,7 +73,7 @@ local_texts = {
         },
         AuxTexts.section: {
             AuxTexts.techIntro: f"Por favor, reporte este texto: '{0}'",
-        }
+        },
     },
 }
 

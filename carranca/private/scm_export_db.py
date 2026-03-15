@@ -14,6 +14,7 @@ from typing import List
 from dataclasses import dataclass
 
 from .scm_data import get_scm_data
+from ..common.UIDBTexts import UITextsKeys
 from ..helpers.py_helper import class_to_dict
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.user_helper import UserFolders
@@ -38,6 +39,7 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_generated_html | Response:
     try:
         task_code += 1
         tmpl_ffn, _, ui_db_texts = get_private_response_data("scmExportDB")
+        ui_db_texts[UITextsKeys.Form.pretend_busy] = False
 
         task_code += 1
         config = ExportProcessConfig()

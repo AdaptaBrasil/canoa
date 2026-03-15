@@ -121,6 +121,7 @@ def send_email(
 
         case EmailProvider.NO_EMAIL:
             sidekick.display.debug("No email provider. Cannot sent email.")
+            return False
 
         case _:
             raise KeyError(f"Unknown email provider [{sidekick.config.EMAIL_PROVIDER}].")

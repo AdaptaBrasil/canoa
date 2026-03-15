@@ -1,3 +1,7 @@
+# mgd
+# shortcuts for known UITextsKeys keys
+
+
 class UITextsKeys:
 
     class Msg:
@@ -21,6 +25,8 @@ class UITextsKeys:
         date_format = "userDateFormat"
         # This button is only visible when msg_only is True OR is a Dialog/Document (see document.html.j2)
         btn_close = "btnCloseForm"
+        submit_route = "fromSubmitRoute"
+        pretend_busy = "formSubmitPretendBusy"
 
     class Fatal:
         no_db_conn = "NoDBConnection"
@@ -37,3 +43,6 @@ class UITextsKeys:
         # this is a special key that has the name of the section loaded in db_Texts,
         # see  get_section
         name = "__section_name__"
+
+
+# eof

@@ -4,7 +4,10 @@
 ----------------------
 Managed & Displays HTML Forms
 
+
 mgd
+
+cSpell:ignore tojson
 --------------------------------------- #}
 
 {# only specify value if different from default #}
@@ -12,6 +15,8 @@ mgd
 {% set form_display_msg= msgOnly | default(False) %}
 {% set form_display_ui= not form_backend_msg %}
 {% set form_close_btn_text= form_close_btn_text | default('Fechar') %}
+{% set form_submit_route = fromSubmitRoute | default(None) %}
+{% set form_submit_pretend_busy = formSubmitPretendBusy | default(None) %}
 
 {% extends "./layouts/dialog.html.j2" %}
 
@@ -76,6 +81,12 @@ mgd
 {% block dlg_blc_javascript %}
 {{ super() }}
 
+{% if form_submit_pretend_busy is not none %}
+<script>
+    Canoa.afterSubmitPretendBusy = {{ form_submit_pretend_busy | tojson }};
+</script>
+{% endif %}
+
 {% block frm_blc_script %}
 {% endblock frm_blc_script %}
 
@@ -84,5 +95,17 @@ mgd
 
 {% endif %}
 {# ╘═══════════════ Display UI ═══════════════╛ #}
+
+
+{% if form_submit_route %}
+{# ╒════════════════ Dialog Forms ════════════════╕ #}
+{% block dlg_blc_forms %}
+
+{% from "includes/_action_forms_and_btns.html.j2" import action_form__submit_cargo %}
+{{ action_form__submit_cargo(dlg_submit_form_id, form_submit_route ) }}
+
+{% endblock dlg_blc_forms %}
+{# ╘═════════════════ Dialog Forms ════════════════╛ #}
+{% endif %}
 
 {# eof #}

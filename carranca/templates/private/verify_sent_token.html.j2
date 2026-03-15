@@ -15,7 +15,7 @@ mgd
 
 {# [token #}
 <div class="form-group">
-    <label class="form-label" inert for="{{ form.token.id }}">{{ tokenLabel }}</label>
+    <label class="form-label" inert for="{{ form.token.id }}">Label del Token</label>
     <div class="input-group">
         <span class="input-group-text">
             <i class="fas fa-envelope-circle-check" aria-hidden="true"></i>
@@ -27,12 +27,7 @@ mgd
 
 {% endblock frm_blc_inputs %}
 
-{% block frm_blc_script %}
-<script>
-    Canoa.submitImmediately = false;
-</script>
-{% endblock frm_blc_script %}
-
+{#
 {# ╒════════════════ Dialog Forms ════════════════╕ #}
 {% block dlg_blc_forms %}
 
@@ -41,6 +36,6 @@ mgd
 
 {% endblock dlg_blc_forms %}
 {# ╘═════════════════ Dialog Forms ════════════════╛ #}
-
+ #}
 
 <!-- eof -->

@@ -51,7 +51,7 @@ def email(cargo: Cargo, user_report_full_name) -> Cargo:
             h_email_started_at=cargo.email_started_at,
             email_sent=True,
         )
-        sidekick.display.info(f"{proc}The validation process record was updated with the email info.")
+        sidekick.display.info(f"{proc}The validation process DB record was updated with the email info.")
         task_code = 0  # !important
     except Exception as e:
         task_code += 5

@@ -139,7 +139,7 @@ Ensure this matches the expected dimensions for dialog icons.
         /** @type {CanoaGlobal} */
         window.Canoa = {
             dataModified: false,
-            submitImmediately: false,
+            afterSubmitPretendBusy: true,
         }
         const dlgm = document.getElementById("{{ dlg_main_id }}");
 
@@ -154,14 +154,14 @@ Ensure this matches the expected dimensions for dialog icons.
         }
 
         window.addEventListener('beforeunload', (event) => {
-            {# TODO: sessionStorage.getItem("canoa_session_started") # }
+            {# TODO: sessionStorage.getItem("canoa_session_started") #}
             if (Canoa.dataModified) {
                 event.preventDefault();
             }
         });
 
         document.getElementById("{{dlg_submit_form_id}}")?.addEventListener('submit', (e) => {
-            sleep((Canoa.submitImmediately ? 10 : 600));
+            sleep((Canoa.afterSubmitPretendBusy ? 600: 10));
         });
 
         document.getElementById("{{dlg_close_form_id}}")?.addEventListener('submit', (e) => {

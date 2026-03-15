@@ -47,6 +47,5 @@
     ],
     // === Environment and Interpreter Settings ===
     // mgd per copitlot  2026.03.05 "python.defaultInterpreterPath": ".env\\Scripts\\python.exe",
-    "python.defaultInterpreterPath": "C:\\Program Files\\Python313\\python.exe",
-    "python-envs.pythonProjects": []
+    "python.defaultInterpreterPath": "C:\\Program Files\\Python313\\python.exe"
 }

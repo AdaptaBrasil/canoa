@@ -88,7 +88,7 @@ class DynamicConfig(BaseConfig):
         self.DB_len_val_for_uname = LenValidate(3, 22)
         self.DB_len_val_for_email = LenValidate(8, 60)
         self.email_verify_token_digit_count = 6  # LenValidate(100000, 999999)
-        self.email_verify_token_expires_hours = 2
+        self.email_verify_token_expires_hours = 5
 
         # propagate APP_DEBUG
         default = self.APP_DEBUG if self.APP_PROPAGATE_DEBUG else False

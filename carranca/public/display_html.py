@@ -25,13 +25,13 @@ from ..helpers.html_helper import img_filenames, img_change_src_path
 from ..helpers.jinja_helper import process_template, jinja_pre_template
 from ..common.app_context_vars import sidekick
 from ..common.app_error_assistant import ModuleErrorCode, AppStumbled
-from ..helpers.ui_db_texts_class import add_msg_error, get_section, UITextsKeys
+from ..helpers.ui_db_texts_manager import set_msg_error, get_section, UITextsKeys
 
 
 def __prepare_img_files(
     html_images: list[str], db_images: list[str], img_local_path: str, section: str
 ) -> bool:
-    from ..helpers.ui_db_texts_class import db_retrieve_text
+    from ..helpers.ui_db_texts_manager import db_retrieve_text
 
     is_img_local_path_ready = os.path.exists(img_local_path)
     missing_files = html_images.copy()  # missing files from folder, assume all
@@ -133,7 +133,7 @@ def display_html(docName: str):
         task_code += 1
         if is_str_none_or_empty(body):
             task_code += 1
-            msg = add_msg_error("documentNotFound", ui_db_texts, docName)
+            msg = set_msg_error("documentNotFound", ui_db_texts, docName)
             raise AppStumbled(msg, task_code, False, True)
         elif len(html_images) == 0:
             # html has no images

@@ -31,7 +31,7 @@ from ...helpers.js_consts_helper import (
     js_form_cargo_id,
     js_grid_col_meta_info,
 )
-from ...helpers.ui_db_texts_class import add_msg_error, UITextsKeys
+from ...helpers.ui_db_texts_manager import set_msg_error, UITextsKeys
 from ...helpers.db_records.DBRecords import DBRecords, ListOfDBRecords
 
 from .save_to_db import save_data
@@ -65,7 +65,7 @@ def sep_mgmt() -> str:
             sep_data, user_list = _sep_data_fetch(item_none, col_names)
         elif not is_str_none_or_empty(msg := js_form_sec_check()):
             task_code += 2  # 5
-            msg = add_msg_error(msg, ui_db_texts)
+            msg = set_msg_error(msg, ui_db_texts)
             raise AppStumbled(msg, task_code, True, True)
         else:
             task_code += 3  # 6

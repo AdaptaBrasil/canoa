@@ -95,8 +95,18 @@ class UIDBTexts:
     """
 
     def __init__(self, data: Dict[str, Any], debugging: bool):
-        self._data = data
+        # collect msg keys names
+        items = UITextsKeys.Msg.__dict__.items()
+        self._msg_keys = [value for key, value in items if not key.startswith("__")]
+
+        # filter all msg to _msg dict
+        self._msg = {k: v for k, v in data.items() if k in self.msg_keys}
+        # filter get all 'texts' into _data dict
+        self._data = {k: v for k, v in data.items() if k not in self.msg_keys}
+
         self.is_debug_mode = debugging
+        self.__section__ = self.get_str(UITextsKeys.Section.name)
+        self._data.pop(UITextsKeys.Section.name, None)
 
     def data(self) -> Dict[str, Any]:
         """
@@ -155,24 +165,30 @@ class UIDBTexts:
     def __len__(self) -> int:
         return len(self._data)
 
-    # --- merged by mgd on 2025-11-08:
-    # --  get_str() now supports an optional default parameter for missing keys ---
-    # def get_str(self, key: str, default: str = "") -> str:
-    #     try:
-    #         value = self._data.get(key, _MISSING)
-    #         return default if value is _MISSING else self.str(key)
-    #     except KeyError:
-    #         return default
+    # --- Update dict values ---
+    def update_info(self, *args) -> str:
+        return self.update_value(UITextsKeys.Msg.info, *args)
 
-    # def str(self, key: str) -> str:
-    #     """Retrieves a value guaranteed to be a string."""
-    #     raw_value = self._get_and_check_type(key, str)
-    #     return "" if raw_value is None else cast(str, raw_value)
+    def update_value(self, key: str, *args) -> str:
+        """
+        Updates the ._data dictionary value
+        """
+        value = self.format(key, *args)
+        self[key] = value
+        return value
 
     # --- Type-Specific Accessors ---
+    def get_msg(self, key: str, default: str = "") -> str:
+        """
+        Retrieves a value from self._msg guaranteed to be a string.
+        """
+        _value = self._msg.get(key, _MISSING)
+        value = default if _value == _MISSING else str(_value)
+        return value
+
     def get_str(self, key: str, default: str = "") -> str:
         """
-        Retrieves a value guaranteed to be a string.
+        Retrieves a value from self._data guaranteed to be a string.
         If the key is missing returns the provided default value as str
         """
         value = self._get_value_or_default(key, default, str)
@@ -180,14 +196,14 @@ class UIDBTexts:
 
     def get_bool(self, key: str, default: bool | None = None) -> bool:
         """
-        Retrieves a value guaranteed to be a boolean.
+        Retrieves a value from self._data guaranteed to be a boolean.
         If the key is missing returns the provided default value as str
         """
         value = self._get_value_or_default(key, default, bool)
         return cast(bool, value)
 
     def get_int(self, key: str) -> int:
-        """Retrieves a value guaranteed to be an integer."""
+        """Retrieves a value from self._data guaranteed to be an integer."""
         raw_value = self._get_and_check_type(key, int)
         if raw_value is None:
             raise TypeError(VALUE_IS_NONE_ERROR.format(key, int.__name__))
@@ -195,17 +211,27 @@ class UIDBTexts:
         return cast(int, raw_value)
 
     def get_float(self, key: str) -> float:
-        """Retrieves a value guaranteed to be a float (decimal number)."""
+        """Retrieves a value from self._data guaranteed to be a float (decimal number)."""
         raw_value = self._get_and_check_type(key, float)
         if raw_value is None:
             raise TypeError(VALUE_IS_NONE_ERROR.format(key, float.__name__))
 
         return cast(float, raw_value)
 
+    def reset_messages(self):
+        """safely wipe all potential ui messages from the data dict."""
+        for k_msg in self.msg_keys:
+            self._data.pop(k_msg, None)
+
+    @property
+    def msg_keys(self) -> list[str]:
+        return self._msg_keys
+
     @property
     def section(self) -> str:
         """Returns the section name associated with this UIDBTexts instance, if available."""
-        return self.get_str(UITextsKeys.Section.name)
+        return self.__section__
+        ## return self.get_str(UITextsKeys.Section.name)
 
     @property
     def display_msg_only(self) -> bool:

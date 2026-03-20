@@ -2,52 +2,46 @@
 Tests and confirms that the email and sending functionality
 is configured and working correctly.
 
-mgd 2025.10.29 -- 11.08
+mgd 2025.10.29 -- 2026.03.20
 """
 
-# cSpell: ignore  formdata FlaskForm
+# cSpell: ignore formdata FlaskForm timestamping
+
 import random
 
 # flask_wtf is squiggly
+from typing import cast
 from datetime import datetime, timedelta
-from flask import request
 from flask_wtf import FlaskForm
-from flask_login import current_user
 
 from .wtforms import EmailTokenForm
 from ..models.public import get_user_where, persist_user
-from ..helpers.py_helper import is_str_none_or_empty
+from ..helpers.py_helper import is_str_none_or_empty, datetime_for_ui
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.types_helper import Usual_dict
+from ..helpers.route_helper import get_form_input_value
 from ..helpers.jinja_helper import Jinja_generated_html, process_template
 from ..helpers.email_helper import RecipientsDic, RecipientsList, send_email
 from ..helpers.route_helper import get_private_response_data, init_response_vars, is_method_get
 from ..common.app_context_vars import sidekick
-from ..helpers.ui_db_texts_class import add_msg_success, add_msg_error
 from ..common.app_error_assistant import ModuleErrorCode
-
-
-def _get_token_expiration_date(from_dt: datetime | None) -> datetime:
-    if from_dt is None:
-        # ok, already expired
-        return sidekick.now() - timedelta(hours=24)
-
-    token_life_in_hours = int(sidekick.config.email_verify_token_expires_hours)
-    if token_life_in_hours < 2:
-        raise ValueError(f"The verification token expiration time is too short: {token_life_in_hours}h.")
-    expires_at = from_dt + timedelta(hours=token_life_in_hours)
-    return expires_at
-
-
-def has_token_expired(from_dt: datetime | None):
-    return True if from_dt is None else sidekick.now() > _get_token_expiration_date(from_dt)
+from ..helpers.ui_db_texts_manager import (
+    set_msg_success,
+    set_msg_error,
+    set_msg_info,
+    MSG_DEFAULT,
+)
 
 
 def _send_email(
-    ui_section: str, email: str, name: str, vars: Usual_dict, msg_only: bool, fform: FlaskForm
+    ui_section: str,
+    email: str,
+    name: str,
+    vars: Usual_dict,
+    msg_only: bool,
+    fform: FlaskForm,
 ) -> Jinja_generated_html:
 
-    email_sent = False
     jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.EMAIL_CHECK)
     try:
         tmpl_ffn, _, ui_db_texts = get_private_response_data(ui_section)
@@ -59,11 +53,10 @@ def _send_email(
         email_sent = send_email(recipients, ui_section, vars)
         task_code += 1
         if email_sent:
-            add_msg_success("emailSentSuccess", ui_db_texts)
-            # if requested, display form (if any)
+            set_msg_success("emailSentSuccess", ui_db_texts)
             ui_db_texts.display_msg_only = msg_only
         else:
-            add_msg_error("emailSentError", ui_db_texts)
+            set_msg_error("emailSentError", ui_db_texts)
 
         task_code += 1
         jHtml = process_template(tmpl_ffn, form=fform, **vars, **ui_db_texts.data())
@@ -72,6 +65,26 @@ def _send_email(
         jHtml = get_ups_jHtml("emailSentException", ui_db_texts, task_code, e)
 
     return jHtml
+
+
+def has_token_expired(sent_at: datetime | None) -> bool:
+    """
+    Checks if the verification window has closed.
+    Relies on the DB-generated timestamp for maximum precision.
+    """
+    if sent_at is None:
+        # No timestamp means the token was either cleared by the trigger
+        # or never generated. In both cases, it's 'expired/invalid'.
+        return True
+
+    # Hours defined in sidekick.config (e.g., 8)
+    limit_hours = int(sidekick.config.email_verify_token_expires_hours)
+
+    # Calculate the deadline
+    expiration_deadline = sent_at + timedelta(hours=limit_hours)
+
+    # Compare with current application time
+    return sidekick.now() > expiration_deadline
 
 
 def send_email_to_test_address(email: str, name: str) -> Jinja_generated_html:
@@ -87,108 +100,92 @@ def send_email_to_test_address(email: str, name: str) -> Jinja_generated_html:
 
 
 def send_token_and_verify(email: str, name: str) -> Jinja_generated_html:
-
-    # AQUI FIX, se exites token, abrir input
+    """
+    emails the token and returns a form for the user to inform it
+    """
 
     def __generate_token(digit_count: int) -> int:
-        """Generates a random integer with exactly `digit_count` digits."""
+        """Internal helper for string-based tokens."""
         low = 10 ** (digit_count - 1)
         high = (10**digit_count) - 1
         return random.randint(low, high)
 
     vars = {}
     if is_method_get():
-        token = __generate_token(sidekick.config.email_verify_token_digit_count)
+        digit_count = sidekick.config.email_verify_token_digit_count
+        token = __generate_token(digit_count)
+
+        # Persistence triggers the DB's automated timestamping
         user_rec = get_user_where(email=email)
-        expiration = _get_token_expiration_date(user_rec.verify_email_sent_at)
-        vars.update({"expires": expiration, "user": name, "token": token})
         user_rec.verify_email_token = str(token)
         persist_user(user_rec)
 
+        # Prepare email variables including the new 'hours' logic
+        vars.update({"token": token, "expires": sidekick.config.email_verify_token_expires_hours})
+
     fform = EmailTokenForm()
-    jHtml = _send_email("sendTokenAndVerify", email, name, vars, False, fform)
+
+    jHtml = _send_email("verifySentToken", email, name, vars, False, fform)
 
     return jHtml
 
 
-def verify_sent_token(email: str, token_entered: str) -> Jinja_generated_html:
+def verify_sent_token(email: str, db_token: str, email_sent_at: datetime) -> Jinja_generated_html:
 
     jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.EMAIL_VERIFY)
     code = 0
     try:
-        fform = FlaskForm(formdata=None)
+
+        def _get_time_info(sent_at: datetime) -> str:
+            """Updates the UI labels like 'today at 14:00' using DB time."""
+            days = (sidekick.now().date() - sent_at.date()).days
+            time_str = sent_at.strftime("%H:%M")
+
+            if days == 0:
+                label = ui_db_texts.format("sendToday", time_str)
+            elif days == 1:
+                label = ui_db_texts.format("sendYesterday", time_str)
+            else:
+                label = ui_db_texts.format("sendDate", datetime_for_ui(sent_at))
+
+            return label
+
+        fform = EmailTokenForm()
         tmpl_ffn, is_get, ui_db_texts = get_private_response_data("verifySentToken")
 
-        why_msg = "msg_Unknown"
-        code = 1
-        if is_get:
-            fform = EmailTokenForm()
-            code = 0
-        elif is_str_none_or_empty(token_entered):
-            code += 2
-            why_msg = "msg_NoToken"
-        elif not (user_rec := get_user_where(email=email)):
-            code += 3
-            why_msg = "msg_UserNotFound"
-        elif is_str_none_or_empty(token_read := user_rec.verify_email_token):
-            code += 4
-            why_msg = "msg_TokenNotFound"
-        elif token_entered != token_read:
-            code += 5
-            why_msg = "msg_WrongToken"
-        elif has_token_expired(user_rec.verify_email_sent_at):
-            code += 6
-            why_msg = "msg_TokenExpired"
-        else:
-            why_msg = "msg_PostFailed"
-            code += 7
-            user_rec.verify_email_token = token_entered + "*"  # the key to unlock the e-mail.
-            persist_user(user_rec)
-            code = 0
-            if user_rec.email_verified:
-                code = 0
+        # keep info, GET and POST (because it can have a warn|error)
+        time_info = _get_time_info(email_sent_at)
+        set_msg_info(MSG_DEFAULT, ui_db_texts, time_info)
 
-        if fform:
-            pass
-        elif code == 0:
-            add_msg_success("msgSuccess", ui_db_texts)
+        if is_get:
+            jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.data())
+            return jHtml
+
+        # is post
+        def _set_msg_error(code: int, error_hint: str):
+            set_msg_error(MSG_DEFAULT, ui_db_texts, task_code + code, error_hint)
+            return
+
+        code = 1
+        if is_str_none_or_empty(ui_token := cast(str, get_form_input_value(fform.token.name))):
+            _set_msg_error(code + 2, "msg_TokenNotFound")
+        elif not (db_token == ui_token):
+            set_msg_error("wrongToken", ui_db_texts)
+        elif not (user_rec := get_user_where(email=email)):
+            _set_msg_error(code + 4, "msg_UserNotFound")
+        elif has_token_expired(email_sent_at):
+            _set_msg_error(code + 5, "msg_TokenExpired")
         else:
-            add_msg_error("msgError", ui_db_texts, task_code + code, why_msg)
+            code += 6
+            user_rec.verify_email_token = ui_token + "*"  # the key to unlock the e-mail.
+            persist_user(user_rec)
+            set_msg_success(MSG_DEFAULT, ui_db_texts)
 
         jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.data())
 
     except Exception as e:
         task_code = task_code + code
-        jHtml = get_ups_jHtml("verifySentTokenException", ui_db_texts, task_code, e)
-
-    return jHtml
-
-
-def email_token_process(verify_email_token: str, verify_email_sent_at: datetime):
-    def _is_token_ready_to_be_verified(email: str) -> bool:
-        # get very fresh info
-        user_rec = get_user_where(email=email)
-        if not user_rec:
-            return False
-        elif user_rec.email_verified:
-            return False
-        elif is_str_none_or_empty(user_rec.verify_email_token):
-            return False
-        elif has_token_expired(user_rec.verify_email_sent_at):
-            return False
-        else:
-            return True
-
-    if _is_token_ready_to_be_verified(current_user.email):
-        from .email_token_process import verify_sent_token
-
-        jHtml = verify_sent_token(current_user.email, request.form.get("token", ""))
-
-    else:
-        # Start the process with an e-mail
-        from .email_token_process import send_token_and_verify
-
-        jHtml = send_token_and_verify(current_user.email, current_user.username)
+        jHtml = get_ups_jHtml(MSG_DEFAULT, ui_db_texts, task_code, e)
 
     return jHtml
 

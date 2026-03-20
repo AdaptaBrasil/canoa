@@ -19,7 +19,7 @@ from ...helpers.route_helper import (
 )
 from ...common.app_context_vars import app_user
 from ...helpers.js_consts_helper import js_ui_dictionary
-from ...helpers.ui_db_texts_class import UITextsKeys
+from ...helpers.ui_db_texts_manager import UITextsKeys
 from ...common.app_error_assistant import ModuleErrorCode
 
 from .fetch_users import fetch_user_s

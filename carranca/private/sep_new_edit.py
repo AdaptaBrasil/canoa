@@ -39,12 +39,12 @@ from ..helpers.route_helper import (
     login_route,
     redirect_to,
 )
-from ..helpers.ui_db_texts_class import (
+from ..helpers.ui_db_texts_manager import (
     UITextsKeys,
-    add_msg_success,
-    add_msg_error,
-    add_msg_final,
-    add_msg_warning,
+    set_msg_success,
+    set_msg_error,
+    set_msg_fatal,
+    set_msg_warn,
 )
 
 
@@ -150,7 +150,7 @@ def do_sep_edit(data: str) -> str:
 
         def _check_if_icon_is_repeated(sep_id: int, icon_crc: int):
             if msg_repeated := Sep.icon_exist_sep(sep_id, icon_crc) if icon_crc else "":
-                add_msg_error("sepIconRepeated", ui_db_texts, msg_repeated)
+                set_msg_error("sepIconRepeated", ui_db_texts, msg_repeated)
             return
 
         task_code += 1  # 1
@@ -191,7 +191,7 @@ def do_sep_edit(data: str) -> str:
             return redirect_to(process_on_end)
         elif not is_str_none_or_empty(msg_error_key := js_form_sec_check()):
             task_code += 2
-            msg_error = add_msg_error(msg_error_key, ui_db_texts)
+            msg_error = set_msg_error(msg_error_key, ui_db_texts)
             raise AppStumbled(msg_error, task_code, True, True)
         elif (
             scm_name := (
@@ -205,11 +205,11 @@ def do_sep_edit(data: str) -> str:
             # should never happen, is used to keep the if's one level indentation
             AppStumbled(f"Schema with id {id_schema} was not found.", task_code + 3)
         elif sep_modified and Sep.full_name_exists(id_schema, sep_name):
-            raise Exception(add_msg_error("sepNameRepeated", ui_db_texts, scm_name, sep_name))
+            raise Exception(set_msg_error("sepNameRepeated", ui_db_texts, scm_name, sep_name))
         elif (icon_data := get_icon_data(sep_row, icon_data)).error_code > 0:
             # msg {ext} [{hint}-{code}]
             raise Exception(
-                add_msg_error(
+                set_msg_error(
                     "sepInvalidFormat",
                     ui_db_texts,
                     SepIconMaker.ext,
@@ -219,7 +219,7 @@ def do_sep_edit(data: str) -> str:
             )
 
         elif not (form_modified or icon_data.ready):
-            add_msg_warning("dataUnmodified", ui_db_texts)
+            set_msg_warn("dataUnmodified", ui_db_texts)
             ui_db_texts.display_msg_only = True
 
         else:
@@ -267,7 +267,7 @@ def do_sep_edit(data: str) -> str:
             if (sep_id := Sep.save(sep_row, schema_changed, batch_code)) >= 0:  # :——
                 task_code += 5  # 517
                 msg_key = "sepSuccessNew" if editMode == SepEditMode.INSERT else "sepSuccessEdit"
-                add_msg_success(msg_key, ui_db_texts, sep_fullname)
+                set_msg_success(msg_key, ui_db_texts, sep_fullname)
                 _check_if_icon_is_repeated(sep_id, icon_crc)
 
                 if fresh_icon:  # after post, refresh the icon file on disk
@@ -276,7 +276,7 @@ def do_sep_edit(data: str) -> str:
             else:  # :——(
                 task_code += 6  # 19
                 item = f"sepFailed{'Edit' if editMode == SepEditMode.SIMPLE_EDIT else 'New'}"
-                add_msg_final(item, ui_db_texts, sep_fullname, task_code)
+                set_msg_fatal(item, ui_db_texts, sep_fullname, task_code)
 
         jHtml = process_template(
             tmpl_ffn,

@@ -33,16 +33,16 @@ from ..helpers.types_helper import Jinja_generated_html
 from ..helpers.jinja_helper import process_template
 from ..helpers.route_helper import get_tmpl_full_file_name
 from ..config.local_ui_texts import AuxTexts, local_ui_texts, local_form_texts
-from ..helpers.ui_db_texts_class import get_section
+from ..helpers.ui_db_texts_manager import get_section
 from ..common.app_error_assistant import AppStumbled
-from ..helpers.ui_db_texts_class import Db_texts, UITextsKeys, add_msg_final
+from ..helpers.ui_db_texts_manager import Db_texts, UITextsKeys, set_msg_fatal
 
 
 def get_ups_jHtml(
     ui_item_error_key: str, ui_db_texts: UIDBTexts, task_code: int, e: Exception | None = None, *args
 ) -> Jinja_generated_html:
 
-    msg = add_msg_final(ui_item_error_key, ui_db_texts, task_code, *args)
+    msg = set_msg_fatal(ui_item_error_key, ui_db_texts, task_code, *args)
     _, tmpl_ffn, ui_texts = ups_handler(task_code, msg, e)
     jHtml = process_template(tmpl_ffn, **ui_texts)
 
@@ -112,10 +112,9 @@ def ups_handler(
             ui_texts[key] = value
 
     # set the url for the icon IF a file name exists
-    if (file_name := ui_texts.get(UITextsKeys.Form.icon_file)) and not ui_texts.get(
-        UITextsKeys.Form.icon_url
-    ):
-        ui_texts[UITextsKeys.Form.icon_url] = icon_url("icons", file_name)
+    icon_file_name = ui_texts.get(UITextsKeys.Form.icon_file)
+    if icon_file_name and not ui_texts.get(UITextsKeys.Form.icon_url):
+        ui_texts[UITextsKeys.Form.icon_url] = icon_url("icons", icon_file_name)
 
     # before logout
     sidekick.display.error(e)

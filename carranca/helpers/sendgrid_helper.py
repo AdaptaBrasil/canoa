@@ -19,7 +19,7 @@ from base64 import b64encode
 
 from .py_helper import is_str_none_or_empty
 from .email_helper import RecipientsDic, RecipientsList, mime_types
-from .ui_db_texts_class import get_section
+from .ui_db_texts_manager import get_section
 
 # https://docs.sendgrid.com/pt-br/for-developers/sending-email/api-getting-started
 # curl --request POST \

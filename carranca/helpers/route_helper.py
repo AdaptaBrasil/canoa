@@ -21,7 +21,7 @@ from .jinja_helper import Template_file_full_name
 from .types_helper import Jinja_generated_html, FlaskResponse
 from ..common.UIDBTexts import UIDBTexts
 from ..config.BaseConfig import BaseConfig
-from .ui_db_texts_class import get_db_texts
+from .ui_db_texts_manager import get_db_texts
 from ..common.app_error_assistant import ModuleErrorCode
 
 

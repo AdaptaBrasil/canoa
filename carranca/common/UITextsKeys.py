@@ -3,7 +3,7 @@
 
 
 class UITextsKeys:
-
+    ## see carranca\templates\includes\backend-msg.html.j2
     class Msg:
         info = "msgInfo"
         warn = "msgWarn"

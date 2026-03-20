@@ -16,7 +16,7 @@ from ..models.private import Schema
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.jinja_helper import process_template
 from ..helpers.uiact_helper import UiActResponseProxy
-from ..helpers.ui_db_texts_class import add_msg_final
+from ..helpers.ui_db_texts_manager import set_msg_fatal
 from ..helpers.route_helper import (
     get_private_response_data,
     init_response_vars,
@@ -67,7 +67,7 @@ def do_scm_edit(data: str) -> str:
         if (scm_row := Schema() if is_insert else Schema.get_row(scm_id)) is None:
             # get the editable row
             # Someone deleted just now?
-            raise JumpOut(add_msg_final("scmEditNotFound", ui_db_texts), task_code + 1)
+            raise JumpOut(set_msg_fatal("scmEditNotFound", ui_db_texts), task_code + 1)
 
         task_code += 1  # 3
         ui_db_texts["formTitle"] = ui_db_texts[f"formTitle{'New' if is_insert else 'Edit'}"]

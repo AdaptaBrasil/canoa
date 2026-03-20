@@ -117,7 +117,7 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
         if not is_anyone_logged():
             return sub_menu
 
-        from .helpers.ui_db_texts_class import get_app_menu
+        from .helpers.ui_db_texts_manager import get_app_menu
 
         _app_menu = get_app_menu()
         if sub_menu_name in _app_menu:

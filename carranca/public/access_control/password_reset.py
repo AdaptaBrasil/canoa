@@ -15,7 +15,7 @@ from ...helpers.pw_helper import hash_pass
 from ...helpers.py_helper import now, to_str
 from ...helpers.jinja_helper import process_template
 from ...common.app_error_assistant import ModuleErrorCode
-from ...helpers.ui_db_texts_class import add_msg_error, add_msg_success, add_msg_final
+from ...helpers.ui_db_texts_manager import set_msg_error, set_msg_success, set_msg_fatal
 from ...helpers.route_helper import (
     get_form_input_value,
     init_response_vars,
@@ -53,34 +53,34 @@ def password_reset(token):
         # If you need the password pwd=  hash_pass(password);
         task_code += 1  # 3
         if len(token_str) < 12:
-            add_msg_error("invalidToken", ui_db_texts)
+            set_msg_error("invalidToken", ui_db_texts)
         elif is_get:
             pass
         elif not sidekick.config.DB_len_val_for_pw.check(password):
-            add_msg_error(
+            set_msg_error(
                 "invalidPasswordLength",
                 ui_db_texts,
                 sidekick.config.DB_len_val_for_pw.min,
                 sidekick.config.DB_len_val_for_pw.max,
             )
         elif password != confirm_password:
-            add_msg_error("passwordsAreDifferent", ui_db_texts)
+            set_msg_error("passwordsAreDifferent", ui_db_texts)
         else:
             task_code += 1  # 4
             record_to_update = get_user_where(recover_email_token=token_str)
             if record_to_update is None:
-                add_msg_error("invalidToken", ui_db_texts)
+                set_msg_error("invalidToken", ui_db_texts)
             elif not __is_token_valid(record_to_update.recover_email_token_at, 5):
-                add_msg_error("expiredToken", ui_db_texts)
+                set_msg_error("expiredToken", ui_db_texts)
             else:
                 task_code += 1  # 5
                 record_to_update.password = hash_pass(password)
                 record_to_update.recover_email_token = None
                 task_code += 1  # 6
                 persist_user(record_to_update, task_code)
-                add_msg_success("resetPwSuccess", ui_db_texts)
+                set_msg_success("resetPwSuccess", ui_db_texts)
     except Exception as e:
-        msg = add_msg_final("errorPasswordReset", ui_db_texts, task_code)
+        msg = set_msg_fatal("errorPasswordReset", ui_db_texts, task_code)
         sidekick.display.error(e)
         sidekick.display.debug(msg)
 

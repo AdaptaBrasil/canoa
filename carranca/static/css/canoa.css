@@ -27,7 +27,16 @@
 }
 
 body {
+    /*
     background: url(/static/img/pages/canoa_fundo.jpeg) no-repeat center center fixed;
+    background-size: cover;
+    in this way, Firefox has NO flickering
+     */
+    background-color: var(--canoa-form-text-color);
+    background-image: url('/static/img/pages/canoa_fundo.jpeg');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: fixed;
     background-size: cover;
 }
 

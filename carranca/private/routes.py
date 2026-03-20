@@ -6,17 +6,18 @@ This routes are private, users _must be_ logged
 Equipe da Canoa -- 2024
 mgd
 """
+# cSpell: ignore werkzeug wtforms tmpl mgmt jscmd
+
 
 from __future__ import annotations
 
-# cSpell: ignore werkzeug wtforms tmpl mgmt jscmd
 from flask import Blueprint, request
-from typing import Tuple, Callable
-from ..models.public import get_user_where
-from werkzeug.exceptions import NotFound
-
+from typing import Tuple, Callable, cast
+from datetime import datetime
 from flask_login import login_required, current_user
-from ..helpers.py_helper import is_str_none_or_empty
+
+from ..models.public import get_user_where
+from ..helpers.py_helper import is_str_none_or_empty, to_str
 from ..helpers.pw_helper import internal_logout, nobody_is_logged
 from ..public.ups_handler import ups_handler
 from ..helpers.uiact_helper import UiActResponse, UiActResponseProxy, UiActResponseKeys
@@ -352,6 +353,7 @@ def auto_email_user() -> Route_response:
     def _does_user_need_token(user_rec: User) -> bool:
         # Does the user need a token?
         if is_str_none_or_empty(user_rec.verify_email_token):
+            # Yes, no token
             return True
 
         from .email_token_process import has_token_expired
@@ -371,7 +373,7 @@ def auto_email_user() -> Route_response:
         return redirect_to(login_route())
 
     elif user_rec.email_verified:
-        # if user's email address was verified, send him and email
+        # if user's email address was verified, send him a email
         # Why current_user.email_verified didn't know?
         jHtml = _send_test_email(current_user.email, current_user.username)
 
@@ -384,9 +386,11 @@ def auto_email_user() -> Route_response:
 
     else:
         # User has an active token to confirm, challenge the user ;-)
-        from .email_token_process import email_token_process
+        from .email_token_process import verify_sent_token
 
-        jHtml = email_token_process(user_rec.verify_email_token, user_rec.verify_email_sent_at)
+        db_token = to_str(user_rec.verify_email_token)
+        email_sent_at = cast(datetime, user_rec.verify_email_sent_at)
+        jHtml = verify_sent_token(current_user.email, db_token, email_sent_at)
 
     return jHtml
 

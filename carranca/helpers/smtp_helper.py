@@ -13,7 +13,7 @@ from flask_mail import Message
 from .py_helper import is_str_none_or_empty, get_params
 from .types_helper import Usual_dict
 from .email_helper import RecipientsDic, RecipientsList
-from .ui_db_texts_class import get_section
+from .ui_db_texts_manager import get_section
 from ..common.app_constants import APP_NAME
 from ..common.app_context_vars import sidekick
 from ..common.app_error_assistant import ModuleErrorCode

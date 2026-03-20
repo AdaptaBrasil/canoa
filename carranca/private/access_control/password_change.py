@@ -20,7 +20,7 @@ from ...helpers.jinja_helper import Jinja_generated_html, process_template
 from ...common.app_context_vars import sidekick
 from ...helpers.js_consts_helper import js_form_sec_check
 from ...common.app_error_assistant import AppStumbled, ModuleErrorCode
-from ...helpers.ui_db_texts_class import add_msg_error, add_msg_success
+from ...helpers.ui_db_texts_manager import set_msg_error, set_msg_success
 from ...helpers.route_helper import (
     redirect_to,
     login_route,
@@ -50,18 +50,18 @@ def do_change_password() -> Jinja_generated_html:
             pass
         elif not is_str_none_or_empty(msg_error_key := js_form_sec_check()):
             task_code += 1
-            msg_error = add_msg_error(msg_error_key, ui_db_texts)
+            msg_error = set_msg_error(msg_error_key, ui_db_texts)
             raise AppStumbled(msg_error, task_code, True, True)
         elif not sidekick.config.DB_len_val_for_pw.check(password):
             task_code += 2
-            add_msg_error(
+            set_msg_error(
                 "invalidPasswordLength",
                 ui_db_texts,
                 sidekick.config.DB_len_val_for_pw.min,
                 sidekick.config.DB_len_val_for_pw.max,
             )
         elif password != confirm_password:
-            add_msg_error("passwordsAreDifferent", ui_db_texts)
+            set_msg_error("passwordsAreDifferent", ui_db_texts)
         elif user is None:
             internal_logout()
             return redirect_to(login_route())
@@ -71,7 +71,7 @@ def do_change_password() -> Jinja_generated_html:
             task_code += 1  # 6
             persist_user(user, task_code)
             task_code += 1  # 7
-            add_msg_success("passwordChangeSuccess", ui_db_texts)
+            set_msg_success("passwordChangeSuccess", ui_db_texts)
             task_code += 1  # 8
             internal_logout()
 

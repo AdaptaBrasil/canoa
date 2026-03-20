@@ -2,11 +2,8 @@
 ./includes/backend-msg.html.j2
 ---------------------------------
 
-Displays HTML messages (Error, Info & Success)
-Used by:
-carranca/templates/accounts/
-- from.html.j2
-- sep_mgmt.html.j2
+Displays HTML messages (Warn, Error, Success, Info, Technical)
+See carranca\common\UITextsKeys.py
 
 mgd
 --------------------------------------- #}
@@ -26,7 +23,7 @@ mgd
             <i class="backend-msg-icon" inert>⚠️</i>
             <div>{{ msgWarn | safe }}</div>
         </div>
-         {% set first_msg = False %}
+        {% set first_msg = False %}
         {% endif %}
 
         {# ┄┄┄┄┄ Error ┄┄┄┄┄ #}
@@ -35,7 +32,7 @@ mgd
             <i class="backend-msg-icon" inert>🛑</i>
             <div>{{ msgError | safe }}</div>
         </div>
-         {% set first_msg = False %}
+        {% set first_msg = False %}
         {% endif %}
 
         {# ┄┄┄┄┄ Success ┄┄┄┄┄ #}
@@ -44,7 +41,7 @@ mgd
             <i class="backend-msg-icon" inert>⭐</i>
             <div>{{ msgSuccess | safe }}</div>
         </div>
-         {% set first_msg = False %}
+        {% set first_msg = False %}
         {% endif %}
 
         {# ┄┄┄┄┄ Information ┄┄┄┄┄ #}
@@ -53,7 +50,7 @@ mgd
             <i class="backend-msg-icon" inert>🛈</i>
             <div>{{ msgInfo | safe }}</div>
         </div>
-         {% set first_msg = False %}
+        {% set first_msg = False %}
         {% endif %}
 
         {# ┄┄┄┄┄ Technical ┄┄┄┄┄ #}
@@ -62,7 +59,7 @@ mgd
             <i class="backend-msg-icon" inert>⚙️</i>
             <div>{{ msgTech | safe }}</div>
         </div>
-         {% set first_msg = False %}
+        {% set first_msg = False %}
         {% endif %}
 
     </h6>

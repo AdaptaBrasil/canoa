@@ -22,7 +22,7 @@ from ...helpers.jinja_helper import process_template
 from ...common.app_context_vars import sidekick
 from ...helpers.js_consts_helper import js_form_sec_check
 from ...common.app_error_assistant import ModuleErrorCode, AppStumbled
-from ...helpers.ui_db_texts_class import add_msg_error, add_msg_warning
+from ...helpers.ui_db_texts_manager import set_msg_error, set_msg_warn
 from ...helpers.route_helper import (
     home_route,
     redirect_to,
@@ -53,7 +53,7 @@ def do_login():
             pass
         elif not is_str_none_or_empty(msg_error_key := js_form_sec_check()):
             task_code += 3  # 5
-            msg_error = add_msg_error(msg_error_key, ui_db_texts)
+            msg_error = set_msg_error(msg_error_key, ui_db_texts)
             raise AppStumbled(msg_error, task_code, True, True)
         else:
             task_code += 4  # 6
@@ -70,24 +70,24 @@ def do_login():
             task_code += 1  # 11
             if not user:
                 task_code += 1  # 12
-                add_msg_error("userOrPwdIsWrong", ui_db_texts)
+                set_msg_error("userOrPwdIsWrong", ui_db_texts)
             elif not verify_pass(password, user.password):
                 # TODO: new  user.login_failed = True
                 user.password_failed_at = func.now()
                 task_code += 2  # 13
                 user.password_failures = user.password_failures + 1
-                add_msg_error("userOrPwdIsWrong", ui_db_texts)
+                set_msg_error("userOrPwdIsWrong", ui_db_texts)
                 persist_user(user, task_code)
                 # persist_user creates an Anonymous User, so lets logout it
             elif user.disabled:
                 task_code += 3  # 14
-                add_msg_error("userIsDisabled", ui_db_texts)
+                set_msg_error("userIsDisabled", ui_db_texts)
             elif user_role_abbr is None:
                 task_code += 4  # 15
-                add_msg_error("roleNotFound", ui_db_texts, "(null)")
+                set_msg_error("roleNotFound", ui_db_texts, "(null)")
             elif not user_role_abbr in {role.value for role in RolesAbbr}:
                 task_code += 5  # 16
-                add_msg_error("roleNotFound", ui_db_texts, user_role_abbr)
+                set_msg_error("roleNotFound", ui_db_texts, user_role_abbr)
             else:
                 task_code += 6  # 17
                 user_email_verified = user.email_verified
@@ -112,7 +112,7 @@ def do_login():
                     return redirect_to(home_route())
 
                 task_code += 1  # 24
-                add_msg_warning("msgVerifyEmail", ui_db_texts)
+                set_msg_warn("msgVerifyEmail", ui_db_texts)
                 ui_db_texts["display_footer"] = "False"
                 ui_db_texts.display_msg_only = True
 

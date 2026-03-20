@@ -12,7 +12,7 @@ mgd 2025-03-15, 5-23
 # cspell:words Entendí ui_texts_locale
 
 from ..common.UITextsKeys import UITextsKeys
-from ..helpers.ui_db_texts_class import ui_texts_locale
+from ..helpers.ui_db_texts_manager import ui_texts_locale
 
 default_locale = "en"
 default_section = "Form"

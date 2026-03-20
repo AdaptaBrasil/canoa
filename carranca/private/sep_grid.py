@@ -17,7 +17,7 @@ from ..helpers.uiact_helper import UiActResponseKeys
 from ..helpers.jinja_helper import Jinja_generated_html, process_template
 from ..helpers.route_helper import MTD_POST, get_private_response_data, init_response_vars
 from ..helpers.js_consts_helper import js_grid_col_meta_info, js_ui_dictionary
-from ..helpers.ui_db_texts_class import add_msg_final, UITextsKeys
+from ..helpers.ui_db_texts_manager import set_msg_fatal, UITextsKeys
 from ..common.app_error_assistant import ModuleErrorCode, AppStumbled, HTTP_StatusCode
 from ..helpers.db_records.DBRecords import DBRecords
 
@@ -40,7 +40,7 @@ def get_sep_grid() -> Jinja_generated_html:
 
         task_code += 1  # 2
         if not is_get:
-            msg = f"{add_msg_final(HTTP_StatusCode.CODE_405.value, ui_db_texts)} (Requested: ${MTD_POST}.)"
+            msg = f"{set_msg_fatal(HTTP_StatusCode.CODE_405.value, ui_db_texts)} (Requested: ${MTD_POST}.)"
             raise AppStumbled(msg, task_code, False, True)
 
         task_code += 1  # 3

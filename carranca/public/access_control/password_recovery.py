@@ -21,7 +21,7 @@ from ...public.ups_handler import get_ups_jHtml
 from ...helpers.email_helper import RecipientsList, send_email
 from ...helpers.jinja_helper import process_template
 from ...common.app_error_assistant import ModuleErrorCode
-from ...helpers.ui_db_texts_class import add_msg_error, add_msg_success, add_msg_final
+from ...helpers.ui_db_texts_manager import set_msg_error, set_msg_success, set_msg_fatal
 from ...helpers.route_helper import (
     public_route,
     get_form_input_value,
@@ -80,13 +80,13 @@ def password_recovery():
             pass
         elif user_data is None:
             task_code += 2  # 6
-            add_msg_error("emailNotRegistered", ui_db_texts)
+            set_msg_error("emailNotRegistered", ui_db_texts)
         elif not is_external_ip_ready(sidekick.config):
             task_code += 3  # 7
-            add_msg_error("noExternalIP", ui_db_texts)
+            set_msg_error("noExternalIP", ui_db_texts)
         elif (code := __can_request_password_recovery()) > 0:
             task_code += 4  # 8
-            add_msg_error("cannotRequestPwRecovery", ui_db_texts, code)
+            set_msg_error("cannotRequestPwRecovery", ui_db_texts, code)
             ui_db_texts.display_msg_only = True
         else:
             task_code += 4  # 8
@@ -100,7 +100,7 @@ def password_recovery():
             user_data.recover_email_token = token
             task_code += 1  # 13
             persist_user(user_data, task_code)
-            add_msg_success("emailSent", ui_db_texts)
+            set_msg_success("emailSent", ui_db_texts)
             task_code = 0
 
         jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.data())

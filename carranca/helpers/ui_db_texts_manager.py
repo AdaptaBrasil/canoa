@@ -30,6 +30,9 @@ from .. import global_ui_texts_cache  # it is used, ignore warn
 # ==== UI Texts Constants ====================================
 cache_key: TypeAlias = Tuple[str, str, Optional[str]]
 
+# use the default message key. eg set_msg_info(MSG_DEFAULT, ui_db_texts, time_info) MSG_DEFAULT -> 'msgInfo'
+MSG_DEFAULT: str = ""
+
 
 class UITexts_TableSearch:
     global global_ui_texts_cache
@@ -77,11 +80,9 @@ class UITexts_TableSearch:
         return (self.section, self._locale, self.item)
 
 
-# TODO: refactor it into
 class MsgNotFound:
     cache: Optional[str] = None
     default = "The message with key '{0}' was not found in §: {1}."
-    # "Message '{0}' (not registered §: {1})"
 
 
 # === current user's locale  ================================
@@ -145,13 +146,13 @@ def _msg_not_found() -> str:  ## THIS IS OUTDATED ##
     return mnf
 
 
-def _add_msg(item: str, section: str, name: str, ui_db_texts: UIDBTexts, *args) -> str:
+def _set_or_add_msg(item: str, section: str, name: str, ui_db_texts: UIDBTexts, *args) -> str:
     """Retrieves text and adds it to a dictionary.
 
     Args:
         item: The item identifier.
         section: The section identifier.
-        name: The key for the dictionary entry.
+        name: The key for the dictionary entry. see UITextsKeys.Msg
         ui_db_texts: UIDBTexts.
         args: Optional arguments for formatting the retrieved text.
 
@@ -164,14 +165,20 @@ def _add_msg(item: str, section: str, name: str, ui_db_texts: UIDBTexts, *args) 
     in the 'current' section.
 
     """
-    # new alternative, add the msg on the same section (not in a special one [secError, secSuccess])
-    msg_text: str = ui_db_texts.get_str(item) if ui_db_texts else ""
+    # take the default value for Item
+    item = item or name
+    # search in the messages dict
+    msg_text: str = ui_db_texts.get_msg(item) if ui_db_texts else ""
+
+    if not msg_text:
+        # search in the items dict
+        msg_text = ui_db_texts.get_str(item) if ui_db_texts else ""
 
     if len(ui_db_texts) == 0:
         # TODO: ui_db_texts can have no items, the next error message mask this situation. TODO:
         print(f"Warning: ui_db_texts[{ui_db_texts.section}] has no items.")
 
-    if not msg_text:
+    if section and not msg_text:
         msg_text = db_retrieve_text(item, section)
 
     try:
@@ -241,58 +248,71 @@ def get_app_menu() -> Db_texts:
 
 def get_db_texts(section_name: str) -> Db_texts:
     db_texts = get_section(section_name)
-    if db_texts:
-        for k in [
-            UITextsKeys.Msg.success,
-            UITextsKeys.Msg.warn,
-            UITextsKeys.Msg.error,
-            UITextsKeys.Msg.fatal,
-            UITextsKeys.Msg.display_msg_only,
-        ]:
-            if k in db_texts:  # DEBUG
-                print(f"Unexpected item en section {section_name}: {k}.")
+    # 2026/03/18 db_texts SHOULD have is on msgSuccess, msgError, ... they are reallocated (to ._msg dict) just before sending to ui
+    # see carranca\common\UIDBTexts.py
+    # if db_texts:
+    #     for k in [
+    #         UITextsKeys.Msg.success,
+    #         UITextsKeys.Msg.warn,
+    #         UITextsKeys.Msg.error,
+    #         UITextsKeys.Msg.fatal,
+    #         UITextsKeys.Msg.display_msg_only,
+    #     ]:
+    #         if k in db_texts:  # DEBUG
+    #             print(f"Unexpected item en section {section_name}: {k}.")
     return db_texts
 
 
-def add_msg_warning(item: str, ui_db_texts: UIDBTexts, *args) -> str:
+def set_msg_info(item: str, ui_db_texts: UIDBTexts, *args) -> str:
+    """
+    returns `text` for the [item, <curr_section>]
+    and adds the pair to `texts` => texts.add(text, 'msgInfo')
+    """
+    return _set_or_add_msg(item, "", UITextsKeys.Msg.info, ui_db_texts, *args)
+
+
+def set_msg_warn(item: str, ui_db_texts: UIDBTexts, *args) -> str:
     """
     returns text for the [item/'sec_Error'] pair
     and adds pair to texts => texts.add( text, 'msgError')
     """
-    return _add_msg(item, UITextsKeys.Section.error, UITextsKeys.Msg.warn, ui_db_texts, *args)
+    return _set_or_add_msg(item, UITextsKeys.Section.error, UITextsKeys.Msg.warn, ui_db_texts, *args)
 
 
-def add_msg_error(item: str, ui_db_texts: UIDBTexts, *args) -> str:
+def set_msg_error(item: str, ui_db_texts: UIDBTexts, *args) -> str:
     """
     returns text for the [item/'sec_Error'] pair
     and adds pair to texts => texts.add( text, 'msgError')
     """
-    return _add_msg(item, UITextsKeys.Section.error, UITextsKeys.Msg.error, ui_db_texts, *args)
+    return _set_or_add_msg(item, UITextsKeys.Section.error, UITextsKeys.Msg.error, ui_db_texts, *args)
 
 
-def add_msg_success(item: str, ui_db_texts: UIDBTexts, *args) -> str:
+def set_msg_success(item: str, ui_db_texts: UIDBTexts, *args) -> str:
     """
-    returns `text` for the [item, 'sec_Success'] pair
-    (of the vw_ui_texts wonderful view)
+    returns `text` for the [item, <curr_section>] | [item, 'sec_Success'] pair
+    (of the vw_ui_texts view)
     and adds the pair to `texts` => texts.add(text, 'msgSuccess')
 
     Finally sets ui_db_texts.Msg.display_msg_only = True, so the form only displays
     the message (no other form inputs)
 
     """
-    msg = _add_msg(item, UITextsKeys.Section.success, UITextsKeys.Msg.success, ui_db_texts, *args)
+
+    ui_db_texts.reset_messages()
+    msg = _set_or_add_msg(item, UITextsKeys.Section.success, UITextsKeys.Msg.success, ui_db_texts, *args)
     ui_db_texts.display_msg_only = True
     return msg
 
 
-def add_msg_final(item: str, ui_db_texts: UIDBTexts, *args) -> str:
+def set_msg_fatal(item: str, ui_db_texts: UIDBTexts, *args) -> str:
     """
-    TODO: fatal
-    Same as add_msg_error, but sets
-    ui_db_texts.display_msg_only = True,
-    so the form only displays the message (no other form inputs)
+    Same as add_msg_error, but
+    1) sets  ui_db_texts.display_msg_only = True,
+       so the form only displays the message (no other form inputs)
+    2) wipes all ui messages from the data dict
     """
-    msg = add_msg_error(item, ui_db_texts, *args)
+    ui_db_texts.reset_messages()
+    msg = set_msg_error(item or UITextsKeys.Msg.fatal, ui_db_texts, *args)
     ui_db_texts.display_msg_only = True
     return msg
 

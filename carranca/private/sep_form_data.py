@@ -21,7 +21,7 @@ from ..helpers.types_helper import Usual_dict
 from ..helpers.route_helper import is_method_get
 from ..common.app_context_vars import app_user
 from ..common.app_error_assistant import AppStumbled, JumpOut
-from ..helpers.ui_db_texts_class import UITextsKeys, add_msg_final
+from ..helpers.ui_db_texts_manager import UITextsKeys, set_msg_fatal
 
 
 class SepEditMode(IntEnum):
@@ -79,13 +79,13 @@ def get_sep_data(
     if sep_row is None:
         # get the editable row
         # Someone deleted just now?
-        raise JumpOut(add_msg_final("sepEditNotFound", ui_db_texts), task_code + 1)
+        raise JumpOut(set_msg_fatal("sepEditNotFound", ui_db_texts), task_code + 1)
     elif edit_mode == SepEditMode.SIMPLE_EDIT:
         # edit only description & icon
         pass
     elif not app_user.is_power:
         # Power user only can edit more fields than description & icon
-        raise AppStumbled(add_msg_final("sepNewNotAllowed", ui_db_texts), task_code + 2, True)
+        raise AppStumbled(set_msg_fatal("sepNewNotAllowed", ui_db_texts), task_code + 2, True)
     elif edit_mode == SepEditMode.FULL_EDIT:
         # edit Scheme (from list), sep name, description & icon
         ui_select_lists = _get_ui_select_lists([])
@@ -101,7 +101,7 @@ def get_sep_data(
             ui_db_texts["sepNewTmpName"],
         )  # = 'Novo SEP'
     else:
-        raise AppStumbled(add_msg_final("sepNewNotAllowed", ui_db_texts), task_code + 5)
+        raise AppStumbled(set_msg_fatal("sepNewNotAllowed", ui_db_texts), task_code + 5)
     # else is_simple_edit or is_full_edit
     # ------------
     task_code += 6
@@ -120,12 +120,12 @@ def get_sep_data(
     elif not app_user.is_power:
         # current user does NOT own the sep, and he is not power user, so can *not* edit it.
         raise JumpOut(
-            add_msg_final("sepEditNotAllowed", ui_db_texts, sep_tmp_name),
+            set_msg_fatal("sepEditNotAllowed", ui_db_texts, sep_tmp_name),
             task_code + 1,
         )
     elif (sep_usr_row := MgmtSepsUser.get_sep_row(sep_id)) is None:
         # the selected sep id was not found
-        raise JumpOut(add_msg_final("sepEditNotFound", ui_db_texts), task_code + 2)
+        raise JumpOut(set_msg_fatal("sepEditNotFound", ui_db_texts), task_code + 2)
     else:
         # create a `usr_sep` and get the sep's manager (user_curr)
         usr_sep_dict = dict(sep_usr_row)

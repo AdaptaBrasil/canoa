@@ -18,7 +18,7 @@ from ...helpers.pw_helper import internal_logout, is_anyone_logged
 from ...public.ups_handler import get_ups_jHtml
 from ...helpers.jinja_helper import process_template
 from ...common.app_context_vars import sidekick
-from ...helpers.ui_db_texts_class import add_msg_success, add_msg_error, add_msg_final
+from ...helpers.ui_db_texts_manager import set_msg_success, set_msg_error, set_msg_fatal
 from ...common.app_error_assistant import ModuleErrorCode
 from ...helpers.route_helper import (
     get_account_response_data,
@@ -48,18 +48,18 @@ def register():
         elif is_get:
             pass
         elif __exists_user_where(username_lower=user_name.lower()):
-            add_msg_error("userAlreadyRegistered", ui_db_texts)
+            set_msg_error("userAlreadyRegistered", ui_db_texts)
         elif __exists_user_where(email=get_form_input_value("email").lower()):
-            add_msg_error("emailAlreadyRegistered", ui_db_texts)
+            set_msg_error("emailAlreadyRegistered", ui_db_texts)
         elif not sidekick.config.DB_len_val_for_pw.check(get_form_input_value("password")):
-            add_msg_error(
+            set_msg_error(
                 "invalidPasswordLength",
                 ui_db_texts,
                 sidekick.config.DB_len_val_for_pw.min,
                 sidekick.config.DB_len_val_for_pw.max,
             )
         elif not sidekick.config.DB_len_val_for_uname.check(user_name):
-            add_msg_error(
+            set_msg_error(
                 "invalidUserName",
                 ui_db_texts,
                 sidekick.config.DB_len_val_for_uname.min,
@@ -71,7 +71,7 @@ def register():
             task_code += 1  # 5
             persist_user(user_record_to_insert, task_code)
             task_code += 1  # 6
-            add_msg_success("welcome", ui_db_texts)
+            set_msg_success("welcome", ui_db_texts)
             # todo welcome e-mail with Token for email confirmation and login after confirmation
 
         jHtml = process_template(

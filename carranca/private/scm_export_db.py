@@ -22,7 +22,7 @@ from ..helpers.uiact_helper import UiActResponse
 from ..helpers.jinja_helper import process_template
 from ..helpers.types_helper import Jinja_generated_html
 from ..helpers.route_helper import get_private_response_data, init_response_vars
-from ..helpers.ui_db_texts_class import add_msg_error, add_msg_success
+from ..helpers.ui_db_texts_manager import set_msg_error, set_msg_success
 from ..config.ExportProcessConfig import ExportProcessConfig
 from ..common.app_error_assistant import ModuleErrorCode
 from ..models.private_1.ExportGrid import ExportGrid
@@ -76,8 +76,8 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_generated_html | Response:
             def _str(what: str, list: List) -> str:
                 return f"<br>{what}: [{list}],"
 
-            add_msg_error(
-                "exportError",
+            set_msg_error(
+                "msgError",
                 ui_db_texts,
                 (_str("Files", file_missing) + _str("Schema", scm_missing) + _str("SEP", sep_missing))[:-1],
                 task_code,
@@ -92,7 +92,7 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_generated_html | Response:
                 for file in file_info:
                     zipf.write(file.ffn, arcname=file.name)
 
-            add_msg_success("exportSuccess", ui_db_texts)
+            set_msg_success("msgSuccess", ui_db_texts)
             # TODO:
             # <!-- JavaScript to trigger download -->
             # <script>
@@ -107,7 +107,7 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_generated_html | Response:
         jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
 
     except Exception as e:
-        jHtml = get_ups_jHtml("dbExportException", ui_db_texts, task_code, e, task_code)
+        jHtml = get_ups_jHtml("msgFatal", ui_db_texts, task_code, e, task_code)
 
     return jHtml
 

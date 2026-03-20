@@ -30,12 +30,12 @@ from ..helpers.types_helper import Jinja_template, Usual_dict, Jinja_generated_h
 from ..helpers.route_helper import get_private_response_data, get_form_input_value, init_response_vars
 from ..helpers.dwnLd_goo_helper import is_gd_url_valid, download_public_google_file
 from ..helpers.js_consts_helper import js_ui_dictionary
-from ..helpers.ui_db_texts_class import (
+from ..helpers.ui_db_texts_manager import (
     UITextsKeys,
-    add_msg_success,
-    add_msg_error,
-    add_msg_final,
-    add_msg_warning,
+    set_msg_success,
+    set_msg_error,
+    set_msg_fatal,
+    set_msg_warn,
 )
 from .validate_process.ProcessData import ProcessData
 
@@ -91,11 +91,11 @@ def receive_file() -> Jinja_template:
 
         match msg_type:
             case Display.Kind.WARN:
-                msg_arg = add_msg_warning(msg_id, ui_db_texts, show_code, msg_arg)
+                msg_arg = set_msg_warn(msg_id, ui_db_texts, show_code, msg_arg)
             case Display.Kind.ERROR:
-                msg_arg = add_msg_error(msg_id, ui_db_texts, show_code, msg_arg)
+                msg_arg = set_msg_error(msg_id, ui_db_texts, show_code, msg_arg)
             case Display.Kind.FATAL:
-                msg_arg = add_msg_final(msg_id, ui_db_texts, show_code, msg_arg)
+                msg_arg = set_msg_fatal(msg_id, ui_db_texts, show_code, msg_arg)
 
         sidekick.display.type(msg_type, msg_arg)
         return local_error
@@ -202,7 +202,7 @@ def receive_file() -> Jinja_template:
         error_code, msg_id, _ = process(app_user, sep_data, file_data, pd, received_at, valid_extensions)
 
         if error_code == 0:
-            log_msg = add_msg_success("uploadFileSuccess", ui_db_texts, pd.user_receipt, app_user.email)
+            log_msg = set_msg_success("uploadFileSuccess", ui_db_texts, pd.user_receipt, app_user.email)
             sidekick.display.debug(log_msg)
         else:
             _log_issue(Display.Kind.FATAL, error_code, msg_id, task_code, "")
@@ -211,7 +211,7 @@ def receive_file() -> Jinja_template:
     except Exception as e:
         error_code = _log_issue(Display.Kind.fatal, task_code + 1, "", True)
         sidekick.display.fatal(f"{RECEIVE_FILE_DEFAULT_ERROR}: Code {error_code}, Message: {e}.")
-        msg = add_msg_final("receiveFileException", ui_db_texts, task_code)
+        msg = set_msg_fatal("receiveFileException", ui_db_texts, task_code)
         _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)
         jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
 

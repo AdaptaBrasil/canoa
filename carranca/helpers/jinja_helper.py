@@ -20,7 +20,7 @@ from ..common.app_context_vars import sidekick
 
 # mark a string as a jinja text, a text that will be parsed before rendering
 _jinja_pre_template_mark = "^"
-_jinja_bug_found = "🚨 Jinja runtime error detected"
+_jinja_bug_found = "🚨 A Jinja runtime error was detected"
 
 
 def jinja_pre_template(val: str) -> str:
@@ -149,7 +149,7 @@ def process_template(tmpl_ffn: Jinja_template, **context: Any) -> Jinja_generate
             errors = _detect_jinja_runtime_errors(jHtml_to_display)
             if errors:
                 raise AppStumbled(
-                    f"{_jinja_bug_found}: {errors}",
+                    f"{_jinja_bug_found}: {errors}<br><br>in template: <code>{file_name}</code>",
                     ModuleErrorCode.TEMPLATE_BUG.value,
                     False,
                     False,

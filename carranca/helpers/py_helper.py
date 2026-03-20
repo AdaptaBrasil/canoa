@@ -52,17 +52,21 @@ def now() -> datetime:
     return datetime.now()
 
 
-def now_as_text() -> str:
-    # current date time for user
+def datetime_for_ui(when: datetime | None) -> str:
     ##- TODO: get config <- from ui_texts
-    return datetime.now().strftime("%d/%m/%Y às %H:%M")
+    return "?" if when is None else when.strftime("%d/%m/%Y às %H:%M")
+
+
+def now_as_text() -> str:
+    return datetime_for_ui(datetime.now())
+    # return datetime.now().strftime("%d/%m/%Y às %H:%M") # 2025/03/18
 
 
 def now_as_iso() -> str:
     return datetime.now().isoformat()
 
 
-def iso_to_datetime(value) -> datetime:
+def iso_to_datetime(value: str) -> datetime:
     timestamp = datetime.fromisoformat(value)
     # don't hide exceptions, let the caller handle them
     # mgd 2026-03-06
@@ -75,7 +79,7 @@ def iso_to_datetime(value) -> datetime:
     return timestamp
 
 
-def as_str_strip(s: str) -> str:
+def as_str_strip(s: str | None) -> str:
     return "" if s is None else (str(s) + "").strip()
 
 
@@ -228,7 +232,7 @@ def to_int(s: Optional[str], default=-1) -> int:
         return default
 
 
-def to_str(s: str) -> str:
+def to_str(s: str | None) -> str:
     """
     Returns the argument as a string, striping spaces
     """

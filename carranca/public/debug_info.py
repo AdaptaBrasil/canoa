@@ -12,13 +12,14 @@ from ..config.DynamicConfig import DynamicConfig
 
 
 def get_debug_info(app, config: DynamicConfig) -> List[Tuple[str, str]]:
-    from ..helpers.py_helper import coalesce, is_str_none_or_empty
     from os import getcwd
     from flask import __version__ as flask_version
     from jinja2 import __version__ as jinja2_version
     from platform import python_version, uname
     from sqlalchemy import __version__ as sqlalchemy_v
     from flask_login import __version__ as flask_login_version
+    from ..helpers.py_helper import coalesce, is_str_none_or_empty
+    from ..common.app_constants import APP_NAME, APP_VERSION
 
     """App & and main packages version"""
     result = []
@@ -32,8 +33,8 @@ def get_debug_info(app, config: DynamicConfig) -> List[Tuple[str, str]]:
         vl = len(v) if vl < len(v) else vl
         result.append((name, v))
 
-    _add(f"{config.APP_NAME} Configuration", "")
-    _add("Version", config.APP_VERSION)
+    _add(f"{APP_NAME} Configuration", "")
+    _add("Version", APP_VERSION)
     _add("Mode", config.APP_MODE)
     _add("Debug", config.APP_DEBUGGING)
     _add("Debug Messages", config.APP_DISPLAY_DEBUG_MSG)

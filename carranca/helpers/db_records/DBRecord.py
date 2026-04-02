@@ -12,7 +12,7 @@ import datetime
 from typing import Optional, List, Any
 
 from ..py_helper import encode64_utf8
-from ..types_helper import Opt_list_of_str
+from ..types_helper import Opt_List_Of_Str
 from .DBRecord_types import DBRecordData
 
 
@@ -26,7 +26,7 @@ class DBRecord:
     def __init__(
         self,
         record_data: DBRecordData,
-        names_filter: Opt_list_of_str = None,
+        names_filter: Opt_List_Of_Str = None,
         types_filter: Optional[List[type]] = None,
     ):
         """
@@ -52,7 +52,7 @@ class DBRecord:
             if isinstance(value, types_filter) if types_filter else True:
                 setattr(self, key, value)
 
-    def copy(self, exclude_cols: Opt_list_of_str = []):
+    def copy(self, exclude_cols: Opt_List_Of_Str = []):
         copy = self.__dict__.copy()
         for ex_col in exclude_cols:
             if ex_col in copy:
@@ -60,7 +60,7 @@ class DBRecord:
 
         return copy
 
-    def encode64(self, exclude_cols: Opt_list_of_str = []):
+    def encode64(self, exclude_cols: Opt_List_Of_Str = []):
         encoded = self.copy(exclude_cols)
         for key, value in encoded.items():
             if value is None:

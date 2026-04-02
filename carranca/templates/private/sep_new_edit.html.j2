@@ -24,7 +24,7 @@ mgd
         {{ managerLabel }}</label>
     <div class="input-group">
         <span class="input-group-text">
-            <i class="fas fa-circle-user" aria-hidden="true"></i>
+            <i class="{{ faStyle }} fa-circle-user" aria-hidden="true"></i>
         </span>
         {% if formForNew %}
         {{ form.manager_list() }}
@@ -44,7 +44,7 @@ mgd
     </label>
     <div class="input-group">
         <span class="input-group-text">
-            <i class="fas fa-vector-square" aria-hidden="true"></i>
+            <i class="{{ faStyle }} fa-vector-square" aria-hidden="true"></i>
         </span>
         {% if formForNew %}
         {{ form.schema_list() }}
@@ -71,7 +71,7 @@ mgd
     <label class="form-label" inert for="{{ form.sep_name.id }}">{{ sepLabel }}</label>
     <div class="input-group">
         <span class="input-group-text">
-            <i class="fas fa-layer-group" aria-hidden="true"></i>
+            <i class="{{ faStyle }} fa-layer-group" aria-hidden="true"></i>
         </span>
         {{ form.sep_name() }}
     </div>
@@ -83,7 +83,7 @@ mgd
     <label class="form-label" inert for="{{ form.description.id }}">{{ descriptionLabel }}</label>
     <div class="input-group">
         <span class="input-group-text">
-            <i class="fas fa-tag" aria-hidden="true"></i>
+            <i class="{{ faStyle }} fa-tag" aria-hidden="true"></i>
         </span>
         {{ form.description() }}
     </div>
@@ -95,7 +95,7 @@ mgd
     <label class="form-label" inert for="{{ form.icon_filename.id }}">{{ fileLabel }}</label>
     <div class="input-group">
         <span class="input-group-text">
-            <i class="fas fa-image" aria-hidden="true"></i>
+            <i class="{{ faStyle }} fa-image" aria-hidden="true"></i>
         </span>
         {{ form.icon_filename() }}
     </div>

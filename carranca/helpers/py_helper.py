@@ -11,15 +11,16 @@ mgd 2025-02-04
 
 import re
 import json
+import random
 import base64
 import string
 import os, time, platform
 
 from sys import argv
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Type, Dict, Tuple, List, Optional
 
-from .types_helper import Usual_dict, Opt_str
+from .types_helper import Usual_Dict, Opt_Str
 from ..common.app_constants import APP_NAME
 
 # https://docs.python.org/3/library/platform.html#platform.system
@@ -32,7 +33,7 @@ CODE_UTF_8 = "utf-8"
 
 
 class JSONObject:
-    def __init__(self, d: Usual_dict):
+    def __init__(self, d: Usual_Dict):
         for key, value in d.items():
             setattr(self, key, value)
 
@@ -55,6 +56,17 @@ def now() -> datetime:
 def datetime_for_ui(when: datetime | None) -> str:
     ##- TODO: get config <- from ui_texts
     return "?" if when is None else when.strftime("%d/%m/%Y às %H:%M")
+
+
+def add_hours(hours: int, to: datetime = datetime.now()) -> datetime:
+    added = to + timedelta(hours=hours)
+    return added
+
+
+def elapsed_hours(when: datetime, since: datetime = datetime.now()) -> float:
+    delta = since - when
+    hours = delta.total_seconds() / 3600
+    return hours
 
 
 def now_as_text() -> str:
@@ -83,7 +95,7 @@ def as_str_strip(s: str | None) -> str:
     return "" if s is None else (str(s) + "").strip()
 
 
-def encode64_utf8(data: str) -> Opt_str:
+def encode64_utf8(data: str) -> Opt_Str:
     # encodes srt into utf-8  => base64
     encoded = data
     if data is None:
@@ -100,7 +112,7 @@ def encode64_utf8(data: str) -> Opt_str:
     return encoded
 
 
-def decode64_utf8(data_encoded: str) -> Opt_str:
+def decode64_utf8(data_encoded: str) -> Opt_Str:
     # decodes srt from utf-8  => base64
     data = data_encoded
     if data_encoded is None:
@@ -203,11 +215,7 @@ def get_init_params(from_instance: Any, From_class=None) -> dict:
     # Get parameter names, excluding 'self'
     init_params = [param_name for param_name in init_signature.parameters if param_name != "self"]
 
-    params = {
-        param_name: getattr(from_instance, param_name)
-        for param_name in init_params
-        if hasattr(from_instance, param_name)
-    }
+    params = {param_name: getattr(from_instance, param_name) for param_name in init_params if hasattr(from_instance, param_name)}
 
     return params
 
@@ -262,7 +270,7 @@ def clean_text(text: str, not_allowed: str = ""):
     return check_3
 
 
-def strip_and_ignore_empty(s: str, sep: str = ",", max_split: int = -1) -> list[str]:
+def strip_and_ignore_empty(s: str, sep: str = ",", max_split: int = -1) -> List[str]:
     """
     Returns a list of the striped items created by splitting s and ignoring empty items
     """
@@ -349,6 +357,13 @@ def crc16(data: bytes | str) -> int:
             crc &= 0xFFFF
 
     return crc
+
+
+def generate_random(digit_count: int) -> int:
+    """Internal helper for string-based tokens."""
+    low = 10 ** (digit_count - 1)
+    high = (10**digit_count) - 1
+    return random.randint(low, high)
 
 
 # def current_milliseconds():
@@ -479,7 +494,7 @@ def copy_attributes(class_instance: Any, this_types: Optional[Tuple[Type] | Type
     return copy_instance
 
 
-def class_to_dict(from_class: Any) -> Usual_dict:
+def class_to_dict(from_class: Any) -> Usual_Dict:
     """
     Converts a class's non-callable, non-dunder attributes to a dictionary.
     Args:
@@ -516,11 +531,7 @@ def get_params(content: str) -> list:
 
     """
     formatter = string.Formatter()
-    params = list(
-        dict.fromkeys(
-            field_name for _, field_name, _, _ in formatter.parse(content) if field_name is not None
-        )
-    )
+    params = list(dict.fromkeys(field_name for _, field_name, _, _ in formatter.parse(content) if field_name is not None))
     return params
 
 

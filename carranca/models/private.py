@@ -25,7 +25,7 @@ from sqlalchemy import (
     and_,
 )
 from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import defer, Session
+from sqlalchemy.orm import defer, Session, Mapped, mapped_column
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from .. import global_sqlalchemy_scoped_session
@@ -34,8 +34,8 @@ from ..models import SQLABaseTable
 from ..helpers.db_helper import db_fetch_rows, col_names_to_columns
 from ..helpers.py_helper import is_str_none_or_empty
 from ..helpers.user_helper import get_user_code
-from ..helpers.types_helper import Opt_list_of_str
-from ..private.SepIconMaker import SepIconMaker, Svg_content
+from ..helpers.types_helper import Opt_List_Of_Str
+from ..private.SepIconMaker import SepIconMaker, Svg_Content
 from ..common.app_context_vars import sidekick, app_user
 from ..helpers.db_records.DBRecords import DBRecords
 
@@ -117,7 +117,7 @@ class UserDataFiles(SQLABaseTable):
     # Special
     # error_handled, when admin handles the error (TODO)
 
-    ## obsolete
+    ## obsolete  2026.04.02
     # upload_start_at ->
     # report_ready_ay -> g_report_ready_at
     #
@@ -165,11 +165,9 @@ class UserDataFiles(SQLABaseTable):
             except Exception as e:
                 db_session.rollback()
                 operation = "update" if isUpdate else "insert to"
-                msg_error = (
-                    f"Cannot {operation} {UserDataFiles.__tablename__}.ticket = {uTicket} | Error {e}."
-                )
+                msg_error = f"Cannot {operation} {UserDataFiles.__tablename__}.ticket = {uTicket} | Error {e}."
                 sidekick.display.error(msg_error)
-                raise DatabaseError(msg_error)
+                raise DatabaseError(msg_error, None, e)
         return None
 
     # Public insert/update
@@ -230,7 +228,7 @@ class Schema(SQLABaseTable):
         return row
 
     @staticmethod
-    def get_schemas(col_names: Opt_list_of_str = None, order_by: str = "") -> DBRecords:
+    def get_schemas(col_names: Opt_List_Of_Str = None, order_by: str = "") -> DBRecords:
         """
         Returns:
           All records from Schema table, optional of selected fields, order by the order_by, eg 'name ASC'
@@ -357,12 +355,12 @@ class Sep(SQLABaseTable):
         return sep_row
 
     @staticmethod
-    def get_content(id: int) -> Optional[Svg_content]:
+    def get_content(id: int) -> Optional[Svg_Content]:
         """
         Returns the content of the icon_svg (useful for creating a file)
         """
 
-        def _get_data(db_session: Session) -> Svg_content:
+        def _get_data(db_session: Session) -> Svg_Content:
             try:
                 stmt = select(Sep).where(Sep.id == id)
                 sep = db_session.execute(stmt).scalar_one_or_none()
@@ -441,11 +439,9 @@ class Sep(SQLABaseTable):
     @staticmethod
     def full_name_exists(id_schema: int, sep_name: str) -> bool:
 
-        def _get_data(db_session: Session) -> Svg_content:
+        def _get_data(db_session: Session) -> Svg_Content:
             # see sep__sch_name_lower_uix
-            stmt = select(Sep.name_lower).where(
-                Sep.id_schema == id_schema, Sep.name_lower == func.lower(sep_name)
-            )
+            stmt = select(Sep.name_lower).where(Sep.id_schema == id_schema, Sep.name_lower == func.lower(sep_name))
             name_exists = db_session.query(exists(stmt)).scalar()
             return name_exists
 
@@ -470,11 +466,7 @@ class Sep(SQLABaseTable):
 
         def _get_data(db_session: Session) -> List[Sep]:
             sel_cols = col_names_to_columns(col_names, Sep.__table__.columns)
-            stmt = (
-                select(*sel_cols)
-                .where(and_(Sep.id_schema == scm_id, Sep.visible == True))
-                .order_by(Sep.ui_order)
-            )
+            stmt = select(*sel_cols).where(and_(Sep.id_schema == scm_id, Sep.visible == True)).order_by(Sep.ui_order)
             rows = db_session.execute(stmt).all()
             recs = DBRecords(stmt, rows)
             return recs

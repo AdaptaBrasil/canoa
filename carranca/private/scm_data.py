@@ -14,24 +14,24 @@ from pathlib import Path
 from .sep_icon import do_icon_get_url
 from ..models.public import User
 from ..models.private import Sep
-from ..helpers.py_helper import Usual_dict
-from ..helpers.types_helper import Opt_str
+from ..helpers.py_helper import Usual_Dict
+from ..helpers.types_helper import Opt_Str
 from ..config.ExportProcessConfig import ExportProcessConfig
 from ..models.private_1.SchemaGrid import SchemaGrid
 
 
 class SchemaData:
-    header: Optional[Usual_dict]
-    meta_scm: Usual_dict
-    meta_sep: Usual_dict
-    schemas: List[Usual_dict]
+    header: Optional[Usual_Dict]
+    meta_scm: Usual_Dict
+    meta_sep: Usual_Dict
+    schemas: List[Usual_Dict]
 
     def __init__(
         self,
-        header: Optional[Usual_dict],
-        meta_scm: Usual_dict,
-        meta_sep: Usual_dict,
-        schemas: List[Usual_dict],
+        header: Optional[Usual_Dict],
+        meta_scm: Usual_Dict,
+        meta_sep: Usual_Dict,
+        schemas: List[Usual_Dict],
     ):
         self.coder = None  # coder
         self.header = header
@@ -70,7 +70,7 @@ def get_scm_data(task_code: int, config: ExportProcessConfig, for_export: bool) 
 
     get_icon = Sep.icon_file_name.name in sep_cols
     task_code += 1
-    mgmt: Opt_str = None
+    mgmt: Opt_Str = None
     scm_col_ign = [] if for_export else [scm_id]
     sep_col_ign = [] if for_export else [sep_id]
     for scm in scm_rows:

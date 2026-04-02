@@ -13,8 +13,8 @@ mgd
 
 from os import path
 from ..private.IdToCode import IdToCode
-from ..helpers.py_helper import Usual_dict, ms_since_midnight, now
-from ..helpers.types_helper import Opt_list_of_str
+from ..helpers.py_helper import Usual_Dict, ms_since_midnight, now
+from ..helpers.types_helper import Opt_List_Of_Str
 from ..helpers.file_helper import folder_must_exist
 from ..common.app_context_vars import sidekick, app_user
 
@@ -40,9 +40,7 @@ class ExportProcessConfig:
     coder: IdToCode
     encode_data = False
 
-    def __init__(
-        self, encode_data: bool = False, scm_cols: Opt_list_of_str = [], sep_cols: Opt_list_of_str = []
-    ):
+    def __init__(self, encode_data: bool = False, scm_cols: Opt_List_Of_Str = [], sep_cols: Opt_List_Of_Str = []):
         self.scm_cols = scm_cols.copy() if scm_cols else ExportProcessConfig._scm_cols.copy()
         self.sep_cols = sep_cols.copy() if sep_cols else ExportProcessConfig._sep_cols.copy()
         self.encode_data = encode_data
@@ -62,7 +60,7 @@ class ExportProcessConfig:
         return self._full_file_name
 
     @property
-    def header(self) -> Usual_dict:
+    def header(self) -> Usual_Dict:
         if not self._header:
             self._header = {
                 "version": self.version,

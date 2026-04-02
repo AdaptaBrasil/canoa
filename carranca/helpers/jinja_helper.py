@@ -1,72 +1,35 @@
 #
 #
-# mgd 2024-06-21
+# mgd 2024-06-21, 2026-03-25 (dont_validate)
 
-# cSpell:ignore reraising
+# cSpell:ignore reraising dont
 import re
+from collections import Counter
 from os import path
 from flask import current_app, render_template
 from jinja2 import Environment, TemplateSyntaxError
 from typing import Any, List
 
 from .py_helper import as_str_strip
-from .file_helper import file_full_name_parse
-from .types_helper import Jinja_generated_html, Jinja_template, Template_file_full_name
+from .file_helper import file_full_name_parse, is_same_file_name
+from .types_helper import Jinja_Rendered, Jinja_Template, Template_File_Full_Name
+from ..common.app_constants import APP_UPS_HTML_PAGE_FILE_NAME, APP_JINJA_ORPHANED_TAG_ERROR
 from ..common.app_error_assistant import AppStumbled, ModuleErrorCode
 
 # Avoid importing sidekick during app initialization
 # 3/3. This line produce the sidekick-incident
 from ..common.app_context_vars import sidekick
 
-# mark a string as a jinja text, a text that will be parsed before rendering
-_jinja_pre_template_mark = "^"
-_jinja_bug_found = "🚨 A Jinja runtime error was detected"
+_jinja_bug_found = APP_JINJA_ORPHANED_TAG_ERROR
+
+# Obsolete 2026.04.02
+# def extract_tag(tmpl: Jinja_Template, tag: str) -> str | None:
+#     pattern = rf"<{tag}>(.*?)</{tag}>"
+#     match = re.search(pattern, tmpl, re.IGNORECASE | re.DOTALL)
+#     return match.group(1).strip() if match else None
 
 
-def jinja_pre_template(val: str) -> str:
-    # mgd 2024-06-21, not ready
-    text = val
-    try:
-        # Create a template from the value
-        template = current_app.jinja_env.from_string(val)
-        text = template.render()
-    except Exception as e:
-        print(f"Error rendering template [{val}]: {e}")
-
-    return text
-
-
-def process_pre_templates(texts: dict, mark: str = _jinja_pre_template_mark):
-    """
-    Process the dictionary to apply _jinjaText where necessary
-    Original idea by mgd
-
-    Example:
-        # A typical jinja texts to use on a template, except for `About`,
-        # that starts and ends with the (default) jinja_template_mark: ^
-        texts = {
-            'fruit': 'lucuma'
-            , 'stone': 'meteoric'
-            , 'about': '^About {{ app_name }} version {{ app_ver }}^'
-        }
-        processed_texts = process_pre_templates(texts)
-        print(processed_texts['about']) # -> "About Canoa version 21.8"
-    """
-    for key, text in texts.items():
-        if len(text) > 7 and text[0] == mark and text[0] == text[-1]:
-            pre_template = text.strip(mark)
-            value = jinja_pre_template(pre_template)
-            texts[key] = value
-    return texts
-
-
-def extract_tag(tmpl: Jinja_template, tag: str):
-    pattern = rf"<{tag}>(.*?)</{tag}>"
-    match = re.search(pattern, tmpl, re.IGNORECASE | re.DOTALL)
-    return match.group(1).strip() if match else None
-
-
-def _get_line(tmpl: Jinja_template, lineno: int) -> str:
+def _get_line(tmpl: Jinja_Template, lineno: int) -> str:
     lines = tmpl.splitlines()
     line = ""
     if 1 <= lineno <= len(lines):
@@ -74,7 +37,7 @@ def _get_line(tmpl: Jinja_template, lineno: int) -> str:
     return line
 
 
-def _validate_jinja(tmpl: Jinja_template, tmpl_ffn: str, raise_if_error: bool = False) -> str:
+def _validate_jinja(tmpl: Jinja_Template, tmpl_ffn: str, raise_if_error: bool = False) -> str:
     error = ""
     try:
         env = Environment()
@@ -88,18 +51,18 @@ def _validate_jinja(tmpl: Jinja_template, tmpl_ffn: str, raise_if_error: bool = 
     return error
 
 
-def _load_template(tmpl_ffn: Template_file_full_name) -> Jinja_template:
-    tmpl: Jinja_template = ""
+def _load_template(tmpl_ffn: Template_File_Full_Name) -> Jinja_Template:
+    tmpl: Jinja_Template = ""
     with open(tmpl_ffn, encoding="utf-8") as f:
         tmpl = f.read()
 
     return tmpl
 
 
-def _detect_jinja_runtime_errors(rendered_html: str) -> list[str]:
+def _detect_jinja_runtime_errors(rendered_html: str) -> List[str]:
     """this was difficult to catch.
     Ater sharing the bug with Copilot, she/he/it wrote:
-    # 🌀 The Echoing Braces Incident
+    # ?? The Echoing Braces Incident
     # A recursive error surfaced when a Jinja-rendered message contained literal {{ ... }},
     # triggering a second validation pass. Lesson: escape error messages before re-rendering.
 
@@ -118,19 +81,40 @@ def _detect_jinja_runtime_errors(rendered_html: str) -> list[str]:
     missing_obj = re.findall(r"\{\{\s*no such element:.*?\}\}", rendered_html)
     matches_var = re.findall(r"\{\{\s*(.*?)\s*\}\}", rendered_html)
     missing_var = [m for m in matches_var if len(m.strip()) <= 18]
-    result: list[str] = missing_obj + missing_var
+    result: List[str] = missing_obj + missing_var
     return result
 
 
-def process_template(tmpl_ffn: Jinja_template, **context: Any) -> Jinja_generated_html:
+def _detect_duplicate_ids(rendered_html: str) -> List[str]:
+    """Finds id= attributes that appear more than once in the rendered HTML.
+    Duplicate IDs are invalid HTML and a common Jinja block/loop bug.
+    Only active when DEBUG_RENDERED_TEMPLATES is enabled.
+    by Claude 2026.04.01
     """
-    TODO  » HTML with BeautifulSoup
-    """
+    from bs4 import BeautifulSoup
+
+    soup = BeautifulSoup(rendered_html, "html.parser")
+    counts = Counter(tag["id"] for tag in soup.find_all(id=True))  # type: ignore (to much hint for a tag)
+    return [f"#{id_} ({n}&times;)" for id_, n in counts.items() if n > 1]
+
+
+def process_text(text: str, **context: Any) -> str:
+    try:
+        # Create a template from a text (eg see display_html.py)
+        template = current_app.jinja_env.from_string(text)
+        text = template.render(context)
+    except Exception as e:
+        print(f"Error rendering template [{text}]: {e}")
+
+    return text
+
+
+def process_template(tmpl_ffn: Jinja_Template, **context: Any) -> Jinja_Rendered:
     # Avoid importing sidekick during app initialization
     from ..common.app_context_vars import sidekick
 
-    jHtml_to_display: Jinja_generated_html = ""
-    jHtml: Jinja_generated_html = ""
+    jHtml_to_display: Jinja_Rendered = ""
+    jHtml: Jinja_Rendered = ""
     validated = False
     errors: List[str] = []
     file_name = "?"
@@ -142,10 +126,22 @@ def process_template(tmpl_ffn: Jinja_template, **context: Any) -> Jinja_generate
             _validate_jinja(jHtml, file_name, True)
             validated = True
 
-        jHtml: Jinja_generated_html = render_template(tmpl_ffn, **context)
+        jHtml = render_template(tmpl_ffn, **context)
         jHtml_to_display = as_str_strip(jHtml)
 
-        if sidekick.config.DEBUG_RENDERED_TEMPLATES:
+        detect_jinja_errors = not is_same_file_name(APP_UPS_HTML_PAGE_FILE_NAME, file_name)
+
+        if detect_jinja_errors and sidekick.config.DEBUG_RENDERED_TEMPLATES:
+            dup_ids = _detect_duplicate_ids(jHtml_to_display)
+            if dup_ids:
+                raise AppStumbled(
+                    f"{_jinja_bug_found}: duplicate HTML ids {dup_ids}<br><br>in template: <code>{file_name}</code>",
+                    ModuleErrorCode.TEMPLATE_BUG.value,
+                    False,
+                    False,
+                    None,
+                    "Disable config.DEBUG_RENDERED_TEMPLATES to hide this error.",
+                )
             errors = _detect_jinja_runtime_errors(jHtml_to_display)
             if errors:
                 raise AppStumbled(

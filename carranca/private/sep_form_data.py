@@ -7,7 +7,7 @@ mgd 2025-11-19
 """
 
 from enum import IntEnum
-from typing import Tuple
+from typing import Tuple, List
 from dataclasses import dataclass
 
 from .wtforms import SepNew
@@ -17,8 +17,8 @@ from ..models.private import Sep, Schema, MgmtSepsUser
 from ..private.UserSep import UserSep
 from ..common.UIDBTexts import UIDBTexts
 from ..helpers.py_helper import to_int, clean_text
-from ..helpers.types_helper import Usual_dict
-from ..helpers.route_helper import is_method_get
+from ..helpers.types_helper import Usual_Dict
+from ..helpers.route_helper import is_method_post
 from ..common.app_context_vars import app_user
 from ..common.app_error_assistant import AppStumbled, JumpOut
 from ..helpers.ui_db_texts_manager import UITextsKeys, set_msg_fatal
@@ -44,11 +44,9 @@ MANAGER_LIST_VALUE = "managerListValue"
 # TODO: refactor to 'modern style' jHtml/up_handler
 
 
-def _get_managers(no_manager: NoManager) -> list[Usual_dict]:
+def _get_managers(no_manager: NoManager) -> List[Usual_Dict]:
     user_rows = User.get_all_users(User.disabled == False)
-    mng_list = [{"id": no_manager.id, "name": no_manager.name}] + [
-        {"id": user.id, "name": user.username} for user in user_rows
-    ]
+    mng_list = [{"id": no_manager.id, "name": no_manager.name}] + [{"id": user.id, "name": user.username} for user in user_rows]
     return mng_list
 
 
@@ -60,12 +58,12 @@ def get_sep_data(
     form: SepNew,
     sep_id: int,
     sep_tmp_name: str,
-) -> Tuple[Sep, Usual_dict, str]:
+) -> Tuple[Sep, Usual_Dict, str]:
 
-    is_get = is_method_get()
+    is_get = is_method_post()
     load_sep_icon_content = not is_get
     sep_row = Sep() if (edit_mode == SepEditMode.INSERT) else Sep.get_row(sep_id, load_sep_icon_content)
-    ui_select_lists: Usual_dict = {}
+    ui_select_lists: Usual_Dict = {}
 
     def _get_ui_select_lists(no_scm: list):
         ui_db_texts[SCHEMA_LIST_VALUE] = "" if is_get else str(form.schema_list.data)
@@ -130,9 +128,7 @@ def get_sep_data(
         # create a `usr_sep` and get the sep's manager (user_curr)
         usr_sep_dict = dict(sep_usr_row)
         # Remove 'user_curr' from edit_dict, because is not needed in UserSep(..)
-        sep_manager = (
-            sep_user if (sep_user := usr_sep_dict.pop("user_curr", None)) else ui_db_texts["managerNone"]
-        )
+        sep_manager = sep_user if (sep_user := usr_sep_dict.pop("user_curr", None)) else ui_db_texts["managerNone"]
         usr_sep = UserSep(**usr_sep_dict)
         usr_sep.icon_url = SepIconMaker.get_url(usr_sep.icon_file_name)
 

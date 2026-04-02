@@ -22,7 +22,7 @@ from ..helpers.route_helper import (
     redirect_to,
     index_route,
     login_route,
-    is_method_get,
+    is_method_post,
     private_route,
     base_route_public,
     public_route__password_reset,
@@ -86,7 +86,7 @@ def login():
       [register] and
       the usual documents.
     """
-    if is_method_get() and is_anyone_logged():
+    if is_method_post() and is_anyone_logged():
         return redirect_to(home_route())
     else:
         from .access_control.login import do_login
@@ -123,7 +123,7 @@ def password_recovery():
     """
 
     if is_anyone_logged():
-        return redirect_to(private_route("change_password"))
+        return redirect_to(private_route("password_change"))
     else:
         from .access_control.password_recovery import password_recovery
 

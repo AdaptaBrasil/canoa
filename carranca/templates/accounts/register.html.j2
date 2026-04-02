@@ -1,5 +1,5 @@
-{# ------------------------------------
-
+{#
+------------------------------------
 ./accounts/register.html.j2
 ---------------------------
 
@@ -22,7 +22,7 @@ mgd
 <div class="form-group">
     <label class="form-label" inert for="{{form.username.name}}">{{ userLabel }}</label>
     <div class="input-group">
-        <span class="input-group-text"><i class="fas fa-user"></i></span>
+        <span class="input-group-text"><i class="{{ faStyle }} fa-user"></i></span>
         {{ form.username() }}
     </div>
 </div>
@@ -32,7 +32,7 @@ mgd
 <div class="form-group mt-3">
     <label class="form-label" inert for="user_email">{{ emailLabel }}</label>
     <div class="input-group">
-        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+        <span class="input-group-text"><i class="{{ faStyle }} fa-envelope"></i></span>
         {{ form.email(class="form-control", type="email", id="user_email") }}
     </div>
 </div>
@@ -42,7 +42,7 @@ mgd
 <div class="form-group mt-3">
     <label class="form-label" inert for="{{form.password.name}}">{{ passwordLabel }}</label>
     <div class="input-group">
-        <span class="input-group-text"><i class="fas fa-unlock-alt"></i></span>
+        <span class="input-group-text"><i class="{{ faStyle }} fa-unlock-alt"></i></span>
         {{ form.password() }}
     </div>
 </div>

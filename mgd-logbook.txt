@@ -1,7 +1,7 @@
 #spell:ignore onclick jinja apikey bingint vw_sepcombined andrade inpe nginx getusermail passwordrecovery changepassword resetpassword
 #spell:ignore desloga sepcombined especificacaosetor suporteusuariogrupo suporteusuarioelemento tmpl wtforms getuseremail getusermail requestemail
 #spell:ignore venv ccedil atilde receivefile datetime saude uix unsync healthcheck
-#spell:ignore Setorista sendgrid linux cnpq ajax mgmt SQLA sqla gmail
+#spell:ignore Setorista sendgrid linux cnpq ajax mgmt SQLA sqla gmail varchar onsubmit
 
 
 ------------- Use of / in schema/SEP -------------
@@ -72,7 +72,22 @@
     Check  carranca\templates\private\sep_mgmt.html.j2
       if too many params {{ action_form__submit_cargo(dlg_submit_form_id, private_route('sep_mgmt'), 'post', "onsubmit='return doGridCargo()'")}}
     todo:
-        
+
+
+------- 2026 - March -------------
+    - Start 'recortes' se tests/test_shape_geojson.py
+    - Refactor ui_db_texts_manager.py
+    - Refactor class UIDBTexts
+    - Move get/set UIDBTexts from ui_db_texts_manager to UIDBTexts
+    - Start removing None initializations to prevent unwanted Optional types and reduce Pylance noise.
+     eg
+
+
+------- 2026 - February -------------
+    - Check routines
+    - Solved background flicker in some browsers (eg FF)
+    - Several minor fixes
+    - Standardize Jinja Responses
 
 ------- 2026 - January -------------
     - Verified email issue #2
@@ -1231,7 +1246,7 @@
             _Unless a very specific reason exists, we recommend using the InputRequired instead._
     5.  As far as I check, EqualTo runs on the server. Using mine.
            https://wtforms.readthedocs.io/en/3.0.x/validators/?highlight=equa#wtforms.validators.EqualTo:
-    6.  Start process_pre_templates (New jinja_helper.py)
+    6.  Start process_pre_templates (New jinja_helper.py) (abandoned in 2026.04.02)
     7.  Document what I learn todas documenting_python_code.md
 
 

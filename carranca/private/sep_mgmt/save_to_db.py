@@ -15,17 +15,17 @@ from sqlalchemy.orm import Session
 from ...common.UIDBTexts import UIDBTexts
 from ...helpers.py_helper import is_str_none_or_empty
 from ...helpers.db_helper import try_get_mgd_msg
-from ...helpers.types_helper import Sep_mgmt_return, Cargo_list, Opt_str
+from ...helpers.types_helper import Sep_Mgmt_Return, Cargo_List, Opt_Str
 
 from .keys_values import SepMgmtGridCols, CargoKeys
 
 
 def save_data(
-    grid_response: Cargo_list,
+    grid_response: Cargo_List,
     batch_code: str,
     ui_db_texts: UIDBTexts,
     task_code: int,
-) -> Sep_mgmt_return:  # msg_success, msg_error, task_code
+) -> Sep_Mgmt_Return:  # msg_success, msg_error, task_code
     """Saves user modifications to the DB via the view's trigger"""
 
     msg_success = None
@@ -49,21 +49,21 @@ def save_data(
 
 
 def _prepare_data_to_save(
-    grid_response: Cargo_list,
+    grid_response: Cargo_List,
     ui_db_texts: UIDBTexts,
     task_code: int,
-) -> Tuple[str, Cargo_list, Cargo_list, int]:
+) -> Tuple[str, Cargo_List, Cargo_List, int]:
     """Distributes grid's modifications in two groups: remove & assign"""
 
     msg_error = None
-    remove: Cargo_list = []
-    assign: Cargo_list = []
+    remove: Cargo_List = []
+    assign: Cargo_List = []
     try:
         actions = grid_response[CargoKeys.actions]
         task_code += 1
         str_none: str = actions[CargoKeys.none]
         task_code += 1
-        grid: Cargo_list = grid_response[CargoKeys.cargo]
+        grid: Cargo_List = grid_response[CargoKeys.cargo]
         task_code += 1
         for item in grid:
             usr_new = item[SepMgmtGridCols.usr_new]
@@ -82,12 +82,12 @@ def _prepare_data_to_save(
 
 
 def _save_data_to_db(
-    remove: Cargo_list,
-    update: Cargo_list,
+    remove: Cargo_List,
+    update: Cargo_List,
     batch_code: str,
     ui_db_texts: UIDBTexts,
     task_code: int,
-) -> Sep_mgmt_return:
+) -> Sep_Mgmt_Return:
     """
     Saves user-made changes to the UI grid to the database
     via an 'instead-of' trigger that:
@@ -109,7 +109,7 @@ def _save_data_to_db(
     with global_sqlalchemy_scoped_session() as db_session:
         try:
 
-            def __set_sep_new_user(id: int, usr_new: Opt_str):
+            def __set_sep_new_user(id: int, usr_new: Opt_Str):
                 user_sep = db_session.query(MgmtSepsUser).filter_by(id=id).one_or_none()
                 if user_sep:
                     user_sep.user_new = usr_new

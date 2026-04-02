@@ -14,7 +14,7 @@ from flask_login import login_user, logout_user
 
 from ...models.public import persist_user
 from ...helpers.py_helper import is_str_none_or_empty, now_as_iso, to_str
-from ...helpers.pw_helper import internal_logout, is_anyone_logged, verify_pass
+from ...helpers.pw_helper import internal_logout, is_anyone_logged, verify_password
 from ...private.RolesAbbr import RolesAbbr
 from ...public.ups_handler import get_ups_jHtml
 from ...common.UITextsKeys import UITextsKeys
@@ -43,7 +43,6 @@ def do_login():
     try:
         task_code += 1  # 1
         tmpl_ffn, is_get, ui_db_texts = get_account_response_data("login")
-        ui_db_texts[UITextsKeys.Form.pretend_busy] = False
         task_code += 1  # 2
         if is_get and is_anyone_logged():
             task_code += 1  # 3
@@ -71,7 +70,7 @@ def do_login():
             if not user:
                 task_code += 1  # 12
                 set_msg_error("userOrPwdIsWrong", ui_db_texts)
-            elif not verify_pass(password, user.password):
+            elif not verify_password(password, user.password):
                 # TODO: new  user.login_failed = True
                 user.password_failed_at = func.now()
                 task_code += 2  # 13

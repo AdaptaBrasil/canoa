@@ -1,21 +1,19 @@
 {# ------------------------------------
 
-./layouts/form.html.j2
-----------------------
-Managed & Displays HTML Forms
+./layouts/prompt.html.j2
+------------------------
+Managed & Displays an HTML Prompt or `dialog Box` to the user.
+A simplification of form.html.j2
 
 mgd
 
-cSpell:ignore tojson
+cSpell:ignore
 --------------------------------------- #}
 
-{# set a default value for msgOnly #}
-{% set form_backend_msg= msgOnly | default(False) %}
-{% set form_submit_route = formSubmitRoute | default(None) %}
-{% set form_display_ui= not form_backend_msg %}
-
-{% set form_submit_btn_text= form_close_btn_text | default( submitFormButton | default(None)) %}
-{% set form_close_btn_text= form_close_btn_text | default( closeFormButton | default(ui_defaults.okButton)) %}
+{# only specify value if different from default #}
+{% set form_submit_route= formSubmitRoute | default(False) %}
+{% set form_submit_btn_text= form_submit_btn_text | default(submitFormButton) %}
+{% set form_close_btn_text= form_close_btn_text | default(closeFormButton) %}
 
 {% extends "./layouts/dialog.html.j2" %}
 
@@ -23,27 +21,8 @@ cSpell:ignore tojson
 {% block dlg_blc_body %}
 
 {# ╒═════════ Display Message If Any ═══════════╕ #}
-{# always is included, internal filter knows
-what should be shown#}
 {% include "includes/backend-msg.html.j2" %}
 {# ╘═════════ Display Message If Any ═══════════╛ #}
-
-{% if form_display_ui %}
-
-{# ╒═══════════════ Display UI ═══════════════╕ #}
-
-{% if not form_submit_route %}
-{# There are TWO forms with same ID, trying to fix 2026.04.02 #}
-<form method="post" action="" id="{{dlg_submit_form_id}}" {{ formAttribute | default('') }}>
-    <input type="hidden" name="{{safe_token.key}}" value="{{safe_token.value}}">
-    {# ╒═══════════════ Form's input ═══════════════╕ #}
-    {% block frm_blc_inputs %}{% endblock %}
-    {# ╘══════════════ Form's input ════════════════╛ #}
-</form>
-{% endif %}
-
-{# ╘═══════════════ Display UI ═══════════════╛ #}
-{% endif %}
 
 {% endblock dlg_blc_body %}
 {# ╘════════════════════ Dialog Body ══════════════════════╛ #}
@@ -54,25 +33,20 @@ what should be shown#}
 {# ╒════════════ Footer Buttons ══════════╕ #}
 {% block dlg_blc_footer_buttons %}
 
-{% if form_display_ui %}
-
-{# ╒═══════════ Display UI ═══════════╕ #}
+{% if form_submit_btn_text %}
 <div class="col-auto">
     {% from "includes/_action_forms_and_btns.html.j2" import btn_submit %}
     {{ btn_submit(dlg_submit_form_id, dlg_submit_btn_id, form_submit_btn_text) }}
 </div>
-{# ╘══════════ Display UI ═══════════╛ #}
+{% endif %}
 
-{% else %}
-
-{# ╒══════ Display Only Message ═════╕ #}
+{% if form_close_btn_text %}
 <div class="col-auto">
     {% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
     {{ btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, form_close_btn_text) }}
 </div>
-{# ╘══════ Display Only Message ══════╛ #}
-
 {% endif %}
+
 {% endblock dlg_blc_footer_buttons %}
 {# ╘════════════ Footer Buttons ══════════╛ #}
 
@@ -84,8 +58,6 @@ what should be shown#}
 {# ╘═══════════ Footer Option ════════════╛ #}
 
 
-{% if form_display_ui %}
-{# ╒═══════════════ Display UI ═══════════════╕ #}
 {# ╒══════ Override dialog ══════╕ #}
 {% block dlg_blc_javascript %}
 {{ super() }}
@@ -95,10 +67,6 @@ what should be shown#}
 
 {% endblock dlg_blc_javascript %}
 {# ╘══════ Override dialog ══════╛ #}
-
-{% endif %}
-{# ╘═══════════════ Display UI ═══════════════╛ #}
-
 
 {% if form_submit_route %}
 {# ╒════════════════ Dialog Forms ════════════════╕ #}
@@ -110,4 +78,5 @@ what should be shown#}
 {% endblock dlg_blc_forms %}
 {# ╘═════════════════ Dialog Forms ════════════════╛ #}
 {% endif %}
+
 {# eof #}

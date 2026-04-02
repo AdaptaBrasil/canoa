@@ -48,9 +48,7 @@ def _init_envvar_of_config(cfg: "DynamicConfig", fuse: Fuse):
         if not key.upper().startswith(envvar_prefix):
             pass
         elif not hasattr(cfg, attribute_name):
-            fuse.display.debug(
-                f"Environment variable [{attribute_name}] is not a recognized attribute of `Config`, skipping."
-            )
+            fuse.display.debug(f"Environment variable [{attribute_name}] is not a recognized attribute of `Config`, skipping.")
         elif not is_str_none_or_empty(value):
             _value = as_bool(value) if value.lower() in [t, f, "t", "1"] else value
             setattr(cfg, attribute_name, _value)
@@ -61,9 +59,7 @@ def _init_envvar_of_config(cfg: "DynamicConfig", fuse: Fuse):
             else:
                 fuse.display.warn(msg)
         else:
-            fuse.display.warn(
-                f"Empty value for environment variable [{attribute_name}] ignored, retaining original value."
-            )
+            fuse.display.warn(f"Empty value for environment variable [{attribute_name}] ignored, retaining original value.")
 
 
 class DynamicConfig(BaseConfig):
@@ -75,7 +71,7 @@ class DynamicConfig(BaseConfig):
         self.SERVER_ADDRESS = server_address
         self.EMAIL_REPORT_CC = ""
 
-        # flask has config.from_prefixed_env() that us used in create_app
+        # flask has config.from_prefixed_env() that is used in create_app
         # but I need one now, and displaying some msg.
         _init_envvar_of_config(self, fuse)
         fuse.display.info(f"The Config class was instantiated in {self.APP_MODE} mode.")
@@ -87,8 +83,10 @@ class DynamicConfig(BaseConfig):
         self.DB_len_val_for_pw = LenValidate(6, 22)
         self.DB_len_val_for_uname = LenValidate(3, 22)
         self.DB_len_val_for_email = LenValidate(8, 60)
-        self.email_verify_token_digit_count = 6  # LenValidate(100000, 999999)
-        self.email_verify_token_expires_hours = 5
+        # Verification/Validation
+        self.EMAIL_VERIFY_TOKEN_DIGIT_COUNT: int = 6
+        self.EMAIL_VERIFY_TOKEN_EXPIRES_HOURS: int = 18
+        self.EMAIL_RECOVER_TOKEN_EXPIRES_HOURS: int = 8
 
         # propagate APP_DEBUG
         default = self.APP_DEBUG if self.APP_PROPAGATE_DEBUG else False

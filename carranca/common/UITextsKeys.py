@@ -10,7 +10,7 @@ class UITextsKeys:
         error = "msgError"
         success = "msgSuccess"
         fatal = "msgFatal"
-        tech = "msgTech"
+        tech = "msgTech"  # This is an internal type of message, not from db
         # displays only message, no form, inputs/buttons (see .carranca/templates/layouts/form.html.j2 & dialog.html.j2)
         display_msg_only = "msgOnly"
 
@@ -18,15 +18,16 @@ class UITextsKeys:
         title = "pageTitle"
 
     class Form:  # & dialog
+        faStyle = "faStyle"  # Font Awesome Style
         title = "formTitle"
         icon_file = "iconFile"  # only the icon's name
         icon_url = "iconFileUrl"  # url of an png/svg icon dlg_var_icon_url = iconFileUrl, dlg-var-icon-id
         icon_css = ""  # TODO
         date_format = "userDateFormat"
         # This button is only visible when msg_only is True OR is a Dialog/Document (see document.html.j2)
-        btn_close = "btnCloseForm"
-        submit_route = "fromSubmitRoute"
-        pretend_busy = "formSubmitPretendBusy"
+        btn_close = "closeFormButton"
+        btn_submit = "submitFormButton"
+        submit_route = "formSubmitRoute"
 
     class Fatal:
         no_db_conn = "NoDBConnection"
@@ -35,11 +36,13 @@ class UITextsKeys:
         http_code = "UpsHttpCode"
 
     class Section:
-        """See table ui_sections.nameThis two sections are special (id=1 & id=2):
+        """See table ui_sections.name
+        This two sections are special (id=1 & id=2):
         as they group all msg error and msgs success"""
 
         error = "secError"
         success = "secSuccess"
+        current = ""  # only search on the current section
         # this is a special key that has the name of the section loaded in db_Texts,
         # see  get_section
         name = "__section_name__"

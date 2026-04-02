@@ -15,7 +15,7 @@ from flask import request
 from typing import Optional, List, Final
 
 from ..common.app_error_assistant import AppStumbled
-from .types_helper import Js_constants
+from .types_helper import JS_Constants
 
 
 # === Global js constants Keys for JsConstants Jinja Dictionary for j2 grid/form/security ====
@@ -63,9 +63,7 @@ def js_form_sec_check(value: Optional[str] = None) -> str:
     return msg_error
 
 
-def js_ui_dictionary(
-    col_meta_info_txt: str = "", col_names: List[str] = [], task_code: int = 1
-) -> Js_constants:
+def js_ui_dictionary(col_meta_info_txt: str = "", col_names: List[str] = [], task_code: int = 1) -> JS_Constants:
     """
     col_meta_info_txt -> json text from table 'ui_items' key= [section]'colMetaInfo'
        eg-> {"id":"", "name":"Nome", "color":"Cor", "visible":"Visível", "sep_v2t":"SEPs (visível/total)" }
@@ -73,7 +71,7 @@ def js_ui_dictionary(
 
     """
 
-    js_ui_dict: Js_constants = {}
+    js_ui_dict: JS_Constants = {}
 
     js_ui_dict["grid_id"] = "ag-grid-id"
     js_ui_dict[js_form_cargo_id] = js_form_cargo_id
@@ -85,7 +83,7 @@ def js_ui_dictionary(
     """ little bit of 'recursive':
         can be used as `js_ui_dict.form_sec_key` or, in macros, `just `form_sec_key`
     """
-    js_ui_dict["js_ui_dict"]: Js_constants = js_ui_dict  # type: ignore
+    js_ui_dict["js_ui_dict"]: JS_Constants = js_ui_dict  # type: ignore
 
     if col_meta_info_txt:
         col_meta_info_json = json.loads(col_meta_info_txt)

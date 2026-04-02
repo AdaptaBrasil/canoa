@@ -37,6 +37,7 @@ instance/*
 ## Canoa per git's user
 carranca/static/sep_icons/
 carranca/log_files
+carranca/shape2geojsn/data
 downloaded_files/
 uploaded_files/
 local_storage/
@@ -51,7 +52,6 @@ mount-win.sh
 todo_today.txt
 SAtelier-info
 Hallucination
-carranca/test_py.py
-
+carranca/mgd_tests
 #eof
 

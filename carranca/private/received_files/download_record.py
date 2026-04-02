@@ -20,7 +20,7 @@ from .fetch_records import fetch_record_s, IGNORE_USER, USER_RECEIPT
 from ...helpers.py_helper import is_str_none_or_empty, to_int
 from ...public.ups_handler import ups_handler
 from ...helpers.file_helper import change_file_ext
-from ...helpers.types_helper import Usual_dict
+from ...helpers.types_helper import Usual_Dict
 from ...helpers.route_helper import MTD_GET, get_private_response_data, init_response_vars
 from ...common.app_error_assistant import HTTP_StatusCode, ModuleErrorCode, AppStumbled
 from ...helpers.js_consts_helper import js_form_sec_check, js_form_cargo_id, js_grid_col_meta_info
@@ -42,7 +42,7 @@ def download_rec() -> Response:
             http_status_code = hsc
             raise AppStumbled(msg, task_code, log_out, True)
 
-        def _get_receipt(db_record: Usual_dict):
+        def _get_receipt(db_record: Usual_Dict):
             col_meta = ui_db_texts[js_grid_col_meta_info]
             caption = json.loads(col_meta)[USER_RECEIPT]
             return f"{caption}: [{db_record[USER_RECEIPT]}]."
@@ -66,9 +66,7 @@ def download_rec() -> Response:
         else:
             task_code += 3  # 5
             no_sep = ui_db_texts["itemNone"]
-            db_records, download_file_name, uploaded_name, report_ext = fetch_record_s(
-                no_sep, rec_id, IGNORE_USER
-            )
+            db_records, download_file_name, uploaded_name, report_ext = fetch_record_s(no_sep, rec_id, IGNORE_USER)
             if len(db_records) != 1:
                 msg = set_msg_error("noRecord", ui_db_texts)
                 _raise(msg, HTTPStatus.NOT_FOUND)
@@ -79,9 +77,7 @@ def download_rec() -> Response:
                 uploaded_name = change_file_ext(uploaded_name, report_ext)
 
             if path.isfile(download_file_name):
-                file_response = send_file(
-                    download_file_name, as_attachment=True, download_name=uploaded_name
-                )
+                file_response = send_file(download_file_name, as_attachment=True, download_name=uploaded_name)
                 http_status_code = HTTPStatus.OK
             else:  # deleted just now :-(
                 msg = f"{set_msg_error("fileNotFound", ui_db_texts)} {_get_receipt(db_records[0])}"

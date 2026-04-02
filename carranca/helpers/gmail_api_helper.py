@@ -111,6 +111,7 @@ def _send_email(
     # --- Authentication Selection Logic ---
 
     scopes = ["https://www.googleapis.com/auth/gmail.send"]
+    # Google code: 
     service: Type[build]
 
     # Check configuration flag to select DWD or OAuth

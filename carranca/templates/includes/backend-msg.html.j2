@@ -9,12 +9,12 @@ mgd
 --------------------------------------- #}
 {# cSpell:ignore #}
 
-{# ┌┄┄┄┄┄┄┄┄┄┄┄┄┄ if any message exists ┄┄┄┄┄┄┄┄┄┄┄┄┄┐ #}
-{% if msgInfo or msgWarn or msgError or msgSuccess or msgTech %}
 
+{% if msgInfo or msgWarn or msgError or msgSuccess or msgTech %}
+{# ╒═════════════════ Display if Any Message Available ═════════════════╕ #}
 <div class="text-center text-md-center">
     <h6 class="font-weight-normal">
-        {# Warn is only used is ups_handler, to show a 'light error', if user is adm, follows str(e) #}
+
         {% set first_msg = True %}
 
         {# ┄┄┄┄┄ Warning ┄┄┄┄┄ #}
@@ -64,8 +64,8 @@ mgd
 
     </h6>
 </div>
+{# ╘═════════════════ Display if Any Message Available ═════════════════╛ #}
 
 {% endif %}
-{# └┄┄┄┄┄┄┄┄┄┄┄┄┄ if any message exists ┄┄┄┄┄┄┄┄┄┄┄┄┄┘ #}
 
 {# eof #}

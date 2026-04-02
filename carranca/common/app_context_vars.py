@@ -92,9 +92,7 @@ def __get_scoped_var(var_name: str, do_var_creator: Callable[[], Any]) -> Any:
                     return var_value
                 except Exception as e:
                     setattr(g, var_name, _CREATION_FAILED)
-                    raise RuntimeError(
-                        f"Scoped variable creator {do_var_creator} raised an exception [{e}]."
-                    )
+                    raise RuntimeError(f"Scoped variable creator {do_var_creator} raised an exception [{e}].")
 
     elif not hasattr(g, var_name):
         try:
@@ -150,7 +148,7 @@ def __prepare_user_seps() -> "UserSepsRtn":
     from ..private.sep_icon import do_icon_get_url
     from ..helpers.pw_helper import is_anyone_logged
     from ..helpers.py_helper import class_to_dict
-    from ..helpers.types_helper import Usual_dict
+    from ..helpers.types_helper import Usual_Dict
 
     user_id: int = current_user.id if is_anyone_logged() else -1
 
@@ -161,7 +159,7 @@ def __prepare_user_seps() -> "UserSepsRtn":
         except Exception as e:
             return str(e)
 
-        seps: List[Usual_dict] = []
+        seps: List[Usual_Dict] = []
         for sep_row in sep_usr_rows:
             item = UserSep(**sep_row)
             item.icon_url = do_icon_get_url(item.icon_file_name, item.id)
@@ -220,7 +218,5 @@ def __getattr__(name):
 # Keep __setattr__ to enforce read-only status
 def __setattr__(name, value):
     if name == "sidekick":
-        raise AttributeError(
-            f"Cannot assign to attribute '{name}' of module '{__name__}'. It is read-only."
-        )
+        raise AttributeError(f"Cannot assign to attribute '{name}' of module '{__name__}'. It is read-only.")
     globals()[name] = value

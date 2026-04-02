@@ -7,23 +7,22 @@ mgd
 
 """
 
-# cSpell:ignore app_name sqlalchemy sessionmaker autoflush gethostname connstr juser scms gcfg
+# cSpell:ignore app_name sqlalchemy sessionmaker autoflush gethostname connstr juser scms gcfg uidbtexts
 
 # ============================================================================ #
 from flask_mail import Mail
 from flask_login import LoginManager
 from sqlalchemy.orm import scoped_session
 
-from typing import Dict, List
+from typing import cast, Tuple, Dict, List
 from .common.Sidekick import Sidekick
+from .helpers.py_helper import OS_IS_LINUX
 
-# App Global variables: TODO: app_g.sidekick, etc
-global_sidekick: Sidekick | None = None
-global_login_manager: LoginManager | None = None
-global_sqlalchemy_scoped_session: scoped_session | None = None
+# App Global variables:
+global_sidekick: Sidekick
+global_login_manager: LoginManager
+global_sqlalchemy_scoped_session: scoped_session
 global_ui_texts_cache: Dict[str, str] = {}
-APP_DB_VERSION: str = "?"
-
 
 """
 'scoped' refers to the management of SQLAlchemy `Session` objects within a specific scope,
@@ -51,7 +50,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask_sqlalchemy import SQLAlchemy
 
-from .helpers.py_helper import crc16
+from .helpers.py_helper import crc16, to_base
 from .private.JinjaUser import JinjaUser
 from .config.BaseConfig import BaseConfig
 from .helpers.pw_helper import is_anyone_logged
@@ -106,14 +105,14 @@ def _register_blueprint_routes(app: Flask):
 
 
 # ---------------------------------------------------------------------------- #
-def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version: str):
-    from .helpers.types_helper import Db_texts
+def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version: str, db_version: str, ui_defaults: str):
+    from .helpers.types_helper import DB_Texts
     from .helpers.uiact_helper import UiActResponseProxy
     from .helpers.route_helper import private_route, public_route, static_route
     from .helpers.js_consts_helper import js_form_sec_key, js_form_cargo_id, js_form_sec_value
 
-    def __get_app_menu(sub_menu_name: str) -> Db_texts:
-        sub_menu: Db_texts = {}
+    def __get_app_menu(sub_menu_name: str) -> DB_Texts:
+        sub_menu: DB_Texts = {}
         if not is_anyone_logged():
             return sub_menu
 
@@ -158,9 +157,16 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
         btn_id = f"{action}{format(i, '04x')}"
         return btn_id
 
+    # def __get_email_code() -> str:
+    #     value = to_base(generate_random(5), 16)
+    #     return value
+
+    # TODO: Merge with ui_db_texts
     app.jinja_env.globals.update(
         app_name=app_name,
         app_version=app_version,
+        db_version=db_version,
+        ui_defaults=json.loads(ui_defaults),
         static_route=static_route,
         private_route=private_route,
         public_route=public_route,
@@ -174,9 +180,14 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
         ui_act_shw=UiActResponseProxy.show,
         safe_token={"key": js_form_sec_key, "value": js_form_sec_value(), "cargo": js_form_cargo_id},
     )
+
     if debugUndefined:
         # Enable DebugUndefined for better error messages in Jinja2 templates
         app.jinja_env.undefined = jinja2.DebugUndefined
+
+    _info("All Jinja functions and global vars of this app have been successfully")
+    _info(f"...attached to 'jinja_env.globals' (with debug_templates as {debugUndefined}).")
+
     return
 
 
@@ -228,7 +239,25 @@ def _info(text: str):  # shortcut
 
 
 # ---------------------------------------------------------------------------- #
+def _init_ui_db_texts() -> str:
+    """
+    Check connection with DB Texts provider
+
+    """
+    from .common.UITextsKeys import UITextsKeys
+    from .helpers.ui_db_texts_manager import db_retrieve_text
+
+    welcome_msg = db_retrieve_text("WelcomeMsg", UITextsKeys.Section.success)
+    jinja_ui_defaults = db_retrieve_text("ui_defaults", UITextsKeys.Section.success)
+
+    _info(welcome_msg)
+
+    return jinja_ui_defaults
+
+
+# ---------------------------------------------------------------------------- #
 def _create_app_and_log_file(app_name: str):
+    import locale
     from .helpers.db_helper import db_connstr_obfuscate
     from .helpers.log_helper import do_log_file
 
@@ -238,7 +267,7 @@ def _create_app_and_log_file(app_name: str):
 
     # 🖋️ Local alias for clarity — sk rides with sidekick, no duplication.
     # from ..common.app_context_vars import sidekick
-    g_sk = global_sidekick
+    g_sk = cast(Sidekick, global_sidekick)
 
     # -- config from file
     app.config.from_object(g_sk.config)
@@ -247,18 +276,38 @@ def _create_app_and_log_file(app_name: str):
     _info("App's config was successfully bound to the app.")
 
     # -- config from env vars
+    # flask has config.from_prefixed_env()
     app.config.from_prefixed_env(app_name)
     pcName = socket.gethostname().upper()
     _info(f"App's config updated with environment variables from [{pcName}].")
+
+    # -- set python locale
+    def __set_locale(locale_str: str):
+        result = True
+        try:
+            locale.setlocale(locale.LC_TIME, locale_str)
+            _info(f"{app_name}'s locale set to {locale_str} at exactly {g_sk.now().strftime('%c.%f')}")
+        except:
+            result = False
+        return result
+
+    locales = (
+        [g_sk.config.APP_LINUX_LOCALE, g_sk.config.APP_WINDOWS_LOCALE]
+        if OS_IS_LINUX
+        else [g_sk.config.APP_WINDOWS_LOCALE, g_sk.config.APP_LINUX_LOCALE]
+    )
+    for loc in locales:
+        if __set_locale(loc):
+            break
+    else:
+        g_sk.display.error(f"{app_name}'s locale could not be changed.")
 
     # -- Log file
     if not g_sk.config.LOG_TO_FILE:
         g_sk.config.LOG_FILE_STATUS = "off"
     else:
         cfg = g_sk.config
-        error, full_name, level = do_log_file(
-            app, cfg.LOG_FILE_NAME, cfg.LOG_FILE_FOLDER, cfg.LOG_MIN_LEVEL
-        )
+        error, full_name, level = do_log_file(app, cfg.LOG_FILE_NAME, cfg.LOG_FILE_FOLDER, cfg.LOG_MIN_LEVEL)
         info = f"file '{full_name}' levels '{level}' and above"
         if not error:
             _info(f"Logging to {info}.")
@@ -288,9 +337,9 @@ def create_app():
     # is assigned before being used.
 
     # === 1/3 Global sidekick  === #
-    global global_sidekick, APP_DB_VERSION
+    global global_sidekick
     # === Check if all mandatory information is ready === #
-    global_sidekick, APP_DB_VERSION, display_mute_after_init = ignite_app(APP_NAME, started)
+    global_sidekick, db_version, display_mute_after_init = ignite_app(APP_NAME, started)
     _info(f"[{global_sidekick}] instance is now ready to assist you.")
     gcfg = global_sidekick.config  # shortcut
 
@@ -325,15 +374,17 @@ def create_app():
     _register_blueprint_routes(app)
     _info("The blueprint routes were collected and registered within the app.")
 
+    # -- Start  Database User Interface Text Max Module:
+    jinja_ui_defaults = _init_ui_db_texts()
+
     # -- Jinja2
-    _register_jinja(app, bool(gcfg.DEBUG_TEMPLATES), APP_NAME, APP_VERSION)
-    sd = f"(with debug_templates as {gcfg.DEBUG_TEMPLATES})"
-    _info("All Jinja functions of this app have been successfully attached.")
-    global_sidekick.display.debug(f"..attached to 'jinja_env.globals' {sd}.")
+    _register_jinja(app, bool(gcfg.DEBUG_TEMPLATES), APP_NAME, APP_VERSION, db_version, jinja_ui_defaults)
 
     # config sidekick.display
     if display_mute_after_init:
         global_sidekick.display.mute_all = True
+
+    # -- the welcome message from the database UIDBTexts
 
     return app, global_sidekick
 

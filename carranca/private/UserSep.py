@@ -12,11 +12,11 @@ mgd
 from typing import TYPE_CHECKING, List
 
 from .IdToCode import IdToCode
-from ..helpers.types_helper import Error_message
+from ..helpers.types_helper import Error_Message
 
 if TYPE_CHECKING:
     type UserSepList = List["UserSep"]
-    type UserSepsRtn = UserSepList | Error_message
+    type UserSepsRtn = UserSepList | Error_Message
 
 
 class UserSep:

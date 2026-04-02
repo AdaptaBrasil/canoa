@@ -25,8 +25,8 @@ mgd
 # cSpell:ignore ext
 # pyright: reportAttributeAccessIssue=false
 
+from typing import List, Tuple
 from datetime import datetime
-from typing import Tuple
 
 from ...models.private import UserDataFiles
 
@@ -52,7 +52,7 @@ def process(
     file_data: object | str,
     proc_data: ProcessData,
     received_at: datetime,
-    valid_ext: list[str],
+    valid_ext: List[str],
 ) -> Tuple[int, str, str]:
 
     from ...common.app_context_vars import sidekick

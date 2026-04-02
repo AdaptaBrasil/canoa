@@ -11,17 +11,17 @@ from typing import TypeAlias, Tuple, List
 from ..helpers.py_helper import class_to_dict
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.uiact_helper import UiActResponseKeys, UiActResponse
-from ..helpers.types_helper import Jinja_template
+from ..helpers.types_helper import Jinja_Template
 from ..helpers.jinja_helper import process_template
 from ..helpers.route_helper import get_private_response_data, init_response_vars
-from ..helpers.ui_db_texts_manager import set_msg_success
+from ..helpers.ui_db_texts_manager import set_msg_success, MSG_DEFAULT
 from ..common.app_error_assistant import ModuleErrorCode
 from ..config.ExportProcessConfig import ExportProcessConfig
 
 SepUiOrder: TypeAlias = List[Tuple[int, int]]
 
 
-def scm_export_ui_save(uiact_rsp: UiActResponse) -> Jinja_template:
+def scm_export_ui_save(uiact_rsp: UiActResponse) -> Jinja_Template:
     from ..models.private import Sep
 
     jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SCM_EXPORT_UI_SAVE)
@@ -54,12 +54,10 @@ def scm_export_ui_save(uiact_rsp: UiActResponse) -> Jinja_template:
         Sep.save_ui_order(items, task_code)
 
         task_code += 1
-        set_msg_success("msgSuccess", ui_db_texts)
+        set_msg_success(MSG_DEFAULT, ui_db_texts)
 
         task_code += 1
-        jHtml = process_template(
-            tmpl_ffn, cargo_keys=class_to_dict(UiActResponseKeys), **ui_db_texts.data()
-        )
+        jHtml = process_template(tmpl_ffn, cargo_keys=class_to_dict(UiActResponseKeys), **ui_db_texts.data())
     except Exception as e:
         jHtml = get_ups_jHtml("msgFatal", ui_db_texts, task_code, e)
 

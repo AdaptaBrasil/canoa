@@ -29,29 +29,35 @@ from ..common.UIDBTexts import UIDBTexts
 from ..helpers.py_helper import is_str_none_or_empty
 from ..helpers.pw_helper import internal_logout, is_anyone_logged
 from ..helpers.html_helper import icon_url
-from ..helpers.types_helper import Jinja_generated_html
 from ..helpers.jinja_helper import process_template
+from ..helpers.types_helper import Jinja_Rendered, DB_Texts_Args
 from ..helpers.route_helper import get_tmpl_full_file_name
 from ..config.local_ui_texts import AuxTexts, local_ui_texts, local_form_texts
 from ..helpers.ui_db_texts_manager import get_section
 from ..common.app_error_assistant import AppStumbled
-from ..helpers.ui_db_texts_manager import Db_texts, UITextsKeys, set_msg_fatal
+from ..helpers.ui_db_texts_manager import DB_Texts, UITextsKeys
 
 
 def get_ups_jHtml(
-    ui_item_error_key: str, ui_db_texts: UIDBTexts, task_code: int, e: Exception | None = None, *args
-) -> Jinja_generated_html:
+    ui_item_error_key: str,
+    ui_db_texts: UIDBTexts,
+    task_code: int,
+    e: Exception | None = None,
+    args: DB_Texts_Args = None,
+) -> Jinja_Rendered:
+    # Claude
+    # TO FIX: 2026.04.01
+    _args = (task_code,) + (args if isinstance(args, tuple) else (args,) if args is not None else ())
+    msg = ui_db_texts.set_msg_fatal(ui_item_error_key, _args)
 
-    msg = set_msg_fatal(ui_item_error_key, ui_db_texts, task_code, *args)
+    # msg = ui_db_texts.set_msg_fatal(ui_item_error_key, task_code, args)
     _, tmpl_ffn, ui_texts = ups_handler(task_code, msg, e)
     jHtml = process_template(tmpl_ffn, **ui_texts)
 
     return jHtml
 
 
-def ups_handler(
-    error_code: int, user_msg: str, e: Exception | None = None, logout: bool = False
-) -> Tuple[dict, str, Db_texts]:
+def ups_handler(error_code: int, user_msg: str, e: Exception | None = None, logout: bool = False) -> Tuple[dict, str, DB_Texts]:
     from ..common.app_context_vars import app_user, sidekick
 
     try:
@@ -61,11 +67,7 @@ def ups_handler(
 
     def _get_tech_msg():
         tech_msg = getattr(e, "tech_info", "")
-        return (
-            tech_msg
-            if tech_msg
-            else local_ui_texts(AuxTexts.section)[AuxTexts.techIntro].format(sidekick.log_filename)
-        )
+        return tech_msg if tech_msg else local_ui_texts(AuxTexts.section)[AuxTexts.techIntro].format(sidekick.log_filename)
 
     tech_msg = ""
     error_msg = ""
@@ -97,9 +99,7 @@ def ups_handler(
     }
 
     def _should_update(key: str, value: Any) -> bool:
-        return not is_str_none_or_empty(value) and (
-            key not in ui_texts or is_str_none_or_empty(ui_texts.get(key))
-        )
+        return not is_str_none_or_empty(value) and (key not in ui_texts or is_str_none_or_empty(ui_texts.get(key)))
 
     # Add `context_texts` if the key is missing from ui_texts or its value is empty.
     for key, value in context_texts.items():
@@ -117,7 +117,7 @@ def ups_handler(
         ui_texts[UITextsKeys.Form.icon_url] = icon_url("icons", icon_file_name)
 
     # before logout
-    sidekick.display.error(e)
+    sidekick.display.error(str(e))
     sidekick.display.fatal(error_msg)
 
     # TODO: send email

@@ -7,15 +7,19 @@ mgd
 """
 
 # cSpell:ignore wtforms passwordreset
-
-from flask import request
-
+from datetime import datetime
 from ...models.public import persist_user
-from ...helpers.pw_helper import hash_pass
-from ...helpers.py_helper import now, to_str
+from ...helpers.pw_helper import hash_password
+from ...helpers.py_helper import elapsed_hours, to_str
 from ...helpers.jinja_helper import process_template
 from ...common.app_error_assistant import ModuleErrorCode
-from ...helpers.ui_db_texts_manager import set_msg_error, set_msg_success, set_msg_fatal
+from ...helpers.ui_db_texts_manager import (
+    set_msg_error,
+    set_msg_success,
+    set_msg_fatal,
+    set_msg_warn,
+    MSG_DEFAULT,
+)
 from ...helpers.route_helper import (
     get_form_input_value,
     init_response_vars,
@@ -28,13 +32,9 @@ from ...models.public import get_user_where
 def password_reset(token):
     from ...common.app_context_vars import sidekick
 
-    def __is_token_valid(time_stamp, max: int) -> bool:
-        """
-        True when the number of days since issuance is less than
-        or equal to `max`
-        """
-        days = (now() - time_stamp).days
-        return 0 <= days <= max
+    def __is_token_valid(time_stamp: datetime, max: int) -> bool:
+        hours = elapsed_hours(time_stamp)
+        return 0 <= hours <= max
 
     tmpl_ffn, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.ACCESS_CONTROL_PW_RESET)
     fform = ChangePassword()
@@ -42,9 +42,7 @@ def password_reset(token):
 
     try:
         task_code += 1  # 1
-        tmpl_ffn, is_get, ui_db_texts = get_account_response_data(
-            "passwordreset", "password_reset_or_change"
-        )
+        tmpl_ffn, is_get, ui_db_texts = get_account_response_data("passwordReset", "password_reset_or_change")
         token_str = to_str(token)
         password = "" if is_get else get_form_input_value("password")
         task_code += 1  # 2
@@ -57,7 +55,7 @@ def password_reset(token):
         elif is_get:
             pass
         elif not sidekick.config.DB_len_val_for_pw.check(password):
-            set_msg_error(
+            set_msg_warn(
                 "invalidPasswordLength",
                 ui_db_texts,
                 sidekick.config.DB_len_val_for_pw.min,
@@ -74,14 +72,14 @@ def password_reset(token):
                 set_msg_error("expiredToken", ui_db_texts)
             else:
                 task_code += 1  # 5
-                record_to_update.password = hash_pass(password)
+                record_to_update.password = hash_password(password)
                 record_to_update.recover_email_token = None
                 task_code += 1  # 6
                 persist_user(record_to_update, task_code)
-                set_msg_success("resetPwSuccess", ui_db_texts)
+                set_msg_success(MSG_DEFAULT, ui_db_texts)
     except Exception as e:
         msg = set_msg_fatal("errorPasswordReset", ui_db_texts, task_code)
-        sidekick.display.error(e)
+        sidekick.display.error(str(e))
         sidekick.display.debug(msg)
 
     return process_template(tmpl_ffn, form=fform, **ui_db_texts.data())

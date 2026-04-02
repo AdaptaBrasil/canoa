@@ -98,9 +98,7 @@ def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple[Fuse | 
             started_from,
         )
         _fuse = Fuse(app_name, display, args)
-        _fuse.display.info(
-            f"The 'fuse' was started in {_fuse.app_mode} mode (and now we have how to print pretty)."
-        )
+        _fuse.display.info(f"The 'fuse' was started in {_fuse.app_mode} mode (and now we have how to print pretty).")
         s_args = f"{app_name}'s args: {{0}}"
         if _fuse.debugging:
             _args = f"\n{json.dumps(_fuse.args.__dict__, indent=3, sort_keys=True)}"
@@ -140,9 +138,7 @@ def _ignite_config(fuse: Fuse) -> Tuple[DynamicConfig | None, str]:
         # REMOVE config.APP_ARGS = fuse.args
         fuse.display.info(f"The app config, in '{fuse.app_mode}' mode, was ignited.")
     except Exception as e:
-        msg_error = _ERROR_MSG.format(
-            __name__, f"initializing the app config in mode '{fuse.app_mode}'", str(e)
-        )
+        msg_error = _ERROR_MSG.format(__name__, f"initializing the app config in mode '{fuse.app_mode}'", str(e))
 
     return config, msg_error
 
@@ -180,9 +176,7 @@ def _check_mandatory_keys(config, fDisplay) -> str:
         )
 
     except Exception as e:
-        msg_error = _ERROR_MSG.format(
-            __name__, f"checking mandatory keys of config[`{config.APP_MODE}`]", e
-        )
+        msg_error = _ERROR_MSG.format(__name__, f"checking mandatory keys of config[`{config.APP_MODE}`]", e)
 
     return msg_error
 
@@ -263,7 +257,7 @@ def ignite_app(app_name, start_at) -> Tuple[Sidekick, str, bool]:
     # Check DB connection, stop if not debugging
     error, db_version = _ignite_sql_connection(fuse, config.SQLALCHEMY_DATABASE_URI)
     if not error:
-        fuse.display.info("SQLAlchemy engine was created and the db connection was successfully tested.")
+        fuse.display.info(f"SQLAlchemy engine was created and the db (version {db_version}) connection was successfully tested.")
     elif RaiseIf.ignite_no_sql_conn:
         _log_and_exit(error)
     else:
@@ -279,9 +273,7 @@ def ignite_app(app_name, start_at) -> Tuple[Sidekick, str, bool]:
 
     no_email_text = "The email {0} for the app is not defined. The app will not be able to send emails."
 
-    no_email = not hasattr(config, "EMAIL_PROVIDER") or (
-        config.EMAIL_PROVIDER == EmailProvider.NO_EMAIL.value
-    )
+    no_email = not hasattr(config, "EMAIL_PROVIDER") or (config.EMAIL_PROVIDER == EmailProvider.NO_EMAIL.value)
     if no_email:
         config.EMAIL_PROVIDER = EmailProvider.NO_EMAIL.value
     else:
@@ -297,11 +289,7 @@ def ignite_app(app_name, start_at) -> Tuple[Sidekick, str, bool]:
     # Final message
 
     fuse.display.print(
-        (
-            Display.Kind.INFO
-            if warns + errors == 0
-            else (Display.Kind.WARN if errors == 0 else Display.Kind.ERROR)
-        ),
+        (Display.Kind.INFO if warns + errors == 0 else (Display.Kind.WARN if errors == 0 else Display.Kind.ERROR)),
         f"'[{__name__}] module completed with {errors} error{'' if errors == 1 else 's'} and {warns} warning{'' if warns == 1 else 's'} .",
     )
     mute_display_after_init = fuse.args.display_mute_after_init

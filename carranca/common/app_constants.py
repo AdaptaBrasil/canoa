@@ -15,10 +15,16 @@ app_constants.py
 
 APP_NAME = "Canoa"
 
-# &beta; major.minor.patch
-APP_VERSION = "β 6.02"  # 2025-02-18
+# &beta; major.minor
+APP_VERSION = "β 5.50"  # 2026-03-20
 
 # default user HTML/DB lang/locale (see table users.lang)
 APP_LANG = "pt-br"
+
+# the file that displays handled exceptions (see \helpers\jinja_helper.py)
+APP_UPS_HTML_PAGE_FILE_NAME = "ups_page.html.j2"
+
+# Message error for a jinja leftover tag
+APP_JINJA_ORPHANED_TAG_ERROR = "🚨 A Jinja runtime error was detected"
 
 # eof

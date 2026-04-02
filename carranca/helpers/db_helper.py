@@ -19,7 +19,7 @@ from sqlalchemy.engine import CursorResult
 from .. import global_sqlalchemy_scoped_session
 from ..config import BaseConfig
 from .py_helper import is_str_none_or_empty, to_str
-from .types_helper import Db_texts
+from .types_helper import DB_Texts
 
 # Avoid importing sidekick during app initialization
 # from ..common.app_context_vars import sidekick
@@ -55,7 +55,7 @@ def try_get_mgd_msg(error: object, default_msg: Optional[str] = None) -> str:
         return mgd_message if is_mgd else default_msg
 
 
-def col_names_to_columns(column_names: List[str], columns: list[Column]) -> List[Column]:
+def col_names_to_columns(column_names: List[str], columns: List[Column]) -> List[Column]:
     if not column_names:
         return []
 
@@ -97,9 +97,7 @@ def db_fetch_rows(
 
         # TODO LOG to log
         err_code = f"[{e.code}]" if hasattr(e, "code") else ""
-        sidekick.display.error(
-            f"[{func_or_query}]: '{msg}'; Table: [{table_name}]; Error{err_code} details: {e}."
-        )
+        sidekick.display.error(f"[{func_or_query}]: '{msg}'; Table: [{table_name}]; Error{err_code} details: {e}.")
 
         if table_name:
             db_ups_error(e, msg, table_name)
@@ -180,7 +178,7 @@ def retrieve_rows(query: str) -> Optional[Union[Any, Tuple]]:
         return tuple()
 
 
-def retrieve_dict(query: str) -> Db_texts:
+def retrieve_dict(query: str) -> DB_Texts:
     """
     Executes the query and attempts to return the result as a dictionary,
     assuming the result consists of two columns (key, value) per row.
@@ -195,7 +193,7 @@ def retrieve_dict(query: str) -> Db_texts:
 
     data = retrieve_rows(query)
 
-    result: Db_texts = {}
+    result: DB_Texts = {}
     try:
         if data and isinstance(data, tuple):
             # Check if data contains multiple rows of at least two columns

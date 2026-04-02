@@ -9,7 +9,21 @@ Type Aliases:
 - `TemplateFileFullName`: A string representing the full name of a template file.
 
 Naming Conventions:
-Type aliases follow `Snake_case` BUT with the first letter uppercase
+Although PEP 613, recommends PascalCase | CapWords (like classes)
+
+variables	 snake_case
+functions	 snake_case
+classes	     CapWords | PascalCase
+type aliases CapWords | PascalCase
+constants  	 UPPER_CASE
+
+I do prefer `Pascal_Snake`  ;—)
+- Words are Capitalized
+- Acronyms are Upper Case
+- Words are Separated by underscores
+- Acronyms remain readable  (DB_Texts)
+- The whole thing stays clean and human-friendly
+
 
 Author: Equipe da Canoa, 2024
 
@@ -18,48 +32,55 @@ cSpell:ignore
 
 # --- ⚠️ ---
 # Avoid adding project-specific imports in this module to prevent circular dependencies.
+# Although PEP 613, recommends PascalCase, please use
+# `Pascal_Snake`:
 
-from typing import TypeAlias, Optional, Any, Dict, Tuple, List, Final
-from werkzeug.wrappers import Response as FlaskResponse
+
+from typing import TypeAlias, Protocol, Optional, Any, Dict, Tuple, List, Final
+from werkzeug.wrappers import Response as Flask_Response
+
 
 # Classes
 # ----------
-
-__all__ = ["FlaskResponse"]
+# DB_Lookup: TypeAlias = Callable[[str, str], str]
+class DB_Lookup(Protocol):
+    def __call__(self, key: str, section: str, default_value: str) -> str: ...
 
 
 # Type Alias
 # ----------
+""" A dictionary where both keys and values are strings, loaded form the Database ui_items."""
+DB_Texts: TypeAlias = Dict[str, str]
+DB_Texts_Args = Tuple | Dict | str | None
 
-Db_texts: TypeAlias = Dict[str, str]
-Usual_dict: TypeAlias = Dict[str, Any]
-Js_constants: TypeAlias = Dict[str, str]
+Usual_Dict: TypeAlias = Dict[str, Any]
+JS_Constants: TypeAlias = Dict[str, str]
 
-Sep_mgmt_return: TypeAlias = Tuple[str, str, int]
+Sep_Mgmt_Return: TypeAlias = Tuple[str, str, int]
 
-Cargo_item: TypeAlias = Dict[str, str | Dict[str, str]]
-Cargo_list: TypeAlias = List[Cargo_item]
+Cargo_Item: TypeAlias = Dict[str, str | Dict[str, str]]
+Cargo_List: TypeAlias = List[Cargo_Item]
 
-Template_file_full_name: TypeAlias = str
-Jinja_template: TypeAlias = str
-Jinja_generated_html: TypeAlias = str
+Template_File_Full_Name: TypeAlias = str
+Jinja_Template: TypeAlias = str
+Jinja_Rendered: TypeAlias = str
 
 
-Route_response: TypeAlias = Jinja_generated_html | FlaskResponse
+Route_Response: TypeAlias = Jinja_Rendered | Flask_Response
 
-Svg_content: TypeAlias = str
+Svg_Content: TypeAlias = str
 
-Opt_list_of_str: TypeAlias = Optional[List[str]]
+Opt_List_Of_Str: TypeAlias = Optional[List[str]]
 
-Opt_str: TypeAlias = Optional[str]
+Opt_Str: TypeAlias = Optional[str]
 
 # make str explicit
-Error_message: TypeAlias = str
-SuccessMessage: TypeAlias = str
-Json_text: TypeAlias = str
+Error_Message: TypeAlias = str
+Success_Message: TypeAlias = str
+Json_Text: TypeAlias = str
 
 # Constants
 # ---------
-NEW_FLASK_RESPONSE: Final[Jinja_generated_html] = ""
+NEW_FLASK_RESPONSE: Final[Jinja_Rendered] = ""
 
 # eof

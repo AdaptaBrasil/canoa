@@ -52,7 +52,7 @@ class EmptyForm(FlaskForm):
 
 # Private form
 class EmailTokenForm(FlaskForm):
-    x = sidekick.config.email_verify_token_digit_count
+    x = sidekick.config.EMAIL_VERIFY_TOKEN_DIGIT_COUNT
     min = int("1" + "0" * (x - 1))  # e.g., 100000 for 6 digits
     max = int("9" * x)  # e.g., 999999 for 6 digits
     token = IntegerField(
@@ -71,6 +71,15 @@ class ReceiveFileForm(FlaskForm):
 
 # Private & Public form
 class ChangePassword(FlaskForm):
+    current_password = PasswordField(
+        "",
+        validators=[
+            InputRequired(),
+            Length(**sidekick.config.DB_len_val_for_pw.wtf_val()),
+        ],
+        render_kw={"class": "form-control"},
+    )
+
     password = PasswordField(
         "",
         validators=[

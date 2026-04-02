@@ -41,7 +41,7 @@ mgd
 
 {% set dlg_main_id= 'dlg-main-id'%}
 {% set dlg_icon_id= 'dlg-icon-id' %}
-{% set dlg_sleep_id= 'dlg-sleep_id'%}
+{% set dlg_sleep_veil_id= 'dlg-sleep-veil-id'%}
 {% set dlg_submit_btn_id= 'dlg-submit-btn-id' %}
 {% set dlg_submit_form_id= 'dlg-submit-form-id' %}
 {% set dlg_btns_container_id = 'dlg-btns-container-id' %}
@@ -79,24 +79,21 @@ Ensure this matches the expected dimensions for dialog icons.
         {# ╒════════════════════════ Content ═══════════════════════════╕ #}
         <div class="modal-content">
             {# ╒════════════════════ Pillow ════════════════════════════╕ #}
-            <div id="{{dlg_sleep_id}}"></div>
+            <div id="{{dlg_sleep_veil_id}}"></div>
             {# ╘════════════════════ Pillow ════════════════════════════╛ #}
 
             {# ╒════════════════════ Header ════════════════════════════╕ #}
             <div class="modal-header dlg-header">
                 <h5 class="modal-title dlg-title">
                     {% if dlg_var_icon_url %}
-                    <span
-                        class="{%- if 'sep_icons' in dlg_var_icon_url %}dlg-sep_icon-back{% else %}dlg-icon-back{% endif %}">
-                        <img id="{{dlg_icon_id}}" src="{{dlg_var_icon_url}}" alt="[!]&nbsp;" height="{{dlg_icon_size}}"
-                            width="{{dlg_icon_size}}">
+                    <span class="{%- if 'sep_icons' in dlg_var_icon_url %}dlg-sep_icon-back{% else %}dlg-icon-back{% endif %}">
+                        <img id="{{dlg_icon_id}}" src="{{dlg_var_icon_url}}" alt="[!]&nbsp;" height="{{dlg_icon_size}}" width="{{dlg_icon_size}}">
                     </span>
                     {% endif %}
                     <span inert>{{formTitle|default(app_name)}}</span>
                 </h5>
                 {% if dlg_close_btn_visible %}
-                <button type="submit" title="Fechar" id="{{dlg_close_x_id}}" form="{{dlg_close_form_id}}"
-                    class="btn-close"></button>
+                <button type="submit" title="Fechar" id="{{dlg_close_x_id}}" form="{{dlg_close_form_id}}" class="btn-close"></button>
                 {% endif %}
             </div>
             {# ╘════════════════════ Header ════════════════════════════╛ #}
@@ -129,6 +126,12 @@ Ensure this matches the expected dimensions for dialog icons.
             {% endblock dlg_blc_footer %}
             {# ╘═════════════════════ Dialog Footer ════════════════════╛ #}
 
+
+            {# ╒═════════════════════ TODO:
+            window.addEventListener('beforeunload', (event) => {
+            sessionStorage.getItem("canoa_session_started")
+            ════════════════╛ #}
+
         </div>
     </div>
     {% endblock base_blc_main %}
@@ -139,36 +142,36 @@ Ensure this matches the expected dimensions for dialog icons.
         /** @type {CanoaGlobal} */
         window.Canoa = {
             dataModified: false,
-            afterSubmitPretendBusy: true,
         }
         const dlgm = document.getElementById("{{ dlg_main_id }}");
 
-        const sleep = (wait) => {
-            wait = wait ?? 80;
+        const sleep = () => {
             document.body.style.cursor = "wait";
-            const dlgs = document.getElementById("{{ dlg_sleep_id }}");
-            dlgs?.classList.add('dlg-sleep');
-            if (wait) {
-                setTimeout(() => { dlgm.style.display = 'none'; }, wait);
-            }
+            const dlgs = document.getElementById("{{ dlg_sleep_veil_id }}");
+            dlgs?.classList.add('dlg-sleep-veil');
         }
 
         window.addEventListener('beforeunload', (event) => {
-            {# TODO: sessionStorage.getItem("canoa_session_started") #}
             if (Canoa.dataModified) {
                 event.preventDefault();
             }
         });
 
         document.getElementById("{{dlg_submit_form_id}}")?.addEventListener('submit', (e) => {
-            sleep((Canoa.afterSubmitPretendBusy ? 600: 10));
+            const url = document.getElementById('dlg_submit_form_id');
+            if (url && url.action) {
+                const route = url.action.split('/').at(-1);
+                if (!(['login', 'goto']).includes(route)) {
+                    setSleepVeil();
+                }
+            }
         });
 
         document.getElementById("{{dlg_close_form_id}}")?.addEventListener('submit', (e) => {
             if (e.submitter.id == '{{dlg_close_x_id}}') {
-                sleep();
+                // continue
             } else if (!Canoa.dataModified || confirm("Perder as alterações?")) {
-                sleep();
+                // not modified
             } else {
                 e.preventDefault();
             }

@@ -17,9 +17,16 @@
     --canoa-form-body-bg: #fbf3ea;
     --canoa-form-footer-bg: #f8e9d9;
     --canoa-form-button-bg: #144270;
+    /* ~30 lighter the the button */
+    /* not working :-( --canoa-form-icon-btn-bg: color-mix(in srgb, var(--bg-color) 70%, white); */
+    /* 130 % --canoa-form-icon-btn-bg: #195591; */
+    /* brightness(160%) */
+    --canoa-form-icon-btn-bg: #2069B3;
     --canoa-form-text-color: #814c17;
-    --canoa-form-icon-color: #56361c;
-    --canoa-form-link-color: #a25f1d;
+    --canoa-form-link-color: ##814c17;
+    --canoa-form-footer-top: #f8dbbc;
+    /* darker than label #80460d; */
+    --canoa-form-icon-color: #975513;
     --canoa-form-label-color: #814c17;
     --canoa-form-button-color: white;
     --canoa-label-margin-left: calc(var(--bs-border-radius) / 2);
@@ -92,7 +99,7 @@ body {
     /* to align the icon vertically */
 }
 
-.dlg-sleep {
+.dlg-sleep-veil {
     position: absolute;
     top: 0;
     left: 0;
@@ -130,6 +137,7 @@ body {
 
 .dlg-footer {
     background-color: var(--canoa-form-footer-bg);
+    border-top: 1px solid var(--canoa-form-footer-top);
     min-height: 2rem;
     padding: 0rem !important;
 }
@@ -294,12 +302,13 @@ body {
 }
 
 .form-main-btn {
-    background-color: var(--canoa-form-button-bg);
-    border: none;
     color: var(--canoa-form-button-color);
+    border: 10px;
     font-size: 1.1rem;
     min-width: 8em;
+    transition: filter 0.3s ease;
     border-radius: var(--bs-border-radius);
+    background-color: var(--canoa-form-button-bg);
 }
 
 .form-main-btn:hover {
@@ -307,19 +316,46 @@ body {
     filter: brightness(130%);
 }
 
+.form-main-btn:active {
+    /* 30% + form-main-btn:hover */
+    filter: brightness(160%);
+}
+
 .form-main-btn:disabled {
-    filter: brightness(70%);
     color: var(--canoa-form-button-color);
+    filter: brightness(70%);
     background-color: var(--canoa-form-button-bg);
 }
 
-.form-icon-btn {
+/* .form-icon-btn {
     width: 2rem;
     justify-content: center;
 }
 
 .form-icon-btn:hover {
     background-color: var(--adaptabrasil-back-color);
+} */
+
+.form-pw-eye-btn {
+    /* similar to form-main-btn:hover */
+    transition: filter 0.3s ease;
+    background-color: var(--canoa-form-icon-btn-bg);
+}
+
+.form-pw-eye-btn:hover {
+    filter: brightness(110%);
+    background-color: var(--canoa-form-icon-btn-bg);
+}
+
+/* override bs that has +!.btn-check */
+.form-pw-eye-btn:not(.btn-check):active {
+    filter: brightness(120%);
+    /* override bs */
+    background-color: var(--canoa-form-icon-btn-bg);
+}
+
+.form-pw-eye-icon {
+    color: var(--canoa-form-button-color);
 }
 
 /* ============================================

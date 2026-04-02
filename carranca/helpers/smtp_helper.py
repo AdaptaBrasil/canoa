@@ -11,7 +11,7 @@ from typing import Optional
 from flask_mail import Message
 
 from .py_helper import is_str_none_or_empty, get_params
-from .types_helper import Usual_dict
+from .types_helper import Usual_Dict
 from .email_helper import RecipientsDic, RecipientsList
 from .ui_db_texts_manager import get_section
 from ..common.app_constants import APP_NAME
@@ -25,8 +25,8 @@ from ..common.app_error_assistant import ModuleErrorCode
 
 def _send_email(
     recipients: RecipientsDic,
-    texts_or_section: Usual_dict | str,
-    text_values: Optional[Usual_dict] = None,
+    texts_or_section: Usual_Dict | str,
+    text_values: Optional[Usual_Dict] = None,
     file_to_send_full_name: str = "",
     file_to_send_type: str = "",
 ) -> bool:
@@ -114,16 +114,8 @@ def _send_email(
             subject=email_subject,
             sender=sender,
             recipients=[recipients.to.parse(item) for item in recipients.to.list()],
-            cc=(
-                [recipients.cc.parse(item) for item in recipients.cc.list()]
-                if recipients.cc.list()
-                else None
-            ),
-            bcc=(
-                [recipients.bcc.parse(item) for item in recipients.bcc.list()]
-                if recipients.bcc.list()
-                else None
-            ),
+            cc=([recipients.cc.parse(item) for item in recipients.cc.list()] if recipients.cc.list() else None),
+            bcc=([recipients.bcc.parse(item) for item in recipients.bcc.list()] if recipients.bcc.list() else None),
             html=email_content,
             body=email_text,
         )

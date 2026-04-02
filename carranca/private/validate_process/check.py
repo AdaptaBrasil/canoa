@@ -13,17 +13,17 @@ mgd
 
 from os import path
 
-from ...common.app_context_vars import sidekick
 from ...helpers.py_helper import is_str_none_or_empty, now
 from ...helpers.db_helper import get_str_field_length
 from ...helpers.file_helper import file_must_exist, folder_must_exist, is_same_file_name
+from ...common.app_context_vars import sidekick
 from ...common.app_error_assistant import ModuleErrorCode
 
 from ...models.private import UserDataFiles
 from .Cargo import Cargo
 
 
-def check(cargo: Cargo, file_data: object | str, valid_ext: list[str]) -> Cargo:
+def check(cargo: Cargo, file_data: object | str, valid_ext: List[str]) -> Cargo:
     error_code = 0
     msg_exception = ""
     task_code = 0

@@ -17,7 +17,7 @@ mgd 2024.03
 {% set dlg_cls_size= 'modal-lg' %}
 {% set dlg_cls_body= 'document_cls_body' %}
 
-{% set form_close_btn_text = btnCloseForm %}
+{% set form_close_btn_text = closeFormButton | default(ui_defaults.closeButton) %}
 
 
 {% extends "/layouts/dialog.html.j2" %}

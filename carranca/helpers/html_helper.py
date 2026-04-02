@@ -8,6 +8,7 @@
 import os
 from bs4 import BeautifulSoup
 from flask import current_app
+from typing import cast, List
 
 URL_PATH_SEP: str = "/"
 
@@ -36,7 +37,7 @@ def icon_url(folder: str, file_name: str) -> str:
     Returns:
         str: The full URL path of the icon image.
     """
-    base_path = os.path.basename(current_app.static_folder)
+    base_path = os.path.basename(cast(str, current_app.static_folder))
     icon_url = URL_PATH_SEP + url_join(base_path, folder, file_name)
     return icon_url
 
@@ -50,28 +51,28 @@ def img_change_src_path(html_content: str, new_img_folder: list) -> str:
     img_tags = soup.find_all("img")
 
     for img_tag in img_tags:
-        src = img_tag.get("src", "")
+        src = img_tag.get("src", "")  # type: ignore
         if src:
-            _, image_name = re.match(r"(.*/)(.*)", src).groups()
+            _, image_name = re.match(r"(.*/)(.*)", src).groups()  # type: ignore (to much error for a r)
             img_folder = new_img_folder.copy()
             img_folder.append(image_name)
             image_path = os.path.join(*img_folder)
-            img_tag["src"] = image_path
+            img_tag["src"] = image_path  # type: ignore  /check the docs
 
     return str(soup)
 
 
 # Returns a list of all img tag `src` filename
-def img_filenames(html_content: str) -> str:
+def img_filenames(html_content: str) -> List[str]:
     from .file_helper import file_full_name_parse
 
     soup = BeautifulSoup(html_content, "html.parser")
     img_tags = soup.find_all("img")
-    images = []
+    images: List[str] = []
     for img_tag in img_tags:
-        src = img_tag.get("src", "")
+        src = cast(str, img_tag.get("src", ""))  # type: ignore  /check the docs
         if src:
-            (_, _, filename) = file_full_name_parse(src)
+            _, _, filename = file_full_name_parse(src)
             images.append(filename)
 
     return images

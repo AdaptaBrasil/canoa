@@ -8,14 +8,14 @@ mgd 2025-01-14 & 03-18
 """
 
 from os import path
-from typing import Tuple, Optional
+from typing import List, Tuple, Optional
 from ...models.private import ReceivedFiles
 from ...common.app_context_vars import app_user
 from ...config.ValidateProcessConfig import ValidateProcessConfig
 
 from ...helpers.user_helper import UserFolders
 from ...helpers.file_helper import change_file_ext
-from ...helpers.types_helper import Usual_dict
+from ...helpers.types_helper import Usual_Dict
 from ...helpers.db_records.DBRecords import DBRecords
 
 ALL_USER_RECS = None
@@ -47,7 +47,7 @@ def fetch_record_s(
     uploaded_file_name = ""
     received_recs = ReceivedFiles.get_records(rec_id, user_id)
     report_ext = ValidateProcessConfig(False).output_file.ext
-    grid_rows: list[Usual_dict] = []
+    grid_rows: List[Usual_Dict] = []
     if received_recs:
         """Adapt the records to the local environment"""
 

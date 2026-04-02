@@ -44,10 +44,10 @@ from logging import Logger
 from datetime import datetime
 from flask_login import current_user
 from .Display import Display
+from ..common.app_constants import APP_NAME
 
 if TYPE_CHECKING:
     from ..config.DynamicConfig import DynamicConfig  # Avoid Circular 2024.11.03
-    from ..private.AppUser import AppUser
 
 
 class Sidekick:
@@ -60,7 +60,7 @@ class Sidekick:
         # from ..models.public import User # Avoid early access
 
         self.config: DynamicConfig = config
-        self.app_name = self.config.APP_NAME
+        self.app_name = APP_NAME
         self.debugging = True if self.config.APP_DEBUGGING else False
         self.log_text = self.config.SIDEKICK_LOG
         self.display = display

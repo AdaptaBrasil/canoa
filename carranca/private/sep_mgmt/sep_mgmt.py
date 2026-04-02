@@ -23,7 +23,7 @@ from ...helpers.py_helper import is_str_none_or_empty, class_to_dict
 from ...public.ups_handler import get_ups_jHtml
 from ...helpers.user_helper import get_batch_code
 from ...helpers.jinja_helper import process_template
-from ...helpers.types_helper import Sep_mgmt_return, Cargo_list
+from ...helpers.types_helper import Sep_Mgmt_Return, Cargo_List
 from ...helpers.route_helper import get_private_response_data, init_response_vars
 from ...helpers.js_consts_helper import (
     js_form_sec_check,
@@ -71,9 +71,7 @@ def sep_mgmt() -> str:
             task_code += 3  # 6
             txt_response = request.form.get(js_form_cargo_id)
             json_response: Dict[str, str] = json.loads(txt_response)
-            msg_success, msg_error_save_and_email, task_code = _save_and_email(
-                json_response, ui_db_texts, task_code
-            )
+            msg_success, msg_error_save_and_email, task_code = _save_and_email(json_response, ui_db_texts, task_code)
             sep_data, user_list = _sep_data_fetch(item_none, col_names)
 
             task_code += 1  # ?
@@ -115,7 +113,7 @@ def _sep_data_fetch(_item_none: str, col_names: List[str]) -> Tuple[DBRecords, L
     return sep_usr_rows, users_list
 
 
-def _save_and_email(grid_response: Cargo_list, ui_db_texts: UIDBTexts, task_code: int) -> Sep_mgmt_return:
+def _save_and_email(grid_response: Cargo_List, ui_db_texts: UIDBTexts, task_code: int) -> Sep_Mgmt_Return:
     """Saves data & sends emails"""
 
     task_code += 1

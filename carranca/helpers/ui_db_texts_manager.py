@@ -9,16 +9,19 @@ mgd 2024-04-03
 TODO:
     - remove sections `secSuccess` & `secError`, just add the items on is on
       section. They will be loaded always
+    - create a secCache for alway need msg, loaded on start. eg
+        ui_datatime =
 
 """
 
 # cSpell:ignore getDictResultset connstr adaptabrasil mgmt
+from flask import current_app
 from flask_login import current_user
 
-from typing import TypeAlias, Optional, Tuple, cast
+from typing import TypeAlias, Optional, Tuple, Any, cast
 from .pw_helper import is_anyone_logged
-from .py_helper import is_str_none_or_empty
-from .types_helper import Db_texts, Opt_str
+from .py_helper import is_str_none_or_empty, clean_text
+from .types_helper import DB_Texts, DB_Lookup
 from ..common.UIDBTexts import UIDBTexts
 from ..common.UITextsKeys import UITextsKeys
 from ..common.app_constants import APP_LANG
@@ -53,17 +56,17 @@ class UITexts_TableSearch:
     def exists(self) -> bool:
         return self.as_tuple in global_ui_texts_cache
 
-    def update(self, texts: Db_texts | str) -> None:
+    def update(self, texts: DB_Texts | str) -> None:
         if self._cfg_cache_lifetime_min == 0:
             global_ui_texts_cache[self.as_tuple] = texts
 
-    def get_text(self) -> Db_texts | str | None:
+    def get_text(self) -> DB_Texts | str | None:
         if not self.exists():
             return None
         value: dict | str = global_ui_texts_cache[self.as_tuple]
-        return value.copy() if self.value_is_dict else value
+        return cast(dict, value).copy() if self.value_is_dict else value
 
-    def set_info(self, key: str, info: any) -> None:
+    def set_info(self, key: str, info: Any) -> None:
         cache_info = self.get_info_value()
         cache_info[key] = info
         global_ui_texts_cache[UITexts_TableSearch._CACHE_INTERNAL_INFO_KEY] = cache_info
@@ -95,9 +98,7 @@ def ui_texts_locale() -> str:
 def __get_ui_texts_query(cols: str, table_search: UITexts_TableSearch) -> str:
     # returns Select query for locale, section and, eventually, for only one item.
     # Use SQL lower(item) is better than item.lower because uses db locale.
-    optional_item_filter = (
-        "" if table_search.item is None else f" and (item_lower = lower('{table_search.item}'))"
-    )
+    optional_item_filter = "" if table_search.item is None else f" and (item_lower = lower('{table_search.item}'))"
 
     # ** ⚠️ ******************************************************************
     #  don't use <schema>.table_name. Must set
@@ -121,12 +122,11 @@ def __get_table_row(table_search: UITexts_TableSearch) -> tuple[str, str]:
     return ("", "") if not result else result
 
 
-def _get_query_as_dict(query) -> Db_texts:
+def _get_query_as_dict(query) -> DB_Texts:
     """returns DBTexts for the item/section pair"""
     from .db_helper import retrieve_dict
 
     db_texts = retrieve_dict(query)
-    # TODO db_texts = process_pre_templates(result)
     return db_texts
 
 
@@ -137,7 +137,8 @@ def _msg_not_found() -> str:  ## THIS IS OUTDATED ##
 
     mnf = MsgNotFound.default
     try:
-        text, _ = __get_table_row("messageNotFound", UITextsKeys.Section.error)
+        text = db_retrieve_text("messageNotFound", UITextsKeys.Section.error)
+        # 2026.03.27 text, _ = __get_table_row("messageNotFound", UITextsKeys.Section.error)
         MsgNotFound.cache = MsgNotFound.default if is_str_none_or_empty(text) else text
         mnf = MsgNotFound.cache
     except:
@@ -146,7 +147,7 @@ def _msg_not_found() -> str:  ## THIS IS OUTDATED ##
     return mnf
 
 
-def _set_or_add_msg(item: str, section: str, name: str, ui_db_texts: UIDBTexts, *args) -> str:
+def _set_or_add_msg(item: str, section: str, name: str, ui_db_texts: UIDBTexts, args: tuple | dict | None = None) -> str:
     """Retrieves text and adds it to a dictionary.
 
     Args:
@@ -165,6 +166,8 @@ def _set_or_add_msg(item: str, section: str, name: str, ui_db_texts: UIDBTexts, 
     in the 'current' section.
 
     """
+    from ..common.app_context_vars import sidekick
+
     # take the default value for Item
     item = item or name
     # search in the messages dict
@@ -176,14 +179,24 @@ def _set_or_add_msg(item: str, section: str, name: str, ui_db_texts: UIDBTexts, 
 
     if len(ui_db_texts) == 0:
         # TODO: ui_db_texts can have no items, the next error message mask this situation. TODO:
-        print(f"Warning: ui_db_texts[{ui_db_texts.section}] has no items.")
+        sidekick.display.warn(f"Warning: ui_db_texts[{ui_db_texts.section}] has no items.")
 
     if section and not msg_text:
         msg_text = db_retrieve_text(item, section)
 
     try:
-        value = "" if is_str_none_or_empty(msg_text) else (msg_text.format(*args) if args else msg_text)
-    except:
+        if is_str_none_or_empty(msg_text):
+            value = ""
+        elif not args:
+            value = msg_text
+        elif isinstance(args, dict):
+            value = msg_text.format(**args)
+        elif isinstance(args, tuple):
+            value = msg_text.format(*args)
+        else:  # simple
+            value = msg_text.format(args)
+    except Exception as e:
+        sidekick.display.error(f"UIDBTexts, msg [{msg_text}] render error: [{e}].")
         value = msg_text
 
     if ui_db_texts and value:  # add or refresh
@@ -193,10 +206,12 @@ def _set_or_add_msg(item: str, section: str, name: str, ui_db_texts: UIDBTexts, 
 
 
 # Cached Texts retrievers ==================================
-def get_section(section_name: str) -> Db_texts:
+def get_section(section_name: str) -> DB_Texts:
     """
     returns a DBTexts of the 'section_name' from table vw_ui_texts
     """
+    from ..common.app_context_vars import sidekick
+
     if is_str_none_or_empty(section_name):
         return {}
 
@@ -210,14 +225,19 @@ def get_section(section_name: str) -> Db_texts:
         # TODO: raise if section does not
         # if len(items) == 0:
         #     raise KeyError(f"UI texts section '{section_name}' for [{table_cache.locale}] not found or has no items.")
-        # # TODO process_pre_templates(items) # TODO: check if needed
-        items[UITextsKeys.Section.name] = section_name
-        items[UITextsKeys.Form.date_format] = table_cache.locale
+        items.update({UITextsKeys.Section.name: section_name})
+        items.update({UITextsKeys.Form.date_format: table_cache.locale})
+        items.update({UITextsKeys.Form.faStyle: sidekick.config.APP_UI_FONT_AWESOME_STYLE})
+
+        _glb = {key: value for key, value in current_app.jinja_env.globals.items() if isinstance(value, str)}
+        items.update(_glb)
+
         table_cache.update(items)
+
         return items.copy()  # Ensures caller gets a copy, preventing cache pollution
 
 
-def db_retrieve_text(item: str, section: str, default: Opt_str = None) -> str:
+def db_retrieve_text(item: str, section: str, default: str | None = None) -> str:
     """
     returns text for the item/section pair. if not found, a `warning message`
     """
@@ -229,7 +249,8 @@ def db_retrieve_text(item: str, section: str, default: Opt_str = None) -> str:
     text, _ = __get_table_row(table_search)
 
     if not is_str_none_or_empty(text):
-        pass
+        # only use HTML control chars, 2026.03.28
+        text = clean_text(text)
     elif default is None:
         text = _msg_not_found().format(item, section)
     else:
@@ -241,12 +262,15 @@ def db_retrieve_text(item: str, section: str, default: Opt_str = None) -> str:
 
 
 # Texts retrievers helpers ==================================
-def get_app_menu() -> Db_texts:
+
+
+# TODO Change this get/set by UIDBTexts
+def get_app_menu() -> DB_Texts:
     db_texts = get_section("appMenu")
     return db_texts
 
 
-def get_db_texts(section_name: str) -> Db_texts:
+def get_db_texts(section_name: str) -> DB_Texts:
     db_texts = get_section(section_name)
     # 2026/03/18 db_texts SHOULD have is on msgSuccess, msgError, ... they are reallocated (to ._msg dict) just before sending to ui
     # see carranca\common\UIDBTexts.py
@@ -263,6 +287,19 @@ def get_db_texts(section_name: str) -> Db_texts:
     return db_texts
 
 
+def init_ui_db_texts(ui_db_section: str) -> UIDBTexts:
+    from ..common.app_context_vars import sidekick
+
+    db_texts = get_db_texts(ui_db_section)
+    ## add to ui_db_texts useful values  of 'general use'
+    ui_dt_format = sidekick.config.APP_UI_DATETIME_FORMAT
+    db_lookup = cast(DB_Lookup, db_retrieve_text)
+    ui_db_texts = UIDBTexts(db_texts, sidekick.debugging, ui_dt_format, db_lookup)
+
+    return ui_db_texts
+
+
+## ----- OBSOLETE  2026.04.02-----------
 def set_msg_info(item: str, ui_db_texts: UIDBTexts, *args) -> str:
     """
     returns `text` for the [item, <curr_section>]
@@ -295,7 +332,6 @@ def set_msg_success(item: str, ui_db_texts: UIDBTexts, *args) -> str:
 
     Finally sets ui_db_texts.Msg.display_msg_only = True, so the form only displays
     the message (no other form inputs)
-
     """
 
     ui_db_texts.reset_messages()
@@ -317,4 +353,5 @@ def set_msg_fatal(item: str, ui_db_texts: UIDBTexts, *args) -> str:
     return msg
 
 
+## ----- OBSOLETE -----------
 # eof

@@ -18,7 +18,7 @@ class Codec:
     ascii = "ascii"
 
 
-def __dopwh(text: str, salt: str) -> str:
+def __dopwh(text: str, salt: str) -> bytes:
     pwd_digest = hashlib.pbkdf2_hmac("sha512", text.encode(Codec.utf_8), salt.encode(Codec.ascii), 100000)
     pwd_hashed = binascii.hexlify(pwd_digest)
     return pwd_hashed
@@ -27,7 +27,7 @@ def __dopwh(text: str, salt: str) -> str:
 # Inspiration -> https://www.vitoshacademy.com/hashing-passwords-in-python/
 
 
-def hash_pass(user_password: str) -> str:
+def hash_password(user_password: str) -> bytes:
     """Hash a password for storing."""
     salt = hashlib.sha256(os.urandom(60)).hexdigest()
     pwd_hashed = __dopwh(user_password, salt)
@@ -44,12 +44,13 @@ def hash_pass(user_password: str) -> str:
 #     return pwdhash == stored_password
 
 
-def verify_pass(provided_password: str, stored_password: str) -> bool:
+def verify_password(provided_password: str, stored_password: bytes) -> bool:
     """Verify a stored password against one provided by user."""
-    stored_password = stored_password.decode(Codec.ascii)
-    stored_pwd_hashed = stored_password[64:]
-    provided_pwd_hashed = __dopwh(provided_password, stored_password[:64]).decode(Codec.ascii)
-    return stored_pwd_hashed == provided_pwd_hashed
+    stored_password_str = stored_password.decode(Codec.ascii)
+    salt = stored_password_str[:64]
+    stored_pwd_hash = stored_password_str[64:]
+    provided_pwd_hash = __dopwh(provided_password, salt).decode(Codec.ascii)
+    return stored_pwd_hash == provided_pwd_hash
 
 
 def is_anyone_logged() -> bool:

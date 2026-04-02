@@ -9,8 +9,8 @@ mgd
 --------------------------------------- #}
 {# cSpell:ignore #}
 {% set dlg_cls_size= '' %}
-{% set form_close_btn_text= btnCloseForm | default('Ok') %}
-{% set form_backend_msg= msgOnly | default(True) %}
+{% set form_close_btn_text= closeFormButton | default(ui_defaults.okButton) %}
+{# {% set form_backend_msg= msgOnly | default(True) %} #}
 
 {% extends "./layouts/dialog.html.j2" %}
 
@@ -26,10 +26,10 @@ mgd
 {# ╒════════════════ Dialog Footer ═══════════════╛ #}
 {% block dlg_blc_footer_buttons %}
 
-   <div class="col-auto">
-      {% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
-      {{ btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, form_close_btn_text) }}
-   </div>
+<div class="col-auto">
+    {% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
+    {{ btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, form_close_btn_text) }}
+</div>
 
 {% endblock dlg_blc_footer_buttons %}
 {# ╘════════════════ Dialog Footer ═══════════════╛ #}

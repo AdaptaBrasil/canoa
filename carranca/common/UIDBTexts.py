@@ -11,9 +11,14 @@ debugging safeguards. Well done!
 Gemini 2025-11-08
 """
 
+import re
+import json
 import warnings
-from typing import Dict, Any, Type, cast
+from typing import Optional, Dict, Any, Type, List, cast
+from datetime import datetime, timedelta
 from .UITextsKeys import UITextsKeys
+from ..helpers.types_helper import DB_Lookup, DB_Texts, DB_Texts_Args
+
 
 # Define a unique object to act as the sentinel default value for dictionary lookups
 _MISSING = object()
@@ -24,16 +29,20 @@ KEY_NOT_FOUND_ERROR = "Key '{0}' not found, cannot cast to {1}."
 # New constant for explicit None values:
 VALUE_IS_NONE_ERROR = "Key '{0}' value is None, cannot cast to {1}."
 
+CACHE_UI_TEXTS: DB_Texts = {}
 
+
+# User Interface Database Texts
 class UIDBTexts:
     # -------------------------------------------------------------
     # Internal helper methods for value retrieval and type checking
     def _get_value(self, key: str) -> Any:
         value = self._data.get(key, _MISSING)
-        return value
+        return None if value is _MISSING else value
 
     def _key_exists(self, key: str) -> bool:
-        return self._get_value(key) is not _MISSING
+        value = self._data.get(key, _MISSING)
+        return value is not _MISSING
 
     def _get_and_check_type(self, key: str, expected_type: Type) -> Any:
         """
@@ -42,6 +51,7 @@ class UIDBTexts:
 
         Raises KeyError if the key is missing.
         """
+        from ..common.app_context_vars import sidekick
 
         # 1. Check for missing key (Hard Error)
         if not self._key_exists(key):
@@ -51,25 +61,23 @@ class UIDBTexts:
         # 2. Lookup with a unique sentinel object for performance
         value = self._get_value(key)
 
+        def __warn(text: str):
+            sidekick.display.error(text)
+            warnings.warn(text, UserWarning, stacklevel=2)
+            return
+
         # 3. Check for explicit None value (Soft Warning in debug)
         if value is None:
             # The key exists, but its stored value is None.
-            warnings.warn(
-                f"UI_Texts Warning: Key '{key}' returned None. Type check for "
-                f"{expected_type.__name__} skipped.",
-                UserWarning,
-                stacklevel=2,
-            )
+            __warn(f"UI_Texts Warning: Key '{key}' returned None. Type check for " f"{expected_type.__name__} skipped.")
             return None
 
         # 4. Debug runtime type check (for non-None values)
         if self.is_debug_mode:
             if not isinstance(value, expected_type):
-                warnings.warn(
+                __warn(
                     f"UI_Texts Runtime Error: Key '{key}' expected type {expected_type.__name__}, "
                     f"but found {type(value).__name__}. Check database entry.",
-                    RuntimeWarning,
-                    stacklevel=2,
                 )
 
         # 5. Return the raw value.
@@ -88,13 +96,32 @@ class UIDBTexts:
 
         return value
 
+    def _retrieve_value(self, key: str, section: str, default: str = "", cache_it: bool = False) -> str:
+        cache_key = f"{section}={key}"
+
+        cached = CACHE_UI_TEXTS.get(cache_key, _MISSING)
+        if cached is not _MISSING:
+            return cast(str, cached)
+        elif self._db_lookup is None:
+            value = default
+        else:
+            value = self._db_lookup(key, section, default)
+            if cache_it:
+                CACHE_UI_TEXTS.update({cache_key: value})
+
+        return value
+
+    def _get_ui_datetime(self) -> str:
+        ui_dt_str = self._retrieve_value("ui_datetime", UITextsKeys.Section.success, self.ui_dt_format, True)
+        return ui_dt_str
+
     """
     A dictionary wrapper for UI texts (loaded in the DB) providing strongly typed access methods
     (e.g., .get_str(), .get_bool(), .get_float()) and dictionary-like access for strings via __getitem__.
     Performs runtime type checking only when running in debug mode.
     """
 
-    def __init__(self, data: Dict[str, Any], debugging: bool):
+    def __init__(self, data: Dict[str, Any], debugging: bool, ui_dt_format: str, db_lookup: DB_Lookup | None = None):
         # collect msg keys names
         items = UITextsKeys.Msg.__dict__.items()
         self._msg_keys = [value for key, value in items if not key.startswith("__")]
@@ -105,6 +132,8 @@ class UIDBTexts:
         self._data = {k: v for k, v in data.items() if k not in self.msg_keys}
 
         self.is_debug_mode = debugging
+        self.ui_dt_format = ui_dt_format
+        self._db_lookup = db_lookup
         self.__section__ = self.get_str(UITextsKeys.Section.name)
         self._data.pop(UITextsKeys.Section.name, None)
 
@@ -156,8 +185,7 @@ class UIDBTexts:
         # This check runs always to enforce the class's contract.
         if not isinstance(value, (str, bool)):
             raise TypeError(
-                f"UIDBTexts only accepts str or bool for assignment, "
-                f"but received type {type(value).__name__} for key '{key}'."
+                f"UIDBTexts only accepts str or bool for assignment, " f"but received type {type(value).__name__} for key '{key}'."
             )
 
         self._data[key] = value
@@ -167,14 +195,21 @@ class UIDBTexts:
 
     # --- Update dict values ---
     def update_info(self, *args) -> str:
-        return self.update_value(UITextsKeys.Msg.info, *args)
+        return self.update_item(UITextsKeys.Msg.info, *args)
 
-    def update_value(self, key: str, *args) -> str:
+    def set_value(self, key: str, value: str) -> str:
+        """
+        Replace the item with new value
+        """
+        self[key] = value
+        return value
+
+    def update_item(self, key: str, *args) -> str:
         """
         Updates the ._data dictionary value
         """
         value = self.format(key, *args)
-        self[key] = value
+        self.set_value(key, value)
         return value
 
     # --- Type-Specific Accessors ---
@@ -183,7 +218,7 @@ class UIDBTexts:
         Retrieves a value from self._msg guaranteed to be a string.
         """
         _value = self._msg.get(key, _MISSING)
-        value = default if _value == _MISSING else str(_value)
+        value = default if _value is _MISSING else str(_value)
         return value
 
     def get_str(self, key: str, default: str = "") -> str:
@@ -223,8 +258,171 @@ class UIDBTexts:
         for k_msg in self.msg_keys:
             self._data.pop(k_msg, None)
 
+    # -- Message manipulation
+
+    def get_ui_datetime(self, add_unit: int, dt_from: datetime, unit: str = "hours"):
+        ui_dt_str = self._retrieve_value("ui_datetime", UITextsKeys.Section.success, self.ui_dt_format, True)
+        value = self.set_ui_datetime("", ui_dt_str, add_unit, dt_from, unit)
+
+        return value
+
+    def set_ui_datetime(
+        self, key: str, value: str, dt_to_or_add: datetime | int, dt_from: Optional[datetime] = None, unit: str = "hours", index: str = "days"
+    ) -> str:
+        """
+        Tries is best to make a nice readable datetime msg
+        Example used on code:
+            value = '{"2": "depois de amanhã às %H:%M", "1": "amanhã às %H:%M", "0": "hoje às %H:%M", "-1": "ontem às %H:%M", "n": "%d/%m/%Y às %H:%M", "text": "válido até {0}."'
+        """
+        if not value:
+            value = self.get_str(key)  # » '{"2": "depois de amanhã às %H:%M", "1": "amanhã às %H...
+
+        if not dt_from:
+            dt_from = datetime.now()
+
+        if isinstance(dt_to_or_add, datetime):
+            dt_to = dt_to_or_add
+        else:
+            add = int(dt_to_or_add)
+            dt_to = dt_from + timedelta(**{unit: add})  # » add in a number in unit (eg hours)
+
+        delta = dt_to.date() - dt_from.date()
+        _qtd = {
+            "days": delta.days,
+            "hours": int(delta.total_seconds() / 3600),
+            "minutes": int(delta.total_seconds() / 60),
+            "seconds": int(delta.total_seconds()),
+        }
+        qtd = str(_qtd[index])  # » '2' [days] (example)
+
+        dic: dict = json.loads(value)
+        fallback = dic.get("n", self.ui_dt_format)  # » "%d/%m/%Y às %H:%M"
+        qtd_frm = dic.get(qtd, fallback)  # » "depois de amanhã às %H:%M",
+
+        qtd_txt = dt_to.strftime(qtd_frm)  # » "depois de amanhã às 11:37",
+        text = dic.get("text", "{0}")  # » válido até {0}
+        msg = text.format(qtd_txt)  # » válido até depois de amanhã às 11:37.
+        if key in self.data():
+            self[key] = msg
+        return msg
+
+    def try_recursive(self, key: str, value: str) -> str:
+        """
+        Replace all placeholders of the form {<key>_<suffix>} inside the given text.
+        """
+
+        _keys = re.findall(r"\{(" + key + r"_[^}]+)\}", value)
+        if not _keys:
+            return value
+
+        replacements = {k: v for k in _keys if (v := self.get_str(k, ""))}
+
+        result = value
+        for k, v in replacements.items():
+            result = result.replace("{" + k + "}", v)
+
+        return result
+
+    # def try_date_day(self, key: str, value: str) -> str:
+
+    def set_or_add_msg(self, key: str, section: str, msg_kind: str, args: DB_Texts_Args = None) -> str:
+        """Retrieves text (local or from DB) and adds it to a dictionary, formatted.
+
+        args:
+            key: The item identifier.
+            section: The section identifier, see UITextsKeys.section
+            msg_kind: The message kind, see UITextsKeys.Msg => [info, warn, error, success, fatal, tech]
+            args: Optional arguments for formatting the retrieved text.
+
+        Returns:
+            The formatted text.
+
+        mgd 2025-10-30
+        Check if texts contains the required item
+        This will allow to set the items of sections [secSuccess, secError]
+        in the 'current' section.
+
+        """
+        from ..common.app_context_vars import sidekick
+
+        # take the default value for Item
+        key = key or msg_kind
+
+        # search in the messages dict
+        msg_text: str = self.get_msg(key)
+
+        if not msg_text:
+            # search in the items dict
+            msg_text = self.get_str(key)
+
+        if len(self) == 0:
+            # TODO: ui_db_texts can have no items, the next error message mask this situation. TODO:
+            print(f"Warning: ui_db_texts[{self.section}] has no items.")
+
+        if section and not msg_text:
+            msg_text = self._retrieve_value(key, section, "")
+
+        try:
+            if not msg_text:
+                value = ""
+            elif not args:
+                value = msg_text
+            elif isinstance(args, dict):
+                value = msg_text.format(**args)
+            elif isinstance(args, tuple):
+                value = msg_text.format(*args)
+            else:  # str
+                value = msg_text.format(args)
+
+            value = self.try_recursive(key, value)
+        except Exception as e:
+            sidekick.display.error(f"UIDBTexts, msg [{msg_text}] render error: [{e}].")
+            value = msg_text
+
+        if value:  # add or refresh
+            self[msg_kind] = value
+
+        return value
+
+    def set_msg_success(self, key: str = "", args: DB_Texts_Args = None) -> str:
+        """
+        Removes all other msg
+        Retrieves `text` for the [item, <curr_section>] | [item, 'sec_Success'] pair
+        (of the vw_ui_texts view)
+        and adds the pair to `texts` => texts.add(text, 'msgSuccess')
+
+        Finally sets ui_db_texts.Msg.display_msg_only = True, so the form only displays
+        the message (no other form inputs)
+        """
+
+        self.reset_messages()
+        msg = self.set_or_add_msg(key, UITextsKeys.Section.success, UITextsKeys.Msg.success, args)
+        self.display_msg_only = True
+        return msg
+
+    def set_msg_fatal(self, key: str = "", args: DB_Texts_Args = None) -> str:
+        """
+        Same as set_msg_success, but search section 'msgError'
+        """
+        self.reset_messages()
+        msg = self.set_msg_error(key or UITextsKeys.Msg.fatal, args)
+        self.display_msg_only = True
+        return msg
+
+    def set_msg_error(self, key: str = "", args: DB_Texts_Args = None) -> str:
+        msg = self.set_or_add_msg(key, UITextsKeys.Section.error, UITextsKeys.Msg.error, args)
+        return msg
+
+    def set_msg_info(self, key: str = "", args: DB_Texts_Args = None) -> str:
+        msg = self.set_or_add_msg(key, UITextsKeys.Section.current, UITextsKeys.Msg.info, args)
+        return msg
+
+    def set_msg_warn(self, key: str = "", args: DB_Texts_Args = None) -> str:
+        msg = self.set_or_add_msg(key, UITextsKeys.Section.error, UITextsKeys.Msg.warn, args)
+        return msg
+
     @property
-    def msg_keys(self) -> list[str]:
+    def msg_keys(self) -> List[str]:
         return self._msg_keys
 
     @property

@@ -17,9 +17,12 @@ pipreqs>=0.4.13
 psycopg2-binary==2.9.10
 puremagic==1.28.0
 requests==2.32.3
-# optional sendgrid==6.11.0
+# see carranca\helpers\email_helper.py [optional] sendgrid==6.11.0,
 SQLAlchemy==2.0.38
 types-Flask>=1.1
 Werkzeug==3.1.3
 WTForms==3.2.1
+# for Shape to geojason conversion, see carranca\shape2geojsn:
+geopandas
+pyogrio
 #eof

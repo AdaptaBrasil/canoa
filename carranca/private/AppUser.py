@@ -17,7 +17,7 @@ from .RolesAbbr import RolesAbbr
 from ..common.app_constants import APP_LANG
 from ..common.app_error_assistant import AppStumbled
 from ..helpers.user_helper import get_user_code, get_user_folder
-from ..helpers.types_helper import Error_message
+from ..helpers.types_helper import Error_Message
 
 if TYPE_CHECKING:
     from .UserSep import UserSepList
@@ -80,7 +80,7 @@ class AppUser:
         elif isinstance(us_list := user_seps, list):
             result: "UserSepList" = us_list
         else:
-            msg: Error_message = str(us_list) if isinstance(user_seps, str) else "Error loading user SEP."
+            msg: Error_Message = str(us_list) if isinstance(user_seps, str) else "Error loading user SEP."
             raise AppStumbled(msg)
 
         return result

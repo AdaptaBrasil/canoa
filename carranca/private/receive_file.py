@@ -26,7 +26,7 @@ from .wtforms import ReceiveFileForm
 from ..helpers.py_helper import now, is_str_none_or_empty
 from ..helpers.file_helper import folder_must_exist
 from ..helpers.jinja_helper import process_template
-from ..helpers.types_helper import Jinja_template, Usual_dict, Jinja_generated_html
+from ..helpers.types_helper import Jinja_Template, Usual_Dict, Jinja_Rendered
 from ..helpers.route_helper import get_private_response_data, get_form_input_value, init_response_vars
 from ..helpers.dwnLd_goo_helper import is_gd_url_valid, download_public_google_file
 from ..helpers.js_consts_helper import js_ui_dictionary
@@ -52,16 +52,14 @@ def _do_sep_placeholderOption(fullname: str) -> "UserSep":
     from .SepIconMaker import SepIconMaker
     from .UserSep import UserSep
 
-    sep_fake = UserSep(
-        -1, "", "", fullname, "", False, SepIconMaker.none_file, do_icon_get_url("")
-    )  # empty
+    sep_fake = UserSep(-1, "", "", fullname, "", False, SepIconMaker.none_file, do_icon_get_url(""))  # empty
     return sep_fake
 
 
-def receive_file() -> Jinja_template:
+def receive_file() -> Jinja_Template:
 
     # utils
-    def _get_template(error_code: int) -> Jinja_generated_html:
+    def _get_template(error_code: int) -> Jinja_Rendered:
         seps: "UserSepList" = []
         ui_db_texts[UITextsKeys.Msg.tech] = ""
         ui_db_texts[UITextsKeys.Msg.info] = ""
@@ -75,17 +73,13 @@ def receive_file() -> Jinja_template:
             seps.insert(0, sep_placeholder_option)
 
         ui_db_texts[UITextsKeys.Form.icon_url] = seps[0].icon_url if len(seps) > 0 else ""
-        seps_list: List[Usual_dict] = [
+        seps_list: List[Usual_Dict] = [
             {"code": sep.code, "fullname": sep.fullname, "icon_url": sep.icon_url} for sep in seps
         ]
-        tmpl = process_template(
-            tmpl_ffn, form=fform, seps=seps_list, **ui_db_texts.data(), **js_ui_dictionary()
-        )
+        tmpl = process_template(tmpl_ffn, form=fform, seps=seps_list, **ui_db_texts.data(), **js_ui_dictionary())
         return tmpl
 
-    def _log_issue(
-        msg_type: Display.Kind, error_code: int, msg_id: str, task_code: int, msg_arg: str = ""
-    ) -> int:
+    def _log_issue(msg_type: Display.Kind, error_code: int, msg_id: str, task_code: int, msg_arg: str = "") -> int:
         local_error = ModuleErrorCode.RECEIVE_FILE_ADMIT.value + task_code
         show_code = f"{local_error}" if error_code == 0 else f"{error_code}:{task_code}"
 

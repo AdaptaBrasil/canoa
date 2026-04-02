@@ -1,5 +1,5 @@
-{# ------------------------------------
-
+{#
+------------------------
 ./accounts/login.html.j2
 ------------------------
 `login` page the _landing page_ for visitors
@@ -7,7 +7,7 @@
 
 mgd
 --------------------------------------- #}
-{# cspell:ignore unselectable #}
+{# cspell:ignore unselectable endfrom #}
 
 {% set dlg_close_btn_visible= False %}
 {% set dlg_cls_size= '' %} {# default size #}
@@ -21,7 +21,7 @@ mgd
 <div class="form-group">
     <label class="form-label" inert for="{{form.username.name}}">{{ userLabel }}</label>
     <div class="input-group">
-        <span class="input-group-text"><i class="fas fa-user"></i></span>
+        <span class="input-group-text"><i class="{{ faStyle }} fa-user"></i></span>
         {{ form.username() }}
     </div>
 </div>
@@ -29,11 +29,8 @@ mgd
 
 <!--{ Password  -->
 <div class="form-group mt-3">
-    <label class="form-label" inert for="{{form.password.name}}">{{ passwordLabel }}</label>
-    <div class="input-group">
-        <span class="input-group-text"><i class="fas fa-unlock-alt"></i></span>
-        {{ form.password() }}
-    </div>
+    {% from "./includes/_password_field.html.j2" import password_field_input %}
+    {{ password_field_input(form.password, faStyle, passwordLabel, password_show) }}
 </div>
 <!-- Password }-->
 
@@ -83,5 +80,10 @@ mgd
 
 {% endblock dlg_blc_footer_options %}
 {# ╘════════════════ Options ═══════════════╛ #}
+
+{% block frm_blc_script %}
+{% from "./includes/_password_field.js.j2" import password_field_js %}
+{{ password_field_js() }}
+{% endblock frm_blc_script %}
 
 {# eof #}

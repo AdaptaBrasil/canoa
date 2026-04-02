@@ -28,8 +28,8 @@ cSpell:ignore &ç ã gico endere
 
     <div class="container-fluid">
         <div class="navbar-brand mb-1" inert>{{app_name}}</div>
-        <button class="navbar-toggler {{nav_button_state}}" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navbarCollapsible" aria-controls="navbarCollapsible" aria-label="Toggle navigation">
+        <button class="navbar-toggler {{nav_button_state}}" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapsible"
+            aria-controls="navbarCollapsible" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -39,8 +39,7 @@ cSpell:ignore &ç ã gico endere
 
                 {# ╒════════════════════ Menu: Validação ═════════════════════════════╕ #}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#"
-                        id="menu-receive" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-receive" role="button" data-bs-toggle="dropdown">
                         {{menu_header['validate']}}
 
                     </a>
@@ -62,8 +61,8 @@ cSpell:ignore &ç ã gico endere
 
                 {# ╒════════════════════ Menu: Setor Estratégico ═════════════════════╕ #}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}} {{sep_menu_class}}"
-                        href="#" id="menu-se" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}} {{sep_menu_class}}" href="#" id="menu-se" role="button"
+                        data-bs-toggle="dropdown">
                         {{menu_header['strategicSector']}}
                     </a>
                     {% if nav_sub_menu %}
@@ -93,8 +92,7 @@ cSpell:ignore &ç ã gico endere
                         {# ╒═════ user with seps menu ═════╕ #}
                         {% for sep in sep_list %}
                         <li>
-                            <a class="dropdown-item"
-                                href="{{private_route('sep_edit', code=sep.code) }}">{{sep.name}}</a>
+                            <a class="dropdown-item" href="{{private_route('sep_edit', code=sep.code) }}">{{sep.name}}</a>
                         </li>
                         {% endfor %}
                         {# ╘════════ user sep menu ════════╛ #}
@@ -106,8 +104,7 @@ cSpell:ignore &ç ã gico endere
                 {# ╒════════════════════ Menu: Esquema ══════════════════════════════╕ #}
                 {% if j_user.power %}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-se"
-                        role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-es" role="button" data-bs-toggle="dropdown">
                         {{menu_header['Schema']}}
                     </a>
                     {# ╒════════ schema menu ════════╕ #}
@@ -119,8 +116,7 @@ cSpell:ignore &ç ã gico endere
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{private_route('scm_grid', code=ui_act_shw) }}"
-                                title="Abre grid para editar ou remover esquemas">
+                            <a class="dropdown-item" href="{{private_route('scm_grid', code=ui_act_shw) }}" title="Abre grid para editar ou remover esquemas">
                                 Edi&ccedil;&atilde;o e Remo&ccedil;&atilde;o
                             </a>
                         </li>
@@ -139,17 +135,14 @@ cSpell:ignore &ç ã gico endere
 
                 {# ╒════════════════════ Menu: Documentos ════════════════════════════╕ #}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-docs"
-                        role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-docs" role="button" data-bs-toggle="dropdown">
                         {{menu_header['documents']}}
                     </a>
                     {% if nav_sub_menu %}
                     <ul class="dropdown-menu">
                         <li>
-                            <a class="dropdown-item"
-                                href="https://docs.google.com/document/d/1ZYOQricIqeNkZ3XnLoSXp-lKle9V1UTb-acASZtAa4E/edit"
-                                target="_blank" rel="noopener noreferrer"
-                                title="Abre documento 'Especifica&ccedil;&atilde;o de Requisitos e Formatos' em outra aba">
+                            <a class="dropdown-item" href="https://docs.google.com/document/d/1ZYOQricIqeNkZ3XnLoSXp-lKle9V1UTb-acASZtAa4E/edit" target="_blank"
+                                rel="noopener noreferrer" title="Abre documento 'Especifica&ccedil;&atilde;o de Requisitos e Formatos' em outra aba">
                                 Especifica&ccedil;&atilde;o
                             </a>
                         </li>
@@ -178,8 +171,7 @@ cSpell:ignore &ç ã gico endere
 
                 {# ╒════════════════════ Menu: Usuário ═══════════════════════════════╕ #}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-user"
-                        role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-user" role="button" data-bs-toggle="dropdown">
                         {{j_user.name}}
                     </a>
                     {% if nav_sub_menu %}
@@ -190,23 +182,21 @@ cSpell:ignore &ç ã gico endere
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{private_route('change_password')}}"
-                                title="Abre formul&aacute;rio para alterar sua senha">
+                            <a class="dropdown-item" href="{{private_route('password_change')}}" title="Abre formul&aacute;rio para alterar sua senha">
                                 Mudar Senha
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{private_route('auto_email_user')}}"
+                            <a class="dropdown-item" href="{{private_route('email_addr_hub')}}"
                                 title="{{ 'Lhe envia um e-mail de teste' if j_user.email_verified else 'Inicia o processo de verifica&ccedil;&atilde;o de e-mail' }}">
-                                {{ 'Confirma envio de e-mail' if j_user.email_verified else 'Verifica endere&ccedil;o de e-mail' }}
+                                {{ 'Confirmar envio de e-mail' if j_user.email_verified else 'Verificar endere&ccedil;o de e-mail' }}
                             </a>
                         </li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#" onclick="logout()"
-                                title="Fecha a sess&atilde;o e sai do aplicativo">
+                            <a class="dropdown-item" href="#" onclick="logout()" title="Fecha a sess&atilde;o e sai do aplicativo">
                                 Sair de {{app_name}}
                             </a>
                         </li>

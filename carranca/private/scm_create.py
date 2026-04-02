@@ -14,13 +14,13 @@ from ..common.app_error_assistant import ModuleErrorCode, AppStumbled
 from ..helpers.py_helper import class_to_dict
 from ..helpers.uiact_helper import UiActResponseKeys
 from ..helpers.jinja_helper import process_template
-from ..helpers.types_helper import Jinja_template
+from ..helpers.types_helper import Jinja_Template
 from ..helpers.route_helper import get_private_response_data, init_response_vars
 from ..helpers.js_consts_helper import js_grid_col_meta_info, js_ui_dictionary
 from ..helpers.db_records.DBRecords import ListOfDBRecords
 
 
-def do_scm_create() -> Jinja_template:
+def do_scm_create() -> Jinja_Template:
 
     jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SCM_GRID)
     scm_data: ListOfDBRecords = []

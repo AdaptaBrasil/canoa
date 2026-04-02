@@ -11,26 +11,25 @@ Equipe da Canoa -- 2024
 mgd
 """
 
-# cSpell:ignore tmpl
+# cSpell:ignore tmpl updt
 
 import os
 import base64
 
-from ..common.UIDBTexts import UIDBTexts
+from typing import List
+from ..common.UIDBTexts import UITextsKeys
 from ..helpers.py_helper import is_str_none_or_empty
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.file_helper import folder_must_exist
 from ..helpers.route_helper import init_response_vars
 from ..helpers.html_helper import img_filenames, img_change_src_path
-from ..helpers.jinja_helper import process_template, jinja_pre_template
+from ..helpers.jinja_helper import process_template, process_text
 from ..common.app_context_vars import sidekick
 from ..common.app_error_assistant import ModuleErrorCode, AppStumbled
-from ..helpers.ui_db_texts_manager import set_msg_error, get_section, UITextsKeys
+from ..helpers.ui_db_texts_manager import init_ui_db_texts  # , set_msg_error, get_section, UITextsKeys
 
 
-def __prepare_img_files(
-    html_images: list[str], db_images: list[str], img_local_path: str, section: str
-) -> bool:
+def __prepare_img_files(html_images: List[str], db_images: List[str], img_local_path: str, section: str) -> bool:
     from ..helpers.ui_db_texts_manager import db_retrieve_text
 
     is_img_local_path_ready = os.path.exists(img_local_path)
@@ -56,9 +55,7 @@ def __prepare_img_files(
         q = len(missing_files)
         qtd = "One" if q == 1 else f"{q}"
         p = "" if q == 1 else "s"
-        sidekick.display.warn(
-            f"{qtd} image record{p} missing for [sectorSpecifications] in database: {', '.join(missing_files)}."
-        )
+        sidekick.display.warn(f"{qtd} image record{p} missing for [sectorSpecifications] in database: {', '.join(missing_files)}.")
         return True  # some files missing, but I can't fix it :-(
 
     for file in available_files:
@@ -69,9 +66,7 @@ def __prepare_img_files(
                 with open(os.path.join(img_local_path, file), "wb") as file:
                     file.write(image_data)
         except Exception as e:
-            sidekick.display.error(
-                f"Error writing image [{file}] in folder {img_local_path}. Message [{str(e)}]"
-            )
+            sidekick.display.error(f"Error writing image [{file}] in folder {img_local_path}. Message [{str(e)}]")
 
     return True
 
@@ -86,54 +81,47 @@ def display_html(docName: str):
 
     tmpl_ffn = "./home/document.html.j2"
     section = docName
-    jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.DISPLAY_HTML_DOC)
+    jHtml, _, default_texts, task_code = init_response_vars(ModuleErrorCode.DISPLAY_HTML_DOC)
 
     try:
+        default_texts = init_ui_db_texts("DisplayDoc")  # default section
+        ui_db_texts = init_ui_db_texts(section)
 
-        def _get_section(ui_section: str) -> UIDBTexts:
-            ui_texts = get_section(ui_section)
-            return UIDBTexts(ui_texts, sidekick.debugging)
-
-        ui_db_texts = _get_section("DisplayDoc")
-        doc_texts = _get_section(section)
-
-        def _setValue(key: str, default: str):
-            value = doc_texts.get_str(key)
-            if not value:
-                value = ui_db_texts.get_str(key, default)
-                doc_texts[key] = value
+        def _updt_val(key: str, default: str):
+            if not ui_db_texts.get_str(key):
+                value = default_texts.get_str(key, default)
+                ui_db_texts.set_value(key, value)
             return
 
-        _setValue(UITextsKeys.Page.title, "Display Document")
-        _setValue(UITextsKeys.Form.title, "Document")
-        _setValue(UITextsKeys.Form.btn_close, "Close")
-        _setValue("documentStyle", "")
+        _updt_val(UITextsKeys.Page.title, "Display Document")
+        _updt_val(UITextsKeys.Form.title, "Document")
+        _updt_val(UITextsKeys.Form.btn_close, "Close")
+        _updt_val("documentStyle", "")
 
         # shortcuts
         task_code += 1
         body_key = "documentBody"
-        body = doc_texts.get_str(body_key)
-        images = doc_texts.get_str("images")
+        body_raw = ui_db_texts.get_str(body_key)
+        body_proc = process_text(body_raw, **ui_db_texts.data())
+        body_text = ui_db_texts.set_value(body_key, body_proc)
+
+        images = ui_db_texts.get_str("images")
 
         # a comma separated list of images.ext names available on the db,
         # see below db_images & _prepare_img_files
         task_code += 1
-        db_images = (
-            [] if is_str_none_or_empty(images) else [s.strip() for s in images.split(",")]
-        )  # list of img names in db
+        db_images = [] if is_str_none_or_empty(images) else [s.strip() for s in images.split(",")]  # list of img names in db
 
         task_code += 1  # 173
-        html_images = (
-            [] if is_str_none_or_empty(body) else sorted(img_filenames(body))
-        )  # list of img tags in HTML
+        html_images = [] if is_str_none_or_empty(body_text) else sorted(img_filenames(body_text))  # list of img tags in HTML
 
         task_code += 1
         img_folders = ["static", "docs", section, "images"]
         img_local_path = os.path.join(sidekick.config.APP_FOLDER, *img_folders)
         task_code += 1
-        if is_str_none_or_empty(body):
+        if is_str_none_or_empty(body_text):
             task_code += 1
-            msg = set_msg_error("documentNotFound", ui_db_texts, docName)
+            msg = default_texts.set_msg_error("documentNotFound", docName)
             raise AppStumbled(msg, task_code, False, True)
         elif len(html_images) == 0:
             # html has no images
@@ -147,16 +135,14 @@ def display_html(docName: str):
         elif __prepare_img_files(html_images, db_images, img_local_path, section):
             task_code += 3
             img_folders.insert(0, os.sep)
-            body = img_change_src_path(body, img_folders)
+            doc_body_with_imgs = img_change_src_path(body_text, img_folders)
+            ui_db_texts.set_value(body_key, doc_body_with_imgs)
 
-        doc_body = jinja_pre_template(body)
-        doc_texts[body_key] = doc_body
-        jHtml = process_template(tmpl_ffn, **doc_texts.data())
+        jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
 
     except Exception as e:
-        jHtml = get_ups_jHtml("displayDocException", ui_db_texts, task_code, e)
+        jHtml = get_ups_jHtml("displayDocException", default_texts, task_code, e)
 
     return jHtml
-
 
 # eof

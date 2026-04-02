@@ -10,26 +10,28 @@ Equipe da Canoa -- 2024
 import requests
 from os import path
 from flask import redirect, request, url_for
-from typing import Tuple, Optional
+from typing import cast, Tuple, Optional
 
 
 from .py_helper import is_str_none_or_empty, camel_to_snake, clean_text
 from .html_helper import URL_PATH_SEP
 
 # 2/3. This line produce the sidekick-incident
-from .jinja_helper import Template_file_full_name
-from .types_helper import Jinja_generated_html, FlaskResponse
+from .jinja_helper import Template_File_Full_Name
+from .types_helper import Jinja_Rendered, Flask_Response, DB_Lookup
 from ..common.UIDBTexts import UIDBTexts
 from ..config.BaseConfig import BaseConfig
-from .ui_db_texts_manager import get_db_texts
+from .ui_db_texts_manager import init_ui_db_texts
 from ..common.app_error_assistant import ModuleErrorCode
 
 
-ResponseData = Tuple[Jinja_generated_html, bool, UIDBTexts]
+ResponseData = Tuple[Jinja_Rendered, bool, UIDBTexts]
 
 base_route_private = "private"
 base_route_public = "public"
 base_route_static = "static"
+base_route_account = "accounts"
+
 public_route__password_reset = "password_reset"
 templates_found = []
 
@@ -56,9 +58,7 @@ def _route(base: str, page: str, **params) -> str:
         address = f"{bp_name(base)}.{page}"
         url = url_for(address, **params)
     except:
-        raise Exception(
-            f"An error occurred while constructing the following address: [{base}.{page}/{params}]"
-        )
+        raise Exception(f"An error occurred while constructing the following address: [{base}.{page}/{params}]")
     return url
 
 
@@ -103,11 +103,11 @@ def get_method() -> str:
     return request.method.upper()
 
 
-def is_method_post() -> bool:
-    return not is_method_get()
-
-
 def is_method_get() -> bool:
+    return not is_method_post()
+
+
+def is_method_post() -> bool:
     """
     Determine if the current request method is GET.
     Raises a ValueError for unexpected request methods.
@@ -124,17 +124,17 @@ def is_method_get() -> bool:
     return is_get
 
 
-def get_form_input_value(name: str, not_allowed: Optional[str] = "") -> str:
+def get_form_input_value(name: str, not_allowed: str = "") -> str:
     text = request.form.get(name)
     return "" if text is None else clean_text(text, not_allowed)
 
 
-def get_tmpl_full_file_name(tmpl: str, folder: str) -> Template_file_full_name:
+def get_tmpl_full_file_name(tmpl: str, folder: str) -> Template_File_Full_Name:
     from ..common.app_context_vars import sidekick
 
     tmpl_file_name = f"{tmpl}.html.j2"
     # template *must* be with '/':
-    tmpl_full_file_name: Template_file_full_name = f".{URL_PATH_SEP}{folder}{URL_PATH_SEP}{tmpl_file_name}"
+    tmpl_full_file_name: Template_File_Full_Name = f".{URL_PATH_SEP}{folder}{URL_PATH_SEP}{tmpl_file_name}"
     tmpl_full_name = path.join(".", sidekick.config.TEMPLATES_FOLDER, folder, tmpl_file_name)
     if tmpl_full_name in templates_found:
         pass
@@ -151,12 +151,15 @@ def _get_response_data(ui_db_section: str, tmpl_file_name: str, folder: str) -> 
 
     tmpl_full_file_name, is_get, ui_db_texts, _ = init_response_vars(ModuleErrorCode.LEGACY_STYLE)
     try:
-
         tmpl_file_name = tmpl_file_name if tmpl_file_name else camel_to_snake(ui_db_section)
         tmpl_full_file_name = get_tmpl_full_file_name(tmpl_file_name, folder)
-
-        db_texts = get_db_texts(ui_db_section)
-        ui_db_texts = UIDBTexts(db_texts, sidekick.debugging)
+        # 2026.04.02
+        # db_texts = get_db_texts(ui_db_section)
+        # ## add to ui_db_texts useful values  of 'general use'
+        # ui_dt_format = sidekick.config.APP_UI_DATETIME_FORMAT
+        # db_lookup = cast(DB_Lookup, db_retrieve_text)
+        # ui_db_texts = UIDBTexts(db_texts, sidekick.debugging, ui_dt_format, db_lookup)
+        ui_db_texts = init_ui_db_texts(ui_db_section)
 
     except Exception as e:
         # Re-raise exception to allow it to propagate
@@ -190,18 +193,21 @@ def get_account_response_data(ui_texts_section: str, tmpl_base_name: str = "") -
         - UIDBTexts the DB ui texts for this Form/Grid etc.
     """
 
-    return _get_response_data(ui_texts_section, tmpl_base_name, "accounts")
+    return _get_response_data(ui_texts_section, tmpl_base_name, base_route_account)
 
 
 def init_response_vars(error_code: ModuleErrorCode) -> Tuple[*ResponseData, int]:
     """
     returns JinjaTemplate, is_get, ui_db_texts
     """
-    is_get = is_method_get()
-    return "", is_get, UIDBTexts({}, False), (error_code.value if error_code else 1)
+    from ..common.app_context_vars import sidekick
+
+    ui_dt_format = sidekick.config.APP_UI_DATETIME_FORMAT
+    is_get = is_method_post()
+    return "", is_get, UIDBTexts({}, False, ui_dt_format, None), (error_code.value if error_code else 1)
 
 
-def redirect_to(route: str, message: Optional[str] = None) -> FlaskResponse:
+def redirect_to(route: str, message: Optional[str] = None) -> Flask_Response:
     # TODO: display message 'redirecting to ...
     return redirect(route)
 

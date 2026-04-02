@@ -10,7 +10,7 @@ mgd 2025-01-14 & 03-18
 # cSpell: ignore samp rqst dnld rprt
 
 from ...public.ups_handler import get_ups_jHtml, AppStumbled
-from ...helpers.types_helper import Jinja_template
+from ...helpers.types_helper import Jinja_Template
 from ...helpers.jinja_helper import process_template
 from ...helpers.route_helper import (
     get_private_response_data,
@@ -27,7 +27,7 @@ from .fetch_records import fetch_record_s, ALL_USER_RECS
 from .constants import DOWNLOAD_ZIPFILE, DOWNLOAD_REPORT
 
 
-def init_grid(for_user: int) -> Jinja_template:
+def init_grid(for_user: int) -> Jinja_Template:
 
     jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.RECEIVED_FILES_MGMT)
     try:
@@ -51,9 +51,7 @@ def init_grid(for_user: int) -> Jinja_template:
                 )
                 for user in users
             ]
-            users_list.insert(
-                0, ("", ui_db_texts[("noneUser" if len(users_list) == 0 else "selectUser")], True)
-            )
+            users_list.insert(0, ("", ui_db_texts[("noneUser" if len(users_list) == 0 else "selectUser")], True))
             task_code += 1  # 6
             ui_db_texts[UITextsKeys.Form.title] = ui_db_texts[UITextsKeys.Form.title + "Power"].format(
                 request_user.user_name

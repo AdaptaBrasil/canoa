@@ -21,7 +21,7 @@ mgd 2025-03-05--15
 {% set dlg_close_btn_visible= False %}
 {% set dlg_var_icon_url= iconFileUrl %}
 {% set dlg_var_svg= iconSvgUrl %}
-{% set form_close_btn_text= btnCloseForm %}
+{% set form_close_btn_text= closeFormButton %}
 {# see canoa.css #}
 
 {% extends "./layouts/dialog.html.j2" %}
@@ -39,8 +39,8 @@ mgd 2025-03-05--15
 {% block dlg_blc_footer_buttons %}
 
 <div class="col-auto">
-{% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
-{{ btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, form_close_btn_text) }}
+    {% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
+    {{ btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, form_close_btn_text) }}
 </div>
 
 {% endblock dlg_blc_footer_buttons %}

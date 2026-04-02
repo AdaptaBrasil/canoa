@@ -33,7 +33,7 @@ from flask_login import UserMixin
 from ..helpers.db_records.DBRecords import DBRecords
 
 from ..models import SQLABaseTable
-from ..helpers.pw_helper import hash_pass
+from ..helpers.pw_helper import hash_password
 from ..helpers.py_helper import is_str_none_or_empty
 from ..helpers.db_helper import db_fetch_rows
 from ..private.RolesAbbr import RolesAbbr
@@ -52,25 +52,25 @@ class User(SQLABaseTable, UserMixin):
     # see carranca\public\access_control\password_recovery.py
     # for example of how it simplifies the code and avoids mistakes in type annotations
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    id_role = Column(Integer, ForeignKey("roles.id"))
-    lang = Column(String(8), default=APP_LANG)
-    username = Column(String(100), unique=True)
-    username_lower = Column(String(100), Computed(""))
-    email = Column(String(64), unique=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id_role: Mapped[int] = mapped_column(Integer, ForeignKey("roles.id"))
+    lang: Mapped[str | None] = mapped_column(String(8), default=APP_LANG)
+    username: Mapped[str] = mapped_column(String(100), unique=True)
+    username_lower: Mapped[str] = mapped_column(String(100), Computed(""))
+    email: Mapped[str] = mapped_column(String(64), unique=True)
     disabled: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    password = Column(LargeBinary)
-    # OBSOLETE
+    password: Mapped[bytes] = mapped_column(LargeBinary)
+    # OBSOLETE  2026.04.02
     # mgmt_sep_id = Column(Integer, unique=True)
-    last_login_at = Column(DateTime, nullable=True)
+    last_login_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     # this columns names are confusing, they are for password recovery process, not for email confirmation
     # It should be renamed to "recover_pw_token" and "recover_pw_token_at"
     recover_email_token: Mapped[str | None] = mapped_column(String(100), nullable=True, unique=True)
-    recover_email_token_at = Column(DateTime, Computed(""))
+    recover_email_token_at: Mapped[datetime] = mapped_column(DateTime, Computed(""))
     # this columns names are confusing, they are for login failures
-    password_failures = Column(Integer, default=0)
-    password_failed_at = Column(DateTime)
+    password_failures: Mapped[int] = mapped_column(Integer, default=0)
+    password_failed_at: Mapped[datetime] = mapped_column(DateTime)
 
     # 2026-01
     verify_email_token: Mapped[str | None] = mapped_column(String(8), nullable=True, unique=False)
@@ -92,7 +92,7 @@ class User(SQLABaseTable, UserMixin):
                 value = value[0]
 
             if property == "password":
-                value = hash_pass(value)  # we need bytes here (not plain str)
+                value = hash_password(value)  # we need bytes here (not plain str)
 
             setattr(self, property, value)
 
@@ -112,9 +112,7 @@ class User(SQLABaseTable, UserMixin):
         return user
 
     @staticmethod
-    def get_all_users(
-        arg_where: ColumnExpressionArgument[bool], arg_order: Optional[Column] = None
-    ) -> List["User"]:  # DBRecords:
+    def get_all_users(arg_where: ColumnExpressionArgument[bool], arg_order: Optional[Column] = None) -> List["User"]:  # DBRecords:
         """
         Fetches a list of all users (id, id_role, username, email, disabled)
         from the `users` table.

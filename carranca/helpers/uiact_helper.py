@@ -12,7 +12,7 @@ import json
 from typing import Optional, Tuple, Any, Dict
 
 from ..helpers.py_helper import to_int
-from ..helpers.types_helper import Usual_dict, Json_text
+from ..helpers.types_helper import Usual_Dict, Json_Text
 from ..common.app_error_assistant import AppStumbled
 
 DATA_SEPARATOR = ":"
@@ -44,7 +44,7 @@ class UiActResponse:
         value = self.data[key] if key in self.data else "?"
         return value
 
-    def __init__(self, cmd_text_or_code: str | Json_text):
+    def __init__(self, cmd_text_or_code: str | Json_Text):
         try:
             ## is 'cmd_text_or_code' is json?
             self.data = json.loads(cmd_text_or_code)
@@ -63,7 +63,7 @@ class UiActResponse:
             else:
                 raise AppStumbled(f"Unknown UI Action Response <code>{code}</code>.")
 
-    def initial(self) -> Usual_dict:
+    def initial(self) -> Usual_Dict:
         return {
             "action": "",
             "row_index": self.row_index,

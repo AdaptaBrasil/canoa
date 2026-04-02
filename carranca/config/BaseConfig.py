@@ -60,8 +60,8 @@ class BaseConfig(Config):
         ----------------------------
     """
 
-    APP_NAME = APP_NAME
-    APP_VERSION = APP_VERSION
+    # APP_NAME = APP_NAME
+    # APP_VERSION = APP_VERSION
     APP_ROOT = ""  #  f"/{APP_NAME.lower()}"
 
     """ Canoa Configurations
@@ -93,6 +93,16 @@ class BaseConfig(Config):
     # (see table ui_texts, UIDbTexts.py and carranca.py>global_ui_texts_cache: dict)
     # 0= no cache; -1 < 0 infinite; n > 0 = _n_ minutes
     APP_UI_DB_TEXTS_CACHE_LIFETIME_MIN = 0
+    # https://docs.fontawesome.com/web/style/style-cheatsheet
+    # https://docs.fontawesome.com/web/setup/get-started
+    # 1. Check if style is available for the plan (free => fas/fa only)
+    # 2. Name convention: fas = fa-solid, far = fa-regular, da-light, fa-thin
+    # 3. Fix canoa.css class color
+    APP_UI_FONT_AWESOME_STYLE: str = "fas"
+    APP_UI_DATETIME_FORMAT = "%H:%M %d/%m/%Y"
+
+    APP_LINUX_LOCALE = "pt_BR.UTF-8"
+    APP_WINDOWS_LOCALE = "Portuguese_Brazil.1252"
 
     # send to the log all sidekick display text
     SIDEKICK_LOG = True
@@ -128,6 +138,7 @@ class BaseConfig(Config):
     # My address service is SERVER_EXTERNAL_IP is empty
     # (used to send recovery email confirmation, etc)
     EXTERNAL_IP_SERVICE = "https://checkip.amazonaws.com"
+    SERVER_EXTERNAL_SCHEME: str = "https"
     # satelier.dev.br -> "177.43.119.39"
     SERVER_EXTERNAL_IP: str = ""
     SERVER_EXTERNAL_PORT: str = ""
@@ -166,7 +177,7 @@ class BaseConfig(Config):
     # folder is log_files
     LOG_FILE_FOLDER = ""  # "log_files"
     LOG_FILE_NAME = ""  # defaults to APP_NAME.datetime.log
-    LOG_FILE_STATUS = "?"  # internal set at startup
+    LOG_FILE_STATUS: str = "?"  # internal set at startup
 
     """ Database constant
         --------------------------

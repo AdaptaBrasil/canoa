@@ -31,7 +31,7 @@ def email(cargo: Cargo, user_report_full_name) -> Cargo:
         cargo.email_started_at = now()
         task_code += 1  # 1
         email_body_params = {
-            "user_name": cargo.user.name,
+            "user": cargo.user.name,
             "receipt": cargo.pd.user_receipt,
             "when": now_as_text(),
         }

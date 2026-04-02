@@ -41,7 +41,7 @@ Demonstrates the **manual override** for template filenames:
 
 | Convention | Example |
 |---|---|
-| `snake_case` for type aliases | `db_texts` |
+| `Pascal_Snake` for type aliases | `DB_Texts` |
 | Proper case for UI strings via HTML entities | `&aacute;` ? á |
 | Defensive dictionary handling | `.pop(key, None)` |
 

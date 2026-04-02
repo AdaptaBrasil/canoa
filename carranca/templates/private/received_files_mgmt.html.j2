@@ -32,27 +32,26 @@ mgd
 {# ╘════════════════ Dialog Body ════════════════╛ #}
 
 {% block dlg_blc_footer_buttons %}
-    {% if users_list %}
-    <div class="col-auto">
-        <select id="{{sel_id}}" class="form-control form-select" >
-            {% for code, name, enabled in users_list %}
-            <option value="{{code}}" {% if not enabled %}disabled{% endif %}>{{name | safe}}</option>
-            {% endfor %}
-        </select>
-    </div>
-    {% endif %}
-    {# TODO: from "includes/_action_forms_and_btns.html.j2" import btn_click #}
-    <div class="col-auto">
-        <button type="button" onclick="download('{{dnld_F}}')" id="btn{{dnld_F}}" class="form-control form-main-btn" disabled>
-            {{btnDwnLoadFile}}
-        </button>
-    </div>
-    <div class="col-auto">
-        <button type="button" onclick="download('{{dnld_R}}')" id="btn{{dnld_R}}" class="form-control form-main-btn"
-            disabled>
-            {{btnDwnLoadRprt}}
-        </button>
-    </div>
+{% if users_list %}
+<div class="col-auto">
+    <select id="{{sel_id}}" class="form-control form-select">
+        {% for code, name, enabled in users_list %}
+        <option value="{{code}}" {% if not enabled %}disabled{% endif %}>{{name | safe}}</option>
+        {% endfor %}
+    </select>
+</div>
+{% endif %}
+{# TODO: from "includes/_action_forms_and_btns.html.j2" import btn_click #}
+<div class="col-auto">
+    <button type="button" onclick="download('{{dnld_F}}')" id="btn{{dnld_F}}" class="form-control form-main-btn" disabled>
+        {{btnDwnLoadFile}}
+    </button>
+</div>
+<div class="col-auto">
+    <button type="button" onclick="download('{{dnld_R}}')" id="btn{{dnld_R}}" class="form-control form-main-btn" disabled>
+        {{btnDwnLoadRprt}}
+    </button>
+</div>
 {% endblock dlg_blc_footer_buttons %}
 
 {% block dlg_blc_javascript %}
@@ -88,7 +87,7 @@ mgd
 
     document.getElementById('{{sel_id}}').addEventListener('change',
         (e) => {
-            sleep();
+            setSleepVeil();
             setTimeout(() => {
                 const href = '{{ private_route('received_files_mgmt') }}?id=' + e.target.value;
                 window.location.href = href

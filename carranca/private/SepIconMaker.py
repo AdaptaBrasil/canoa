@@ -9,12 +9,11 @@ mgd 2024-11-15, 2025-06-24 fix+rename
 
 from os import path
 from flask import current_app
-from typing import cast
 
 from ..helpers.py_helper import to_str
 from ..helpers.html_helper import url_join
 from ..helpers.route_helper import static_route
-from ..helpers.types_helper import Svg_content
+from ..helpers.types_helper import Svg_Content
 
 
 class class_property(property):
@@ -60,7 +59,7 @@ class SepIconMaker:
         stroke_width: int = 2,
         fill_opacity: str = "1",
         stroke_opacity: str = "1",
-    ) -> Svg_content:
+    ) -> Svg_Content:
         return (
             "<svg width='64' height='64' xmlns='http://www.w3.org/2000/svg'>"
             f"<rect width='100%' height='100%' fill='{fill_color}' fill-opacity='{fill_opacity}' stroke='black' stroke-opacity='{stroke_opacity}' stroke-width='{stroke_width}' />"
@@ -69,15 +68,15 @@ class SepIconMaker:
         )
 
     @classmethod
-    def empty_content(cls) -> Svg_content:
+    def empty_content(cls) -> Svg_Content:
         return cls.content_for("white", "", 1, "0.1", "0.1")
 
     @classmethod
-    def error_content(cls) -> Svg_content:
+    def error_content(cls) -> Svg_Content:
         return cls.content_for("firebrick", "!")
 
     @classmethod
-    def none_content(cls) -> Svg_content:
+    def none_content(cls) -> Svg_Content:
         return cls.content_for("darkgrey", "?", stroke_opacity="0.45")
 
 

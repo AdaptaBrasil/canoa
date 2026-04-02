@@ -20,14 +20,14 @@ from sqlalchemy.orm import Session
 from carranca import global_sqlalchemy_scoped_session
 from ...models.private import MgmtEmailSep
 from ...common.UIDBTexts import UIDBTexts
-from ...helpers.types_helper import Sep_mgmt_return, Opt_str
+from ...helpers.types_helper import Sep_Mgmt_Return, Opt_Str
 from ...helpers.email_helper import RecipientsDic, RecipientsList, send_email
 from ...common.app_context_vars import sidekick
 
 from ...common.app_error_assistant import proper_user_exception
 
 
-def mgmt_notify(batch_code: str, ui_db_texts: UIDBTexts, task_code: int) -> Sep_mgmt_return:
+def mgmt_notify(batch_code: str, ui_db_texts: UIDBTexts, task_code: int) -> Sep_Mgmt_Return:
     """
     Send an email for each user with a
     'new' SEP or if it was removed
@@ -43,7 +43,7 @@ def mgmt_notify(batch_code: str, ui_db_texts: UIDBTexts, task_code: int) -> Sep_
             if not mgmt_email_list:
                 return None, ui_db_texts["emailNone"], task_code
 
-            def _send_email(content_key: str, email: str, to_user: str, sep: str) -> Opt_str:
+            def _send_email(content_key: str, email: str, to_user: str, sep: str) -> Opt_Str:
                 msg_error = ""  # maybe is a second try to send email, so clear it
                 try:
                     recipients = RecipientsDic(RecipientsList(email, to_user))
@@ -77,9 +77,7 @@ def mgmt_notify(batch_code: str, ui_db_texts: UIDBTexts, task_code: int) -> Sep_
                 elif new_error is None and old_error is None:
                     item.email_error = None
                 else:
-                    item.email_error = (
-                        _e(item.new_user_email, new_error) + _e(item.old_user_email, old_error)
-                    ).strip()
+                    item.email_error = (_e(item.new_user_email, new_error) + _e(item.old_user_email, old_error)).strip()
 
             task_code += 1
             db_session.commit()

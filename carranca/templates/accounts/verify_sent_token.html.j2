@@ -1,16 +1,17 @@
 {#
-----------------------------------
-./private/verify_sent_token.html.html.j2
-----------------------------------
+-----------------------------------------
+.accounts//verify_sent_token.html.html.j2
+-----------------------------------------
 This dialog request the user to provide the verification code sent to the user's registered email address
 in order to verify email ownership and complete the email verification process.
 
 mgd
 --------------------------------------- #}
 {# cSpell:ignore #}
+
 {% extends "./layouts/form.html.j2" %}
 
-{# ╒═════════════════════ Inputs ═════════════════════════╕ #}
+{# ╒════════════════ Inputs ════════════════╕ #}
 {% block frm_blc_inputs %}
 
 {# [token #}
@@ -18,7 +19,7 @@ mgd
     <label class="form-label" inert for="{{ form.token.id }}">{{ tokenLabel }}</label>
     <div class="input-group">
         <span class="input-group-text">
-            <i class="fas fa-envelope-circle-check" aria-hidden="true"></i>
+            <i class="{{ faStyle }} fa-envelope-circle-check" aria-hidden="true"></i>
         </span>
         {{ form.token() }}
     </div>
@@ -26,5 +27,7 @@ mgd
 {# token ] #}
 
 {% endblock frm_blc_inputs %}
+{# ╘════════════════ Inputs ════════════════╛ #}
+
 
 <!-- eof -->

@@ -1,16 +1,16 @@
 {#
-----------------------------------
-./private/email_confirm.html.j2
-----------------------------------
+--------------------------------------
+./accounts/email_to_test_email.html.j2
+--------------------------------------
 This dialog confirms that a test email has been sent to the user's registered email address,
 verifying email deliverability and sending engine functionality.
 
 mgd
 --------------------------------------- #}
 {# cSpell:ignore #}
-{% set form_close_btn_text= btnCloseForm | default('OK') %}
-{% set dlg_cls_size = '' %}
-{% set form_backend_msg= msgOnly | default(True) %}
+{% set dlg_cls_size= '' %}
+{% set form_close_btn_text= closeFormButton | default(ui_defaults.okButton) %}
+{# {% set form_backend_msg= msgOnly | default(True) %} #}
 
 {% extends "./layouts/dialog.html.j2" %}
 

@@ -11,7 +11,7 @@ This module uses a key file to impersonate a user within a Google Workspace doma
 # cSpell: ignore googleapiclient creds
 
 from os import path
-from typing import Type
+from typing import Type, List
 
 from googleapiclient.discovery import build
 
@@ -27,7 +27,7 @@ except ImportError as e:
 SERVICE_ACCOUNT_FILENAME = "canoa-gmail-key.json"
 
 
-def get_gmail_service_dwd(storage_path: str, sender_email: str, scopes: list[str]) -> Type[build]:
+def get_gmail_service_dwd(storage_path: str, sender_email: str, scopes: List[str]) -> Type[build]:
     """
     Authenticates using Service Account with DWD and returns the Gmail API service object.
 

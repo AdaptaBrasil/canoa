@@ -20,15 +20,15 @@ from ..public.ups_handler import get_ups_jHtml
 from ..helpers.user_helper import UserFolders
 from ..helpers.uiact_helper import UiActResponse
 from ..helpers.jinja_helper import process_template
-from ..helpers.types_helper import Jinja_generated_html
+from ..helpers.types_helper import Jinja_Rendered
 from ..helpers.route_helper import get_private_response_data, init_response_vars
-from ..helpers.ui_db_texts_manager import set_msg_error, set_msg_success
 from ..config.ExportProcessConfig import ExportProcessConfig
 from ..common.app_error_assistant import ModuleErrorCode
+from ..helpers.ui_db_texts_manager import set_msg_error, set_msg_success, MSG_DEFAULT
 from ..models.private_1.ExportGrid import ExportGrid
 
 
-def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_generated_html | Response:
+def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_Rendered | Response:
 
     @dataclass
     class FileInfo:
@@ -39,11 +39,8 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_generated_html | Response:
     try:
         task_code += 1
         tmpl_ffn, _, ui_db_texts = get_private_response_data("scmExportDB")
-        ui_db_texts[UITextsKeys.Form.pretend_busy] = False
-
         task_code += 1
         config = ExportProcessConfig()
-
         task_code += 1
         schema_data, task_code = get_scm_data(task_code, config, True)
 
@@ -92,7 +89,7 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_generated_html | Response:
                 for file in file_info:
                     zipf.write(file.ffn, arcname=file.name)
 
-            set_msg_success("msgSuccess", ui_db_texts)
+            set_msg_success(MSG_DEFAULT, ui_db_texts)
             # TODO:
             # <!-- JavaScript to trigger download -->
             # <script>

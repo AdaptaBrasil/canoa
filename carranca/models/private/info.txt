@@ -5,3 +5,6 @@ and create files like
    carranca\models\private_1\ExportGrid.py
 
 When finished, rename private_1 -> private
+
+2026.04.09
+The new model is table SpatialDataFile

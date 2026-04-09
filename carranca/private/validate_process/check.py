@@ -19,7 +19,7 @@ from ...helpers.file_helper import file_must_exist, folder_must_exist, is_same_f
 from ...common.app_context_vars import sidekick
 from ...common.app_error_assistant import ModuleErrorCode
 
-from ...models.private import UserDataFiles
+from ...models.privates import UserDataFiles
 from .Cargo import Cargo
 
 

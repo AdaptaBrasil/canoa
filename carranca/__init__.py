@@ -14,7 +14,7 @@ from flask_mail import Mail
 from flask_login import LoginManager
 from sqlalchemy.orm import scoped_session
 
-from typing import cast, Tuple, Dict, List
+from typing import cast, Dict, List
 from .common.Sidekick import Sidekick
 from .helpers.py_helper import OS_IS_LINUX
 
@@ -186,7 +186,7 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
         app.jinja_env.undefined = jinja2.DebugUndefined
 
     _info("All Jinja functions and global vars of this app have been successfully")
-    _info(f"...attached to 'jinja_env.globals' (with debug_templates as {debugUndefined}).")
+    _info(f"...attached to 'jinja_env.globals' (with debug_templates set to {debugUndefined}).")
 
     return
 

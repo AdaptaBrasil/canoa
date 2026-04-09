@@ -7,18 +7,31 @@ main.py
 """
 
 # cSpell:ignore sqlalchemy cssless keepalives UNMINIFIED
+from __future__ import annotations
+from typing import cast, Tuple, TYPE_CHECKING
+from flask_minify import Minify
+
+if TYPE_CHECKING:
+    from flask import Flask
 
 
-def _get_minify():
+def _init_minify(app: "Flask", config: str) -> Tuple[Minify | None, str]:
+    from .helpers.py_helper import strip_and_ignore_empty
+
+    cnf_str = " ".join(strip_and_ignore_empty(config))
+
+    def _g(key) -> bool:
+        return f" {key} ".lower() in f" {cnf_str} ".lower()
+
+    error: str = ""
     minify = None
     try:
-        from flask_minify import Minify
-
-        minify = Minify(app=app, html=True, js=True, cssless=True)
-    except:
+        minify = Minify(app=app, html=_g("html"), js=_g("js"), cssless=_g("css"))
+    except Exception as e:
+        error = str(e)
         minify = None
 
-    return minify
+    return minify, error
 
 
 import time
@@ -34,17 +47,20 @@ print(f"{'-' * len(the_aperture_msg)}\n{the_aperture_msg}")
 
 # Flask app
 from carranca import create_app, started  # see __init__.py
+from .helpers.py_helper import is_str_none_or_empty
 
 app, sidekick = create_app()
 
-
 if sidekick.config.APP_MINIFY_OFF:
     sidekick.display.info("App minification is fully disabled.")
-elif m := _get_minify():
+elif is_str_none_or_empty(modules := sidekick.config.APP_MINIFY_MODULES):
+    sidekick.display.error(f"App minification requested but not configured in APP_MINIFY_MODULES.")
+elif (result := _init_minify(app, modules)) and (m := result[0]):
     sidekick.display.info(f"Flask-Minify initialized: [html: {m.html}, js: {m.js}, cssless: {m.cssless}].")
 else:
-    sidekick.display.error("Configuration error: Flask-Minify is enabled but not installed.")
-    sidekick.display.info("Install with 'pip install Flask-Minify' or set APP_MINIFY_OFF=True in config.")
+    error = result[1]
+    sidekick.display.error(f"Configuration error: Flask-Minify raised an Error: [{error}].")
+    # sidekick.display.info("Install with 'pip install Flask-Minify' or set APP_MINIFY_OFF=False in config.")
 
 
 sidekick.display.info("The app is ready to run!")
@@ -61,6 +77,23 @@ elapsed = (time.perf_counter() - started) * 1000
 sidekick.display.info(f"{APP_NAME} version {APP_VERSION} is now ready for the journey.")
 sidekick.display.debug(f"It took {elapsed:,.0f} ms to create and initialize it.")
 
+# printed messages ;—)
+try:
+    _k = sidekick.display.Kind
+    sidekick.display.set_elapsed_output(False)
+    info = ""  # _k.USER,
+    for k in [_k.INFO, _k.WARN, _k.ERROR, _k.DEBUG, _k.FATAL]:
+        info += cast(str, sidekick.display.print(k, str(sidekick.occurrences(k)), "", True, True)) + ", "
+
+    sidekick.display.set_elapsed_output(True)
+    sidekick.display.info("Messages printed:  " + info.strip(", "))
+    if (i := sidekick.occurrences(_k.ERROR)) > 1:
+        sidekick.display.error(f"Attention: {i} errors occurred during initialization.")
+finally:
+    sidekick.display.set_elapsed_output(True)
+    sidekick.display.restart_occurrences()
+
+
 # -------------------------------------------
 # (i)
 # -------------------------------------------
@@ -72,9 +105,7 @@ app_debug = sidekick.config.APP_DEBUG
 app_reload = sidekick.config.APP_AUTO_RELOAD
 if __name__ != "__main__":
     sidekick.display.info("Using configuration from `.vscode/launch.json`.")
-    sidekick.display.warn(
-        "This module is *not* running as `__main__`, so the app will not automatically run."
-    )
+    sidekick.display.warn("This module is *not* running as `__main__`, so the app will not automatically run.")
 else:
     app.run(debug=app_debug)
 

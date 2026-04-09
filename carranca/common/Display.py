@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import time
 from math import log10, modf
-from enum import Enum
+from enum import IntEnum
 from typing import List, Callable
 from platform import uname
 
@@ -39,7 +39,7 @@ class Display:
             self.icons: List[str] = icons
             self.with_color = with_color
 
-    class Kind(Enum):
+    class Kind(IntEnum):
         PROMPT = 0
         ELAPSED = 1
         USER = 2
@@ -128,6 +128,7 @@ class Display:
         _d = Display.default  # value is None => use default
         self.echo: Callable[[Display.Kind, str], None] = lambda kind, text: None  # Default no-op function
 
+        self.restart_occurrences()
         self.prompt = _d.prompt if prompt is None else prompt
         self.mute_all = True if mute_all else False
         self.debug_output = _d.debug_output if debug_output is None else debug_output
@@ -148,18 +149,15 @@ class Display:
         return self.colors[kind.value] if self.with_color else Display.no_color
 
     def print(
-        self,
-        kind_or_user_color: Kind | str,
-        msg: str,
-        prompt: str | None = None,
-        icon_output: bool | None = None,
-    ) -> None:
+        self, kind_or_user_color: Kind | str, msg: str, prompt: str | None = None, icon_output: bool | None = None, just_return: bool = False
+    ) -> str | None:
         if self.mute_all:
-            return
+            return None
 
         start_color = Display.no_color
         is_kind = isinstance(kind_or_user_color, Display.Kind)
         kind = kind_or_user_color if is_kind else Display.Kind.USER
+
         if not msg:
             print(msg)  # perhaps a command
             return
@@ -185,6 +183,7 @@ class Display:
         _prompt = self.prompt if prompt is None else str(prompt)
         start_text = "" if not _prompt else _colorfy(Display.Kind.PROMPT, _prompt)
         elapsed = self.elapsed()
+        self._occurrences[kind] += 1
 
         if self.elapsed_output:
             start_text = f"{start_text}{_colorfy(Display.Kind.ELAPSED, elapsed)} "
@@ -193,8 +192,11 @@ class Display:
 
         icon = self.icons[kind.value] if _icon_output else ""
         end_color = Display.no_color if start_color == Display.no_color else Display.reset_color
-        print(f"{start_text}{start_color}{icon}{msg}{end_color}")
-        self.echo(kind, f"{elapsed}{icon} {msg}")
+        _output = f"{start_text}{start_color}{icon}{msg}{end_color}"
+        if not just_return:
+            print(_output)
+            self.echo(kind, f"{elapsed}{icon} {msg}")
+        return _output
 
     def type(self, kind: Kind, msg: str, prompt: str = "", icon_output: bool | None = None) -> None:
         self.print(kind, msg, prompt, icon_output)
@@ -256,6 +258,12 @@ class Display:
             result = "**:**.****"
 
         return result
+
+    def occurrences(self, kind: Kind):
+        return self._occurrences[kind]
+
+    def restart_occurrences(self):
+        self._occurrences = [0] * len(Display.Kind)
 
 
 # if __name__ == "__main__":

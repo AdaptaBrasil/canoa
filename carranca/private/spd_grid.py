@@ -1,5 +1,7 @@
 """
-SEP
+SPD
+Spatial Data
+
 Grid form Adm
 
 mgd
@@ -22,21 +24,21 @@ from ..helpers.db_records.DBRecords import DBRecords
 from ..models.private.mgmt_seps_user import MgmtSepsUser
 
 
-def get_sep_grid() -> Jinja_Rendered:
+def get_spd_grid() -> Jinja_Rendered:
 
-    def _sep_data_fetch(col_names: List[str]) -> DBRecords:
-        sep_usr_rows = MgmtSepsUser.get_seps_usr(col_names)
-        for sep in sep_usr_rows:
-            sep_id = sep.id
-            sep.id = MgmtSepsUser.code(sep_id)
-            sep.icon_file_name = do_icon_get_url(sep.icon_file_name, sep_id)
+    def _spd_data_fetch(col_names: List[str]) -> DBRecords:
+        spd_usr_rows = MgmtSepsUser.get_spd_usr(col_names)
+        for spd in spd_usr_rows:
+            spd_id = spd.id
+            spd.id = MgmtSepsUser.code(spd_id)
+            spd.icon_file_name = do_icon_get_url(spd.icon_file_name, spd_id)
 
-        return sep_usr_rows
+        return spd_usr_rows
 
-    jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SEP_GRID)
+    jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SPD_GRID)
     try:
         task_code += 1  # 1
-        tmpl_ffn, is_get, ui_db_texts = get_private_response_data("sepGrid")
+        tmpl_ffn, is_get, ui_db_texts = get_private_response_data("spdGrid")
 
         task_code += 1  # 2
         if not is_get:
@@ -48,16 +50,16 @@ def get_sep_grid() -> Jinja_Rendered:
         js_ui_dict = js_ui_dictionary(ui_db_texts[js_grid_col_meta_info], col_names, task_code)
 
         task_code += 1  # 4
-        sep_data = _sep_data_fetch(col_names)
+        spd_data = _spd_data_fetch(col_names)
 
         task_code += 1  # 5
-        # TODO sep_data[ start_index ]
-        ui_db_texts[UITextsKeys.Form.icon_url] = sep_data[0].icon_file_name if len(sep_data) > 0 else ""
+        # TODO spd_data[ start_index ]
+        ui_db_texts[UITextsKeys.Form.icon_url] = spd_data[0].icon_file_name if len(spd_data) > 0 else ""
 
         task_code += 1  # 6
         jHtml = process_template(
             tmpl_ffn,
-            sep_data=sep_data.to_list(),
+            spd_data=spd_data.to_list(),
             cargo_keys=class_to_dict(UiActResponseKeys),
             **ui_db_texts.data(),
             **js_ui_dict,

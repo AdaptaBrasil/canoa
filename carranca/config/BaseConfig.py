@@ -82,7 +82,8 @@ class BaseConfig(Config):
     APP_PROPAGATE_DEBUG = False
     # set in derived classes
     APP_DEBUG: TrueInDebug = True
-    APP_MINIFY_OFF: TrueInDebug = None  #
+    APP_MINIFY_OFF: TrueInDebug = False  #
+    APP_MINIFY_MODULES = "js css"  # config which modules are enable: "html css js app" # use only spaces
     APP_DISPLAY_DEBUG_MSG: TrueInDebug = None
 
     APP_MODE = "None"  # see below (enum)

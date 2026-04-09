@@ -113,16 +113,20 @@ class ModuleErrorCode(IntEnum):
 
     SEP_EDIT = 500
     SEP_MGMT = 550
+    DB_FETCH_ROWS = 590  # only one
     SEP_GRID = 600
     SCM_GRID = 700
     SCM_EDIT = 750
+
     SCM_EXPORT_UI_SHOW = 800
     SCM_EXPORT_UI_SAVE = 820
     SCM_EXPORT_DB = 840
+
     EMAIL_CHECK = 850
     EMAIL_VERIFY = 860
 
-    DB_FETCH_ROWS = 590  # only on
+    SPD_EDIT = 900
+    SPD_GRID = 950
 
     RECEIVED_FILES_MGMT = 700
 

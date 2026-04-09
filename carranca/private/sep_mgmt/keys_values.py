@@ -7,7 +7,7 @@ mgd 2025-04-17
 """
 
 # cSpell: ignore mgmt
-from ...models.private import MgmtSepsUser
+from ...models.private.mgmt_seps_user import MgmtSepsUser
 
 
 class SepMgmtGridCols:
@@ -23,7 +23,7 @@ class SepMgmtGridCols:
 
 
 class CargoKeys:
-    # TODO refactor to avoid confusion with 
+    # TODO refactor to avoid confusion with
     # This class is used to create the cargo of the response of `sp_mgmt` & etc
     # and parsed sep_mgm_save._prepare_data_to_save
     actions = "actions"

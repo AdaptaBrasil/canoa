@@ -15,7 +15,6 @@ mgd 2024.03
 {# so documents are displayed at the same height than login/register/password_.. forms (se the forms footer) #}
 {% set dlg_var_scroll= True %}
 {% set dlg_cls_size= 'modal-lg' %}
-{% set dlg_cls_body= 'document_cls_body' %}
 
 {% set form_close_btn_text = closeFormButton | default(ui_defaults.closeButton) %}
 
@@ -33,7 +32,9 @@ mgd 2024.03
 {# ╒═════════ Dialog Body ═════════╕ #}
 {% block dlg_blc_body %}
 
-{{ documentBody | safe }}
+<div class="document-body-class">
+    {{ documentBody | safe }}
+</div>
 
 {% endblock %}
 {# ╘═════════ Dialog Body ═════════╛ #}

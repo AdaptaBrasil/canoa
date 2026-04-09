@@ -11,17 +11,10 @@ Equipe da Canoa -- 2025.07.24
 #
 # cSpell:ignore: nullable sqlalchemy sessionmaker sep ssep scm sepsusr usrlist SQLA duovigesimal
 
-from sqlalchemy import (
-    Computed,
-    Boolean,
-    Column,
-    Integer,
-    String,
-    select,
-)
+from sqlalchemy import Computed, Boolean, Column, Integer, String, select
 from sqlalchemy.orm import Session
 
-from ...models import SQLABaseTable
+from ..base import CanoaBaseView
 from ...private.IdToCode import IdToCode
 from ...helpers.db_helper import db_fetch_rows, col_names_to_columns
 from ...helpers.types_helper import Opt_List_Of_Str
@@ -29,10 +22,9 @@ from ...helpers.db_records.DBRecords import DBRecords
 
 
 # --- View ---
-class SchemaGrid(SQLABaseTable):
+class SchemaGrid(CanoaBaseView):
     __tablename__ = "vw_schema_grid"
 
-    id = Column(Integer, primary_key=True, autoincrement=False)
     name = Column(String(100))
     color = Column(String(9))
     title = Column(String(140))
@@ -48,6 +40,7 @@ class SchemaGrid(SQLABaseTable):
     def code(id: int) -> str:
         return SchemaGrid.id_to_code.encode(id)
 
+    # TODO refactor to self.get_data()
     @staticmethod
     def get_schemas(
         col_names: Opt_List_Of_Str = None,

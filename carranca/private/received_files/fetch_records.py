@@ -9,7 +9,7 @@ mgd 2025-01-14 & 03-18
 
 from os import path
 from typing import List, Tuple, Optional
-from ...models.private import ReceivedFiles
+from ...models.privates import ReceivedFiles
 from ...common.app_context_vars import app_user
 from ...config.ValidateProcessConfig import ValidateProcessConfig
 

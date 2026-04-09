@@ -73,6 +73,10 @@
       if too many params {{ action_form__submit_cargo(dlg_submit_form_id, private_route('sep_mgmt'), 'post', "onsubmit='return doGridCargo()'")}}
     todo:
 
+------- 2026 - April -------------
+    - 'recortes' -> Spatial Data
+    - Remove ui_db_texts_cache.py
+
 
 ------- 2026 - March -------------
     - Start 'recortes' se tests/test_shape_geojson.py

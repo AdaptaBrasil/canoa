@@ -11,7 +11,7 @@ from flask import request
 from typing import Tuple, List, Dict
 
 from ...models.public import User
-from ...models.private import MgmtSepsUser
+from ...models.private.mgmt_seps_user import MgmtSepsUser
 
 from ..sep_icon import do_icon_get_url
 from ..SepIconMaker import SepIconMaker

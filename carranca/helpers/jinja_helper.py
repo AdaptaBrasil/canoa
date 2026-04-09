@@ -129,7 +129,8 @@ def process_template(tmpl_ffn: Jinja_Template, **context: Any) -> Jinja_Rendered
         jHtml = render_template(tmpl_ffn, **context)
         jHtml_to_display = as_str_strip(jHtml)
 
-        detect_jinja_errors = not is_same_file_name(APP_UPS_HTML_PAGE_FILE_NAME, file_name)
+        detect_jinja_errors = False
+        # not is_same_file_name(APP_UPS_HTML_PAGE_FILE_NAME, file_name)
 
         if detect_jinja_errors and sidekick.config.DEBUG_RENDERED_TEMPLATES:
             dup_ids = _detect_duplicate_ids(jHtml_to_display)

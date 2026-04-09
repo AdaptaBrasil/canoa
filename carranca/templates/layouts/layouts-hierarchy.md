@@ -54,7 +54,7 @@ base → dialog
 
       <!-- BODY -->
       <div class="modal-body">
-        <form id="dlg_submit_form_id" method="post">
+        <form id="dlg-submit-form-id" method="post">
           <!-- Username -->
           <div class="form-group">
             <label>User Name</label>
@@ -80,7 +80,7 @@ base → dialog
         <!-- Buttons (from form.html.j2) -->
         <div class="row justify-content-center" id="dlg_btns_container_id">
           <div class="col-auto">
-            <button id="dlg_submit_btn_id" type="submit" form="dlg_submit_form_id" class="btn btn-primary">
+            <button id="dlg_submit_btn_id" type="submit" form="dlg-submit-form-id" class="btn btn-primary">
               Entrar
             </button>
           </div>

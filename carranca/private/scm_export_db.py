@@ -22,10 +22,10 @@ from ..helpers.uiact_helper import UiActResponse
 from ..helpers.jinja_helper import process_template
 from ..helpers.types_helper import Jinja_Rendered
 from ..helpers.route_helper import get_private_response_data, init_response_vars
+from ..models.private.ExportGrid import ExportGrid
 from ..config.ExportProcessConfig import ExportProcessConfig
 from ..common.app_error_assistant import ModuleErrorCode
 from ..helpers.ui_db_texts_manager import set_msg_error, set_msg_success, MSG_DEFAULT
-from ..models.private_1.ExportGrid import ExportGrid
 
 
 def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_Rendered | Response:
@@ -50,22 +50,23 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_Rendered | Response:
         scm_missing = []
         file_info = []
         task_code += 1
-        file_data = ExportGrid.get_data(["user_id", "sep_id", "scm_id", "file_origin", "file_name"])
+        grid_data = ExportGrid.get_data(["user_id", "sep_id", "scm_id", "file_origin", "file_name"])
 
         task_code += 1
+        ## TODO: records: List[ExportGrid] = file_data.records
         _schemas = schema_data.schemas
-        for file in file_data.records:
-            ffn = UserFolders(file.user_id).file_full_name(file.file_origin, file.file_name)
-            if (scm := next((item for item in _schemas if item["id"] == file.scm_id), None)) is None:
-                scm_missing.append(f"{file.scm_id}")
-            elif (sep := next((item for item in scm["seps"] if item["id"] == file.sep_id), None)) is None:
-                sep_missing.append(f"{file.sep_id}")
+        for row in grid_data.records:
+            ffn = UserFolders(row.user_id).file_full_name(row.file_origin, row.file_name)
+            if (scm := next((item for item in _schemas if item["id"] == row.scm_id), None)) is None:
+                scm_missing.append(f"{row.scm_id}")
+            elif (sep := next((item for item in scm["seps"] if item["id"] == row.sep_id), None)) is None:
+                sep_missing.append(f"{row.sep_id}")
                 pass
             elif not os.path.exists(ffn):
-                file_missing.append(file.file_name)
+                file_missing.append(row.file_name)
             else:
-                sep["data_file_name"] = file.file_name
-                file_info.append(FileInfo(file.file_name, ffn))
+                sep["data_file_name"] = row.file_name
+                file_info.append(FileInfo(row.file_name, ffn))
 
         if len(scm_missing) > 0 or len(sep_missing) > 0 or len(file_missing) > 0:
             task_code += 1
@@ -86,8 +87,8 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_Rendered | Response:
                 zipf.writestr("header.json", json.dumps(config.header, **config.json_cfg))
                 zipf.writestr("metadata.json", json.dumps(schema_dict, **config.json_cfg))
                 # Add files from the folder
-                for file in file_info:
-                    zipf.write(file.ffn, arcname=file.name)
+                for row in file_info:
+                    zipf.write(row.ffn, arcname=row.name)
 
             set_msg_success(MSG_DEFAULT, ui_db_texts)
             # TODO:
@@ -104,7 +105,7 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_Rendered | Response:
         jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
 
     except Exception as e:
-        jHtml = get_ups_jHtml("msgFatal", ui_db_texts, task_code, e, task_code)
+        jHtml = get_ups_jHtml("msgFatal", ui_db_texts, task_code, e)
 
     return jHtml
 

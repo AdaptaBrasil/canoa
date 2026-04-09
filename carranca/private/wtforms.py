@@ -6,7 +6,7 @@ Equipe da Canoa -- 2024
 mgd 2024-04-09,27; 06-22, 2026-01
 """
 
-# cSpell:ignore: wtforms urlname iconfilename uploadfile tmpl RRGGBB
+# cSpell:ignore: wtforms urlname iconfilename uploadfile tmpl RRGGBB gpkg
 
 from flask_wtf import FlaskForm
 from wtforms import (
@@ -150,7 +150,7 @@ class SepEdit(FlaskForm):
         },
     )
 
-    icon_filename = FileField("", render_kw={"class": "form-control", "accept": ".svg"})
+    icon_file = FileField("", render_kw={"class": "form-control", "accept": ".svg"})
 
     visible = BooleanField("", render_kw={"class": "form-check-input"})
 
@@ -256,6 +256,80 @@ class ScmEdit(FlaskForm):
     )
 
     content = TextAreaField("", render_kw={"class": "form-control", "rows": "13"})
+
+
+# Private form
+class SpdEdit(FlaskForm):
+    """
+    ------------------------------------------------------------
+       ⚠️
+        Don't defined here mutable render_kw, they persist
+        set value to those that will not change throw tha app
+        see:
+            carranca/private/sep_new_edit.py
+                fform = SepNew(request.form) if is_new
+                        else
+                        SepEdit(request.form)
+    ------------------------------------------------------------
+        like:
+          lang, disabled, readonly, required
+    """
+
+    name = StringField(
+        "",
+        validators=[
+            InputRequired(),
+            Length(min=2, max=140),
+        ],  # TODO sidekick.config.DB_len_val_for_sep
+        render_kw={
+            "class": "form-control",
+            "autofocus": "true",
+            "autocomplete": "off",
+            "spellcheck": True,
+            "lang": "",
+        },
+    )
+
+    color = StringField(
+        "",
+        validators=[Length(min=7, max=7)],
+        default="#000000",
+        id="id-color-inp",  # see .j2
+        render_kw={
+            "class": "form-control",
+            "autocomplete": "off",
+            "spellcheck": False,
+            "placeholder": "#RRGGBB",
+        },
+        #  widget=ColorInput(),
+    )
+
+    title = StringField(
+        "",
+        validators=[
+            InputRequired(),
+            Length(min=2, max=140),
+        ],  # TODO sidekick.config.DB_len_val_for_sep
+        render_kw={
+            "class": "form-control",
+            "autocomplete": "off",
+            "spellcheck": True,
+            "lang": "",
+        },
+    )
+
+    description = StringField(
+        "",
+        validators=[Length(min=5, max=140)],
+        render_kw={
+            "class": "form-control",
+            "autocomplete": "off",
+            "spellcheck": True,
+            "lang": "",  # ⚠️ Don't define it here, they persist. See below ScmNew
+        },
+    )
+
+    spd_file = FileField("", render_kw={"class": "form-control", "accept": ".gpkg"})
 
 
 # eof

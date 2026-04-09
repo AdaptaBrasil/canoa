@@ -42,7 +42,7 @@ class DBRecords:
             a list of DBRecord objects
     """
 
-    from .DBRecord_types import SQLAStatement, SQLABaseRecords
+    from .DBRecord_types import SQLA_Statement, SQLA_Base_Records
 
     simple_types_filter: Tuple[type, ...] = (str, int, float, bool, datetime)
 
@@ -51,8 +51,8 @@ class DBRecords:
 
     def __init__(
         self,
-        sqla_stmt: SQLAStatement,
-        sqla_records: Optional[SQLABaseRecords] = None,
+        sqla_stmt: SQLA_Statement,
+        sqla_records: Optional[SQLA_Base_Records] = None,
         allowed_field_names: Opt_List_Of_Str = None,
         allowed_field_types: Optional[Tuple[type, ...]] = None,
         includeNone: bool = True,
@@ -103,13 +103,9 @@ class DBRecords:
                 _add_meta(col.name, col.type.python_type.__name__, col_length)
 
         # Fields names filter required?
-        self.allowed_field_names = (
-            allowed_field_names if isinstance(allowed_field_names, List) and len(allowed_field_names) > 0 else None
-        )
+        self.allowed_field_names = allowed_field_names if isinstance(allowed_field_names, List) and len(allowed_field_names) > 0 else None
         # Fields values types were specified?
-        self.allowed_field_types = (
-            allowed_field_types if allowed_field_types is not None else DBRecords.simple_types_filter
-        )
+        self.allowed_field_types = allowed_field_types if allowed_field_types is not None else DBRecords.simple_types_filter
 
         if includeNone:
             self.allowed_field_types += (type(None),)
@@ -189,10 +185,7 @@ class DBRecords:
         exclude_fields = (exclude_fields or []) + ["__class__.__name__"]
         if include_fields is None or len(include_fields) == 0:
             include_fields = list(self.records[0].__dict__.keys()) if self.records else []
-        _list = [
-            {key: value for key, value in record.__dict__.items() if key not in exclude_fields}
-            for record in self.records
-        ]
+        _list = [{key: value for key, value in record.__dict__.items() if key not in exclude_fields} for record in self.records]
         return _list
 
     def keys(self):

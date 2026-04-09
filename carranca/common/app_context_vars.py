@@ -143,12 +143,12 @@ def __get_jinja_user() -> Optional["JinjaUser"]:
 # -----------
 def __prepare_user_seps() -> "UserSepsRtn":
 
-    from ..models.private import MgmtSepsUser
     from ..private.UserSep import UserSep
     from ..private.sep_icon import do_icon_get_url
     from ..helpers.pw_helper import is_anyone_logged
     from ..helpers.py_helper import class_to_dict
     from ..helpers.types_helper import Usual_Dict
+    from ..models.private.mgmt_seps_user import MgmtSepsUser
 
     user_id: int = current_user.id if is_anyone_logged() else -1
 

@@ -21,7 +21,7 @@ mgd
 <div class="form-group">
     <label class="form-label" inert for="{{form.username.name}}">{{ userLabel }}</label>
     <div class="input-group">
-        <span class="input-group-text"><i class="{{ faStyle }} fa-user"></i></span>
+        <span class="input-group-text"><i class="{{faStyle}} fa-fw fa-user"></i></span>
         {{ form.username() }}
     </div>
 </div>
@@ -81,9 +81,11 @@ mgd
 {% endblock dlg_blc_footer_options %}
 {# ╘════════════════ Options ═══════════════╛ #}
 
+{# ╒════════════════ Open Eye ══════════════╕ #}
 {% block frm_blc_script %}
 {% from "./includes/_password_field.js.j2" import password_field_js %}
 {{ password_field_js() }}
 {% endblock frm_blc_script %}
+{# ╘════════════════ Open Eye ══════════════╛ #}
 
 {# eof #}

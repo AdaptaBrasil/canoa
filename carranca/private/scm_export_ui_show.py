@@ -16,9 +16,9 @@ from ..helpers.jinja_helper import process_template
 from ..helpers.uiact_helper import UiActResponse, UiActResponseKeys
 from ..helpers.route_helper import get_private_response_data, init_response_vars
 from ..helpers.js_consts_helper import js_grid_col_meta_info, js_ui_dictionary
+from ..models.private.ExportGrid import ExportGrid
 from ..config.ExportProcessConfig import ExportProcessConfig
 from ..common.app_error_assistant import ModuleErrorCode
-from ..models.private_1.ExportGrid import ExportGrid
 
 
 def scm_export_ui_show(uiact_rsp: UiActResponse) -> Jinja_Template:

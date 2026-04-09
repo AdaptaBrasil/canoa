@@ -18,7 +18,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from carranca import global_sqlalchemy_scoped_session
-from ...models.private import MgmtEmailSep
+from ...models.privates import MgmtEmailSep
 from ...common.UIDBTexts import UIDBTexts
 from ...helpers.types_helper import Sep_Mgmt_Return, Opt_Str
 from ...helpers.email_helper import RecipientsDic, RecipientsList, send_email

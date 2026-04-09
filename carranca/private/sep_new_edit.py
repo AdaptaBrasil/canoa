@@ -50,7 +50,7 @@ from ..helpers.ui_db_texts_manager import (
 
 def do_sep_edit(data: str) -> str:
     """SEP Edit & Insert Form"""
-    from ..models.private import Sep
+    from ..models.privates import Sep
 
     SVG_MIME = "image/svg+xml"
 
@@ -58,9 +58,7 @@ def do_sep_edit(data: str) -> str:
 
     if action is not None:  # called from sep_grid
         # TODO use: window.history.back() in JavaScript.
-        process_on_end = private_route(
-            "sep_grid", code=UiActResponseProxy.show
-        )  # TODO selected Row, ix=row_index)
+        process_on_end = private_route("sep_grid", code=UiActResponseProxy.show)  # TODO selected Row, ix=row_index)
         form_on_close = {"dlg_close_action_url": process_on_end}
     else:  # standard routine
         code = data
@@ -97,16 +95,14 @@ def do_sep_edit(data: str) -> str:
 
         def _init_icon_data(form: SepNew | SepEdit) -> IconData:
             icon_data = IconData()
-            icon_data.storage = request.files.get(form.icon_filename.name, None)
+            icon_data.storage = request.files.get(form.icon_file.name, None)
             icon_data.sent = bool(icon_data.storage and icon_data.storage.filename)
             if icon_data.sent:
                 icon_data.is_svg = icon_data.storage.content_type.startswith(SVG_MIME)
                 icon_data.file_name = icon_data.storage.filename
             return icon_data
 
-        def _was_form_sep_modified(
-            sep_row: Sep, form: SepNew | SepEdit
-        ) -> Tuple[bool, bool, str, int, int]:
+        def _was_form_sep_modified(sep_row: Sep, form: SepNew | SepEdit) -> Tuple[bool, bool, str, int, int]:
             if is_get:
                 return (False, False, "", -1, -1)
 
@@ -129,9 +125,7 @@ def do_sep_edit(data: str) -> str:
                     form_modified = True
                     sep_modified = True
                 case SepEditMode.SIMPLE_EDIT:
-                    form_modified = (frm_visible != sep_row.visible) or (
-                        frm_description != sep_row.description
-                    )
+                    form_modified = (frm_visible != sep_row.visible) or (frm_description != sep_row.description)
                     sep_modified = False
                 case SepEditMode.FULL_EDIT:
                     form_modified = (
@@ -159,9 +153,7 @@ def do_sep_edit(data: str) -> str:
             no_manager = NoManager(name=ui_db_texts["mng_placeholderOption"])
 
             ui_db_texts["formForNew"] = edit_full_or_ins
-            ui_db_texts["formTitle"] = ui_db_texts[
-                f"formTitle{('New' if editMode == SepEditMode.INSERT else 'Edit')}"
-            ]
+            ui_db_texts["formTitle"] = ui_db_texts[f"formTitle{('New' if editMode == SepEditMode.INSERT else 'Edit')}"]
             task_code += 1  # 2
             fform = SepNew() if edit_full_or_ins else SepEdit()
             # Personalized template for this user (see tmpl_form.sep_name for more info):
@@ -172,15 +164,11 @@ def do_sep_edit(data: str) -> str:
             fform.description.render_kw["lang"] = app_user.lang
 
         task_code += 1  # 3
-        sep_row, ui_select_lists, sep_fullname = get_sep_data(
-            task_code, editMode, no_manager, ui_db_texts, fform, sep_id, sep_fullname
-        )
+        sep_row, ui_select_lists, sep_fullname = get_sep_data(task_code, editMode, no_manager, ui_db_texts, fform, sep_id, sep_fullname)
 
         task_code = ModuleErrorCode.SEP_EDIT.value + 10  # 510
         icon_data = _init_icon_data(fform)
-        form_modified, sep_modified, sep_name, id_schema, id_manager = _was_form_sep_modified(
-            sep_row, fform
-        )
+        form_modified, sep_modified, sep_name, id_schema, id_manager = _was_form_sep_modified(sep_row, fform)
         if is_get:
             task_code += 1
             if sep_id and sep_row.icon_crc:
@@ -195,11 +183,7 @@ def do_sep_edit(data: str) -> str:
             raise AppStumbled(msg_error, task_code, True, True)
         elif (
             scm_name := (
-                next(
-                    (scm["name"] for scm in ui_select_lists[SCHEMA_LIST_KEY] if scm["id"] == id_schema), "?"
-                )
-                if edit_full_or_ins
-                else ""
+                next((scm["name"] for scm in ui_select_lists[SCHEMA_LIST_KEY] if scm["id"] == id_schema), "?") if edit_full_or_ins else ""
             )
         ) is None:
             # should never happen, is used to keep the if's one level indentation

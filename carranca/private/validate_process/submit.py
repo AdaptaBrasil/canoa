@@ -16,7 +16,7 @@ import asyncio
 from os import path, stat, access, X_OK
 
 from .Cargo import Cargo
-from ...models.private import UserDataFiles
+from ...models.privates import UserDataFiles
 from .run_validator import run_validator
 from ...helpers.file_helper import change_file_ext
 from ...common.app_context_vars import sidekick

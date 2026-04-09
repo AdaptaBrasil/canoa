@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from .wtforms import SepNew
 from .SepIconMaker import SepIconMaker
 from ..models.public import User
-from ..models.private import Sep, Schema, MgmtSepsUser
+from ..models.privates import Sep, Schema
 from ..private.UserSep import UserSep
 from ..common.UIDBTexts import UIDBTexts
 from ..helpers.py_helper import to_int, clean_text
@@ -22,6 +22,7 @@ from ..helpers.route_helper import is_method_post
 from ..common.app_context_vars import app_user
 from ..common.app_error_assistant import AppStumbled, JumpOut
 from ..helpers.ui_db_texts_manager import UITextsKeys, set_msg_fatal
+from ..models.private.mgmt_seps_user import MgmtSepsUser
 
 
 class SepEditMode(IntEnum):
@@ -105,7 +106,7 @@ def get_sep_data(
     task_code += 6
     # Now, find the sep's manager
     sep_manager: str = ""
-    sep_usr_row: MgmtSepsUser = None
+    sep_usr_row: MgmtSepsUser | None = None
 
     # does current user owns the sep?
     usr_sep = next((sep for sep in app_user.seps if sep.id == sep_id), None)
@@ -139,7 +140,7 @@ def get_sep_data(
         form.sep_name.data = clean_text(sep_row.name)
         form.visible.data = bool(sep_row.visible)
         form.description.data = clean_text(sep_row.description)
-        form.icon_filename.data = None
+        form.icon_file.data = None
         form.manager_name.data = sep_manager
         form.manager_name.render_kw["disabled"] = not (edit_mode == SepEditMode.FULL_EDIT)
         if edit_mode == SepEditMode.FULL_EDIT:

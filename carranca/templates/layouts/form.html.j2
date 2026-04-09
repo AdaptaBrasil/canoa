@@ -29,18 +29,14 @@ what should be shown#}
 {# ╘═════════ Display Message If Any ═══════════╛ #}
 
 {% if form_display_ui %}
-
 {# ╒═══════════════ Display UI ═══════════════╕ #}
 
-{% if not form_submit_route %}
-{# There are TWO forms with same ID, trying to fix 2026.04.02 #}
 <form method="post" action="" id="{{dlg_submit_form_id}}" {{ formAttribute | default('') }}>
     <input type="hidden" name="{{safe_token.key}}" value="{{safe_token.value}}">
     {# ╒═══════════════ Form's input ═══════════════╕ #}
     {% block frm_blc_inputs %}{% endblock %}
     {# ╘══════════════ Form's input ════════════════╛ #}
 </form>
-{% endif %}
 
 {# ╘═══════════════ Display UI ═══════════════╛ #}
 {% endif %}
@@ -77,11 +73,11 @@ what should be shown#}
 {# ╘════════════ Footer Buttons ══════════╛ #}
 
 
-{# ╒═══════════ Footer Option ════════════╕ #}
+{# ╒═══════════ Footer Options ═══════════╕ #}
 {% block dlg_blc_footer_options %}
 {# optional; for a example see login.html.j2 #}
 {% endblock dlg_blc_footer_options %}
-{# ╘═══════════ Footer Option ════════════╛ #}
+{# ╘═══════════ Footer Options ═══════════╛ #}
 
 
 {% if form_display_ui %}
@@ -99,15 +95,18 @@ what should be shown#}
 {% endif %}
 {# ╘═══════════════ Display UI ═══════════════╛ #}
 
-
-{% if form_submit_route %}
 {# ╒════════════════ Dialog Forms ════════════════╕ #}
+
+{#
+{% if form_submit_route %}
 {% block dlg_blc_forms %}
 
 {% from "includes/_action_forms_and_btns.html.j2" import action_form__submit_cargo %}
 {{ action_form__submit_cargo(dlg_submit_form_id, form_submit_route ) }}
 
 {% endblock dlg_blc_forms %}
-{# ╘═════════════════ Dialog Forms ════════════════╛ #}
 {% endif %}
+#}
+
+{# ╘═════════════════ Dialog Forms ════════════════╛ #}
 {# eof #}

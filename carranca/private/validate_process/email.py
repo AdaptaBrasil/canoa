@@ -11,7 +11,7 @@ mgd
 # cSpell:ignore
 
 from .Cargo import Cargo
-from ...models.private import UserDataFiles
+from ...models.privates import UserDataFiles
 from ...common.app_context_vars import sidekick
 from ...common.app_error_assistant import ModuleErrorCode
 from ...helpers.py_helper import now_as_text, now

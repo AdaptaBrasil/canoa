@@ -22,7 +22,7 @@ mgd
 <div class="form-group">
     <label class="form-label" inert for="{{form.username.name}}">{{ userLabel }}</label>
     <div class="input-group">
-        <span class="input-group-text"><i class="{{ faStyle }} fa-user"></i></span>
+        <span class="input-group-text"><i class="{{faStyle}} fa-fw fa-user"></i></span>
         {{ form.username() }}
     </div>
 </div>
@@ -32,21 +32,27 @@ mgd
 <div class="form-group mt-3">
     <label class="form-label" inert for="user_email">{{ emailLabel }}</label>
     <div class="input-group">
-        <span class="input-group-text"><i class="{{ faStyle }} fa-envelope"></i></span>
+        <span class="input-group-text"><i class="{{faStyle}} fa-fw fa-envelope"></i></span>
         {{ form.email(class="form-control", type="email", id="user_email") }}
     </div>
 </div>
 <!-- Email } -->
 
-<!-- { Password  -->
+{# <!-- { Password  -->
 <div class="form-group mt-3">
     <label class="form-label" inert for="{{form.password.name}}">{{ passwordLabel }}</label>
     <div class="input-group">
-        <span class="input-group-text"><i class="{{ faStyle }} fa-unlock-alt"></i></span>
+        <span class="input-group-text"><i class="{{faStyle}} fa-fw fa-unlock-alt"></i></span>
         {{ form.password() }}
     </div>
 </div>
-<!-- Password } -->
+<!-- Password } --> #}
+<!--{ Password  -->
+<div class="form-group mt-3">
+    {% from "./includes/_password_field.html.j2" import password_field_input %}
+    {{ password_field_input(form.password, faStyle, passwordLabel, password_show) }}
+</div>
+<!-- Password }-->
 
 
 {% endblock frm_blc_inputs %}
@@ -74,6 +80,15 @@ mgd
 </div>
 {% endblock dlg_blc_footer_options %}
 {# ╘════════════════ Options ═══════════════╛ #}
+
+
+
+{# ╒════════════════ Open Eye ══════════════╕ #}
+{% block frm_blc_script %}
+{% from "./includes/_password_field.js.j2" import password_field_js %}
+{{ password_field_js() }}
+{% endblock frm_blc_script %}
+{# ╘════════════════ Open Eye ══════════════╛ #}
 
 
 {# eof #}

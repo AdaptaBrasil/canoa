@@ -5,7 +5,7 @@
  *  Miguel Gastelumendi -- mgd
  * ============================================ */
 
-/* cSpell:ignore unselectable callout Konqueror tmpl adaptabrasil */
+/* cSpell:ignore unselectable callout Konqueror tmpl adaptabrasil stylesheet*/
 
 :root {
     --project-name: 'Canoa';
@@ -14,21 +14,21 @@
     /* complementary */
     --canoa-dlg-header-bg: #b36920;
     --canoa-dlg-header-color: white;
-    --canoa-form-body-bg: #fbf3ea;
-    --canoa-form-footer-bg: #f8e9d9;
-    --canoa-form-button-bg: #144270;
+    --canoa-dlg-body-bg: #fbf3ea;
     /* ~30 lighter the the button */
     /* not working :-( --canoa-form-icon-btn-bg: color-mix(in srgb, var(--bg-color) 70%, white); */
     /* 130 % --canoa-form-icon-btn-bg: #195591; */
     /* brightness(160%) */
     --canoa-form-icon-btn-bg: #2069B3;
     --canoa-form-text-color: #814c17;
-    --canoa-form-link-color: ##814c17;
+    --canoa-form-link-color: #814c17;
+    --canoa-form-footer-bg: #f8e9d9;
     --canoa-form-footer-top: #f8dbbc;
-    /* darker than label #80460d; */
+    --canoa-form-button-bg: #144270;
     --canoa-form-icon-color: #975513;
     --canoa-form-label-color: #814c17;
     --canoa-form-button-color: white;
+
     --canoa-label-margin-left: calc(var(--bs-border-radius) / 2);
     --adaptabrasil-back-color: white;
 }
@@ -37,8 +37,8 @@ body {
     /*
     background: url(/static/img/pages/canoa_fundo.jpeg) no-repeat center center fixed;
     background-size: cover;
-    in this way, Firefox has NO flickering
-     */
+    */
+    /* In this way, Firefox has NO flickering: */
     background-color: var(--canoa-form-text-color);
     background-image: url('/static/img/pages/canoa_fundo.jpeg');
     background-repeat: no-repeat;
@@ -85,7 +85,7 @@ body {
 }
 
 .dlg-body {
-    background-color: var(--canoa-form-body-bg);
+    background-color: var(--canoa-dlg-body-bg);
 }
 
 .dlg-header {
@@ -105,18 +105,12 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-
     background-color: rgba(0, 0, 0, 0.3);
-    opacity: 1;
-
     z-index: 10;
 
-    /* a la vuelta al contrario:
-    pointer-events: none;
-    transition: opacity 0.8s ease, background-color 0.8s ease;
-    opacity: 0;
-    transition: opacity 0.8s ease, background-color 0.8s ease;
-     */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .dlg-sep-icon-back {
@@ -156,14 +150,17 @@ body {
 
 /* ============================================
  *  carranca\templates\home\document.html.j2
+ * /!\ font-family
+ *  is imported by Bootstrap CSS
+ *  in .\templates\layouts\base.html.j2
  * ============================================ */
-.document_cls_body {
-    /* light dialog footer */
-    background-color: #fff8f1;
-    font-family: "Source Sans Pro", sans-serif;
-    color: black;
+.document-body-class {
+    font-family: "Roboto", sans-serif;
     font-size: 1rem;
-    line-height: 1.2;
+    line-height: 1.4;
+    color: #2c2c2c;
+    text-align: left;
+    margin: 1rem;
 }
 
 /* =+===========================================

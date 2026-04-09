@@ -1,5 +1,5 @@
 """
-SEP Edition
+Spatial Data Edition
 
 Equipe da Canoa -- 2024
 mgd 2024-10-09, 11-12
@@ -10,7 +10,7 @@ mgd 2024-10-09, 11-12
 from wtforms import StringField
 from sqlalchemy import func  # func.now() == db-server time
 
-from .wtforms import ScmEdit
+from .wtforms import SpdEdit
 from ..models.privates import Schema
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.jinja_helper import process_template
@@ -30,14 +30,15 @@ from ..common.app_context_vars import app_user
 from ..common.app_error_assistant import ModuleErrorCode, JumpOut
 
 
-def do_scm_edit(data: str) -> str:
-    """SCM Edit & Insert Form"""
+def do_spd_edit(data: str) -> str:
+    """Spatial DataEdit & Insert Form"""
 
     action, code, row_index = UiActResponseProxy().decode(data)
 
     if action is not None:  # called from sep_grid
         # TODO use: window.history.back() in JavaScript.
-        process_on_end = private_route("scm_grid", code=UiActResponseProxy.show)  # TODO selected Row, ix=row_index)
+        # TODO selected Row, ix=row_index)
+        process_on_end = private_route("spd_grid", code=UiActResponseProxy.show)
         form_on_close = {"dlg_close_action_url": process_on_end}
     else:  # standard routine
         code = data
@@ -49,19 +50,19 @@ def do_scm_edit(data: str) -> str:
     is_edit = not is_insert
 
     # edit SEP with ID, is a parameter
-    new_scm_id = 0
-    scm_id = new_scm_id if is_insert else Schema.to_id(code)
+    new_spd_id = 0
+    spd_id = new_spd_id if is_insert else Schema.to_id(code)
 
-    jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SCM_EDIT)
+    jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SPD_EDIT)
 
     tmpl_ffn = ""
     try:
         task_code += 1
-        fform = ScmEdit()
+        fform = SpdEdit()
         task_code += 1  # 2
-        tmpl_ffn, is_get, ui_db_texts = get_private_response_data("scmNewEdit")
+        tmpl_ffn, is_get, ui_db_texts = get_private_response_data("spdNewEdit")
 
-        if (scm_row := Schema() if is_insert else Schema.get_row(scm_id)) is None:
+        if (scm_row := Schema() if is_insert else Schema.get_row(spd_id)) is None:
             # get the editable row
             # Someone deleted just now?
             raise JumpOut(set_msg_fatal("scmEditNotFound", ui_db_texts), task_code + 1)
@@ -75,13 +76,11 @@ def do_scm_edit(data: str) -> str:
         fform.name.render_kw["title"] = ui_db_texts["nameErrorHint"]
 
         fform.description.render_kw["lang"] = app_user.lang
-        fform.content.render_kw["lang"] = app_user.lang
         fform.title.render_kw["lang"] = app_user.lang
 
         if is_get and is_insert:
             task_code += 1  # 5
             scm_row.id = None
-            scm_row.visible = False
             scm_row.color = ui_db_texts["colorDefaultValue"]  # "#00000"  # RR GG BB
         elif is_get and is_edit:
             task_code += 2  # 6

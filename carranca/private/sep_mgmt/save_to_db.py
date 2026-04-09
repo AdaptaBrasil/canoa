@@ -98,8 +98,8 @@ def _save_data_to_db(
 
     from carranca import global_sqlalchemy_scoped_session
 
-    from ...models.private import MgmtSepsUser
     from ...common.app_context_vars import app_user, sidekick
+    from ...models.private.mgmt_seps_user import MgmtSepsUser
 
     msg_error = None
     assigned_by = app_user.id

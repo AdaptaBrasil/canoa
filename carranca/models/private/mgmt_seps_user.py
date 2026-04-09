@@ -1,56 +1,20 @@
-"""
-MgmtSepsUser
+# cSpell:ignore: nullable sqlalchemy sessionmaker sep ssep scm sepsusr usrlist SQLA duovigesimal
 
-`vw_mgmt_user_sep` is a database view designed to provide the necessary
-information for displaying a UI grid in the application's admin panel.
+from typing import List, Optional
+from sqlalchemy import DateTime, Boolean, Integer, Column, String, select
+from sqlalchemy.orm import Session
 
-This grid enables administrators to efficiently assign or remove users
-from SEPs (Setor Estratégico P...).
-
-The view is equipped with triggers that automatically update the `users`
-table and log the corresponding actions in the `log_user_sep` table.
-
-mgd
-"""
-
-# cSpell:ignore:  SQLA
-
-from sqlalchemy import (
-    Optional,
-    Computed,
-    DateTime,
-    Boolean,
-    Integer,
-    Column,
-    String,
-    Text,
-    List,
-    select,
-    func,
-    and_,
-    exists,
-)
-from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import defer, Session
-from sqlalchemy.ext.hybrid import hybrid_property
-
-from ... import global_sqlalchemy_scoped_session
-
-from ...models import SQLABaseTable
-from ...helpers.db_helper import db_fetch_rows
-from ...helpers.py_helper import is_str_none_or_empty
-from ...helpers.user_helper import get_user_code
-from ...private.SepIconMaker import SepIconMaker, Svg_Content
+from ..base import CanoaBaseView
+from ...helpers.db_helper import db_fetch_rows, col_names_to_columns
 from ...helpers.db_records.DBRecords import DBRecords
-
 from ...private.IdToCode import IdToCode
 
 
-class MgmtSepsUser(SQLABaseTable):
+class MgmtSepsUser(CanoaBaseView):
     __tablename__ = "vw_mgmt_seps_user"
+    __read_only__ = False
 
     # SEP table
-    id = Column(Integer, primary_key=True, autoincrement=False)  # like a PK
     name = Column(String(100))
     fullname = Column(String(256))  # schema + sep_name
     fullname_lower = Column(String(256))
@@ -83,7 +47,7 @@ class MgmtSepsUser(SQLABaseTable):
     @staticmethod
     def _get_sep_list(user_id: Optional[int] = None, sep_id: Optional[int] = None) -> DBRecords:
         """⚠️
-        any change here must be replated in
+        any change here must be repeated in
         carranca/private/UserSep.py:UserSep
         """
         field_names = [
@@ -107,7 +71,7 @@ class MgmtSepsUser(SQLABaseTable):
         return MgmtSepsUser._get_sep_list(user_id)
 
     @staticmethod
-    def get_sep_row(sep_id: int) -> "MgmtSepsUser":
+    def get_sep_row(sep_id: int) -> Optional["MgmtSepsUser"]:
         """Get one sep"""
         records: DBRecords = MgmtSepsUser._get_sep_list(None, sep_id)
         return None if records is None or (records.count == 0) else records[0]
@@ -119,7 +83,7 @@ class MgmtSepsUser(SQLABaseTable):
 
     @staticmethod
     def get_seps_usr(
-        field_names: List[str],
+        col_names: List[str],
         user_id: Optional[int] = None,
         sep_id: Optional[int] = None,
     ) -> DBRecords:
@@ -132,12 +96,14 @@ class MgmtSepsUser(SQLABaseTable):
         """
 
         def _get_data(db_session: Session):
-            def __cols() -> List[Column]:
-                all_cols = MgmtSepsUser.__table__.columns
-                _cols = [col for col in all_cols if col.name in field_names]
-                return _cols
+            # def __cols() -> List[Column]:
+            #     all_cols = MgmtSepsUser.__table__.columns
+            #     _cols = [col for col in all_cols if col.name in field_names]
+            #     return _cols
 
-            sel_cols = __cols() if field_names else None
+            # sel_cols = __cols() if field_names else None
+            sel_cols = col_names_to_columns(col_names, MgmtSepsUser.__table__.columns)
+
             stmt = select(*sel_cols) if sel_cols else select(MgmtSepsUser)
             if user_id is not None:  # then filter
                 stmt = stmt.where(MgmtSepsUser.user_id == user_id)

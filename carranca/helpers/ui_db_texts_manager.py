@@ -31,7 +31,7 @@ from .. import global_ui_texts_cache  # it is used, ignore warn
 
 
 # ==== UI Texts Constants ====================================
-cache_key: TypeAlias = Tuple[str, str, Optional[str]]
+Cache_Key: TypeAlias = Tuple[str, str, Optional[str]]
 
 # use the default message key. eg set_msg_info(MSG_DEFAULT, ui_db_texts, time_info) MSG_DEFAULT -> 'msgInfo'
 MSG_DEFAULT: str = ""
@@ -40,9 +40,9 @@ MSG_DEFAULT: str = ""
 class UITexts_TableSearch:
     global global_ui_texts_cache
     _LAST_UPDATE_KEY = "last_update"
-    _CACHE_INTERNAL_INFO_KEY: cache_key = (" ", "mgmt_data", "key")
+    _CACHE_INTERNAL_INFO_KEY: Cache_Key = (" ", "mgmt_data", "key")
     ## TODO SAVE is Cache _CACHE_INTERNAL_INFO_KEY
-    _cfg_cache_lifetime_min = 0  # int(current_app.config.get("APP_UI_DB_TEXTS_CACHE_LIFETIME_MIN", 0))
+    ## _cfg_cache_lifetime_min = int(current_app.config.get("APP_UI_DB_TEXTS_CACHE_LIFETIME_MIN", 0))
 
     def __init__(self, locale: str, section: str, item: Optional[str] = None):
         self.locale = locale
@@ -57,8 +57,8 @@ class UITexts_TableSearch:
         return self.as_tuple in global_ui_texts_cache
 
     def update(self, texts: DB_Texts | str) -> None:
-        if self._cfg_cache_lifetime_min == 0:
-            global_ui_texts_cache[self.as_tuple] = texts
+        global_ui_texts_cache[self.as_tuple] = texts
+        # TODO global_ui_texts_cache.update(self.as_tuple, texts)
 
     def get_text(self) -> DB_Texts | str | None:
         if not self.exists():
@@ -76,7 +76,7 @@ class UITexts_TableSearch:
         return cache_value
 
     @property
-    def as_tuple(self) -> cache_key:
+    def as_tuple(self) -> Cache_Key:
         """Returns a tuple of all three 'indexed' attributes.
         If item is None, the entry contains a dict, else a str.
         """
@@ -353,5 +353,4 @@ def set_msg_fatal(item: str, ui_db_texts: UIDBTexts, *args) -> str:
     return msg
 
 
-## ----- OBSOLETE -----------
 # eof

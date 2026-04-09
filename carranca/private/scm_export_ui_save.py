@@ -18,11 +18,11 @@ from ..helpers.ui_db_texts_manager import set_msg_success, MSG_DEFAULT
 from ..common.app_error_assistant import ModuleErrorCode
 from ..config.ExportProcessConfig import ExportProcessConfig
 
-SepUiOrder: TypeAlias = List[Tuple[int, int]]
+Sep_UI_Order: TypeAlias = List[Tuple[int, int]]
 
 
 def scm_export_ui_save(uiact_rsp: UiActResponse) -> Jinja_Template:
-    from ..models.private import Sep
+    from ..models.privates import Sep
 
     jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SCM_EXPORT_UI_SAVE)
     try:
@@ -33,7 +33,7 @@ def scm_export_ui_save(uiact_rsp: UiActResponse) -> Jinja_Template:
         config = ExportProcessConfig()
 
         task_code += 1
-        items: SepUiOrder = []
+        items: Sep_UI_Order = []
 
         task_code += 1
         current_scm_code = ""

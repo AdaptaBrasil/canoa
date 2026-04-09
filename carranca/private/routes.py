@@ -35,7 +35,7 @@ from ..helpers.route_helper import (
     get_private_response_data,
     base_route_private,
     private_route,
-    is_method_post,
+    is_method_get,
     login_route,
     redirect_to,
     get_method,
@@ -262,6 +262,21 @@ def scm_edit(code: str = "?"):
 
 
 @login_required
+@bp_private.route("/spd_edit/<code>", methods=MTD_BOTH)
+def spd_edit(code: str = "?"):
+    """
+    Through this route, the admin user can CRUD spatial data and display a grid
+    """
+
+    if nobody_is_logged():
+        return redirect_to(login_route())
+    else:
+        from .spd_new_edit import do_spd_edit
+
+        return do_spd_edit(code)
+
+
+@login_required
 @bp_private.route("/receive_file", methods=MTD_BOTH)
 def receive_file():
     """
@@ -298,7 +313,7 @@ def received_files_mgmt():
 
     if nobody_is_logged():
         return redirect_to(login_route())
-    elif is_method_post():
+    elif is_method_get():
         return redirect_to(login_route())
     else:
         rid = request.args.get("id", type=int)  # Get 'id' from Request

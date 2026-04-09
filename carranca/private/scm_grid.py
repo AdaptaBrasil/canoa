@@ -17,7 +17,7 @@ from ..helpers.route_helper import MTD_POST, get_private_response_data, init_res
 from ..helpers.js_consts_helper import js_grid_col_meta_info, js_ui_dictionary
 from ..helpers.ui_db_texts_manager import set_msg_fatal
 from ..common.app_error_assistant import ModuleErrorCode, AppStumbled, HTTP_StatusCode
-from ..models.private_1.SchemaGrid import SchemaGrid
+from ..models.private.schema_grid import SchemaGrid
 
 
 def get_scm_grid() -> Jinja_Rendered:

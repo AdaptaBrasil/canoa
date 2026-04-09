@@ -13,6 +13,7 @@ TODO Selected menu class-> active
 cSpell:ignore unselectable labelledby haspopup noopener noreferrer onclick elif
 cSpell:ignore semi-words: formul estrat gicos sess tojson jinja nbsp endfor j_user inser
 cSpell:ignore &ç ã gico endere
+cSpell:ignore spatialdata
 --------------------------------------- #}
 <nav id="navbar-main" class="navbar fixed-top navbar-expand-sm shadow-sm px-2">
     {% set menu_header= app_menu('menuHeaders') %}
@@ -36,10 +37,10 @@ cSpell:ignore &ç ã gico endere
         <div class="collapse navbar-collapse" id="navbarCollapsible">
             <ul class="navbar-nav me-auto mb-lg-0">
 
-
-                {# ╒════════════════════ Menu: Validação ═════════════════════════════╕ #}
+                {# ╒════════════════════ DD Menu: validate ══════════════════════════════╕ #}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-receive" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-validate" role="button"
+                        data-bs-toggle="dropdown">
                         {{menu_header['validate']}}
 
                     </a>
@@ -58,10 +59,12 @@ cSpell:ignore &ç ã gico endere
                     </ul>
                     {% endif %}
                 </li>
+                {# ╘════════════════════ DD Menu: validate ══════════════════════════════╛ #}
 
-                {# ╒════════════════════ Menu: Setor Estratégico ═════════════════════╕ #}
+
+                {# ╒════════════════════ DD Menu: strategicSector ═══════════════════════╕ #}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}} {{sep_menu_class}}" href="#" id="menu-se" role="button"
+                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}} {{sep_menu_class}}" href="#" id="menu-strategicSector" role="button"
                         data-bs-toggle="dropdown">
                         {{menu_header['strategicSector']}}
                     </a>
@@ -69,12 +72,6 @@ cSpell:ignore &ç ã gico endere
                     <ul class="dropdown-menu">
                         {% if j_user.power %}
                         {# ╒════════ admin sep menu ═══════╕ #}
-                        <li>
-                            <a class="dropdown-item" href="{{private_route('sep_mgmt')}}"
-                                title="Abre grid de atribui&ccedil;&atilde;o de gestores a setores estrat&eacute;gicos">
-                                Gest&atilde;o
-                            </a>
-                        </li>
                         <li>
                             <a class="dropdown-item" href="{{private_route('sep_edit', code=ui_act_add) }}"
                                 title="Abre formul&aacute;rio para adicionar um setor estrat&eacute;gico">
@@ -85,6 +82,12 @@ cSpell:ignore &ç ã gico endere
                             <a class="dropdown-item" href="{{private_route('sep_grid', code=ui_act_shw) }}"
                                 title="Abre grid para editar ou remover setores estrat&eacute;gicos">
                                 Edi&ccedil;&atilde;o e Remo&ccedil;&atilde;o
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{private_route('sep_mgmt')}}"
+                                title="Abre grid de atribui&ccedil;&atilde;o de gestores a setores estrat&eacute;gicos">
+                                Gest&atilde;o
                             </a>
                         </li>
                         {# ╘════════ admin sep menu ═══════╛ #}
@@ -100,12 +103,16 @@ cSpell:ignore &ç ã gico endere
                     </ul>
                     {% endif %}
                 </li>
+                {# ╘════════════════════ DD Menu: strategicSector ═══════════════════════╛ #}
 
-                {# ╒════════════════════ Menu: Esquema ══════════════════════════════╕ #}
+
+                {# ╒════════════════════════════════ Power User Menu ══════════════════════════════╕ #}
                 {% if j_user.power %}
+
+                {# ╒════════════════════ DD Menu: schema ════════════════════════════════╕ #}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-es" role="button" data-bs-toggle="dropdown">
-                        {{menu_header['Schema']}}
+                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-schema" role="button" data-bs-toggle="dropdown">
+                        {{menu_header['schema']}}
                     </a>
                     {# ╒════════ schema menu ════════╕ #}
                     <ul class="dropdown-menu">
@@ -129,13 +136,34 @@ cSpell:ignore &ç ã gico endere
                     </ul>
                     {# ╘════════ schema menu ════════╛ #}
                 </li>
+                {# ╘════════════════════ DD Menu: schema ════════════════════════════════╛ #}
+
+                {# ╒════════════════════ DD Menu: spatialData ═══════════════════════════╕ #}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-spatialdata" role="button"
+                        data-bs-toggle="dropdown">
+                        {{menu_header['spatialData']}}
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="{{private_route('spd_edit', code=ui_act_add) }}"
+                                title="Abre formul&aacute;rio para adicionar dados espaciais">
+                                Inser&ccedil;&atilde;o
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                {# ╘════════════════════ DD Menu: spatialData ═══════════════════════════╛ #}
+
+
+                {# ╘════════════════════════════════ Power User Menu ══════════════════════════════════╛ #}
                 {% endif %}
 
 
-
-                {# ╒════════════════════ Menu: Documentos ════════════════════════════╕ #}
+                {# ╒════════════════════ DD Menu: documents ═════════════════════════════╕ #}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-docs" role="button" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-documents" role="button"
+                        data-bs-toggle="dropdown">
                         {{menu_header['documents']}}
                     </a>
                     {% if nav_sub_menu %}
@@ -168,8 +196,10 @@ cSpell:ignore &ç ã gico endere
                     </ul>
                     {% endif %}
                 </li>
+                {# ╘════════════════════ DD Menu: documents ═════════════════════════════╛ #}
 
-                {# ╒════════════════════ Menu: Usuário ═══════════════════════════════╕ #}
+
+                {# ╒════════════════════ DD Menu: currentUser ═══════════════════════════╕ #}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-user" role="button" data-bs-toggle="dropdown">
                         {{j_user.name}}

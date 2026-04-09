@@ -21,7 +21,14 @@ from ...helpers.py_helper import is_str_none_or_empty, generate_random, crc16
 from ...helpers.types_helper import Usual_Dict
 from ...helpers.jinja_helper import Jinja_Rendered, process_template
 from ...helpers.email_helper import RecipientsDic, RecipientsList, send_email
-from ...helpers.route_helper import get_account_response_data, get_form_input_value, init_response_vars, private_route, is_method_get
+from ...helpers.route_helper import (
+    get_account_response_data,
+    get_form_input_value,
+    init_response_vars,
+    private_route,
+    is_method_post,
+    is_method_get,
+)
 from ...common.app_context_vars import sidekick
 from ...common.app_error_assistant import ModuleErrorCode
 from ...helpers.ui_db_texts_manager import UITextsKeys, MSG_DEFAULT

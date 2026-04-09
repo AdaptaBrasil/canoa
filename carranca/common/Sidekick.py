@@ -47,6 +47,7 @@ from .Display import Display
 from ..common.app_constants import APP_NAME
 
 if TYPE_CHECKING:
+    from ..models.public import User
     from ..config.DynamicConfig import DynamicConfig  # Avoid Circular 2024.11.03
 
 
@@ -82,11 +83,20 @@ class Sidekick:
 
     @property
     def user(self) -> "User":
-        return current_user
+        _user: "User" = current_user
+        return _user
 
     @property
     def app_log(self) -> Logger:
         return self.app.logger
+
+    def occurrences(self, kind: Display.Kind) -> int:
+        _count = self.display.occurrences(kind)
+        return _count
+
+    def occurrences_map(self, filter: int = -1) -> dict[Display.Kind, int]:
+        _count = self.display.occurrences
+        return {kind: _count(kind) for kind in Display.Kind if _count(kind) > filter}
 
     def _echo(self, kind: Display.Kind, log_text: str):
         if not (self.app and self.app.logger):

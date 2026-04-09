@@ -1,0 +1,68 @@
+{# Triggers LOGOUT #}
+<button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#confirmModal" data-title="Confirmação" data-message="Confirma sair de Canoa?"
+    data-action="./logout">
+    Logout
+</button>
+
+{# Delete example #}
+<button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmModal" data-title="Excluir item"
+    data-message="Esta ação não pode ser desfeita. Continuar?" data-action="/delete/42">
+    Excluir
+</button>
+
+<!-- Reusable Bootstrap 5.3 Confirm Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalTitle">Confirmação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body" id="confirmModalBody">
+                Tem certeza?
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="button" class="btn btn-danger" id="confirmModalOk">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{# JavaScript handler `show.bs.modal` is from "Bootstrap’s Modal plugin"
+
+this._element.dispatchEvent(
+new Event('show.bs.modal', { bubbles: true })
+);
+» populate modal content dynamically
+» reset or clear form fields
+» attach data to the modal instance
+» cancel showing the modal (by calling event.preventDefault())
+#}
+
+<script>
+    const confirmModal = document.getElementById('confirmModal');
+
+    confirmModal.addEventListener('show.bs.modal', event => {
+        const trigger = event.relatedTarget;
+
+        const title = trigger.getAttribute('data-title');
+        const message = trigger.getAttribute('data-message');
+        const action = trigger.getAttribute('data-action');
+
+        document.getElementById('confirmModalTitle').textContent = title;
+        document.getElementById('confirmModalBody').textContent = message;
+
+        const okBtn = document.getElementById('confirmModalOk');
+        okBtn.onclick = () => { window.location.href = action; };
+    });
+
+</script>

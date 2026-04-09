@@ -1,0 +1,92 @@
+{# ------------------------------------
+./private/scm_new_edit.html.j2
+-------------------------------
+Edit and Inserts Schema
+
+Extends:
+./layouts/form.html.j2
+
+mgd
+--------------------------------------- #}
+{# cSpell:ignore tojson unselectable #}
+
+{% set dlg_var_icon_url= iconFileUrl %}
+
+{% set id_color_inp= form.color.id %}
+{% set id_color_btn= 'id-color-btn' %}
+{% set id_color_img= 'id-color-img' %}
+
+
+{% extends "./layouts/form.html.j2" %}
+
+{# ╒══════════════════════ Inputs ═════════════════════════╕ #}
+{% block frm_blc_inputs %}
+
+<div class="mb-3"> {# [ Name #}
+    <div class="form-group">
+        <label class="form-label" inert for="{{ form.name.id }}">{{ nameLabel }}</label>
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="{{faStyle}} fa-fw fa-location-dot" aria-hidden="true"></i>
+            </span>
+            {{ form.name() }}
+        </div>
+    </div>
+</div> {# Name ] #}
+
+<div class="mb-3"> {# [ Color #}
+    <div class="form-group mt-3">
+        <label class="form-label" inert for="{{ id_color_inp }}">{{ colorLabel }}</label>
+        <div class="input-group">
+            <span class="input-group-text" style="padding: .2rem .2rem">
+                <button class="input-group-text form-icon-btn" type="button" id="{{id_color_btn}}" title="{{ colorHint | default('Change: Text | Selector')}}">
+                    <i class="{{faStyle}} fa-fw" aria-hidden="true" data-class='{"text": "fa-keyboard", "color": "fa-palette"}' id="{{id_color_img}}">
+                    </i>
+                </button>
+            </span>
+            {{ form.color() }}
+        </div>
+    </div>
+</div>{# Color ] #}
+
+<div class="mb-3"> {# [ Title #}
+    <div class="form-group mt-3">
+        <label class="form-label" inert for="{{ form.title.id }}">{{ titleLabel }}</label>
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="{{faStyle}} fa-fw fa-tag" aria-hidden="true"></i>
+            </span>
+            {{ form.title() }}
+        </div>
+    </div>
+</div> {# Title ] #}
+
+<div class="mb-3"> {# [ Description #}
+    <div class=" form-group">
+        <label class="form-label" inert for="{{ form.description.id }}">{{ descriptionLabel }}</label>
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="{{faStyle}} fa-fw fa-align-left" aria-hidden="true"></i>
+            </span>
+            {{ form.description() }}
+        </div>
+    </div>
+</div> {# Description ] #}
+
+{# [ File #}
+<div class="form-group mt-2 mb-3">
+    <label class="form-label" inert for="{{ form.spd_file.id }}">{{ fileLabel }}</label>
+    <div class="input-group">
+        <span class="input-group-text">
+            <i class="{{faStyle}} fa-fw fa-layer-group" aria-hidden="true"></i>
+        </span>
+        {{ form.spd_file() }}
+    </div>
+</div>
+{# File ] #}
+
+
+{% endblock frm_blc_inputs %}
+{# ╘══════════════════════ Inputs ═════════════════════════╛ #}
+
+{# eof #}

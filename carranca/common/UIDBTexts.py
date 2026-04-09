@@ -97,6 +97,7 @@ class UIDBTexts:
         return value
 
     def _retrieve_value(self, key: str, section: str, default: str = "", cache_it: bool = False) -> str:
+        # TODO missing lng
         cache_key = f"{section}={key}"
 
         cached = CACHE_UI_TEXTS.get(cache_key, _MISSING)
@@ -325,7 +326,7 @@ class UIDBTexts:
 
     # def try_date_day(self, key: str, value: str) -> str:
 
-    def set_or_add_msg(self, key: str, section: str, msg_kind: str, args: DB_Texts_Args = None) -> str:
+    def _set_or_add_msg(self, key: str, section: str, msg_kind: str, args: DB_Texts_Args = None) -> str:
         """Retrieves text (local or from DB) and adds it to a dictionary, formatted.
 
         args:
@@ -396,7 +397,7 @@ class UIDBTexts:
         """
 
         self.reset_messages()
-        msg = self.set_or_add_msg(key, UITextsKeys.Section.success, UITextsKeys.Msg.success, args)
+        msg = self._set_or_add_msg(key, UITextsKeys.Section.success, UITextsKeys.Msg.success, args)
         self.display_msg_only = True
         return msg
 
@@ -410,15 +411,15 @@ class UIDBTexts:
         return msg
 
     def set_msg_error(self, key: str = "", args: DB_Texts_Args = None) -> str:
-        msg = self.set_or_add_msg(key, UITextsKeys.Section.error, UITextsKeys.Msg.error, args)
+        msg = self._set_or_add_msg(key, UITextsKeys.Section.error, UITextsKeys.Msg.error, args)
         return msg
 
     def set_msg_info(self, key: str = "", args: DB_Texts_Args = None) -> str:
-        msg = self.set_or_add_msg(key, UITextsKeys.Section.current, UITextsKeys.Msg.info, args)
+        msg = self._set_or_add_msg(key, UITextsKeys.Section.current, UITextsKeys.Msg.info, args)
         return msg
 
     def set_msg_warn(self, key: str = "", args: DB_Texts_Args = None) -> str:
-        msg = self.set_or_add_msg(key, UITextsKeys.Section.error, UITextsKeys.Msg.warn, args)
+        msg = self._set_or_add_msg(key, UITextsKeys.Section.error, UITextsKeys.Msg.warn, args)
         return msg
 
     @property

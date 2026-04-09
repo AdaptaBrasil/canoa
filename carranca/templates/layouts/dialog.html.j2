@@ -35,13 +35,14 @@ dlg_var_v_centered | default(False) // from is Vertical Centered
 
 mgd
 --------------------------------------- #}
-{# cSpell:ignore tabindex endfor elif dlgs dlgm beforeunload #}
+{# cSpell:ignore tabindex endfor elif dlgs beforeunload #}
 
 {% extends "./layouts/base.html.j2" %}
 
 {% set dlg_main_id= 'dlg-main-id'%}
 {% set dlg_icon_id= 'dlg-icon-id' %}
 {% set dlg_sleep_veil_id= 'dlg-sleep-veil-id'%}
+{% set dlg_sleep_veil_cls= 'd-none'%}
 {% set dlg_submit_btn_id= 'dlg-submit-btn-id' %}
 {% set dlg_submit_form_id= 'dlg-submit-form-id' %}
 {% set dlg_btns_container_id = 'dlg-btns-container-id' %}
@@ -67,20 +68,22 @@ Ensure this matches the expected dimensions for dialog icons.
 
 {# ╒═════════════════════════════ Main ═════════════════════════════╕ #}
 {% block base_blc_main %}
-<div id="{{dlg_main_id}}" style="{{ dlg_var_style|default('display: block;') }}"
-    class="modal {% if not (dlg_var_v_centered | default(False)) %}{{ dlg_cls_top | default('mt-5') }}{% endif -%}">
+<div id="{{dlg_main_id}}" style="{{dlg_var_style|default('display: block;')}}"
+    class="modal {% if not (dlg_var_v_centered | default(False)) %}{{dlg_cls_top | default('mt-5')}}{% endif -%}">
 
     {# ╒════════════════════════ Dialog ════════════════════════════╕ #}
-    <div class="modal-dialog {{ dlg_cls_size|default('dlg-width') }}
+    <div class="modal-dialog {{dlg_cls_size|default('dlg-width')}}
         {%- if dlg_var_v_centered %} modal-dialog-centered {% endif -%}
         {%- if dlg_var_scroll %} modal-dialog-scrollable {% endif %}
     ">
 
         {# ╒════════════════════════ Content ═══════════════════════════╕ #}
         <div class="modal-content">
-            {# ╒════════════════════ Pillow ════════════════════════════╕ #}
-            <div id="{{dlg_sleep_veil_id}}"></div>
-            {# ╘════════════════════ Pillow ════════════════════════════╛ #}
+            {# ╒════════════════════ Sleep Veil ════════════════════════╕ #}
+            <div id="{{dlg_sleep_veil_id}}" class="{{dlg_sleep_veil_cls}}">
+                <div class="spinner-border text-light" role="status" style="width: 2rem; height: 2rem;"></div>
+            </div>
+            {# ╘════════════════════ Sleep Veil ════════════════════════╛ #}
 
             {# ╒════════════════════ Header ════════════════════════════╕ #}
             <div class="modal-header dlg-header">
@@ -143,12 +146,10 @@ Ensure this matches the expected dimensions for dialog icons.
         window.Canoa = {
             dataModified: false,
         }
-        const dlgm = document.getElementById("{{ dlg_main_id }}");
 
-        const sleep = () => {
-            document.body.style.cursor = "wait";
-            const dlgs = document.getElementById("{{ dlg_sleep_veil_id }}");
-            dlgs?.classList.add('dlg-sleep-veil');
+        const setSleepVeil = () => {
+            const sv = document.getElementById("{{dlg_sleep_veil_id}}");
+            sv?.classList.replace('{{dlg_sleep_veil_cls}}', 'dlg-sleep-veil');
         }
 
         window.addEventListener('beforeunload', (event) => {
@@ -157,10 +158,10 @@ Ensure this matches the expected dimensions for dialog icons.
             }
         });
 
-        document.getElementById("{{dlg_submit_form_id}}")?.addEventListener('submit', (e) => {
-            const url = document.getElementById('dlg_submit_form_id');
-            if (url && url.action) {
-                const route = url.action.split('/').at(-1);
+        const dlgFrm = document.getElementById("{{dlg_submit_form_id}}")
+        dlgFrm?.addEventListener('submit', (e) => {
+            if (dlgFrm && dlgFrm.action) {
+                const route = dlgFrm.action.split('/').at(-1);
                 if (!(['login', 'goto']).includes(route)) {
                     setSleepVeil();
                 }

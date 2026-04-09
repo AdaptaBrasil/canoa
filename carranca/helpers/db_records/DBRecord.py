@@ -13,7 +13,7 @@ from typing import Optional, List, Any
 
 from ..py_helper import encode64_utf8
 from ..types_helper import Opt_List_Of_Str
-from .DBRecord_types import DBRecordData
+from .DBRecord_types import DBRecord_Data
 
 
 class DBRecord:
@@ -25,7 +25,7 @@ class DBRecord:
 
     def __init__(
         self,
-        record_data: DBRecordData,
+        record_data: DBRecord_Data,
         names_filter: Opt_List_Of_Str = None,
         types_filter: Optional[List[type]] = None,
     ):

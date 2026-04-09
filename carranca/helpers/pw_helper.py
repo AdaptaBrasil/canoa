@@ -54,15 +54,10 @@ def verify_password(provided_password: str, stored_password: bytes) -> bool:
 
 
 def is_anyone_logged() -> bool:
-    # mgd:
-    # in some context, current_user is an 'invalid pointer'
-    # from flask_login import current_user
 
     anyone_logged = False
     try:
-        anyone_logged = (
-            False if current_user is None else current_user.is_authenticated and (current_user.id > 0)
-        )
+        anyone_logged = False if current_user is None else current_user.is_authenticated and (current_user.id > 0)
     except:
         anyone_logged = False
 
@@ -74,9 +69,17 @@ def nobody_is_logged() -> bool:
 
 
 def internal_logout():
+    from ..common.app_context_vars import sidekick, app_user
     from flask_login import logout_user
 
-    if is_anyone_logged():
+    if not is_anyone_logged():
+        pass
+    elif sidekick.debugging and app_user.is_power:
+        # TODO from ..helpers. import UITexts_Cache
+        # UITexts_Cache.flush()
+        #sidekick.display.info(f"{UITexts_Cache.__name__} flushed.")
+        logout_user()
+    else:
         logout_user()
 
     return

@@ -13,11 +13,11 @@ from pathlib import Path
 
 from .sep_icon import do_icon_get_url
 from ..models.public import User
-from ..models.private import Sep
+from ..models.privates import Sep
 from ..helpers.py_helper import Usual_Dict
 from ..helpers.types_helper import Opt_Str
 from ..config.ExportProcessConfig import ExportProcessConfig
-from ..models.private_1.SchemaGrid import SchemaGrid
+from ..models.private.schema_grid import SchemaGrid
 
 
 class SchemaData:

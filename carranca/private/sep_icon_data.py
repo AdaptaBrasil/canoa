@@ -11,13 +11,13 @@ from werkzeug.datastructures import FileStorage
 
 from .sep_icon import ICON_MIN_SIZE
 from .SepIconMaker import SepIconMaker
-from ..models.private import Sep
+from ..models.privates import Sep
 from ..helpers.py_helper import crc16
 
 
 @dataclass
 class IconData:
-    storage: FileStorage = None
+    storage: FileStorage | None = None
     sent: bool = False
     file_name: str = ""
     is_svg: bool = False
@@ -56,7 +56,7 @@ def get_icon_data(sep_row: Sep, icon_data: IconData) -> IconData:
     elif (end - start) < ICON_MIN_SIZE:
         icon_data.error_hint = f"< {ICON_MIN_SIZE}"
         icon_data.error_code = 6
-    elif not (sep_row.icon_svg or "") == (data or ""):
+    elif (sep_row.icon_svg or "") != (data or ""):
         icon_data.content = data
         icon_data.crc = crc16(data)
         icon_data.ready = True

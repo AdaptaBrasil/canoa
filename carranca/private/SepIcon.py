@@ -13,7 +13,7 @@ ICON_MIN_SIZE = 60  # bytes
 
 
 class SepData:
-    from ..models.private import Sep
+    from ..models.privates import Sep
 
     def __init__(self, icon_url: str, sep_fullname: str, sep: Sep):
         self.icon_url = icon_url

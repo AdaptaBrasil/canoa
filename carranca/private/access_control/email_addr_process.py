@@ -117,8 +117,8 @@ def send_email_to_test_address(route: str, email: str, name: str) -> Jinja_Rende
             masked_email = _mask_email(email)
             task_code += 1
             ui_db_texts.set_msg_info("requestEmailText", masked_email)
-            ui_db_texts[UITextsKeys.Form.btn_submit] = ui_db_texts["acceptEmailBtn"]
-            ui_db_texts[UITextsKeys.Form.submit_route] = private_route(route, uid="")
+            ui_db_texts.replace(UITextsKeys.Form.btn_submit, "acceptEmailBtn")
+            ui_db_texts.replace(UITextsKeys.Form.submit_route, private_route(route, uid=""))
             ui_db_texts.display_msg_only = True
             task_code += 1
             jHtml = process_template(tmpl_ffn, **ui_db_texts.data())

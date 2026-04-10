@@ -10,24 +10,18 @@ mgd
 
 import secrets
 
-from flask import request
 from datetime import timedelta, datetime
 
 from ..wtforms import PasswordRecoveryForm
 from ...models.public import get_user_where, User
 from ...models.public import persist_user
-from ...helpers.py_helper import is_str_none_or_empty, elapsed_hours, add_hours
+from ...helpers.py_helper import elapsed_hours
+from ...common.UITextsKeys import UITextsKeys
 from ...public.ups_handler import get_ups_jHtml
 from ...helpers.email_helper import RecipientsList, RecipientsDic, send_email
 from ...helpers.jinja_helper import process_template
 from ...common.app_error_assistant import ModuleErrorCode
-from ...helpers.ui_db_texts_manager import (
-    MSG_DEFAULT,
-    set_msg_info,
-    set_msg_warn,
-    set_msg_fatal,
-    set_msg_success,
-)
+from ...helpers.ui_db_texts_manager import set_msg_fatal
 from ...helpers.route_helper import (
     public_route,
     get_form_input_value,
@@ -132,6 +126,7 @@ def password_recovery():
             task_code += 1  # 15
             key, msg = ui_db_texts.set_msg_success()
             ui_db_texts.set_ui_datetime(key, msg, expires_in_hours)
+            ui_db_texts.replace(UITextsKeys.Form.btn_submit, "successButton")
 
         jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.data())
 

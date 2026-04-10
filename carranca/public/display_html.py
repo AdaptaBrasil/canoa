@@ -121,7 +121,7 @@ def display_html(docName: str):
         task_code += 1
         if is_str_none_or_empty(body_text):
             task_code += 1
-            msg = default_texts.set_msg_error("documentNotFound", docName)
+            _, msg = default_texts.set_msg_error("documentNotFound", docName)
             raise AppStumbled(msg, task_code, False, True)
         elif len(html_images) == 0:
             # html has no images
@@ -144,5 +144,6 @@ def display_html(docName: str):
         jHtml = get_ups_jHtml("displayDocException", default_texts, task_code, e)
 
     return jHtml
+
 
 # eof

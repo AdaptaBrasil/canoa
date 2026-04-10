@@ -48,9 +48,7 @@ def get_ups_jHtml(
     # Claude
     # TO FIX: 2026.04.01
     _args = (task_code,) + (args if isinstance(args, tuple) else (args,) if args is not None else ())
-    msg = ui_db_texts.set_msg_fatal(ui_item_error_key, _args)
-
-    # msg = ui_db_texts.set_msg_fatal(ui_item_error_key, task_code, args)
+    _, msg = ui_db_texts.set_msg_fatal(ui_item_error_key, _args)
     _, tmpl_ffn, ui_texts = ups_handler(task_code, msg, e)
     jHtml = process_template(tmpl_ffn, **ui_texts)
 

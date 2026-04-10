@@ -213,6 +213,14 @@ class UIDBTexts:
         self.set_value(key, value)
         return value
 
+    def replace(self, key: str, from_key, *args) -> str:
+        """
+        replace item's value from other item (with key from_key)
+        """
+        value = self.format(from_key, *args)
+        self.set_value(key, value)
+        return value
+
     # --- Type-Specific Accessors ---
     def get_msg(self, key: str, default: str = "") -> str:
         """
@@ -326,7 +334,7 @@ class UIDBTexts:
 
     # def try_date_day(self, key: str, value: str) -> str:
 
-    def _set_or_add_msg(self, key: str, section: str, msg_kind: str, args: DB_Texts_Args = None) -> str:
+    def _set_or_add_msg(self, key: str, section: str, msg_kind: str, args: DB_Texts_Args = None) -> tuple[str, str]:
         """Retrieves text (local or from DB) and adds it to a dictionary, formatted.
 
         args:
@@ -336,6 +344,7 @@ class UIDBTexts:
             args: Optional arguments for formatting the retrieved text.
 
         Returns:
+            The actual key used
             The formatted text.
 
         mgd 2025-10-30
@@ -383,9 +392,9 @@ class UIDBTexts:
         if value:  # add or refresh
             self[msg_kind] = value
 
-        return value
+        return key, value
 
-    def set_msg_success(self, key: str = "", args: DB_Texts_Args = None) -> str:
+    def set_msg_success(self, key: str = "", args: DB_Texts_Args = None) -> tuple[str, str]:
         """
         Removes all other msg
         Retrieves `text` for the [item, <curr_section>] | [item, 'sec_Success'] pair
@@ -397,30 +406,30 @@ class UIDBTexts:
         """
 
         self.reset_messages()
-        msg = self._set_or_add_msg(key, UITextsKeys.Section.success, UITextsKeys.Msg.success, args)
+        key, msg = self._set_or_add_msg(key, UITextsKeys.Section.success, UITextsKeys.Msg.success, args)
         self.display_msg_only = True
-        return msg
+        return key, msg
 
-    def set_msg_fatal(self, key: str = "", args: DB_Texts_Args = None) -> str:
+    def set_msg_fatal(self, key: str = "", args: DB_Texts_Args = None) -> tuple[str, str]:
         """
         Same as set_msg_success, but search section 'msgError'
         """
         self.reset_messages()
-        msg = self.set_msg_error(key or UITextsKeys.Msg.fatal, args)
+        key, msg = self.set_msg_error(key or UITextsKeys.Msg.fatal, args)
         self.display_msg_only = True
-        return msg
+        return key, msg
 
-    def set_msg_error(self, key: str = "", args: DB_Texts_Args = None) -> str:
-        msg = self._set_or_add_msg(key, UITextsKeys.Section.error, UITextsKeys.Msg.error, args)
-        return msg
+    def set_msg_error(self, key: str = "", args: DB_Texts_Args = None) -> tuple[str, str]:
+        key, msg = self._set_or_add_msg(key, UITextsKeys.Section.error, UITextsKeys.Msg.error, args)
+        return key, msg
 
-    def set_msg_info(self, key: str = "", args: DB_Texts_Args = None) -> str:
-        msg = self._set_or_add_msg(key, UITextsKeys.Section.current, UITextsKeys.Msg.info, args)
-        return msg
+    def set_msg_info(self, key: str = "", args: DB_Texts_Args = None) -> tuple[str, str]:
+        key, msg = self._set_or_add_msg(key, UITextsKeys.Section.current, UITextsKeys.Msg.info, args)
+        return key, msg
 
-    def set_msg_warn(self, key: str = "", args: DB_Texts_Args = None) -> str:
-        msg = self._set_or_add_msg(key, UITextsKeys.Section.error, UITextsKeys.Msg.warn, args)
-        return msg
+    def set_msg_warn(self, key: str = "", args: DB_Texts_Args = None) -> tuple[str, str]:
+        key, msg = self._set_or_add_msg(key, UITextsKeys.Section.error, UITextsKeys.Msg.warn, args)
+        return key, msg
 
     @property
     def msg_keys(self) -> List[str]:

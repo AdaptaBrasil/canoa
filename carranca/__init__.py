@@ -282,25 +282,12 @@ def _create_app_and_log_file(app_name: str):
     _info(f"App's config updated with environment variables from [{pcName}].")
 
     # -- set python locale
-    def __set_locale(locale_str: str):
-        result = True
-        try:
-            locale.setlocale(locale.LC_TIME, locale_str)
-            _info(f"{app_name}'s locale set to {locale_str} at exactly {g_sk.now().strftime('%c.%f')}")
-        except:
-            result = False
-        return result
-
-    locales = (
-        [g_sk.config.APP_LINUX_LOCALE, g_sk.config.APP_WINDOWS_LOCALE]
-        if OS_IS_LINUX
-        else [g_sk.config.APP_WINDOWS_LOCALE, g_sk.config.APP_LINUX_LOCALE]
-    )
-    for loc in locales:
-        if __set_locale(loc):
-            break
-    else:
-        g_sk.display.error(f"{app_name}'s locale could not be changed.")
+    locale_str = g_sk.config.APP_LINUX_LOCALE if OS_IS_LINUX else g_sk.config.APP_WINDOWS_LOCALE
+    try:
+        locale.setlocale(locale.LC_TIME, locale_str)
+        _info(f"{app_name}'s locale set to '{locale_str}' at exactly {g_sk.now().strftime('%c')}")
+    except locale.Error as e:
+        g_sk.display.error(f"{app_name} locale '{locale_str}' is not available on this system: [{e}].")
 
     # -- Log file
     if not g_sk.config.LOG_TO_FILE:

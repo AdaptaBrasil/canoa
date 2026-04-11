@@ -226,9 +226,12 @@ cSpell:ignore spatialdata
                             <hr class="dropdown-divider">
                         </li>
                         <li>
-                            <a class="dropdown-item" href="#" onclick="logout()" title="Fecha a sess&atilde;o e sai do aplicativo">
+                            <a class="dropdown-item" href="{{private_route('log_me_out')}}" title="Encerramento da sess&atilde;o">
                                 Sair de {{app_name}}
                             </a>
+                            {# <a class="dropdown-item" href="#" onclick="logout()" title="Fecha a sess&atilde;o e sai do aplicativo">
+                                Sair de {{app_name}}
+                            </a> #}
                         </li>
                     </ul>
                     {% endif %}

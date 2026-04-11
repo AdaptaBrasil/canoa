@@ -21,7 +21,6 @@ from ...helpers.types_helper import Jinja_Rendered, Flask_Response
 from ...common.app_context_vars import sidekick
 from ...helpers.js_consts_helper import js_form_sec_check
 from ...common.app_error_assistant import AppStumbled, ModuleErrorCode
-from ...helpers.ui_db_texts_manager import set_msg_error, set_msg_warn, MSG_DEFAULT
 from ...helpers.route_helper import (
     redirect_to,
     login_route,
@@ -51,11 +50,11 @@ def password_change() -> Jinja_Rendered | Flask_Response:
             pass
         elif not is_str_none_or_empty(msg_error_key := js_form_sec_check()):
             task_code += 1  # 6
-            msg_error = set_msg_error(msg_error_key, ui_db_texts)
-            raise AppStumbled(msg_error, task_code, True, True)
+            _, msg = ui_db_texts.set_msg_error(msg_error_key)
+            raise AppStumbled(msg, task_code, True, True)
         elif not sidekick.config.DB_len_val_for_pw.check(password):
             task_code += 2  # 7
-            ui_db_texts.set_msg_warn("invalidPasswordLength", sidekick.config.DB_len_val_for_pw.min, sidekick.config.DB_len_val_for_pw.max)
+            ui_db_texts.set_msg_warn("invalidPasswordLength", (sidekick.config.DB_len_val_for_pw.min, sidekick.config.DB_len_val_for_pw.max))
         elif password != confirm_password:
             ui_db_texts.set_msg_warn("passwordsAreDifferent")
         elif user_rec is None:
@@ -77,7 +76,7 @@ def password_change() -> Jinja_Rendered | Flask_Response:
 
         jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.data())
     except Exception as e:
-        jHtml = get_ups_jHtml("passwordChangeException", ui_db_texts, task_code, e)
+        jHtml = get_ups_jHtml("msgException", ui_db_texts, task_code, e)
 
     return jHtml
 

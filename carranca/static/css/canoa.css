@@ -77,6 +77,10 @@ body {
  *  carranca\templates\layouts\dialog.tmpl
  * ============================================ */
 
+.frm-size {
+    /* this is an empty class to default to Bootstrap default */
+}
+
 .dlg-width {
     /* https://getbootstrap.com/docs/4.2/components/modal/#optional-sizes */
     /* this line gives error: "--bs-modal-lg is not set". So as --bs-modal-lg: 900px;

@@ -28,6 +28,7 @@ class UITextsKeys:
         btn_close = "closeFormButton"
         btn_submit = "submitFormButton"
         submit_route = "formSubmitRoute"
+        size = "dlg_cls_size"
 
     class Fatal:
         no_db_conn = "NoDBConnection"

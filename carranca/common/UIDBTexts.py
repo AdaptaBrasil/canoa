@@ -17,6 +17,7 @@ import warnings
 from typing import Optional, Dict, Any, Type, List, cast
 from datetime import datetime, timedelta
 from .UITextsKeys import UITextsKeys
+from ..helpers.py_helper import camel_to_snake
 from ..helpers.types_helper import DB_Lookup, DB_Texts, DB_Texts_Args
 
 
@@ -28,6 +29,9 @@ KEY_NOT_FOUND_ERROR = "Key '{0}' not found, cannot cast to {1}."
 
 # New constant for explicit None values:
 VALUE_IS_NONE_ERROR = "Key '{0}' value is None, cannot cast to {1}."
+
+# Do the best to display the msg {0} to the user & give some tech info
+KEY_NOT_FOUND_MSG = "<b>{0}</b><br><small>The message with key '{1}' was not found in §:&nbsp;{2}.</small>"
 
 CACHE_UI_TEXTS: DB_Texts = {}
 
@@ -107,7 +111,7 @@ class UIDBTexts:
             value = default
         else:
             value = self._db_lookup(key, section, default)
-            if cache_it:
+            if cache_it:  # if value == default, => cache it, no need to access the DB again.
                 CACHE_UI_TEXTS.update({cache_key: value})
 
         return value
@@ -195,7 +199,7 @@ class UIDBTexts:
         return len(self._data)
 
     # --- Update dict values ---
-    def update_info(self, *args) -> str:
+    def update_info_msg(self, *args) -> str:
         return self.update_item(UITextsKeys.Msg.info, *args)
 
     def set_value(self, key: str, value: str) -> str:
@@ -334,7 +338,14 @@ class UIDBTexts:
 
     # def try_date_day(self, key: str, value: str) -> str:
 
-    def _set_or_add_msg(self, key: str, section: str, msg_kind: str, args: DB_Texts_Args = None) -> tuple[str, str]:
+    def _key_not_found_ui_msg(self, key: str, alternative_section: str) -> str:
+        default = KEY_NOT_FOUND_MSG
+        nice_key = camel_to_snake(key).replace("_", " ").capitalize()
+        key_not_found_msg = self._retrieve_value("keyNotFound", UITextsKeys.Section.error, default, True)
+        section = self.section + "" if alternative_section == UITextsKeys.Section.current else f", {alternative_section}"
+        return key_not_found_msg.format(nice_key, key, section)
+
+    def _set_or_add_msg(self, key: str, alternative_section: str, msg_kind: str, args: DB_Texts_Args = None) -> tuple[str, str]:
         """Retrieves text (local or from DB) and adds it to a dictionary, formatted.
 
         args:
@@ -356,25 +367,28 @@ class UIDBTexts:
         from ..common.app_context_vars import sidekick
 
         # take the default value for Item
+        # Example:  (key = '') and (msg_kind = 'msgInfo') => key = msgInfo
         key = key or msg_kind
 
-        # search in the messages dict
+        # search in the messages dict of the UITextsKeys.Section.current section
         msg_text: str = self.get_msg(key)
 
         if not msg_text:
-            # search in the items dict
+            # search in the items dict of the UITextsKeys.Section.current section
             msg_text = self.get_str(key)
 
         if len(self) == 0:
             # TODO: ui_db_texts can have no items, the next error message mask this situation. TODO:
-            print(f"Warning: ui_db_texts[{self.section}] has no items.")
+            sidekick.display.error(f"Error: ui_db_texts[{self.section}] has no items.")
 
-        if section and not msg_text:
-            msg_text = self._retrieve_value(key, section, "")
+        if msg_text or (alternative_section == UITextsKeys.Section.current):
+            pass  # found (can be '') or we have no alternative section to search on
+        else:  # search the DB in the alternative section (secError, secSuccess)
+            msg_text = self._retrieve_value(key, alternative_section, "")
 
         try:
             if not msg_text:
-                value = ""
+                value = self._key_not_found_ui_msg(key, alternative_section)
             elif not args:
                 value = msg_text
             elif isinstance(args, dict):
@@ -396,8 +410,9 @@ class UIDBTexts:
 
     def set_msg_success(self, key: str = "", args: DB_Texts_Args = None) -> tuple[str, str]:
         """
+        returns used `key` and the retrieved `msg`
         Removes all other msg
-        Retrieves `text` for the [item, <curr_section>] | [item, 'sec_Success'] pair
+        Retrieves `text` for the [item, <curr_section>] | [item, 'secSuccess'] pair
         (of the vw_ui_texts view)
         and adds the pair to `texts` => texts.add(text, 'msgSuccess')
 
@@ -412,7 +427,14 @@ class UIDBTexts:
 
     def set_msg_fatal(self, key: str = "", args: DB_Texts_Args = None) -> tuple[str, str]:
         """
-        Same as set_msg_success, but search section 'msgError'
+        returns used `key` and the retrieved `msg`
+        Removes all other msg
+        Retrieves `text` for the [item, <curr_section>] | [item, 'secError'] pair
+        (of the vw_ui_texts view)
+        and adds the pair to `texts` => texts.add(text, 'secError')
+
+        Finally sets ui_db_texts.Msg.display_msg_only = True, so the form only displays
+        the message (no other form inputs)
         """
         self.reset_messages()
         key, msg = self.set_msg_error(key or UITextsKeys.Msg.fatal, args)
@@ -420,14 +442,21 @@ class UIDBTexts:
         return key, msg
 
     def set_msg_error(self, key: str = "", args: DB_Texts_Args = None) -> tuple[str, str]:
+        """returns used `key` and retrieved `msg`"""
         key, msg = self._set_or_add_msg(key, UITextsKeys.Section.error, UITextsKeys.Msg.error, args)
         return key, msg
 
     def set_msg_info(self, key: str = "", args: DB_Texts_Args = None) -> tuple[str, str]:
-        key, msg = self._set_or_add_msg(key, UITextsKeys.Section.current, UITextsKeys.Msg.info, args)
+        """returns used `key` and retrieved `msg`
+        Information texts can be shared with the success section ;—)
+        """
+        key, msg = self._set_or_add_msg(key, UITextsKeys.Section.success, UITextsKeys.Msg.info, args)
         return key, msg
 
     def set_msg_warn(self, key: str = "", args: DB_Texts_Args = None) -> tuple[str, str]:
+        """returns used `key` and the retrieved `msg`
+        Warning texts can be shared with the error section ;—)
+        """
         key, msg = self._set_or_add_msg(key, UITextsKeys.Section.error, UITextsKeys.Msg.warn, args)
         return key, msg
 

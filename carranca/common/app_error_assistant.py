@@ -98,6 +98,7 @@ class ModuleErrorCode(IntEnum):
     TEMPLATE_ERROR = 174
     TEMPLATE_BUG = 176
     SEND_EMAIL = 180
+    USER_UI_LOGOUT = 190
 
     # RECEIVE_FILE_* =: [200... 270] + 100
     RECEIVE_FILE_ADMIT = 200

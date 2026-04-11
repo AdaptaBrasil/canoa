@@ -35,6 +35,7 @@ from ..helpers.route_helper import (
     get_private_response_data,
     base_route_private,
     private_route,
+    is_method_post,
     is_method_get,
     login_route,
     redirect_to,
@@ -342,6 +343,22 @@ def received_file_download():
 
 
 @login_required
+@bp_private.route("/log_me_out", methods=[MTD_GET, MTD_POST])
+def log_me_out():
+    """
+    Finally the logout proc is a Canoa form (and not the js Confirm)
+    he has send for validation or it's generated report.
+    """
+    if is_method_get() or nobody_is_logged():
+        return redirect_to(login_route())
+    else:
+        from ..private.access_control.logout_user import log_me_out
+
+        jHtml = log_me_out()
+        return jHtml
+
+
+@login_required
 @bp_private.route(f"/{ROUTE_EMAIL_ADDR_HUB}", defaults={"uid": ""}, methods=MTD_BOTH)
 @bp_private.route(f"/{ROUTE_EMAIL_ADDR_HUB}/<uid>", methods=MTD_BOTH)
 def email_addr_hub(uid: str = "") -> Route_Response:
@@ -356,7 +373,7 @@ def email_addr_hub(uid: str = "") -> Route_Response:
 
     from ..models.public import User
 
-    def _does_user_need_token(user_rec: User) -> bool:
+    def __does_user_need_token(user_rec: User) -> bool:
         if is_str_none_or_empty(user_rec.verify_email_token):
             # Yes, user has no token
             return True
@@ -381,7 +398,7 @@ def email_addr_hub(uid: str = "") -> Route_Response:
 
         return jHtml
 
-    elif _does_user_need_token(user_rec):
+    elif __does_user_need_token(user_rec):
         # user has no token or has expired
         from .access_control.email_addr_process import send_and_wait_verify_token, explain_email_addr_proc
 
@@ -422,7 +439,7 @@ def password_change():
         return password_change()
 
 
-@bp_private.route("/logout")
+@bp_private.route("/logout", methods=MTD_BOTH)
 def logout() -> Flask_Response:
     """
     Logout the current user

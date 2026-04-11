@@ -16,6 +16,9 @@ Jinja2==3.1.6
 pipreqs>=0.4.13
 psycopg2-binary==2.9.10
 puremagic==1.28.0
+# this is for .tools.
+# in Linux xclip is needed: sudo apt install xclip.
+# pyperclip==1.11.0,
 requests==2.32.3
 # see carranca\helpers\email_helper.py [optional] sendgrid==6.11.0,
 SQLAlchemy==2.0.38

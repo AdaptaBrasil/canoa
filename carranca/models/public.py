@@ -34,7 +34,7 @@ from ..helpers.db_records.DBRecords import DBRecords
 
 from ..models import SQLABaseTable
 from ..helpers.pw_helper import hash_password
-from ..helpers.py_helper import is_str_none_or_empty
+from ..helpers.py_helper import is_str_none_or_empty, to_str
 from ..helpers.db_helper import db_fetch_rows
 from ..private.RolesAbbr import RolesAbbr
 from ..common.app_constants import APP_LANG
@@ -79,7 +79,7 @@ class User(SQLABaseTable, UserMixin):
     email_verified: Mapped[bool] = mapped_column(Boolean, Computed("email_verified", persisted=True))
     # is is hidden column email_verified_at = Column(DateTime, nullable=True)
 
-    role = relationship("Role", back_populates="users")
+    role: Mapped["Role"] = relationship("Role", back_populates="users")
     debug: Mapped[bool] = mapped_column(Boolean, default=False)
 
     def __init__(self, **kwargs):
@@ -99,6 +99,15 @@ class User(SQLABaseTable, UserMixin):
     def __repr__(self):
         return str(self.username)
 
+    @staticmethod
+    def get_where_name_is(name: str) -> "User":
+        return User.get_where(username_lower=to_str(name).lower())
+
+    @staticmethod
+    def get_where_email_is(email: str) -> "User":
+        return User.get_where(email=to_str(email).lower())
+
+    @staticmethod
     def get_where(**filter: Any) -> "User":
         """
         Select a user by a unique filter
@@ -140,29 +149,10 @@ class Role(SQLABaseTable):
     """
 
     __tablename__ = "roles"
-    id = Column(Integer, primary_key=True)
-    name = Column(String(200))
-    abbr = Column(String(3))  # see user_roles.py
-    users = relationship("User", back_populates="role")
-
-
-def get_user_role_abbr(user_id: int, user_role_id: int) -> RolesAbbr | None:
-    """
-    Retrieves and checks a user role against enum
-    """
-
-    abbr: RolesAbbr | None = None
-    if not user_role_id is None:
-        with global_sqlalchemy_scoped_session() as db_session:
-            try:
-                row = db_session.query(Role).filter_by(id=user_role_id).first()
-                abbr = None if row is None else row.abbr
-            except Exception as e:
-                from ..common.app_context_vars import sidekick
-
-                sidekick.display.error(f"Error retrieving user {user_id} role {user_role_id}: [{e}].")
-
-    return abbr
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(200))
+    abbr: Mapped[str] = mapped_column(String(3))  # see user_roles.py
+    users: Mapped["User"] = relationship("User", back_populates="role")
 
 
 def get_user_where(**filter: Any) -> User:

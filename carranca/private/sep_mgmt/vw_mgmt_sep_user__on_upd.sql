@@ -9,12 +9,11 @@ declare
 	usr_new_name varchar(100);
     usr_curr_id int;
 	usr_new_id int;
-	-- fullname variable removed as it is unused
+    operation char(1); -- mgd 2025-06-28 (S)et, (R)emoved | (E)dited, Marked as (D)eleted. For insert, see sep.ins_at.
 begin
     -- spell:ignore mgmt plpgsql
 
-    -- mgd 2025-04-17--28
-	-- Keep a copy of this file updated in carranca\private\seps_mgmt\vw_mgmt_seps_user__on_upd.sql
+	-- /!\ Keep a copy of this file updated in carranca\private\seps_mgmt\vw_mgmt_seps_user__on_upd.sql
 
     -- TODO:
     -- Get message string from vw_ui_texts
@@ -29,15 +28,16 @@ begin
 
 	if NEW.user_new is Null or trim(NEW.user_new) = '' then
 		-- remove user's SEP
-		usr_new_id := Null;
         if usr_curr_id is Null then
             return NEW; -- ignore, there in no current user
 		end if;
+		operation := 'R';
+		usr_new_id := Null;
 
 	else -- find the user's ID from their name
 		usr_new_name:= trim(NEW.user_new);
 		select id into usr_new_id from canoa.users as usr where (usr.username_lower = lower(usr_new_name));
-
+		operation:= 'S';
 		if (usr_new_id is Null) then
  			raise exception '[^|Não foi encontrado o registro do usuário "%".|^]', usr_new_name;
 		elsif usr_curr_id is Null then
@@ -57,16 +57,11 @@ begin
 
 	-- register operation on the log table
 	insert into canoa.log_user_sep
-		   		(id_users,    id_sep, id_users_prior, done_at, done_by,         batch_code)
-		 values (usr_new_id,  NEW.id, usr_curr_id,    done_at, NEW.assigned_by, NEW.batch_code);
+		   		(id_users,    id_sep, id_users_prior, done_at, done_by,         batch_code,     operation)
+		 values (usr_new_id,  NEW.id, usr_curr_id,    done_at, NEW.assigned_by, NEW.batch_code, operation);
 
 	return NEW;
 
 end;
 $function$
 ;
-
--- Permissions
-
-ALTER FUNCTION canoa.vw_mgmt_seps_user__on_upd() OWNER TO canoa_power;
-GRANT ALL ON FUNCTION canoa.vw_mgmt_seps_user__on_upd() TO canoa_power;

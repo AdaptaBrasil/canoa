@@ -31,7 +31,7 @@ what should be shown#}
 {% if form_display_ui %}
 {# ╒═══════════════ Display UI ═══════════════╕ #}
 
-<form method="post" action="" id="{{dlg_submit_form_id}}" {{ formAttribute | default('') }}>
+<form method="post" action="" id="{{dlg_submit_form_id}}" {{formAttribute | default('')}}>
     <input type="hidden" name="{{safe_token.key}}" value="{{safe_token.value}}">
     {# ╒═══════════════ Form's input ═══════════════╕ #}
     {% block frm_blc_inputs %}{% endblock %}
@@ -95,18 +95,16 @@ what should be shown#}
 {% endif %}
 {# ╘═══════════════ Display UI ═══════════════╛ #}
 
-{# ╒════════════════ Dialog Forms ════════════════╕ #}
 
-{#
 {% if form_submit_route %}
+{# ╒════════════════ Dialog Forms ════════════════╕ #}
 {% block dlg_blc_forms %}
 
 {% from "includes/_action_forms_and_btns.html.j2" import action_form__submit_cargo %}
-{{ action_form__submit_cargo(dlg_submit_form_id, form_submit_route ) }}
+{{ action_form__submit_cargo(dlg_submit_form_id, form_submit_route) }}
 
 {% endblock dlg_blc_forms %}
-{% endif %}
-#}
-
 {# ╘═════════════════ Dialog Forms ════════════════╛ #}
+{% endif %}
+
 {# eof #}

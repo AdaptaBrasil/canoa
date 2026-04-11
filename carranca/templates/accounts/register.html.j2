@@ -11,8 +11,7 @@ Extends:
 mgd
 --------------------------------------- #}
 
-{% set form_close_btn_text= gotoLogin %}
-{% set dlg_cls_size= '' %}
+{% set dlg_cls_size= 'frm-width' %}
 {% extends "./layouts/form.html.j2" %}
 
 {# ╒════════════════ Inputs ════════════════╕ #}
@@ -38,19 +37,10 @@ mgd
 </div>
 <!-- Email } -->
 
-{# <!-- { Password  -->
-<div class="form-group mt-3">
-    <label class="form-label" inert for="{{form.password.name}}">{{ passwordLabel }}</label>
-    <div class="input-group">
-        <span class="input-group-text"><i class="{{faStyle}} fa-fw fa-unlock-alt"></i></span>
-        {{ form.password() }}
-    </div>
-</div>
-<!-- Password } --> #}
 <!--{ Password  -->
 <div class="form-group mt-3">
     {% from "./includes/_password_field.html.j2" import password_field_input %}
-    {{ password_field_input(form.password, faStyle, passwordLabel, password_show) }}
+    {{ password_field_input(form.password, faStyle, passwordLabel, passwordShow) }}
 </div>
 <!-- Password }-->
 

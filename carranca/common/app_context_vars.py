@@ -182,9 +182,7 @@ def __get_user_seps() -> "UserSepList":
     else:  # convert simple dict to UserSep again
         list_dic = __get_scoped_var("_user_seps", __prepare_user_seps)
         if list_dic is None or not isinstance(list_dic, list):
-            local_sidekick().display.error(
-                f"An error occurred getting sep from user {app_user.id}: [{type(list_dic)}] → {str(list_dic)}."
-            )
+            local_sidekick().display.error(f"An error occurred getting sep from user {app_user.id}: [{type(list_dic)}] → {str(list_dic)}.")
         else:
             result: "UserSepList" = [UserSep(**item) for item in list_dic]
 
@@ -207,8 +205,7 @@ def __getattr__(name):
 
         if global_sidekick is None:
             raise RuntimeError(
-                "🚨 Application accessed before initialization. global_sidekick is None. "
-                "Check import order or application setup."
+                "🚨 Application accessed before initialization. global_sidekick is None. " "Check import order or application setup."
             )
         return global_sidekick
 

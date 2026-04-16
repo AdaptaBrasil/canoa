@@ -38,7 +38,7 @@ def do_scm_edit(data: str) -> str:
     if action is not None:  # called from sep_grid
         # TODO use: window.history.back() in JavaScript.
         process_on_end = private_route("scm_grid", code=UiActResponseProxy.show)  # TODO selected Row, ix=row_index)
-        form_on_close = {"dlg_close_action_url": process_on_end}
+        form_on_close = {"dlgFormCloseAction": process_on_end}
     else:  # standard routine
         code = data
         action = None

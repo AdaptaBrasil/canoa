@@ -11,9 +11,9 @@ cSpell:ignore
 --------------------------------------- #}
 
 {# only specify value if different from default #}
-{% set form_submit_route= formSubmitRoute | default(False) %}
-{% set form_submit_btn_text= form_submit_btn_text | default(submitFormButton) %}
-{% set form_close_btn_text= form_close_btn_text | default(closeFormButton) %}
+{% set form_post_action= formSubmitRoute | default(False) %}
+{% set form_post_btn_text= submitFormButton %}
+{% set form_close_btn_text= closeFormButton %}
 
 {% extends "./layouts/dialog.html.j2" %}
 
@@ -33,10 +33,10 @@ cSpell:ignore
 {# ╒════════════ Footer Buttons ══════════╕ #}
 {% block dlg_blc_footer_buttons %}
 
-{% if form_submit_btn_text %}
+{% if form_post_btn_text %}
 <div class="col-auto">
     {% from "includes/_action_forms_and_btns.html.j2" import btn_submit %}
-    {{ btn_submit(dlg_submit_form_id, dlg_submit_btn_id, form_submit_btn_text) }}
+    {{ btn_submit(dlg_post_form_id, dlg_post_btn_id, form_post_btn_text) }}
 </div>
 {% endif %}
 
@@ -68,12 +68,13 @@ cSpell:ignore
 {% endblock dlg_blc_javascript %}
 {# ╘══════ Override dialog ══════╛ #}
 
-{% if form_submit_route %}
+
+{% if form_post_action %}
 {# ╒════════════════ Dialog Forms ════════════════╕ #}
 {% block dlg_blc_forms %}
 
-{% from "includes/_action_forms_and_btns.html.j2" import action_form__submit_cargo %}
-{{ action_form__submit_cargo(dlg_submit_form_id, form_submit_route) }}
+{% from "includes/_action_forms_and_btns.html.j2" import action_form__post_cargo %}
+{{ action_form__post_cargo(dlg_post_form_id, form_post_action, dlg_data_wait_process) }}
 
 {% endblock dlg_blc_forms %}
 {# ╘═════════════════ Dialog Forms ════════════════╛ #}

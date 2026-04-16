@@ -6,7 +6,7 @@
     //  "args": ["--no-reload",
     "version": "0.2.0",
     "configurations": [
-        
+
         {
             "name": "Canoa",
             "type": "debugpy",
@@ -19,8 +19,6 @@
                 "FLASK_ENV": "development",
                 "FLASK_DEBUG": "1",
                 "CANOA_DEBUG": "true",
-                // "FLASK_RUN_HOST": "0.0.0.0",
-                // "FLASK_RUN_PORT": "5050",
             },
             "args": [
                 "run",

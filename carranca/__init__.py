@@ -294,7 +294,7 @@ def _create_app_and_log_file(app_name: str):
         g_sk.config.LOG_FILE_STATUS = "off"
     else:
         cfg = g_sk.config
-        error, full_name, level = do_log_file(app, cfg.LOG_FILE_NAME, cfg.LOG_FILE_FOLDER, cfg.LOG_MIN_LEVEL)
+        error, full_name, level = do_log_file(app, cfg.LOG_FILE_FOLDER, cfg.LOG_MIN_LEVEL)
         info = f"file '{full_name}' levels '{level}' and above"
         if not error:
             _info(f"Logging to {info}.")

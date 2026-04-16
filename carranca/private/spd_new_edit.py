@@ -39,7 +39,7 @@ def do_spd_edit(data: str) -> str:
         # TODO use: window.history.back() in JavaScript.
         # TODO selected Row, ix=row_index)
         process_on_end = private_route("spd_grid", code=UiActResponseProxy.show)
-        form_on_close = {"dlg_close_action_url": process_on_end}
+        form_on_close = {"dlgFormCloseAction": process_on_end}
     else:  # standard routine
         code = data
         action = None

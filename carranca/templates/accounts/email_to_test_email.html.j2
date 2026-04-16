@@ -6,11 +6,11 @@ This dialog confirms that a test email has been sent to the user's registered em
 verifying email deliverability and sending engine functionality.
 
 mgd
+mgd 2026.04-todo: use prompt
 --------------------------------------- #}
 {# cSpell:ignore #}
-{% set dlg_cls_size= '' %}
+{% set dlg_cls_size = 'frm-width' %}
 {% set form_close_btn_text= closeFormButton | default(ui_defaults.okButton) %}
-{# {% set form_backend_msg= msgOnly | default(True) %} #}
 
 {% extends "./layouts/dialog.html.j2" %}
 
@@ -23,7 +23,7 @@ mgd
 {# ╘════════════════ Dialog Body ════════════════╛ #}
 
 
-{# ╒════════════════ Dialog Footer ═══════════════╛ #}
+{# ╒════════════════ Dialog Footer ══════════════╕ #}
 {% block dlg_blc_footer_buttons %}
 
 <div class="col-auto">

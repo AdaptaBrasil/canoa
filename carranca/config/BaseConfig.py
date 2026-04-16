@@ -83,7 +83,7 @@ class BaseConfig(Config):
     # set in derived classes
     APP_DEBUG: TrueInDebug = True
     APP_MINIFY_OFF: TrueInDebug = False  #
-    APP_MINIFY_MODULES = "js css"  # config which modules are enable: "html css js app" # use only spaces
+    APP_MINIFY_MODULES = "css"  # config which modules are enable: "html css js app" # use only spaces
     APP_DISPLAY_DEBUG_MSG: TrueInDebug = None
 
     APP_MODE = "None"  # see below (enum)
@@ -154,6 +154,7 @@ class BaseConfig(Config):
     TESTING: TrueInDebug = None  # <- True if APP_PROPAGATE_DEBUG else False
     DEBUG_TEMPLATES: TrueInDebug = None  # <- True if APP_PROPAGATE_DEBUG else False
     DEBUG_RENDERED_TEMPLATES: TrueInDebug = None  # <- True if APP_PROPAGATE_DEBUG else False
+    DEBUG_TEMPLATES_HTML_BUGS_FILE_NAME = "last-file-with-bugs-{0}.html"  # {user_id}
     # this does'nt work (spend a day to find out), is SERVER_NAME: SERVER_ADDRESS = ""
     # https://flask.palletsprojects.com/en/latest/config/#SERVER_NAME
     # Inform the application what host and port it is bound to (NO Scheme).
@@ -175,9 +176,8 @@ class BaseConfig(Config):
     """
     LOG_TO_FILE = True  # Log
     LOG_MIN_LEVEL = logging.INFO
-    # folder is log_files
-    LOG_FILE_FOLDER = ""  # "log_files"
-    LOG_FILE_NAME = ""  # defaults to APP_NAME.datetime.log
+    # folder is log_files & HTML_TEMPLATE_BUGS file
+    LOG_FILE_FOLDER = "log_files"
     LOG_FILE_STATUS: str = "?"  # internal set at startup
 
     """ Database constant

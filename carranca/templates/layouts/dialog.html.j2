@@ -44,8 +44,11 @@ mgd
 {% set dlg_icon_id= 'dlg-icon-id' %}
 {% set dlg_sleep_veil_id= 'dlg-sleep-veil-id'%}
 {% set dlg_sleep_veil_cls= 'd-none'%}
-{% set dlg_submit_btn_id= 'dlg-submit-btn-id' %}
-{% set dlg_submit_form_id= 'dlg-submit-form-id' %}
+{# see canoa.js: #}
+{% set dlg_data_wait_process = 'data-wait-process'%}
+{# this form is the only one that `posts` cargo => submit inputs #}
+{% set dlg_post_btn_id= 'dlg-post-btn-id' %}
+{% set dlg_post_form_id= 'dlg-post-form-id' %}
 {% set dlg_btns_container_id = 'dlg-btns-container-id' %}
 {% set dlg_options_container_id = 'dlg-options-container-id' %}
 
@@ -54,7 +57,7 @@ mgd
 {% set dlg_close_form_id= 'dlg-close-form-id' %}
 
 {% set dlg_close_btn_visible= dlg_close_btn_visible | default(True) %}
-{% set dlg_close_action_url= dlg_close_action_url | default('/login') %}
+{% set dlg_close_action_url= dlgFormCloseAction | default('/login') %}
 
 {% set dlg_icon_size= dlg_icon_size | default('32px') %}
 {#
@@ -73,21 +76,21 @@ Ensure this matches the expected dimensions for dialog icons.
     class="modal {% if not (dlg_var_v_centered | default(False)) %}{{dlg_cls_top | default('mt-5')}}{% endif -%}">
 
     {# ╒════════════════════════ Dialog ════════════════════════════╕ #}
-    <div class="modal-dialog {{dlg_cls_size|default('dlg-width')}}
+    <div id="dlg-modal-id" class="modal-dialog {{dlg_cls_size|default('dlg-width')}}
         {%- if dlg_var_v_centered %} modal-dialog-centered {% endif -%}
         {%- if dlg_var_scroll %} modal-dialog-scrollable {% endif %}
     ">
 
         {# ╒════════════════════════ Content ═══════════════════════════╕ #}
-        <div class="modal-content">
+        <div id="dlg-modal-content-id" class="modal-content">
             {# ╒════════════════════ Sleep Veil ════════════════════════╕ #}
-            <div id="{{dlg_sleep_veil_id}}" class="{{dlg_sleep_veil_cls}}">
+            <div id="{{dlg_sleep_veil_id}}" class="{{dlg_sleep_veil_cls}}" data-sleep-veil>
                 <div class="spinner-border text-light" role="status" style="width: 2rem; height: 2rem;"></div>
             </div>
             {# ╘════════════════════ Sleep Veil ════════════════════════╛ #}
 
             {# ╒════════════════════ Header ════════════════════════════╕ #}
-            <div class="modal-header dlg-header">
+            <div id="dlg-modal-content-header-id" class="modal-header dlg-header">
                 <h5 class="modal-title dlg-title">
                     {% if dlg_var_icon_url %}
                     <span class="{%- if 'sep_icons' in dlg_var_icon_url %}dlg-sep_icon-back{% else %}dlg-icon-back{% endif %}">
@@ -103,7 +106,7 @@ Ensure this matches the expected dimensions for dialog icons.
             {# ╘════════════════════ Header ════════════════════════════╛ #}
 
             {# ╒═════════════════════ Body ═════════════════════════════╕ #}
-            <div class="modal-body dlg-body {% block dlg_blc_body_cls_tweak %}{% endblock %}">
+            <div id="dlg-modal-content-body-id" class="modal-body dlg-body {% block dlg_blc_body_cls_tweak %}{% endblock %}">
                 {# ╒═════════ Dialog Body ═════════╕ #}
                 {% block dlg_blc_body %}{% endblock %}
                 {# ╘═════════ Dialog Body ═════════╛ #}
@@ -112,7 +115,7 @@ Ensure this matches the expected dimensions for dialog icons.
 
             {# ╒═════════════════════ Dialog Footer ════════════════════╕ #}
             {% block dlg_blc_footer %}
-            <div class="modal-footer justify-content-center align-items-center py-2 dlg-footer">
+            <div id="dlg-modal-content-footer-id" class="modal-footer justify-content-center align-items-center py-2 dlg-footer">
 
                 {# ╒═════════ Dialog Footer Buttons═════════╕ #}
                 <div id="{{dlg_btns_container_id}}" class="row justify-content-center g-2">
@@ -130,67 +133,32 @@ Ensure this matches the expected dimensions for dialog icons.
             {% endblock dlg_blc_footer %}
             {# ╘═════════════════════ Dialog Footer ════════════════════╛ #}
 
-
             {# ╒═════════════════════ TODO:
             window.addEventListener('beforeunload', (event) => {
             sessionStorage.getItem("canoa_session_started")
             ════════════════╛ #}
-
         </div>
+        {# ╘════════════════════════ Content ═══════════════════════════╛ #}
     </div>
-    {% endblock base_blc_main %}
+    {# ╘════════════════════════ Dialog ════════════════════════════╛ #}
+</div>
+{% endblock base_blc_main %}
+{# ╘═════════════════════════════ Main ═════════════════════════════╛ #}
 
 
-    {% block base_blc_body_js %}
-    <script id="before_page_close">
-        /** @type {CanoaGlobal} */
-        window.Canoa = {
-            dataModified: false,
-        }
+{% block base_blc_forms %}
+{# FORM: Canoa unique CLOSE [x] page #}
+<form id="{{dlg_close_form_id}}" method="get" action="{{dlg_close_action_url}}" data-form-close></form>
+{# FORM> #}
+{# ╒════════════ Dialog Forms ═════════╕ #}
+{% block dlg_blc_forms %}{% endblock %}
+{# ╘════════════ Dialog Forms ═════════╛ #}
+{% endblock base_blc_forms %}
 
-        const setSleepVeil = () => {
-            const sv = document.getElementById("{{dlg_sleep_veil_id}}");
-            sv?.classList.replace('{{dlg_sleep_veil_cls}}', 'dlg-sleep-veil');
-        }
+{% block base_blc_body_js %}
+{# ╒═════════════ Dialog JS ══════════════╕ #}
+{% block dlg_blc_javascript %}{% endblock %}
+{# ╘═════════════ Dialog JS ══════════════╛ #}
+{% endblock base_blc_body_js %}
 
-        window.addEventListener('beforeunload', (event) => {
-            if (Canoa.dataModified) {
-                event.preventDefault();
-            }
-        });
-
-        const dlgFrm = document.getElementById("{{dlg_submit_form_id}}")
-        dlgFrm?.addEventListener('submit', (e) => {
-            if (dlgFrm && dlgFrm.action) {
-                const route = dlgFrm.action.split('/').at(-1);
-                if (!(['login', 'goto']).includes(route)) {
-                    setSleepVeil();
-                }
-            }
-        });
-
-        document.getElementById("{{dlg_close_form_id}}")?.addEventListener('submit', (e) => {
-            if (e.submitter.id == '{{dlg_close_x_id}}') {
-                // continue
-            } else if (!Canoa.dataModified || confirm("Perder as alterações?")) {
-                // not modified
-            } else {
-                e.preventDefault();
-            }
-        });
-    </script>
-
-    {# ╒═════════════ Dialog JS ══════════════╕ #}
-    {% block dlg_blc_javascript %}{% endblock %}
-    {# ╘═════════════ Dialog JS ══════════════╛ #}
-
-    {% endblock base_blc_body_js %}S
-
-    {% block base_blc_forms %}
-    <form action="{{dlg_close_action_url}}" method="get" id="{{dlg_close_form_id}}"></form>
-    {# ╒════════════ Dialog Forms ═════════╕ #}
-    {% block dlg_blc_forms %}{% endblock %}
-    {# ╘════════════ Dialog Forms ═════════╛ #}
-    {% endblock base_blc_forms %}
-
-    {# eof #}
+{# eof #}

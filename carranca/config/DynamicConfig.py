@@ -102,6 +102,7 @@ class DynamicConfig(BaseConfig):
             """
             return default if value is None else as_bool(value)
 
+        # TODO:
         self.TESTING = _if_debug(self.TESTING)  # Flask
         self.DEBUG_TEMPLATES = _if_debug(self.DEBUG_TEMPLATES)  # jinja
         self.APP_MINIFY_OFF = _if_debug(self.APP_MINIFY_OFF)  #

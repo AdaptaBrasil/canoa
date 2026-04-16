@@ -1,5 +1,6 @@
 # mgd 2025.12.11
 # python==3.13.*
+# see jinja_helper.py:_detect_duplicate_ids & html_herper
 beautifulsoup4==4.13.3
 email-validator==2.2.0
 Flask==3.1.0
@@ -12,11 +13,13 @@ google-auth>=2.30.0
 google-auth-oauthlib>=1.2.1
 google-auth-httplib2>=0.2.0
 google-api-python-client>=2.140.0
+# see jinja_helper.py:_detect_html_errors
+html5lib>= 1.1
 Jinja2==3.1.6
 pipreqs>=0.4.13
 psycopg2-binary==2.9.10
 puremagic==1.28.0
-# this is for .tools.
+# this is for .tools. folder
 # in Linux xclip is needed: sudo apt install xclip.
 # pyperclip==1.11.0,
 requests==2.32.3

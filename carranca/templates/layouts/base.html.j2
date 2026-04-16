@@ -71,10 +71,10 @@ mgd
 </head>
 
 <body>
-    <header>
+    <header id="base-header-id">
     </header>
 
-    <nav>
+    <nav id="base-nav-id">
         {% if is_anyone_logged() %}
         {# ╒═══════════════ Base Navigator ═══════════════╕ #}
         {% set _nav_button_state= nav_button_state | default('disabled') %}
@@ -87,14 +87,14 @@ mgd
         {% endif %}
     </nav>
 
-    <main>
+    <main id="base-main-id">
         {# ╒═══════════════ Base Main ═══════════════╕ #}
         {% block base_blc_main %}
         {% endblock base_blc_main %}
         {# ╘═══════════════ Base Main ═══════════════╛ #}
     </main>
 
-    <div class="form-actions">
+    <div id="base-forms-id">
         {# ╒═══════ Base Forms ══════╕ #}
         {% block base_blc_forms %}
         {% endblock base_blc_forms %}

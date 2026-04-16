@@ -14,12 +14,16 @@ mgd
 Spell:ignore endmacro preid onclick
 #}
 
-
-{# == Close < went to dialog.htm.j2 only place where it was used { # -- Close Form: includes security token -- {% macro action_form__close(on_close, form_id) %}
- <form action="{{on_close}}" method="get" id="{{form_id}}">
+{# -- Post form: includes security token & cargo -- #}
+{% macro action_form__post_cargo(form_id, action_route, dlg_wait_process, extra='')%}
+{# FORM: Canoa POST form #}
+<form id="{{form_id}}" method="post" action="{{action_route}}" {{dlg_wait_process}} {{extra}}>
+    <input type="hidden" name="{{safe_token.cargo}}" id="{{safe_token.cargo}}">
+    <input type="hidden" name="{{safe_token.key}}" value="{{safe_token.value}}">
 </form>
 {% endmacro %}
-#}
+
+
 
 {# -- Close Button: [x] of layouts/dialog.html.j2 -- #}
 {% macro btn_close_dlg(form_id, btn_id, caption, extra='') %}
@@ -27,13 +31,10 @@ Spell:ignore endmacro preid onclick
     {{caption | default('Close')}}
 </button>
 {% endmacro %}
-{# == Close > #}
 
-
-{# == Submit < #} {# -- Submit Button -- #}
+{# -- Submit Button -- #}
 {% macro btn_submit(form_id, btn_id, caption, extra='' ) %}
-<button type="submit" form="{{form_id}}"
-    id="{{btn_id}}" class="form-main-btn form-submit" {{extra}}>
+<button type="submit" form="{{form_id}}" id="{{btn_id}}" class="form-main-btn form-submit" {{extra}}>
     {# --
     The default caption is in English: it is understandable for the user and also indicates that
     the button is awaiting a value from the developer.
@@ -42,20 +43,11 @@ Spell:ignore endmacro preid onclick
 </button>
 {% endmacro %}
 
-{# -- Submit Form: includes security token -- #}
-{% macro action_form__submit_cargo(form_id, action_url, method= 'post', extra='')%}
-<form id="{{form_id}}" action="{{action_url}}" method="{{method}}" {{extra}}>
-    <input type="hidden" name="{{safe_token.cargo}}" id="{{safe_token.cargo}}">
-    <input type="hidden" name="{{safe_token.key}}" value="{{safe_token.value}}">
-</form>
-{% endmacro %}
-
-{# == Submit > #}
-{# -- A Button to linked through ui_constant -- #}
+{# -- Button to linked through ui_constant, creates it 'own' ID -- #}
 {% macro btn_action(action_form__id, caption, cmd= '', attrib= '')%}
 <button type="submit" class="form-main-btn form-submit btn-action" form="{{action_form__id}}" id="{{do_btn_id(cmd, caption)}}" {{attrib}}>
     {{caption}}
 </button>
 {% endmacro %}
-
+{# -- Button #}
 {# eof #}

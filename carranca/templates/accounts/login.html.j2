@@ -9,8 +9,8 @@ mgd
 --------------------------------------- #}
 {# cspell:ignore unselectable endfrom #}
 
+{% set dlg_cls_size = 'frm-width' %}
 {% set dlg_close_btn_visible= False %}
-{% set dlg_cls_size= '' %} {# default size #}
 {% set display_footer_options= display_footer == 'True' %}
 {% extends "./layouts/form.html.j2" %}
 
@@ -49,7 +49,7 @@ mgd
 
 {# ╒════════════════ Buttons ═══════════════╕ #}
 {# % block dlg_blc_footer_buttons % #}
-{# ╘════════════════ Buttons ════════════════╛ #}
+{# ╘════════════════ Buttons ═══════════════╛ #}
 
 {# ╒════════════════ Options ═══════════════╕ #}
 {% block dlg_blc_footer_options %}

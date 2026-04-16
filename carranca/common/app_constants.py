@@ -25,6 +25,7 @@ APP_LANG = "pt-br"
 APP_UPS_HTML_PAGE_FILE_NAME = "ups_page.html.j2"
 
 # Message error for a jinja leftover tag
-APP_JINJA_ORPHANED_TAG_ERROR = "🚨 A Jinja runtime error was detected"
+APP_JINJA_TEMPLATE_BUG_FOUND = "🚨 A Jinja runtime error was detected"
+APP_JINJA_TEMPLATE_BUG_MSG_TECH = "Disable config.DEBUG_RENDERED_TEMPLATES to hide this error."
 
 # eof

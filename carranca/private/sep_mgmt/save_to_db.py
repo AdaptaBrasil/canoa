@@ -28,8 +28,8 @@ def save_data(
 ) -> Sep_Mgmt_Return:  # msg_success, msg_error, task_code
     """Saves user modifications to the DB via the view's trigger"""
 
-    msg_success = None
-    msg_error = None
+    msg_success = ""
+    msg_error = ""
     try:
         msg_error, remove, assign, task_code = _prepare_data_to_save(grid_response, ui_db_texts, task_code)
         if not is_str_none_or_empty(msg_error):
@@ -55,7 +55,7 @@ def _prepare_data_to_save(
 ) -> Tuple[str, Cargo_List, Cargo_List, int]:
     """Distributes grid's modifications in two groups: remove & assign"""
 
-    msg_error = None
+    msg_error = ""
     remove: Cargo_List = []
     assign: Cargo_List = []
     try:
@@ -101,7 +101,7 @@ def _save_data_to_db(
     from ...common.app_context_vars import app_user, sidekick
     from ...models.private.mgmt_seps_user import MgmtSepsUser
 
-    msg_error = None
+    msg_error = ""
     assigned_by = app_user.id
     user_not_found = []
     task_code += 1

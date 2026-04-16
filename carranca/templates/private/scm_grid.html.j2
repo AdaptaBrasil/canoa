@@ -19,14 +19,14 @@ mgd
 
 {# ╒════════════════ Grid Footer ════════════════╕ #}
 {% block grid_blc_footer %}
-    <div class="col-auto">
-        {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
-        {{ btn_action(dlg_submit_form_id, grdBtnEdit, cargo_keys.edit) }}
-    </div>
-    <div class="col-auto">
-        {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
-        {{ btn_action(dlg_submit_form_id, grdBtnDelete, cargo_keys.delete) }}
-    </div>
+<div class="col-auto">
+    {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
+    {{ btn_action(dlg_post_form_id, grdBtnEdit, cargo_keys.edit) }}
+</div>
+<div class="col-auto">
+    {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
+    {{ btn_action(dlg_post_form_id, grdBtnDelete, cargo_keys.delete) }}
+</div>
 
 {% endblock grid_blc_footer %}
 {# ╘═══════════════ Grid Footer ═════════════════╛ #}
@@ -35,8 +35,8 @@ mgd
 {# ╒════════════════ Grid Forms ═════════════════╕ #}
 {% block grid_blc_forms %}
 
-{% from "includes/_action_forms_and_btns.html.j2" import action_form__submit_cargo %}
-{{ action_form__submit_cargo(dlg_submit_form_id, private_route('scm_grid', code=form_cargo_id)) }}
+{% from "includes/_action_forms_and_btns.html.j2" import action_form__post_cargo %}
+{{ action_form__post_cargo(dlg_post_form_id, private_route('scm_grid', code=form_cargo_id), dlg_data_wait_process) }}
 
 {% endblock grid_blc_forms %}
 {# ╘════════════════ Grid Forms ═════════════════╛ #}
@@ -58,7 +58,7 @@ mgd
 
 
     {% from "includes/_action_forms_and_btns.js.j2" import form_link_action %}
-    {{ form_link_action(dlg_submit_form_id, form_cargo_id) }}
+    {{ form_link_action(dlg_post_form_id, form_cargo_id) }}
 
 </script>
 <script src="{{static_route('js/scm_grid.js')}}"></script>

@@ -80,7 +80,7 @@ base → dialog
         <!-- Buttons (from form.html.j2) -->
         <div class="row justify-content-center" id="dlg_btns_container_id">
           <div class="col-auto">
-            <button id="dlg_submit_btn_id" type="submit" form="dlg-submit-form-id" class="btn btn-primary">
+            <button id="dlg_submit_ btn_id" type="submit" form="dlg-submit-form-id" class="btn btn-primary">
               Entrar
             </button>
           </div>
@@ -113,6 +113,10 @@ base.html.j2
 └── layouts/dialog.html.j2
 │ • Defines dialog layout (header, body, footer)
 │ • Declares blocks:
+│ - Main .modal
+│   - Dialog .modal-dialog
+│       - base_blc_forms
+│       - base_blc_forms
 │ - dlg_blc_body
 │ - dlg_blc_footer
 │ - dlg_blc_footer_buttons

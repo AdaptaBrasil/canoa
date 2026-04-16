@@ -7,8 +7,6 @@ mgd 2025.10.29 -- 2026.03.20
 
 # cSpell: ignore formdata FlaskForm timestamping
 
-import random
-
 # flask_wtf is squiggly
 from typing import Tuple, cast
 from datetime import datetime, timedelta
@@ -112,13 +110,13 @@ def send_email_to_test_address(route: str, email: str, name: str) -> Jinja_Rende
     else:
         jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.EMAIL_CHECK)
         try:
-            tmpl_ffn, _, ui_db_texts = get_account_response_data("emailToTestEmail", "generic_prompt")
+            tmpl_ffn, _, ui_db_texts = get_account_response_data("emailToTestEmail", "user_prompt")
             task_code += 1
             masked_email = _mask_email(email)
             task_code += 1
             ui_db_texts.set_msg_info("requestEmailText", masked_email)
             ui_db_texts.replace(UITextsKeys.Form.btn_submit, "acceptEmailBtn")
-            ui_db_texts.replace(UITextsKeys.Form.submit_route, private_route(route, uid=""))
+            ui_db_texts.replace(UITextsKeys.Form.post_route, private_route(route, uid=""))
             ui_db_texts.display_msg_only = True
             task_code += 1
             jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
@@ -169,10 +167,10 @@ def explain_email_addr_proc(route: str, user_email: str) -> Jinja_Rendered:
     jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.EMAIL_VERIFY)
     task_code += 10
     try:
-        tmpl_ffn, _, ui_db_texts = get_account_response_data("verifySentToken", "generic_prompt")
+        tmpl_ffn, _, ui_db_texts = get_account_response_data("verifySentToken", "user_prompt")
         ui_db_texts.set_msg_info("acceptEmail")
         ui_db_texts[UITextsKeys.Form.btn_submit] = ui_db_texts["acceptEmailBtn"]
-        ui_db_texts[UITextsKeys.Form.submit_route] = private_route(route, uid=_uid(user_email))
+        ui_db_texts.set_value(UITextsKeys.Form.post_route, private_route(route, uid=_uid(user_email)))
         ui_db_texts.display_msg_only = True
         jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
 

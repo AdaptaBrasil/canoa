@@ -6,13 +6,13 @@ Macros helper for Action Forms and Buttons HTML
 v2 2025.09.20
 mgd
 
-Spell:ignore endmacro preid onclick
+Spell:ignore endmacro
 #}
 
-{% macro form_link_action(submit_form_id, response_id)%}
+{% macro form_link_action(form_id, response_id)%}
 	document.addEventListener('DOMContentLoaded', () => {
-		const elForm = /** @type {HTMLFormElement} */(document.getElementById('{{ submit_form_id }}'));
-		const elResponse = /** @type {HTMLInputElement} */(document.getElementById('{{ response_id }}'));
+		const elForm = /** @type {HTMLFormElement} */(document.getElementById('{{form_id}}'));
+		const elResponse = /** @type {HTMLInputElement} */(document.getElementById('{{response_id}}'));
 		elForm?.addEventListener('submit', (event) => {
 			event.preventDefault();
 			cargo[cargoKeys.action] = event.submitter.id;

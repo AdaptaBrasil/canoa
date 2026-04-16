@@ -39,8 +39,6 @@ def register():
         task_code += 1  # 3
         fform = RegisterForm()
 
-        ui_db_texts.set_value(UITextsKeys.Form.submit_route, public_route("register"))
-
         if is_get and is_anyone_logged():
             internal_logout()
         elif is_get:

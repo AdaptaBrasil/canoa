@@ -72,7 +72,7 @@ mgd
     const download = (t) => {
         if (activeID) {
             document.getElementById('{{form_cargo_id}}').value = `${activeID}${t}`;;
-            document.getElementById('{{dlg_submit_form_id}}').submit();
+            document.getElementById('{{dlg_post_form_id}}').submit();
         }
     };
 
@@ -101,8 +101,8 @@ mgd
 {# ╒════════════════ Dialog Forms ════════════════╕ #}
 {% block dlg_blc_forms %}
 
-{% from "includes/_action_forms_and_btns.html.j2" import action_form__submit_cargo %}
-{{ action_form__submit_cargo(dlg_submit_form_id, private_route('received_file_download'), extra='target="_blank"') }}
+{% from "includes/_action_forms_and_btns.html.j2" import action_form__post_cargo %}
+{{ action_form__post_cargo(dlg_post_form_id, private_route('received_file_download'), dlg_data_wait_process, extra='target="_blank"') }}
 
 {% endblock %}
 {# ╘═════════════════ Dialog Forms ════════════════╛ #}

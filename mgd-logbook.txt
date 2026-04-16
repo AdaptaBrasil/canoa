@@ -53,12 +53,13 @@
             - drop columns log_user_sep.sep_new, id_sep_old
             - SchemaSEP
 
-        » Flask 2026.02.20
+        » Flask 2026.02.20, 04.16
+            # double idsS
             {% if dlg_forms_post_route } # New eg  private_route('auto_email_user')
                 {% block dlg_blc_forms %}
 
                     {% from "includes/_action_forms_and_btns.html.j2" import action_form__submit_cargo %}
-                    {{ action_form__submit_cargo(dlg_submit_form_id,  dlg_forms_post_route ) }}
+                    {{ action_form__submit_cargo(<changed>,  dlg_forms_post_route ) }}
 
                 {% endblock dlg_blc_forms %}
             {% endif %}
@@ -70,12 +71,16 @@
 
    	A user can not be disabled if it has a SEP, cannot be assigned a sep if is disabled
     Check  carranca\templates\private\sep_mgmt.html.j2
-      if too many params {{ action_form__submit_cargo(dlg_submit_form_id, private_route('sep_mgmt'), 'post', "onsubmit='return doGridCargo()'")}}
+      if too many params {{ action_form__submit_cargo(dlg_post_form_id, private_route('sep_mgmt'), 'post', "onsubmit='return doGridCargo()'")}}
     todo:
 
 ------- 2026 - April -------------
     - 'recortes' -> Spatial Data
     - Remove ui_db_texts_cache.py
+    - Found  2 submit forms with the same id :—(
+        Refactor:
+        - action_form__submit_cargo(dlg_submit_form_id ->dlg_post_form_id, ... => action_form__post_cargo(dlg_post_form_id, ....
+
 
 
 ------- 2026 - March -------------

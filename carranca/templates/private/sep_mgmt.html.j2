@@ -17,20 +17,20 @@ mgd
 {% set dlg_cls_size= 'modal-lg' %}
 
 {% block grid_blc_footer %}
-    <div class="col-auto">
-        {% from "includes/_action_forms_and_btns.html.j2" import btn_submit %}
-        {{ btn_submit(dlg_submit_form_id, dlg_submit_btn_id, grdBtnSave, "disabled") }}
-    </div>
-    <div class="col-auto">
-        {% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
-        {{ btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, grdBtnCancel) }}
-    </div>
+<div class="col-auto">
+    {% from "includes/_action_forms_and_btns.html.j2" import btn_submit %}
+    {{ btn_submit(dlg_post_form_id, dlg_post_btn_id, grdBtnSave, "disabled") }}
+</div>
+<div class="col-auto">
+    {% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
+    {{ btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, grdBtnCancel) }}
+</div>
 {% endblock grid_blc_footer %}
 
 {% block grid_blc_forms %}
-{% from "includes/_action_forms_and_btns.html.j2" import action_form__submit_cargo %}
-{{ action_form__submit_cargo(dlg_submit_form_id, private_route('sep_mgmt'), 'post', "onsubmit='return doGridCargo()'")}}
-{# TODO: use submit event instead of  doGridCargo #}
+{% from "includes/_action_forms_and_btns.html.j2" import action_form__post_cargo %}
+{{ action_form__post_cargo(dlg_post_form_id, private_route('sep_mgmt'), dlg_data_wait_process, "onsubmit='return doGridCargo()'")}}
+{# TODO: use submit event instead of doGridCargo #}
 {% endblock grid_blc_forms %}
 
 
@@ -66,7 +66,7 @@ Create a copy of user_list(or empty array), then add (itemNone)
     const gridID = '{{ grid_id }}';
     const iconID = '{{ dlg_icon_id }}';
     const respID = '{{ form_cargo_id }}';
-    const btnGridSubmit = /** @type {HTMLInputElement} */(document.getElementById('{{dlg_submit_btn_id}}'));
+    const btnGridSubmit = /** @type {HTMLInputElement} */(document.getElementById('{{dlg_post_btn_id}}'));
     const dateFormat = '{{ userDateFormat }}';
 
 </script>

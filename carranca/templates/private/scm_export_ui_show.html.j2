@@ -5,6 +5,9 @@
 Exports Schemas with there Seps
 Also displays an UI to set the display order to the seps
 
+TODO:
+const cargo = {[cargoKeys.action]: '', [cargoKeys.row_index]: initRow, [cargoKeys.code]: '', [cargoKeys.data]: null}
+
 mgd
 
 --------------------------------------- #}
@@ -32,48 +35,48 @@ mgd
 {% block dlg_blc_body %}
 
 <div class="container" id="body-block">
-   <div class="row gx-1">
-      {# ╒══════════════ Column 1 ═══════════════╕ #}
-      <div class="col-12 col-md-3" id='{{reticle_cell_id}}'>
+    <div class="row gx-1">
+        {# ╒══════════════ Column 1 ═══════════════╕ #}
+        <div class="col-12 col-md-3" id='{{reticle_cell_id}}'>
 
-         {# % set scm_count = 0 % #}
+            {# % set scm_count = 0 % #}
 
-         {% for scm in schemas %}
-         {% set scm_index = loop.index %}
-         {% if scm.seps|length > 0 %}
+            {% for scm in schemas %}
+            {% set scm_index = loop.index %}
+            {% if scm.seps|length > 0 %}
 
-         <div class="reticule-frame mb-2">
-            <div class=reticule-header>
-               <div class="reticule-header-color" style="background-color: {{scm.color}}" title='{{scm.color}}'></div>
-               <div class="reticule-header-title">{{scm.name}}</div>
+            <div class="reticule-frame mb-2">
+                <div class=reticule-header>
+                    <div class="reticule-header-color" style="background-color: {{scm.color}}" title='{{scm.color}}'></div>
+                    <div class="reticule-header-title">{{scm.name}}</div>
+                </div>
+                {% for sep in scm.seps %}
+                {% set ui_order = scm_index ~ ':' ~ loop.index %}
+                <span class="reticule-item reticule-item-hot" draggable="true" title='{{sep.name}} | {{sep.manager}}'>
+                    <img src='{{sep.icon_file_name}}' id='{{sep.scm_code}}:{{sep.code}}' data-ui-order='{{ui_order}}'>
+                </span>
+                {% endfor %}
+                {# fill empty slots #}
+                {% set empty_slots = (3 - (scm.seps|length % 3)) % 3 %}
+                {% if empty_slots > 0 %}
+                {% for i in range(empty_slots) %}
+                <div class="reticule-item reticule-item-empty"><img src='{{ empty_icon }}'></div>
+                {% endfor %}
+                {% endif %}
             </div>
-            {% for sep in scm.seps %}
-            {% set ui_order = scm_index ~ ':' ~ loop.index %}
-            <span class="reticule-item reticule-item-hot" draggable="true" title='{{sep.name}} | {{sep.manager}}'>
-               <img src='{{sep.icon_file_name}}' id='{{sep.scm_code}}:{{sep.code}}' data-ui-order='{{ui_order}}'>
-            </span>
-            {% endfor %}
-            {# fill empty slots #}
-            {% set empty_slots = (3 - (scm.seps|length % 3)) % 3 %}
-            {% if empty_slots > 0 %}
-            {% for i in range(empty_slots) %}
-            <div class="reticule-item reticule-item-empty"><img src='{{ empty_icon }}'></div>
-            {% endfor %}
+
             {% endif %}
-         </div>
-
-         {% endif %}
-         {% endfor %}
-      </div>
-      {# ╘═════════════ Column 1 ════════════════╛ #}
+            {% endfor %}
+        </div>
+        {# ╘═════════════ Column 1 ════════════════╛ #}
 
 
-      {# ╒═════════════ Column 2 ═════════════════╕ #}
-      <div class="col-12 col-md-9" id='{{grid_cell_id}}'>
-         {% include "./includes/grid-body.html.j2" %}
-      </div>
-      {# ╘═════════════ Column 2 ═════════════════╛ #}
-   </div>
+        {# ╒═════════════ Column 2 ═════════════════╕ #}
+        <div class="col-12 col-md-9" id='{{grid_cell_id}}'>
+            {% include "./includes/grid-body.html.j2" %}
+        </div>
+        {# ╘═════════════ Column 2 ═════════════════╛ #}
+    </div>
 </div>
 
 {% endblock dlg_blc_body %}
@@ -82,14 +85,14 @@ mgd
 
 {# ╒════════════════ Dialog Footer ═══════════════╛ #}
 {% block dlg_blc_footer_buttons %}
-   <div class="col-auto">
-      {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
-      {{ btn_action(dlg_submit_form_id, dlgBtnSaveArrange, cargo_keys.save, "disabled") }}
-   </div>
-   <div class="col-auto">
-      {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
-      {{ btn_action(dlg_submit_form_id, dlgBtnExport, cargo_keys.export) }}
-   </div>
+<div class="col-auto">
+    {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
+    {{ btn_action(dlg_post_form_id, dlgBtnSaveArrange, cargo_keys.save, "disabled") }}
+</div>
+<div class="col-auto">
+    {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
+    {{ btn_action(dlg_post_form_id, dlgBtnExport, cargo_keys.export) }}
+</div>
 {% endblock dlg_blc_footer_buttons %}
 {# ╘════════════════ Dialog Footer ═══════════════╛ #}
 
@@ -97,8 +100,8 @@ mgd
 {# ╒════════════════ Dialog Forms ════════════════╕ #}
 {% block dlg_blc_forms %}
 
-{% from "includes/_action_forms_and_btns.html.j2" import action_form__submit_cargo %}
-{{ action_form__submit_cargo(dlg_submit_form_id, private_route('scm_export', code=form_cargo_id)) }}
+{% from "includes/_action_forms_and_btns.html.j2" import action_form__post_cargo %}
+{{ action_form__post_cargo(dlg_post_form_id, private_route('scm_export', code=form_cargo_id), dlg_data_wait_process) }}
 
 {% endblock dlg_blc_forms %}
 {# ╘═════════════════ Dialog Forms ════════════════╛ #}
@@ -108,40 +111,39 @@ mgd
 {% block dlg_blc_javascript %}
 
 <script>
-   const reticle = document.getElementById('{{ reticle_cell_id }}');
-   const btnSave = document.getElementById('{{ do_btn_id(cargo_keys.save, dlgBtnSaveArrange) }}');
-   const btnExport = document.getElementById('{{ do_btn_id(cargo_keys.export, dlgBtnExport) }}');
-   const getReticuleOrder = () => {
-      const images = reticle.querySelectorAll('.reticule-item img');
-      const reticuleOrder = Array.from(images)
-         .filter(img => img && img.id)
-         .map(img => `${img.id}:${img.dataset.uiOrder}`)
-         .join(',');
-      return reticuleOrder;
-   }
-   const gridInitialOrder = getReticuleOrder();
-   const gridRows = ({{ grid_data | tojson | safe }}).map(item => {
+    const reticle = document.getElementById('{{ reticle_cell_id }}');
+    const btnSave = document.getElementById('{{ do_btn_id(cargo_keys.save, dlgBtnSaveArrange) }}');
+    const btnExport = document.getElementById('{{ do_btn_id(cargo_keys.export, dlgBtnExport) }}');
+    const getReticuleOrder = () => {
+        const images = reticle.querySelectorAll('.reticule-item img');
+        const reticuleOrder = Array.from(images)
+            .filter(img => img && img.id)
+            .map(img => `${img.id}:${img.dataset.uiOrder}`)
+            .join(',');
+        return reticuleOrder;
+    }
+    const gridInitialOrder = getReticuleOrder();
+    const gridRows = ({{ grid_data | tojson | safe }}).map(item => {
         item.uploaded = item.uploaded ? new Date(item.uploaded) : null;
         return item;
     });
-   const colMeta = {{ grid_col_meta | tojson | safe }};
-   const colCode = colMeta[0].n;
-   const colSep = colMeta[1].n;
-   const colScm = colMeta[2].n;
-   const gridID = '{{ grid_id }}';
-   const dateFormat = '{{ userDateFormat }}';
-   const cargoKeys = {{ cargo_keys | tojson }};
-   const cargo = {{ cargo | tojson }};
-   {# const cargo = { [cargoKeys.action]: '', [cargoKeys.row_index]: initRow, [cargoKeys.code]: '', [cargoKeys.data]: null } #}
+    const colMeta = {{ grid_col_meta | tojson | safe }};
+    const colCode = colMeta[0].n;
+    const colSep = colMeta[1].n;
+    const colScm = colMeta[2].n;
+    const gridID = '{{ grid_id }}';
+    const dateFormat = '{{ userDateFormat }}';
+    const cargoKeys = {{ cargo_keys | tojson }};
+    const cargo = {{ cargo | tojson }};
 
-   const setActiveRow = (row, rowIndex) => {
-      if (!row) { return; }
-      cargo[cargoKeys.row_index] = rowIndex;
-      cargo[cargoKeys.code] = row.data[colCode]
-   }
+    const setActiveRow = (row, rowIndex) => {
+        if (!row) { return; }
+        cargo[cargoKeys.row_index] = rowIndex;
+        cargo[cargoKeys.code] = row.data[colCode]
+    }
 
-   {% from "includes/_action_forms_and_btns.js.j2" import form_link_action %}
-   {{ form_link_action(dlg_submit_form_id, form_cargo_id) }}
+    {% from "includes/_action_forms_and_btns.js.j2" import form_link_action %}
+    {{ form_link_action(dlg_post_form_id, form_cargo_id) }}
 
 </script>
 

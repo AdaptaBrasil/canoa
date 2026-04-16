@@ -5,12 +5,12 @@
 This dialog display the result of the
 Schemas & Seps Database export (Create/Update)
 
+TODO: Use prompt.htl.j2
 mgd
 --------------------------------------- #}
 {# cSpell:ignore #}
-{% set dlg_cls_size= '' %}
+{% set dlg_cls_size = 'frm-width' %}
 {% set form_close_btn_text= closeFormButton | default(ui_defaults.okButton) %}
-{# {% set form_backend_msg= msgOnly | default(True) %} #}
 
 {% extends "./layouts/dialog.html.j2" %}
 

@@ -10,9 +10,14 @@ cSpell:ignore tojson
 --------------------------------------- #}
 
 {# set a default value for msgOnly #}
+{# this form is the only one with user input => submit data entry inputs #}
+{% set frm_data_entry_form_id= 'frm-data-entry-form-id' %}
+{% set dlg_submit_btn_id= 'dlg-submit-btn-id' %}
+
 {% set form_backend_msg= msgOnly | default(False) %}
 {% set form_submit_route = formSubmitRoute | default(None) %}
 {% set form_display_ui= not form_backend_msg %}
+
 
 {% set form_submit_btn_text= form_close_btn_text | default( submitFormButton | default(None)) %}
 {% set form_close_btn_text= form_close_btn_text | default( closeFormButton | default(ui_defaults.okButton)) %}
@@ -30,8 +35,8 @@ what should be shown#}
 
 {% if form_display_ui %}
 {# ╒═══════════════ Display UI ═══════════════╕ #}
-
-<form method="post" action="" id="{{dlg_submit_form_id}}" {{formAttribute | default('')}}>
+{# FORM: only submit/Post data entry (% frm_blc_inputs %) of the app #}
+<form id="{{frm_data_entry_form_id}}" method="post" action="" {{dlg_data_wait_process}} {{formAttribute | default('')}}>
     <input type="hidden" name="{{safe_token.key}}" value="{{safe_token.value}}">
     {# ╒═══════════════ Form's input ═══════════════╕ #}
     {% block frm_blc_inputs %}{% endblock %}
@@ -55,7 +60,7 @@ what should be shown#}
 {# ╒═══════════ Display UI ═══════════╕ #}
 <div class="col-auto">
     {% from "includes/_action_forms_and_btns.html.j2" import btn_submit %}
-    {{ btn_submit(dlg_submit_form_id, dlg_submit_btn_id, form_submit_btn_text) }}
+    {{ btn_submit(frm_data_entry_form_id, dlg_post_btn_id, form_submit_btn_text) }}
 </div>
 {# ╘══════════ Display UI ═══════════╛ #}
 
@@ -95,16 +100,5 @@ what should be shown#}
 {% endif %}
 {# ╘═══════════════ Display UI ═══════════════╛ #}
 
-
-{% if form_submit_route %}
-{# ╒════════════════ Dialog Forms ════════════════╕ #}
-{% block dlg_blc_forms %}
-
-{% from "includes/_action_forms_and_btns.html.j2" import action_form__submit_cargo %}
-{{ action_form__submit_cargo(dlg_submit_form_id, form_submit_route) }}
-
-{% endblock dlg_blc_forms %}
-{# ╘═════════════════ Dialog Forms ════════════════╛ #}
-{% endif %}
 
 {# eof #}

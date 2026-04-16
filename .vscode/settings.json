@@ -17,7 +17,6 @@
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true,
         "editor.tabSize": 4,
-        "editor.len": true
     },
     // === GitHub Copilot ===
     // (Disabled or custom configuration placeholder)

@@ -27,7 +27,7 @@ class UITextsKeys:
         # This button is only visible when msg_only is True OR is a Dialog/Document (see document.html.j2)
         btn_close = "closeFormButton"
         btn_submit = "submitFormButton"
-        submit_route = "formSubmitRoute"
+        post_route = "formSubmitRoute"
         size = "dlg_cls_size"
 
     class Fatal:

@@ -5,8 +5,6 @@ mgd
 Equipe da Canoa -- 2024
 """
 
-# cSpell:ignore cuser mgmt
-
 from os import path
 
 from .py_helper import ms_since_midnight, to_base, to_code, now, crc16
@@ -17,12 +15,12 @@ _ticket_receipt_sep = "_"
 
 
 class UserFolders:
-    common_folder = None
-    downloaded = None
-    uploaded = None
-    user_id = None
+    common_folder = ""
+    downloaded = ""
+    uploaded = ""
+    user_id = -1
 
-    def __init__(self, user_id: int | None = None):
+    def __init__(self, user_id: int):
         from ..common.app_context_vars import sidekick
 
         UserFolders.common_folder = sidekick.config.COMMON_PATH

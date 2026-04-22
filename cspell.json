@@ -5,14 +5,16 @@
         "&[a-zA-Z]+;" // Ignore HTML entities
     ],
     "words": [
-        "btns",
+        "Gest&atilde;o",
+        "UIDBTexts",
         "dunder",
         "fform",
-        "Gest&atilde;o",
-        "mgmt",
+        "gmail",
         "tmpl",
         "uiact",
-        "UIDBTexts",
+        "btns",
+        "mgmt",
+        "tmpl",
         "venv",
     ],
     "ignorePaths": [

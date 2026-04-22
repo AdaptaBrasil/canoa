@@ -18,13 +18,13 @@
 
 """
 
-# cSpell:ignore SQLALCHEMY UNMINIFIED searchpath
+# cSpell:ignore SQLALCHEMY UNMINIFIED searchpath satelier
 
 from os import path
 from flask import Config
 import logging
 
-from ..common.app_constants import APP_NAME, APP_VERSION
+from ..common.app_constants import APP_NAME
 from ..helpers.file_helper import path_remove_last_folder
 from ..helpers.email_helper import EmailProvider
 

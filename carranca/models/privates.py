@@ -27,7 +27,7 @@ from sqlalchemy import (
     and_,
 )
 from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import defer, Session, Mapped, mapped_column
+from sqlalchemy.orm import defer, Session
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from .. import global_sqlalchemy_scoped_session

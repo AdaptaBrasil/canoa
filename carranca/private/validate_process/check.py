@@ -12,6 +12,7 @@ mgd
 # cSpell:ignore werkzeug ext
 
 from os import path
+from typing import List
 
 from ...helpers.py_helper import is_str_none_or_empty, now
 from ...helpers.db_helper import get_str_field_length

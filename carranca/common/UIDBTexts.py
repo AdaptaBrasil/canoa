@@ -126,7 +126,9 @@ class UIDBTexts:
     Performs runtime type checking only when running in debug mode.
     """
 
-    def __init__(self, data: Dict[str, Any], debugging: bool, ui_dt_format: str, db_lookup: DB_Lookup | None = None):
+    def __init__(
+        self, data: Dict[str, Any], debugging: bool, ui_dt_format: str = "", db_lookup: DB_Lookup | None = None
+    ):
         # collect msg keys names
         items = UITextsKeys.Msg.__dict__.items()
         self._msg_keys = [value for key, value in items if not key.startswith("__")]
@@ -137,7 +139,7 @@ class UIDBTexts:
         self._data = {k: v for k, v in data.items() if k not in self.msg_keys}
 
         self.is_debug_mode = debugging
-        self.ui_dt_format = ui_dt_format
+        self.ui_dt_format = ui_dt_format if ui_dt_format else "YYYY-MM-DD HH:MM"
         self._db_lookup = db_lookup
         self.__section__ = self.get_str(UITextsKeys.Section.name)
         self._data.pop(UITextsKeys.Section.name, None)
@@ -190,7 +192,8 @@ class UIDBTexts:
         # This check runs always to enforce the class's contract.
         if not isinstance(value, (str, bool)):
             raise TypeError(
-                f"UIDBTexts only accepts str or bool for assignment, " f"but received type {type(value).__name__} for key '{key}'."
+                f"UIDBTexts only accepts str or bool for assignment, "
+                f"but received type {type(value).__name__} for key '{key}'."
             )
 
         self._data[key] = value
@@ -280,7 +283,13 @@ class UIDBTexts:
         return value
 
     def set_ui_datetime(
-        self, key: str, value: str, dt_to_or_add: datetime | int, dt_from: Optional[datetime] = None, unit: str = "hours", index: str = "days"
+        self,
+        key: str,
+        value: str,
+        dt_to_or_add: datetime | int,
+        dt_from: Optional[datetime] = None,
+        unit: str = "hours",
+        index: str = "days",
     ) -> str:
         """
         Tries is best to make a nice readable datetime msg
@@ -342,10 +351,14 @@ class UIDBTexts:
         default = KEY_NOT_FOUND_MSG
         nice_key = camel_to_snake(key).replace("_", " ").capitalize()
         key_not_found_msg = self._retrieve_value("keyNotFound", UITextsKeys.Section.error, default, True)
-        section = self.section + "" if alternative_section == UITextsKeys.Section.current else f", {alternative_section}"
+        section = (
+            self.section + "" if alternative_section == UITextsKeys.Section.current else f", {alternative_section}"
+        )
         return key_not_found_msg.format(nice_key, key, section)
 
-    def _set_or_add_msg(self, key: str, alternative_section: str, msg_kind: str, args: DB_Texts_Args = None) -> tuple[str, str]:
+    def _set_or_add_msg(
+        self, key: str, alternative_section: str, msg_kind: str, args: DB_Texts_Args = None
+    ) -> tuple[str, str]:
         """Retrieves text (local or from DB) and adds it to a dictionary, formatted.
 
         args:
@@ -377,7 +390,7 @@ class UIDBTexts:
             # search in the items dict of the UITextsKeys.Section.current section
             msg_text = self.get_str(key)
 
-        if len(self) == 0:
+        if len(self) == 0 and self.section:
             # TODO: ui_db_texts can have no items, the next error message mask this situation. TODO:
             sidekick.display.error(f"Error: ui_db_texts[{self.section}] has no items.")
 

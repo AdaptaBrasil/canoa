@@ -14,7 +14,6 @@ from typing import List
 from dataclasses import dataclass
 
 from .scm_data import get_scm_data
-from ..common.UIDBTexts import UITextsKeys
 from ..helpers.py_helper import class_to_dict
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.user_helper import UserFolders
@@ -50,10 +49,19 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_Rendered | Response:
         scm_missing = []
         file_info = []
         task_code += 1
-        grid_data = ExportGrid.get_data(["user_id", "sep_id", "scm_id", "file_origin", "file_name"])
+
+        @dataclass(slots=True)
+        class GridFields:
+            user_id: int
+            sep_id: int
+            scm_id: int
+            file_origin: str
+            file_name: str
+
+        # TRrc grid_data = ExportGrid.get_data(["user_id", "sep_id", "scm_id", "file_origin", "file_name"])
+        grid_data = ExportGrid.get_data(GridFields)
 
         task_code += 1
-        ## TODO: records: List[ExportGrid] = file_data.records
         _schemas = schema_data.schemas
         for row in grid_data.records:
             ffn = UserFolders(row.user_id).file_full_name(row.file_origin, row.file_name)

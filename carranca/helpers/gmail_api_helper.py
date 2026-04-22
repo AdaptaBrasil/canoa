@@ -4,6 +4,8 @@ Central email helper using the Google Gmail API.
 Selects between OAuth 2.0 (User Account) and Service Account (DWD)
 based on application configuration.
 """
+# cSpell:words googleapiclient
+
 import base64
 from os import path
 from typing import Type
@@ -111,7 +113,7 @@ def _send_email(
     # --- Authentication Selection Logic ---
 
     scopes = ["https://www.googleapis.com/auth/gmail.send"]
-    # Google code: 
+    # Google code:
     service: Type[build]
 
     # Check configuration flag to select DWD or OAuth

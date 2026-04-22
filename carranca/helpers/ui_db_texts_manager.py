@@ -10,7 +10,7 @@ TODO:
     - remove sections `secSuccess` & `secError`, just add the items on is on
       section. They will be loaded always
     - create a secCache for alway need msg, loaded on start. eg
-        ui_datatime =
+        ui_datetime =
 
 """
 
@@ -27,7 +27,7 @@ from ..common.UITextsKeys import UITextsKeys
 from ..common.app_constants import APP_LANG
 
 # === Global 'constants' for HTML ui flask forms =============
-from .. import global_ui_texts_cache  # it is used, ignore warn
+from .. import global_ui_texts_cache
 
 
 # ==== UI Texts Constants ====================================
@@ -38,7 +38,6 @@ MSG_DEFAULT: str = ""
 
 
 class UITexts_TableSearch:
-    global global_ui_texts_cache
     _LAST_UPDATE_KEY = "last_update"
     _CACHE_INTERNAL_INFO_KEY: Cache_Key = (" ", "mgmt_data", "key")
     ## TODO SAVE is Cache _CACHE_INTERNAL_INFO_KEY
@@ -290,7 +289,7 @@ def get_db_texts(section_name: str) -> DB_Texts:
 def init_ui_db_texts(ui_db_section: str) -> UIDBTexts:
     from ..common.app_context_vars import sidekick
 
-    db_texts = get_db_texts(ui_db_section)
+    db_texts = get_db_texts(ui_db_section) if ui_db_section else {}
     ## add to ui_db_texts useful values  of 'general use'
     ui_dt_format = sidekick.config.APP_UI_DATETIME_FORMAT
     db_lookup = cast(DB_Lookup, db_retrieve_text)

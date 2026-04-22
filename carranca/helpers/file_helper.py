@@ -19,7 +19,7 @@ def file_full_name_parse(file_full_name: str) -> tuple[str, str, str]:
     return (drive, path, filename)
 
 
-def path_remove_last_folder(dir: str) -> str:
+def path_remove_last_folder(dir: str) -> str | None:
     # remove the last folder form the path (~ cd..)
     folders = dir.split(path.sep)
     if len(folders) < 2:

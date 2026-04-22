@@ -9,9 +9,10 @@ Equipe da Canoa --  2024 — 2025
 
 # cspell:ignore SQLA sqla froms
 
-from typing import Optional, List, Tuple, Dict
+from typing import Optional, Generic, TypeVar, cast, List, Tuple, Dict
 from datetime import datetime
 from sqlalchemy import Row
+from collections.abc import Iterator
 from sqlalchemy.types import String
 
 from ..py_helper import class_to_dict
@@ -21,10 +22,13 @@ from ..types_helper import Opt_List_Of_Str, Usual_Dict
 from .DBRecord import DBRecord
 
 
-type ListOfDBRecords = List["DBRecord"]
+# CoHint: type ListOfDBRecords = List["DBRecord"]
+TDBRecord = TypeVar("TDBRecord")
+type ListOfDBRecords[T] = list[T]
 
 
-class DBRecords:
+# TRec DBRecords:
+class DBRecords(Generic[TDBRecord]):
     """
     A class that converts a SQLAlchemy query result into a list of DBRecord instances,
     standardized representation of database records
@@ -94,7 +98,7 @@ class DBRecords:
         if hasattr(sqla_records, "column_descriptions"):
             for desc in sqla_records.column_descriptions:
                 col_type = desc["type"].python_type
-                col_length = getattr(desc["type"], "length", None)
+                col_length = cast(int, getattr(desc["type"], "length", None))
                 _add_meta(desc["name"], col_type.__name__, col_length)
 
         elif self.is_select and hasattr(sqla_stmt, "selected_columns"):
@@ -103,9 +107,13 @@ class DBRecords:
                 _add_meta(col.name, col.type.python_type.__name__, col_length)
 
         # Fields names filter required?
-        self.allowed_field_names = allowed_field_names if isinstance(allowed_field_names, List) and len(allowed_field_names) > 0 else None
+        self.allowed_field_names = (
+            allowed_field_names if isinstance(allowed_field_names, List) and len(allowed_field_names) > 0 else None
+        )
         # Fields values types were specified?
-        self.allowed_field_types = allowed_field_types if allowed_field_types is not None else DBRecords.simple_types_filter
+        self.allowed_field_types = (
+            allowed_field_types if allowed_field_types is not None else DBRecords.simple_types_filter
+        )
 
         if includeNone:
             self.allowed_field_types += (type(None),)
@@ -156,7 +164,7 @@ class DBRecords:
             dict_data = [class_to_dict(r) for r in sqla_records]
             self.records = [DBRecord(rec, self.allowed_field_names, self.allowed_field_types) for rec in dict_data]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[TDBRecord]:
         """make DBRecords iterable"""
         return iter(self.records)
 
@@ -164,7 +172,7 @@ class DBRecords:
         """make DBRecords have len"""
         return len(self.records)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index) -> TDBRecord:
         """make DBRecords subscriptable"""
         return self.records[index]
 
@@ -185,7 +193,10 @@ class DBRecords:
         exclude_fields = (exclude_fields or []) + ["__class__.__name__"]
         if include_fields is None or len(include_fields) == 0:
             include_fields = list(self.records[0].__dict__.keys()) if self.records else []
-        _list = [{key: value for key, value in record.__dict__.items() if key not in exclude_fields} for record in self.records]
+        _list = [
+            {key: value for key, value in record.__dict__.items() if key not in exclude_fields}
+            for record in self.records
+        ]
         return _list
 
     def keys(self):

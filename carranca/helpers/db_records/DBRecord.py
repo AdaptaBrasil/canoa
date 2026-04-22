@@ -52,7 +52,7 @@ class DBRecord:
             if isinstance(value, types_filter) if types_filter else True:
                 setattr(self, key, value)
 
-    def copy(self, exclude_cols: Opt_List_Of_Str = []):
+    def copy(self, exclude_cols: List[str] = []):
         copy = self.__dict__.copy()
         for ex_col in exclude_cols:
             if ex_col in copy:
@@ -60,7 +60,7 @@ class DBRecord:
 
         return copy
 
-    def encode64(self, exclude_cols: Opt_List_Of_Str = []):
+    def encode64(self, exclude_cols: List[str] = []):
         encoded = self.copy(exclude_cols)
         for key, value in encoded.items():
             if value is None:

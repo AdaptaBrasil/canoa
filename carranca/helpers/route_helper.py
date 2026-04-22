@@ -5,12 +5,12 @@ mgd 2024-05-13
 Equipe da Canoa -- 2024
 """
 
-# cSpell:ignore werkzeug tmpl
+# cSpell:ignore werkzeug
 
 import requests
 from os import path
 from flask import redirect, request, url_for
-from typing import cast, Tuple, Optional
+from typing import Tuple, Optional
 
 
 from .py_helper import is_str_none_or_empty, camel_to_snake, clean_text
@@ -18,7 +18,7 @@ from .html_helper import URL_PATH_SEP
 
 # 2/3. This line produce the sidekick-incident
 from .jinja_helper import Template_File_Full_Name
-from .types_helper import Jinja_Rendered, Flask_Response, DB_Lookup
+from .types_helper import Jinja_Rendered, Flask_Response
 from ..common.UIDBTexts import UIDBTexts
 from ..config.BaseConfig import BaseConfig
 from .ui_db_texts_manager import init_ui_db_texts

@@ -8,17 +8,17 @@ Equipe da Canoa -- 2024
 
 # cSpell:ignore sqlalchemy slqaRecords connstr
 
-from typing import Optional, Union, Tuple, Any, Callable, List
+from typing import Optional, Union, Tuple, cast, Any, Callable, List
 from sqlalchemy import text, Column
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import DatabaseError, OperationalError, ProgrammingError
-from sqlalchemy.engine import CursorResult
+from sqlalchemy.engine import Result
 
 # from psycopg2.errors import ProgrammingError as psycopg2_ProgrammingError
 
 from .. import global_sqlalchemy_scoped_session
-from ..config import BaseConfig
-from .py_helper import is_str_none_or_empty, to_str
+from ..config.BaseConfig import BaseConfig
+from .py_helper import is_str_none_or_empty
 from .types_helper import DB_Texts
 
 # Avoid importing sidekick during app initialization
@@ -26,7 +26,7 @@ from .types_helper import DB_Texts
 from ..common.app_error_assistant import AppStumbled, ModuleErrorCode
 
 
-def try_get_mgd_msg(error: object, default_msg: Optional[str] = None) -> str:
+def try_get_mgd_msg(error: Exception, default_msg: Optional[str] = None) -> str:
     """
     Extracts a custom error message (surrounded by markers)
     from the argument error string, that is typically
@@ -41,8 +41,8 @@ def try_get_mgd_msg(error: object, default_msg: Optional[str] = None) -> str:
     """
     start_mgd_marker = "[^|"
     end_mgd_marker = "|^]"
-    error_string = to_str(error)
-    default_msg = error_string if is_str_none_or_empty(default_msg) else default_msg
+    error_string = str(error)
+    default_msg = cast(str, error_string if is_str_none_or_empty(default_msg) else default_msg)
 
     start_index = error_string.find(start_mgd_marker)
     end_index = error_string.find(end_mgd_marker, start_index + len(start_mgd_marker))
@@ -69,7 +69,7 @@ def db_fetch_rows(
     return_tuple_len: int = 1,
     *args,
     **kwargs,
-) -> Tuple[Optional[Exception], Optional[str], Tuple[Any, ...] | CursorResult]:
+) -> Tuple[Optional[Exception], Optional[str], (Tuple[Any, ...] | Result[Any])]:
     """
     Executes a SQL query or a function within a database session.
 
@@ -82,21 +82,18 @@ def db_fetch_rows(
 
     Returns:
         A tuple containing:
-            - An error or None
-            - A message error or None
+            - Exception | None
+            - A message error | None
             - if type of func_or_query is
-                callable: A tuple of `return_tuple_len` size
-                str: CursorResult
-
-        A tuple containing an error (if any) and the result of the query or function.
+                callable -> A tuple of `return_tuple_len` size
+                str -> Result[Any]
 
     """
 
     def _do_return_error(e: Exception, msg: str) -> Tuple[Exception, str, Tuple]:
         from ..common.app_context_vars import sidekick
 
-        # TODO LOG to log
-        err_code = f"[{e.code}]" if hasattr(e, "code") else ""
+        err_code = getattr(e, "code", "")
         sidekick.display.error(f"[{func_or_query}]: '{msg}'; Table: [{table_name}]; Error{err_code} details: {e}.")
 
         if table_name:
@@ -112,8 +109,8 @@ def db_fetch_rows(
                 return None, None, records
             elif isinstance(func_or_query, str):
                 query = text(func_or_query)
-                cursor: CursorResult = db_session.execute(query)
-                return None, None, cursor
+                results: Result[Any] = db_session.execute(query)
+                return None, None, results
             else:
                 return _do_return_error(
                     TypeError(f"Invalid argument type in {__name__}"),
@@ -150,12 +147,12 @@ def retrieve_rows(query: str) -> Optional[Union[Any, Tuple]]:
       - None if an error occurs or the query returns no results.
     """
     try:
-        err, _, data_cursor = db_fetch_rows(query)
+        err, _, results = db_fetch_rows(query)
         # TODO:
         if err:
             raise err
 
-        rows = data_cursor.fetchall() if data_cursor else None
+        rows = cast(Result[Any], results).fetchall() if results else None
 
         if not rows:
             return tuple()
@@ -220,7 +217,7 @@ def retrieve_dict(query: str) -> DB_Texts:
 def get_str_field_length(table_model: object, field_name: str) -> int:
     """
     Args:
-      table_model: Flask SQLAlchemy Table Model
+      table_model: SQLAlchemy Table Model
       field_name: the field name (must be string)
     Returns:
       the maximum size defined for the column in the Table Model (*not on the DB*)

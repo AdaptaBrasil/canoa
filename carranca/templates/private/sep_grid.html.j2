@@ -12,10 +12,10 @@ mgd
 --------------------------------------- #}
 {# cSpell:ignore onclick tojson onsubmit #}
 
+{% set dlg_cls_size= 'modal-lg' %}
+
 {% extends "./layouts/grid.html.j2" %}
 
-{# only specify if different from default #}
-{% set dlg_cls_size= 'modal-lg' %}
 
 {# ╒════════════════ Grid Footer ════════════════╕ #}
 {% block grid_blc_footer %}
@@ -43,6 +43,7 @@ mgd
 {# ╒══════════════ Grid JavaScript ══════════════╕ #}
 {% block grid_blc_javascript %}
 
+<script>
 const colMeta = {{ grid_col_meta | tojson | safe }};
 const colCode = colMeta[0].n;
 const colIconUrl = colMeta[1].n;
@@ -56,6 +57,7 @@ const icon = /** @type {HTMLImageElement} */(document.getElementById('{{ dlg_ico
 
 {% from "includes/_action_forms_and_btns.js.j2" import form_link_action %}
 {{ form_link_action(dlg_post_form_id, form_cargo_id) }}
+</script>
 
 <script src="{{static_route('js/sep_grid.js')}}"></script>
 {% endblock grid_blc_javascript %}

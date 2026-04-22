@@ -11,7 +11,7 @@ Equipe da Canoa -- 2024
 mgd
 """
 
-# cSpell:ignore tmpl updt
+# cSpell:ignore updt
 
 import os
 import base64

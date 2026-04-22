@@ -8,11 +8,10 @@ Equipe da Canoa -- 2025.09.02
 """
 
 # Equipe da Canoa -- 2025
-#
-# cSpell:ignore: 
 
-from sqlalchemy import DateTime, Integer, String, Column
-from sqlalchemy.orm import Session
+from datetime import datetime
+from sqlalchemy import DateTime, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 
 from ..base import CanoaBaseTable
 
@@ -21,14 +20,16 @@ class ExportGrid(CanoaBaseTable):
     # Latest user data file by SEP view ()
     __tablename__ = "vw_export_data_files"
 
-    user_id = Column(Integer)
-    sep_id = Column(Integer)
-    scm_id = Column(Integer)
-    file_origin = Column(String(1))
-    file_name = Column(String(180))
-    sep_fullname = Column(String(180))
-    uploaded = Column(DateTime)
-    report_errors = Column(Integer)
+    user_id: Mapped[int] = mapped_column(Integer)
+    sep_id: Mapped[int] = mapped_column(Integer)
+    scm_id: Mapped[int] = mapped_column(Integer)
+
+    file_origin: Mapped[str] = mapped_column(String(1))
+    file_name: Mapped[str] = mapped_column(String(180))
+    sep_fullname: Mapped[str] = mapped_column(String(180))
+
+    uploaded: Mapped[datetime] = mapped_column(DateTime)
+    report_errors: Mapped[int] = mapped_column(Integer)
 
     # @staticmethod
     # def get_data(

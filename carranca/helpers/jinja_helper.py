@@ -3,22 +3,38 @@
 # mgd 2024-06-21, 2026-03-25 (dont_validate)
 
 # cSpell:ignore reraising dont samp
+
 import re
 from collections import Counter
 from os import path
 from flask import current_app, render_template
 from jinja2 import Environment, TemplateSyntaxError
-from typing import Any, List
+from typing import cast, Any, List
+from flask_login import current_user
 
+from .pw_helper import is_anyone_logged
 from .py_helper import as_str_strip, now_as_iso
-from .file_helper import file_full_name_parse, is_same_file_name
+from .file_helper import file_full_name_parse
 from .types_helper import Jinja_Rendered, Jinja_Template, Template_File_Full_Name
-from ..common.app_constants import APP_UPS_HTML_PAGE_FILE_NAME, APP_JINJA_TEMPLATE_BUG_FOUND, APP_JINJA_TEMPLATE_BUG_MSG_TECH
+from ..common.app_constants import APP_JINJA_TEMPLATE_BUG_FOUND, APP_JINJA_TEMPLATE_BUG_MSG_TECH
 from ..common.app_error_assistant import AppStumbled, ModuleErrorCode
 
 
 _jinja_bug_found = APP_JINJA_TEMPLATE_BUG_FOUND
 _jinja_bug_tech_info = APP_JINJA_TEMPLATE_BUG_MSG_TECH
+
+
+# === Helpers ===
+def _clean_html(rendered_html: str) -> str:
+    """
+    For debuggers:
+        1. removes consecutive \n, replace by one
+        2. strips spaces
+    """
+    # only_one_new_line = re.sub(r"\n{2,}", "\n", rendered_html)
+    only_one_new_line = re.sub(r"\n\s*\n", "\n", rendered_html)
+    cleaned = as_str_strip(only_one_new_line)
+    return cleaned
 
 
 def _get_line(tmpl: Jinja_Template, lineno: int) -> str:
@@ -51,6 +67,7 @@ def _load_template(tmpl_ffn: Template_File_Full_Name) -> Jinja_Template:
     return tmpl
 
 
+# === Detectors ===
 def _detect_jinja_runtime_errors(rendered_html: str) -> List[str]:
     """this was difficult to catch.
     Ater sharing the bug with Copilot, she/he/it wrote:
@@ -101,7 +118,10 @@ def _detect_html_errors(rendered_html: str, file_name: str) -> tuple[list[str], 
     parser.parse(rendered_html)
     y = len(parser.errors) + 2
     output_error = ""
-    msg_error = [f"[{(y + line):02}, {col:03}] {code}, (tag: {ctx.get('name', 'N/A')})" for (line, col), code, ctx in parser.errors]
+    msg_error = [
+        f"[{(y + line):02}, {col:03}] {code}, (tag: {ctx.get('name', 'N/A')})"
+        for (line, col), code, ctx in parser.errors
+    ]
     if parser.errors and file_name:
         try:
             # TODO inject in body
@@ -114,18 +134,6 @@ def _detect_html_errors(rendered_html: str, file_name: str) -> tuple[list[str], 
         except Exception as e:
             output_error = f"Error save log file {file_name}: [{e}]."
     return msg_error, output_error
-
-
-def _clean_html(rendered_html: str) -> str:
-    """
-    For debuggers:
-        1. removes consecutive \n, replace by one
-        2. strips spaces
-    """
-    # only_one_new_line = re.sub(r"\n{2,}", "\n", rendered_html)
-    only_one_new_line = re.sub(r"\n\s*\n", "\n", rendered_html)
-    cleaned = as_str_strip(only_one_new_line)
-    return cleaned
 
 
 # Jinja Processor
@@ -144,12 +152,14 @@ def process_text(text: str, **context: Any) -> str:
 def process_template(tmpl_ffn: Jinja_Template, **context: Any) -> Jinja_Rendered:
     # Avoid importing sidekick during app initialization
     from ..common.app_context_vars import sidekick
+    from .ui_db_texts_manager import init_ui_db_texts
 
     jHtml_to_display: Jinja_Rendered = ""
     jHtml: Jinja_Rendered = ""
     validated = False
     errors: List[str] = []
     tmpl_file_name = "?"
+    ui_db_texts = init_ui_db_texts("")
     try:
         _, _, tmpl_file_name = file_full_name_parse(tmpl_ffn)
         if sidekick.config.DEBUG_TEMPLATES:
@@ -162,7 +172,6 @@ def process_template(tmpl_ffn: Jinja_Template, **context: Any) -> Jinja_Rendered
         jHtml_to_display = _clean_html(jHtml)
 
         detect_jinja_errors = True
-        # not is_same_file_name(APP_UPS_HTML_PAGE_FILE_NAME, file_name)
 
         if detect_jinja_errors and sidekick.config.DEBUG_RENDERED_TEMPLATES:
             # Duplicated IDs
@@ -191,7 +200,10 @@ def process_template(tmpl_ffn: Jinja_Template, **context: Any) -> Jinja_Rendered
 
             # HTML Errors
             bugged_file = sidekick.config.DEBUG_TEMPLATES_HTML_BUGS_FILE_NAME
-            bugged_fullname = path.join(".", sidekick.config.LOG_FILE_FOLDER, bugged_file).format(sidekick.user.id) if bugged_file else ""
+            id = current_user.id if is_anyone_logged() else 0
+            bugged_fullname = (
+                path.join(".", sidekick.config.LOG_FILE_FOLDER, bugged_file).format(id) if bugged_file else ""
+            )
             errors, output_error = _detect_html_errors(jHtml_to_display, bugged_fullname)
             if errors:
                 if output_error:
@@ -211,6 +223,7 @@ def process_template(tmpl_ffn: Jinja_Template, **context: Any) -> Jinja_Rendered
         from ..public.ups_handler import ups_handler
 
         if isinstance(e, TemplateSyntaxError):
+            e = cast(TemplateSyntaxError, e)
             raise AppStumbled(
                 f"Error in template '{tmpl_file_name}', line {e.lineno}: {e.message}.",
                 ModuleErrorCode.TEMPLATE_ERROR.value,
@@ -218,7 +231,8 @@ def process_template(tmpl_ffn: Jinja_Template, **context: Any) -> Jinja_Rendered
         elif not validated and (msg_error := _validate_jinja(jHtml, tmpl_file_name)):
             raise Exception(msg_error) from e
         else:
-            _, tmpl_ffn, ui_texts = ups_handler(ModuleErrorCode.TEMPLATE_BUG.value, "", e)
+            _, msg_error = ui_db_texts.set_msg_error("templateProcessingException", (tmpl_file_name, str(e)))
+            _, tmpl_ffn, ui_texts = ups_handler(ModuleErrorCode.TEMPLATE_BUG.value, msg_error, e)
             jHtml_to_display = render_template(tmpl_ffn, **ui_texts)
 
     return jHtml_to_display

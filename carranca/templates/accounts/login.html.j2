@@ -19,16 +19,16 @@ mgd
 
 <!-- { User Name -->
 <div class="form-group">
-    <label class="form-label" inert for="{{form.username.name}}">{{ userLabel }}</label>
+    <label class="frm-label" inert for="{{form.username.name}}">{{ userLabel }}</label>
     <div class="input-group">
-        <span class="input-group-text"><i class="{{faStyle}} fa-fw fa-user"></i></span>
+        <span class="input-group-text"><i class="{{ faStyle }} fa-fw fa-user"></i></span>
         {{ form.username() }}
     </div>
 </div>
 <!-- User Name } -->
 
 <!--{ Password  -->
-<div class="form-group mt-3">
+<div class="form-group mt-2">
     {% from "./includes/_password_field.html.j2" import password_field_input %}
     {{ password_field_input(form.password, faStyle, passwordLabel, passwordShow) }}
 </div>
@@ -37,7 +37,7 @@ mgd
 <!-- { RememberMe -->
 <div class="mt-2">
     {{ form.remember_me() }}
-    <label class="unselectable-text form-check-label ms-0" for="{{form.remember_me.name}}">
+    <label class="unselectable-text frm-check-input ms-0" for="{{form.remember_me.name}}">
         {{ rememberMe }}
     </label>
 </div>
@@ -59,20 +59,20 @@ mgd
 
 <div style="display: flex; flex-wrap: wrap;" class="row mt-0 ps-0 pe-0">
     <div class="col-6">
-        <a href="{{ public_route('docs', publicDocName='privacyPolicy') }}" class="form-link">
+        <a href="{{ public_route('docs', publicDocName='privacyPolicy') }}" class="frm-link unselectable-text">
             {{ privacyPolicy}}
         </a>
     </div>
     <div class="col-6 text-end">
-        <a href="{{ public_route('password_recovery') }}" class="form-link">
+        <a href="{{ public_route('password_recovery') }}" class="frm-link unselectable-text">
             {{ forgotPassword }}
         </a>
     </div>
     <div class="col-6">
-        <a href="{{ public_route('docs', publicDocName='termsOfUse') }}" class="form-link">{{ termsOfUse }}</a>
+        <a href="{{ public_route('docs', publicDocName='termsOfUse') }}" class="frm-link unselectable-text">{{ termsOfUse }}</a>
     </div>
     <div class="col-6 text-end">
-        <a href="{{ public_route('register') }}" class="form-link">{{ gotoRegister }}</a>
+        <a href="{{ public_route('register') }}" class="frm-link unselectable-text">{{ gotoRegister }}</a>
     </div>
 </div>
 

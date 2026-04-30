@@ -30,7 +30,7 @@ from ..helpers.py_helper import is_str_none_or_empty
 from ..helpers.pw_helper import internal_logout, is_anyone_logged
 from ..helpers.html_helper import icon_url
 from ..helpers.jinja_helper import process_template
-from ..helpers.types_helper import Jinja_Rendered, DB_Texts_Args
+from ..helpers.types_helper import Template_File_Full_Name, Jinja_Rendered, DB_Texts_Args
 from ..helpers.route_helper import get_tmpl_full_file_name
 from ..config.local_ui_texts import AuxTexts, local_ui_texts, local_form_texts
 from ..helpers.ui_db_texts_manager import get_section
@@ -39,11 +39,7 @@ from ..helpers.ui_db_texts_manager import DB_Texts, UITextsKeys
 
 
 def get_ups_jHtml(
-    ui_item_error_key: str,
-    ui_db_texts: UIDBTexts,
-    task_code: int,
-    e: Exception | None = None,
-    args: DB_Texts_Args = None,
+    ui_item_error_key: str, ui_db_texts: UIDBTexts, task_code: int, e: Exception | None = None, args: DB_Texts_Args = None
 ) -> Jinja_Rendered:
     # Claude
     # TO FIX: 2026.04.01
@@ -55,7 +51,9 @@ def get_ups_jHtml(
     return jHtml
 
 
-def ups_handler(error_code: int, user_msg: str, e: Exception | None = None, logout: bool = False) -> Tuple[dict, str, DB_Texts]:
+def ups_handler(
+    error_code: int, user_msg: str, e: Exception | None = None, logout: bool = False
+) -> Tuple[dict, Template_File_Full_Name, DB_Texts]:
     from ..common.app_context_vars import app_user, sidekick
 
     try:

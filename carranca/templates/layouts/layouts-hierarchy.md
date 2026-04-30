@@ -89,16 +89,16 @@ base → dialog
         <!-- Options (from login.html.j2) -->
         <div class="row justify-content-center mt-2 w-100">
           <div class="col-6">
-            <a href="/docs/privacyPolicy" class="form-link">Política de Privacidade</a>
+            <a href="/docs/privacyPolicy" class="frm-link">Política de Privacidade</a>
           </div>
           <div class="col-6 text-end">
-            <a href="/password_recovery" class="form-link">Esqueci minha senha</a>
+            <a href="/password_recovery" class="frm-link">Esqueci minha senha</a>
           </div>
           <div class="col-6">
-            <a href="/docs/termsOfUse" class="form-link">Termos de Uso</a>
+            <a href="/docs/termsOfUse" class="frm-link">Termos de Uso</a>
           </div>
           <div class="col-6 text-end">
-            <a href="/register" class="form-link">Fazer Cadastro</a>
+            <a href="/register" class="frm-link">Fazer Cadastro</a>
           </div>
         </div>
 

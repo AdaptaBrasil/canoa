@@ -100,8 +100,12 @@ def send_email_to_test_address(route: str, email: str, name: str) -> Jinja_Rende
 
     def _mask_email(email: str) -> str:
         user, domain = email.split("@")
-        lg = len(user) - 1
-        return "*" if lg < 1 else f"{user[0]}{"*" * lg}@{domain}"
+        if len(user) <= 2:
+            masked_user = user[0] + "*" * (len(user) - 1)
+        else:
+            masked_user = user[0] + "*" * (len(user) - 2) + user[-1]
+
+        return f"{masked_user}@{domain}"
 
     if is_method_get():
         fform = FlaskForm(formdata=None)

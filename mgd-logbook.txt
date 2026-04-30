@@ -1701,7 +1701,7 @@ TODO:
 
     ## Small Tasks ##
         - init_form_vars create a 'error tmpl'
-        - check use o form-main-btn in *.j2
+        - check use o frm-main-btn in *.j2
         - share jinja_cache templates + texts (see route_helper templates_found)
         - Login Remember not always working
         - Tmpl for error Internal Error

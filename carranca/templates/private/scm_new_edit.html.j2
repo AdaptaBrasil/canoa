@@ -25,59 +25,56 @@ mgd
 
 {# ╒════════════════ Container ════════════════════════╕ #}
 <div class="container">
-    <div class="row">
+    <div class="row mt-2">
         {# ╒══════════════ Column 1 ═══════════════╕ #}
         <div class="col-12 col-md-5">
-            <div class="mb-3"> {# [ Name #}
-                <div class="form-group">
-                    <label class="form-label" inert for="{{ form.name.id }}">{{ nameLabel }}</label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="{{faStyle}} fa-fw fa-vector-square" aria-hidden="true"></i>
-                        </span>
-                        {{ form.name() }}
-                    </div>
+            <div class="form-group"> {# [ Name #}
+                <label class="frm-label" inert for="{{ form.name.id }}">
+                    {{ nameLabel }}
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="{{ faStyle }} fa-fw fa-vector-square" aria-hidden="true"></i>
+                    </span>
+                    {{ form.name() }}
                 </div>
             </div> {# Name ] #}
 
-            <div class="mb-3"> {# [ Color #}
-                <div class="form-group mt-3">
-                    <label class="form-label" inert for="{{ id_color_inp }}">{{ backColorLabel }}</label>
-                    <div class="input-group">
-                        <span class="input-group-text" style="padding: .2rem .2rem">
-                            <button class="input-group-text form-icon-btn" type="button" id="{{id_color_btn}}"
-                                title="{{ colorHint | default('Change: Text | Selector')}}">
-                                <i class="{{faStyle}} fa-fw " aria-hidden="true" data-class='{"text": "fa-keyboard", "color": "fa-palette"}'
-                                    id="{{id_color_img}}">
-                                </i>
-                            </button>
-                        </span>
-                        {{ form.color() }}
-                    </div>
+            <div class="form-group mt-3"> {# [ Color #}
+                <label class="frm-label" inert for="{{ id_color_inp }}">{{ backColorLabel }}</label>
+                <div class="input-group">
+                    <span class="input-group-text" style="padding: .2rem .2rem">
+                        <button class="input-group-text form-icon-btn" type="button" id="{{id_color_btn}}"
+                            title="{{ colorHint | default('Change: Text | Selector')}}">
+                            <i class="{{ faStyle }} fa-fw " aria-hidden="true" data-class='{"text": "fa-keyboard", "color": "fa-palette"}' id="{{id_color_img}}">
+                            </i>
+                        </button>
+                    </span>
+                    {{ form.color() }}
                 </div>
             </div>{# Color ] #}
 
-            <div class="mb-3"> {# [ Title #}
-                <div class="form-group mt-3">
-                    <label class="form-label" inert for="{{ form.title.id }}">{{ titleLabel }}</label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="{{faStyle}} fa-fw fa-tag" aria-hidden="true"></i>
-                        </span>
-                        {{ form.title() }}
-                    </div>
+            <div class="form-group mt-3"> {# [ Title #}
+                <label class="frm-label" inert for="{{ form.title.id }}">
+                    {{ titleLabel }}
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="{{ faStyle }} fa-fw fa-tag" aria-hidden="true"></i>
+                    </span>
+                    {{ form.title() }}
                 </div>
             </div> {# Title ] #}
 
-            <div class="mb-3"> {# [ Simple Description #}
-                <div class=" form-group">
-                    <label class="form-label" inert for="{{ form.description.id }}">{{ descriptionLabel }}</label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="{{faStyle}} fa-fw fa-align-left" aria-hidden="true"></i>
-                        </span>
-                        {{ form.description() }}
-                    </div>
+            <div class="form-group mt-3 mb-3"> {# `mb-3` for Mobile [ Simple Description #}
+                <label class="frm-label" inert for="{{ form.description.id }}">
+                    {{ descriptionLabel }}
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="{{ faStyle }} fa-fw fa-align-left" aria-hidden="true"></i>
+                    </span>
+                    {{ form.description() }}
                 </div>
             </div> {# Simple Description ] #}
 
@@ -87,17 +84,16 @@ mgd
         {# ╒══════════════ Column 2 ═══════════════╕ #}
         <div class="col-12 col-md-7">
             <div class="form-group"> {# [ Full Description #}
-                <label class="form-label" inert for="{{form.content.id}}">{{contentLabel}}</label>
+                <label class="frm-label" inert for="{{form.content.id}}">{{contentLabel}}</label>
                 <div class="input-group">
                     <span class="input-group-text">
-                        <i class="{{faStyle}} fa-fw fa-file-code" aria-hidden="true"></i>
+                        <i class="{{ faStyle }} fa-fw fa-file-code" aria-hidden="true"></i>
                     </span>
-                    {{ form.content() }}
+                    {{ form.content(class="form-control h-100") }}
                 </div>
-            </div>
-        </div> {# Full Description ] #}
+            </div> {# Full Description ] #}
+        </div>
         {# ╘══════════════ Column 2 ═══════════════╛ #}
-
     </div>
 </div>
 {# ╘════════════════ Container ═══════════════════════╛ #}

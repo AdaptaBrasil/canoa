@@ -7,7 +7,7 @@ mgd
 
 """
 
-# cSpell:ignore app_name sqlalchemy sessionmaker autoflush gethostname connstr juser scms gcfg uidbtexts
+# cSpell:ignore app_name sqlalchemy sessionmaker autoflush gethostname connstr juser scms gcfg uidbtexts fromjson
 
 # ============================================================================ #
 from flask_mail import Mail
@@ -180,6 +180,8 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
         ui_act_shw=UiActResponseProxy.show,
         safe_token={"key": js_form_sec_key, "value": js_form_sec_value(), "cargo": js_form_cargo_id},
     )
+
+    app.jinja_env.filters["fromjson"] = json.loads
 
     if debugUndefined:
         # Enable DebugUndefined for better error messages in Jinja2 templates

@@ -73,9 +73,7 @@ def receive_file() -> Jinja_Template:
             seps.insert(0, sep_placeholder_option)
 
         ui_db_texts[UITextsKeys.Form.icon_url] = seps[0].icon_url if len(seps) > 0 else ""
-        seps_list: List[Usual_Dict] = [
-            {"code": sep.code, "fullname": sep.fullname, "icon_url": sep.icon_url} for sep in seps
-        ]
+        seps_list: List[Usual_Dict] = [{"code": sep.code, "fullname": sep.fullname, "icon_url": sep.icon_url} for sep in seps]
         tmpl = process_template(tmpl_ffn, form=fform, seps=seps_list, **ui_db_texts.data(), **js_ui_dictionary())
         return tmpl
 
@@ -203,7 +201,7 @@ def receive_file() -> Jinja_Template:
 
         jHtml = _get_template(error_code)
     except Exception as e:
-        error_code = _log_issue(Display.Kind.fatal, task_code + 1, "", True)
+        error_code = _log_issue(Display.Kind.FATAL, task_code + 1, "", True)
         sidekick.display.fatal(f"{RECEIVE_FILE_DEFAULT_ERROR}: Code {error_code}, Message: {e}.")
         msg = set_msg_fatal("receiveFileException", ui_db_texts, task_code)
         _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)

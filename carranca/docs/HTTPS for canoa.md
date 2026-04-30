@@ -94,5 +94,5 @@ To support understanding of the internal network architecture, the following are
 | CPE-WinTerm    | TCP      | 45245         | 22
 
 ---
-<small>_eof_<small>
+<small>_eof_</small>
 

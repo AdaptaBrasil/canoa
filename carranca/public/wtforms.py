@@ -39,7 +39,7 @@ class LoginForm(FlaskForm):
     )
     remember_me = BooleanField(
         "",
-        render_kw={"class": "form-check-btn"},
+        render_kw={"class": "frm-check-btn"},
     )
 
 

@@ -11,15 +11,15 @@ mgd 2026.04.09 -- 30
 
 """
 
-from typing import TypeAlias, Type, List, TypeVar, overload, Optional, cast
+from typing import Optional, TypeVar, Type, List, cast, overload
 from dataclasses import is_dataclass
-from sqlalchemy import Integer, Column, ColumnExpressionArgument, event, select
+from sqlalchemy import Column, Integer, event, select
 from sqlalchemy.orm import DeclarativeBase, Session, Mapped, mapped_column
 from sqlalchemy.sql.elements import ColumnElement
+from sqlalchemy.sql.expression import ColumnExpressionArgument
 
-from .. import global_sqlalchemy_scoped_session
 from ..private.IdToCode import IdToCode
-from ..helpers.db_helper import db_fetch_rows, col_names_to_columns
+from ..helpers.db_helper import db_fetch_rows
 from ..common.app_context_vars import sidekick
 from ..helpers.db_records.DBRecords import DBRecords
 
@@ -29,99 +29,88 @@ DBFilter: TypeAlias = ColumnExpressionArgument[bool]
 
 
 class CanoaBase(DeclarativeBase):
-    """Root declarative base for the Canoa project."""
+    """Root declarative base SQLAlchemy Table for the Canoa project."""
 
+    # Internal
     __read_only__ = False
-    # table pk ofuscador
     __id_to_code = IdToCode()
+
     # ID Column
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    @property
-    def table_name(cls) -> str:
-        return cls.__tablename__
-
+    # obfuscate id when it is public (ui)
     @classmethod
-    def to_code(cls: Type[TModel], id: int) -> str:
+    def code(cls: Type[TModel], id: int) -> str:
         return cls.__id_to_code.encode(id)
 
     @classmethod
     def to_id(cls: Type[TModel], code: str) -> int:
         return cls.__id_to_code.decode(code)
 
+    @classmethod
+    def get_row(cls: Type[TModel], id: int) -> TModel:
+        return None
+
     def to_dict(self) -> dict:
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
     @classmethod
-    def get_row(cls: Type[TModel], id: int, col_names: List[str] = []) -> DBRecords:
-        return cls.get_data(col_names, id)
-
-    @classmethod
-    def set_row(cls: Type[TModel], row: Type[TModel]) -> None:
-        """
-        insert ort updates a table record
-        """
-        db_session: Session
-        operation = "inserting" if row.id is None else "updating"
-        with global_sqlalchemy_scoped_session() as db_session:
-            try:
-                db_session.add(row)
-                db_session.commit()
-            except Exception as e:
-                db_session.rollback()
-                sidekick.display.error(f"Error {operation} data record on table {cls.table_name}: [{e}].")
-                raise Exception(e)
-
-        return
+    @overload
+    def get_data(cls: Type[TModel]) -> DBRecords:
+        """Return all columns as ORM model instances."""
+        ...
 
     @classmethod
     @overload
-    def get_data(cls: Type[TModel], col_names: None = None, where_id: DBFilter | int = 0, order: Optional[Column] = None) -> DBRecords: ...
+    def get_data(cls: Type[TModel], col_names: None) -> DBRecords:
+        """Explicit None: return all columns as ORM model instances."""
+        ...
 
     @classmethod
     @overload
-    def get_data(cls: Type[TModel], col_names: List[str], where_id: DBFilter | int = 0, order: Optional[Column] = None) -> DBRecords: ...
+    def get_data(cls: Type[TModel], col_names: List[str]) -> DBRecords:
+        """List of column names: return specific columns as rows."""
+        ...
 
     @classmethod
     @overload
-    def get_data(cls: Type[TModel], col_names: Type[TRecord], where_id: DBFilter | int = 0, order: Optional[Column] = None) -> DBRecords: ...
-
+    def get_data(cls: Type[TModel], col_names: Type[TRecord]) -> DBRecords:
+        """Dataclass schema: return dataclass projections."""
+        ...
     @classmethod
     def get_data(
-        cls: Type[TModel], col_names: Type[TRecord] | List[str] | None = None, where_id: DBFilter | int = 0, order: Optional[Column] = None
+        cls: Type[TModel],
+        col_names: Type[TRecord] | List[str] | None = None,
+        where_id: ColumnExpressionArgument[bool] | int = 0,
+        order: Optional[Column] = None,
     ) -> DBRecords:
         """
-        Typed data factory with flexible column selection, filtering, and ordering.
+        Typed data factory with flexible column selection.
 
         Args:
-            col_names: One of:
+            select_cols: One of:
                 - None (default): return all columns as ORM model instances
-                - List[str]: specific column names
+                - List[str]: specific column names (passed as-is to col_names_to_columns)
                 - Type[TRecord] (dataclass): return dataclass projection
-            where_id: Filter condition:
-                - 0 (default): no filtering
-                - int: filter by id (WHERE id = where_id)
-                - ColumnExpressionArgument[bool]: custom WHERE clause
-            order: Optional column to order results by (ORDER BY order)
 
         Returns:
             DBRecords wrapping the result rows
         """
         # Determine which columns to select and prepare them for SQL
         selected_cols_names: List[str] = []
+
         if col_names is None:
             # No selection → select all via ORM model
             selected_cols_names = []
-        elif isinstance(col_names, list):
+        elif isinstance(col_names, List):
             selected_cols_names = col_names
         elif is_dataclass(schema := col_names):
             fields = schema.__annotations__.keys()
             selected_cols_names = [name for name in fields]
         else:
-            raise TypeError(f"get_data(col_names) expects None, List[str], or a dataclass type, " f"got {type(col_names).__name__}")
+            raise TypeError(f"get_data(sql_select_cols) expects None, List[str], or a dataclass type, " f"got {type(col_names).__name__}")
 
         selected_columns: List[ColumnElement] = [col for col in cls.__table__.columns if col.name in selected_cols_names]
-
         if sidekick.debugging:
             table_col_names = {col.name for col in cls.__table__.columns}
             unknown_cols: List[str] = [col_name for col_name in selected_cols_names if col_name not in table_col_names]
@@ -129,21 +118,16 @@ class CanoaBase(DeclarativeBase):
                 sidekick.display.error(f"Unknown cols [{', '.join(unknown_cols)}] requested for table {cls.__tablename__}")
 
         def _get_data(db_session: Session) -> DBRecords:
-            # Build SELECT statement
             stmt = select(*selected_columns) if selected_columns else select(cls)
-
-            # Apply WHERE filter
-            if isinstance(where_id, int) and where_id != 0:
-                stmt = stmt.where(cls.id == where_id)
-            else:
-                where: DBFilter = where_id
-                stmt = stmt.where(where)
-
-            # Apply ORDER BY
-            if order is not None:
-                stmt = stmt.order_by(order)
+            if isinstance(where_id, int):
+                .filter = f"(id = {int(where_id)})"
+            elif isinstance(where_id, ??):
+                .filter = '?'
+            if order:
+                .order_by(order)
 
             rows = db_session.execute(stmt).all()
+
             return DBRecords(stmt, rows)
 
         _, _, recs = db_fetch_rows(_get_data, cls.__tablename__)
@@ -152,13 +136,13 @@ class CanoaBase(DeclarativeBase):
 
 class CanoaBaseTable(CanoaBase):
     __abstract__ = True
+    # id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
 
 class CanoaBaseView(CanoaBase):
     __abstract__ = True
-    __read_only__ = True
-    # Override id to disable autoincrement for views
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=False)
+    __read_only__ = True  #  👈 can be overridden
+    # id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=False)
 
 
 @event.listens_for(Session, "before_flush")
@@ -166,6 +150,7 @@ def prevent_writes_to_readonly_views(session, flush_context, instances):
     for obj in session.new | session.dirty | session.deleted:
         cls = obj.__class__
         if getattr(cls, "__read_only__", False):
+            # TODO Make it nice
             raise RuntimeError(f"Write operation blocked: {cls.__name__} is marked as read-only.")
 
 

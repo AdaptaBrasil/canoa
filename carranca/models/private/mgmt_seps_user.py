@@ -3,6 +3,7 @@
 from typing import List, Optional
 from sqlalchemy import DateTime, Boolean, Integer, Column, String, select
 from sqlalchemy.orm import Session
+from sqlalchemy.engine import Row
 
 from ..base import CanoaBaseView
 from ...helpers.db_helper import db_fetch_rows, col_names_to_columns
@@ -110,7 +111,8 @@ class MgmtSepsUser(CanoaBaseView):
             if sep_id is not None:  # then filter
                 stmt = stmt.where(MgmtSepsUser.id == sep_id)
 
-            rows = db_session.execute(stmt).all()
+            # Sequence[Row[Tuple[MgmtSepsUser]]]
+            rows: List[Row] = db_session.execute(stmt).all()
             recs = DBRecords(stmt, rows)
             return recs
 

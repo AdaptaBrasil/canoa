@@ -19,9 +19,9 @@ mgd
 
 <!-- { User Name -->
 <div class="form-group">
-    <label class="form-label" inert for="{{form.username.name}}">{{ userLabel }}</label>
+    <label class="frm-label" inert for="{{form.username.name}}">{{ userLabel }}</label>
     <div class="input-group">
-        <span class="input-group-text"><i class="{{faStyle}} fa-fw fa-user"></i></span>
+        <span class="input-group-text"><i class="{{ faStyle }} fa-fw fa-user"></i></span>
         {{ form.username() }}
     </div>
 </div>
@@ -29,9 +29,9 @@ mgd
 
 <!-- Email  -->
 <div class="form-group mt-3">
-    <label class="form-label" inert for="user_email">{{ emailLabel }}</label>
+    <label class="frm-label" inert for="user_email">{{ emailLabel }}</label>
     <div class="input-group">
-        <span class="input-group-text"><i class="{{faStyle}} fa-fw fa-envelope"></i></span>
+        <span class="input-group-text"><i class="{{ faStyle }} fa-fw fa-envelope"></i></span>
         {{ form.email(class="form-control", type="email", id="user_email") }}
     </div>
 </div>
@@ -52,20 +52,19 @@ mgd
 {% block dlg_blc_footer_options %}
 {# Replaced Bootstrap class= "row" with style= "display: flex; flex-wrap: wrap;" to avoid gutter #}
 
-<div style="display: flex; flex-wrap: wrap;" class="row mt-0 ps-0 pe-0">
+<div style="display: flex; flex-wrap: wrap;" class="row mt-0 ps-0 pe-0 unselectable-text">
     <div class="col-1" style="width: 1px">
-        <input class="form-check-btn" type="checkbox" id="id-termsAccepted" required>
+        <input class="frm-check-btn" type="checkbox" id="id-termsAccepted" required>
     </div>
     <div class="col-8">
-        <label class="form-text form-line form-check-label" for="id-termsAccepted"> {{ termsLabel}}&nbsp;</label>
+        <label class="form-text  frm-check-input" for="id-termsAccepted">{{termsLabel}}&nbsp;</label>
         <br>
-        <a class="form-link" href="docs/termsOfUse">{{ termsOfUse }}</a>
+        <a href="docs/termsOfUse" class="frm-link unselectable-text">{{ termsOfUse }}</a>
         &nbsp;e&nbsp;
-        <a href="docs/privacyPolicy" class="form-link">{{ privacyPolicy }}</a>
+        <a href="docs/privacyPolicy" class="frm-link unselectable-text">{{ privacyPolicy }}</a>
     </div>
-
-    <div class="col-3 text-end">
-        <a class="form-link" href="{{ public_route('login') }}">{{ gotoLogin }}</a>
+    <div class="col-3 text-end pe-0">
+        <a href="{{ public_route('login') }}" class="frm-link unselectable-text">{{ gotoLogin }}</a>
     </div>
 </div>
 {% endblock dlg_blc_footer_options %}

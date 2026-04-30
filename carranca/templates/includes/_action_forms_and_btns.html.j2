@@ -27,14 +27,14 @@ Spell:ignore endmacro preid onclick
 
 {# -- Close Button: [x] of layouts/dialog.html.j2 -- #}
 {% macro btn_close_dlg(form_id, btn_id, caption, extra='') %}
-<button type="submit" form="{{form_id}}" id="{{btn_id}}" class="form-main-btn form-cancel" {{extra}}>
+<button type="submit" form="{{form_id}}" id="{{btn_id}}" class="frm-main-btn form-cancel" {{extra}}>
     {{caption | default('Close')}}
 </button>
 {% endmacro %}
 
 {# -- Submit Button -- #}
 {% macro btn_submit(form_id, btn_id, caption, extra='' ) %}
-<button type="submit" form="{{form_id}}" id="{{btn_id}}" class="form-main-btn form-submit" {{extra}}>
+<button type="submit" form="{{form_id}}" id="{{btn_id}}" class="frm-main-btn form-submit" {{extra}}>
     {# --
     The default caption is in English: it is understandable for the user and also indicates that
     the button is awaiting a value from the developer.
@@ -45,7 +45,7 @@ Spell:ignore endmacro preid onclick
 
 {# -- Button to linked through ui_constant, creates it 'own' ID -- #}
 {% macro btn_action(action_form__id, caption, cmd= '', attrib= '')%}
-<button type="submit" class="form-main-btn form-submit btn-action" form="{{action_form__id}}" id="{{do_btn_id(cmd, caption)}}" {{attrib}}>
+<button type="submit" class="frm-main-btn form-submit btn-action" form="{{action_form__id}}" id="{{do_btn_id(cmd, caption)}}" {{attrib}}>
     {{caption}}
 </button>
 {% endmacro %}

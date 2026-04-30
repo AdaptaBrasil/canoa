@@ -17,7 +17,7 @@ from ..helpers.py_helper import crc16
 
 @dataclass
 class IconData:
-    storage: FileStorage | None = None
+    storage: FileStorage = None
     sent: bool = False
     file_name: str = ""
     is_svg: bool = False

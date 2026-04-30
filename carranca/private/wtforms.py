@@ -6,7 +6,7 @@ Equipe da Canoa -- 2024
 mgd 2024-04-09,27; 06-22, 2026-01
 """
 
-# cSpell:ignore: wtforms urlname iconfilename uploadfile tmpl RRGGBB gpkg
+# cSpell:ignore: wtforms urlname iconfilename uploadfile tmpl RRGGBB gpkg attribs
 
 from flask_wtf import FlaskForm
 from wtforms import (
@@ -152,7 +152,8 @@ class SepEdit(FlaskForm):
 
     icon_file = FileField("", render_kw={"class": "form-control", "accept": ".svg"})
 
-    visible = BooleanField("", render_kw={"class": "form-check-input"})
+    # class is special for bootstrap (the only checkbox in Canoa): frm-check-for-bs
+    visible = BooleanField("")
 
 
 # Derived Private form
@@ -201,7 +202,7 @@ class ScmEdit(FlaskForm):
         validators=[
             InputRequired(),
             Length(min=2, max=140),
-        ],  # TODO sidekick.config.DB_len_val_for_sep
+        ],
         render_kw={
             "class": "form-control",
             "autofocus": "true",
@@ -280,7 +281,7 @@ class SpdEdit(FlaskForm):
         validators=[
             InputRequired(),
             Length(min=2, max=140),
-        ],  # TODO sidekick.config.DB_len_val_for_sep
+        ],
         render_kw={
             "class": "form-control",
             "autofocus": "true",
@@ -290,19 +291,19 @@ class SpdEdit(FlaskForm):
         },
     )
 
-    color = StringField(
-        "",
-        validators=[Length(min=7, max=7)],
-        default="#000000",
-        id="id-color-inp",  # see .j2
-        render_kw={
-            "class": "form-control",
-            "autocomplete": "off",
-            "spellcheck": False,
-            "placeholder": "#RRGGBB",
-        },
-        #  widget=ColorInput(),
-    )
+    # color = StringField(
+    #     "",
+    #     validators=[Length(min=7, max=7)],
+    #     default="#000000",
+    #     id="id-color-inp",  # see .j2
+    #     render_kw={
+    #         "class": "form-control",
+    #         "autocomplete": "off",
+    #         "spellcheck": False,
+    #         "placeholder": "#RRGGBB",
+    #     },
+    #     #  widget=ColorInput(),
+    # )
 
     title = StringField(
         "",
@@ -325,11 +326,36 @@ class SpdEdit(FlaskForm):
             "class": "form-control",
             "autocomplete": "off",
             "spellcheck": True,
-            "lang": "",  # ⚠️ Don't define it here, they persist. See below ScmNew
+            "lang": "",  # ⚠️ Don't define it here, they persist.
         },
     )
 
     spd_file = FileField("", render_kw={"class": "form-control", "accept": ".gpkg"})
+
+    field_attributes = {
+        "class": "form-control",
+        "autocomplete": "off",
+        "list": "field_list",
+    }
+
+    # Spatial data attributes (fields)
+    field_ID = StringField(
+        "",
+        validators=[Length(min=2, max=12)],
+        render_kw=field_attributes,
+    )
+
+    field_name = StringField(
+        "",
+        validators=[Length(min=2, max=12)],
+        render_kw=field_attributes,
+    )
+
+    field_alt_name = StringField(
+        "",
+        validators=[Length(min=2, max=12)],
+        render_kw=field_attributes,
+    )
 
 
 # eof

@@ -5,7 +5,7 @@
  *  Miguel Gastelumendi -- mgd
  * ============================================ */
 
-/* cSpell:ignore unselectable callout Konqueror tmpl adaptabrasil stylesheet*/
+/* cSpell:ignore callout Konqueror tmpl adaptabrasil stylesheet*/
 
 :root {
     --project-name: 'Canoa';
@@ -38,7 +38,7 @@ body {
     background: url(/static/img/pages/canoa_fundo.jpeg) no-repeat center center fixed;
     background-size: cover;
     */
-    /* In this way, Firefox has NO flickering: */
+    /* In this way, Firefox has NO flickering   is has! */
     background-color: var(--canoa-form-text-color);
     background-image: url('/static/img/pages/canoa_fundo.jpeg');
     background-repeat: no-repeat;
@@ -90,6 +90,7 @@ body {
 
 .dlg-body {
     background-color: var(--canoa-dlg-body-bg);
+    padding-bottom: 1.4rem
 }
 
 .dlg-header {
@@ -265,7 +266,7 @@ body {
     color: var(--canoa-form-icon-color);
 }
 
-.form-label {
+.frm-label {
     color: var(--canoa-form-label-color);
     font-weight: 500;
     margin-left: var(--canoa-label-margin-left);
@@ -273,36 +274,39 @@ body {
     margin-bottom: .10rem;
 }
 
-.form-text {
-    color: var(--canoa-form-text-color);
-}
-
-.form-line {
+.frm-line {
     margin-bottom: 0px;
 }
 
-.form-link {
+.frm-link {
     color: var(--canoa-form-link-color);
     font-weight: 400;
     text-decoration: none;
 }
 
-.form-link:hover {
+.frm-link:hover {
     text-decoration: underline;
 }
 
-.form-check-label {
+.frm-check-input {
     color: var(--canoa-form-label-color);
     font-weight: 500;
     cursor: pointer;
 }
 
-.form-check-btn {
+.frm-check-btn {
     margin-left: var(--canoa-label-margin-left);
     accent-color: var(--canoa-form-button-bg);
 }
 
-.form-main-btn {
+.frm-check-for-bs {
+    min-width: 6rem;
+    justify-content: center;
+    cursor: pointer;
+    accent-color: var(--canoa-form-button-bg);
+}
+
+.frm-main-btn {
     color: var(--canoa-form-button-color);
     border: 10px;
     font-size: 1.1rem;
@@ -312,50 +316,41 @@ body {
     background-color: var(--canoa-form-button-bg);
 }
 
-.form-main-btn:hover {
+.frm-main-btn:hover {
     /* same as fillcolor of carranca\static\icons\ups_handler.svg */
     filter: brightness(130%);
 }
 
-.form-main-btn:active {
-    /* 30% + form-main-btn:hover */
+.frm-main-btn:active {
+    /* 30% + frm-main-btn:hover */
     filter: brightness(160%);
 }
 
-.form-main-btn:disabled {
+.frm-main-btn:disabled {
     color: var(--canoa-form-button-color);
     filter: brightness(70%);
     background-color: var(--canoa-form-button-bg);
 }
 
-/* .form-icon-btn {
-    width: 2rem;
-    justify-content: center;
-}
-
-.form-icon-btn:hover {
-    background-color: var(--adaptabrasil-back-color);
-} */
-
-.form-pw-eye-btn {
-    /* similar to form-main-btn:hover */
+.frm-pw-eye-btn {
+    /* similar to frm-main-btn:hover */
     transition: filter 0.3s ease;
     background-color: var(--canoa-form-icon-btn-bg);
 }
 
-.form-pw-eye-btn:hover {
+.frm-pw-eye-btn:hover {
     filter: brightness(110%);
     background-color: var(--canoa-form-icon-btn-bg);
 }
 
 /* override bs that has +!.btn-check */
-.form-pw-eye-btn:not(.btn-check):active {
+.frm-pw-eye-btn:not(.btn-check):active {
     filter: brightness(120%);
     /* override bs */
     background-color: var(--canoa-form-icon-btn-bg);
 }
 
-.form-pw-eye-icon {
+.frm-pw-eye-icon {
     color: var(--canoa-form-button-color);
 }
 

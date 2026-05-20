@@ -11,16 +11,18 @@ mgd 2024-08-01
 # cSpell:ignore puremagic surl googleapiclient gserviceaccount chunksize
 
 import requests
-from carranca.helpers.types_helper import Usual_Dict
 import puremagic
 import urllib.parse
+
+from typing import Tuple
 from os import path, remove, rename
 
 
 from .py_helper import is_str_none_or_empty, to_str
 from .file_helper import is_same_file_name, change_file_ext
-from ..common.app_context_vars import sidekick
+from .types_helper import Usual_Dict
 from ..helpers.html_helper import URL_PATH_SEP
+from ..common.app_context_vars import sidekick
 
 
 def is_url_valid(url: str) -> bool:
@@ -106,7 +108,7 @@ def download_public_google_file(
     file_name_format: str = "",
     del_file_if_exists: bool = True,
     debug: bool = False,
-) -> tuple[int, str, Usual_Dict]:
+) -> Tuple[int, str, Usual_Dict]:
     """Downloads a public Google file.
     Args:
         url_or_file_id: The URL or file ID of the Google file.

@@ -104,6 +104,9 @@ A validação do arquivo ```zip``` é realizado por um aplicativo externo, o
          ├── carranca          > a pasta principal do App
          │    ├── shared.py      » variáveis compartilhadas
          │    └── ...
+         │
+         ├── spatial_files     > contem os arquivos de dados espacias
+         │
          ├── user_files        > contem os arquivos dos usuários
          │    ├── downloaded     » baixados da nuvem
          │    │    ├── cod_1        · do usuário 1

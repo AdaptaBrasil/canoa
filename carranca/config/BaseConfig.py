@@ -6,7 +6,7 @@
  ⚠️ Attention
 ---------------------------------------
     This file position is VERY important
-    `app_folder` must point to the folder
+    `app_path` must point to the folder
     where main.py is located
 
 
@@ -20,9 +20,9 @@
 
 # cSpell:ignore SQLALCHEMY UNMINIFIED searchpath satelier
 
+import logging
 from os import path
 from flask import Config
-import logging
 
 from ..common.app_constants import APP_NAME
 from ..helpers.file_helper import path_remove_last_folder
@@ -42,7 +42,8 @@ app_mode_development: str = "Development"  # capital D
 app_mode_stage: str = "Stage"  # capital S
 # ---------------------------
 # Get the folder from main.py
-app_folder = path.abspath(path_remove_last_folder(path.dirname(__file__)))
+_path: str = path_remove_last_folder(path.dirname("" + __file__))
+app_path: str = path.abspath(_path)
 
 
 # Base Class for App Config
@@ -121,10 +122,10 @@ class BaseConfig(Config):
     FLASK_MAIL = {"server": "smtp.gmail.com", "port": 587, "use_tls": True}
 
     # "  with key
-    # Folders
-    APP_FOLDER = app_folder
+    # Folders & Paths
+    APP_PATH = app_path
     # storage area (user_files, schema_icons...)
-    COMMON_PATH = path_remove_last_folder(app_folder)
+    COMMON_PATH = path_remove_last_folder(app_path)
 
     # The name of the folder for storing sensitive, non-versioned files.
     LOCAL_STORAGE_FOLDER = "local_storage"
@@ -135,6 +136,10 @@ class BaseConfig(Config):
     # must never be exposed in the codebase.
     # -- there is a backup on Google Drive --
     LOCAL_STORAGE_PATH = path.join(path_remove_last_folder(COMMON_PATH), LOCAL_STORAGE_FOLDER)
+
+    # Specifies the folder name ("spatial_data") used to store all spatial data files uploaded to the application
+    SDF_STORAGE_FOLDER = "spatial_data"
+    LOCAL_SPATIAL_DATA_PATH = path.join(APP_PATH, SDF_STORAGE_FOLDER)
 
     # My address service is SERVER_EXTERNAL_IP is empty
     # (used to send recovery email confirmation, etc)

@@ -327,8 +327,12 @@ def create_app():
 
     # === 1/3 Global sidekick  === #
     global global_sidekick
+
+    # see .vscode\launch.json{"configurations": [... , "env": {"FLASK_APP": "FLASK_APP": "main.py",... }
+    FLASK_APP_NAME = "main.py"
+
     # === Check if all mandatory information is ready === #
-    global_sidekick, db_version, display_mute_after_init = ignite_app(APP_NAME, started)
+    global_sidekick, db_version, display_mute_after_init = ignite_app(APP_NAME, FLASK_APP_NAME, started)
     _info(f"[{global_sidekick}] instance is now ready to assist you.")
     gcfg = global_sidekick.config  # shortcut
 

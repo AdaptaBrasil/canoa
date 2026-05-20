@@ -21,4 +21,5 @@ Este guia segue as diretrizes da PEP 8 e da PEP 613 para Type Aliases padrão, a
   - **DateTime** → the SQLAlchemy column type (used in mapped_column)
 
 
-#### _eof_
+---
+<small>_eof_</small>

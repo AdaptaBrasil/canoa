@@ -68,3 +68,5 @@ kill -9 <PID>
 logout && sudo shutdown -h now
 ```
 
+---
+<small>_eof_</small>

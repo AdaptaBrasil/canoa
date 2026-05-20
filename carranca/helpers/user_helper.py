@@ -42,12 +42,18 @@ class UserFolders:
     base_downloaded = "downloaded"
     # this is a local for uploaded, downloaded & others users files
     base_user_files = "user_files"
+    # this is a local for Spatial Data Files
+    spatial_files = "spatial_files"
 
     def file_full_name(self, file_origin: str, stored_file_name: str) -> str:
         folder = self.uploaded if file_origin == FILE_ORIGIN_LOCAL else self.downloaded
         user_folder = get_user_folder(self.user_id)
         file_full_name = path.join(folder, user_folder, stored_file_name)
         return file_full_name
+
+    def spatial_data_file_full_name(self, original_name: str) -> str:
+
+        folder = self.spatial_files
 
 
 def get_user_code(id: int) -> str:
@@ -72,7 +78,10 @@ def get_file_ticket(user_code: str) -> str:
     4-2-2: data yyyy-mm-dd
     _    : separador
     6    : ms do dia em base 22
+
+    2026.05.05 new file_type
     """
+
     # `user_receipt` (see below) dependes heavily in the format of the file_ticket
     ms = ms_since_midnight(True)  # max = ggi.48g = d86.400.000
     today_str = now().strftime("%Y-%m-%d")  # 4-2-2
@@ -80,12 +89,13 @@ def get_file_ticket(user_code: str) -> str:
     return file_ticket
 
 
-def get_unique_filename(name: str, ext: str = "") -> str:
-    # https://strftime.org/
-    today_str = now().strftime("%Y-%m-%d")  # 4-2-2_6
-    ms = ms_since_midnight(True)
-    filename = f"{name}{today_str}_{ms}{ext}"
-    return filename
+# moved to file_helper.py 2026.05.08
+# def get_unique_filename(base_name: str, ext: str = "") -> str:
+#     # https://strftime.org/
+#     today_str = now().strftime("%Y-%m-%d")  # 4-2-2_6
+#     ms = ms_since_midnight(True)
+#     filename = f"{base_name}{today_str}_{ms}{ext}"
+#     return filename
 
 
 def get_user_receipt(ticket: str) -> str:

@@ -9,7 +9,7 @@ from collections import Counter
 from os import path
 from flask import current_app, render_template
 from jinja2 import Environment, TemplateSyntaxError
-from typing import cast, Any, List
+from typing import cast, Any, List, Tuple
 from flask_login import current_user
 
 from .pw_helper import is_anyone_logged
@@ -107,7 +107,7 @@ def _detect_duplicate_ids(rendered_html: str) -> List[str]:
     return [f"#{id_} ({n}&times;)" for id_, n in counts.items() if n > 1]
 
 
-def _detect_html_errors(rendered_html: str, file_name: str) -> tuple[list[str], str]:
+def _detect_html_errors(rendered_html: str, file_name: str) -> Tuple[list[str], str]:
     """Parses the rendered HTML with html5lib and returns a list of
     human-readable error messages with line/col position.
     html5lib is the strictest HTML5-compliant parser available.

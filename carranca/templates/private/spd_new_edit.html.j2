@@ -10,76 +10,76 @@ mgd
 --------------------------------------- #}
 {# cSpell:ignore tojson unselectable datalist endfor fromjson #}
 
-{% set dlg_var_icon_url= iconFileUrl %}
-
-{% set field_list = fieldList | default ("[]") | fromjson %}
-
-
 {% extends "./layouts/form.html.j2" %}
 
 {# ╒══════════════════════ Inputs ═════════════════════════╕ #}
 {% block frm_blc_inputs %}
 
 <div class="form-group"> {# [ Name #}
-    <label class="frm-label" inert for="{{ form.name.id }}">
+    <label class="frm-label" inert for="{{ form.spd_name.id }}">
         {{ nameLabel }}
     </label>
     <div class="input-group">
         <span class="input-group-text">
             <i class="{{ faStyle }} fa-fw fa-location-dot" aria-hidden="true"></i>
         </span>
-        {{ form.name() }}
+        {{ form.spd_name() }}
     </div>
 </div> {# Name ] #}
 
 
 <div class="form-group mt-2"> {# [ Title #}
-    <label class="frm-label" inert for="{{ form.title.id }}">
+    <label class="frm-label" inert for="{{ form.spd_title.id }}">
         {{ titleLabel }}
     </label>
     <div class="input-group">
         <span class="input-group-text">
             <i class="{{ faStyle }} fa-fw fa-tag" aria-hidden="true"></i>
         </span>
-        {{ form.title() }}
+        {{ form.spd_title() }}
     </div>
 </div> {# Title ] #}
 
 <div class="form-group mt-2"> {# [ Description #}
-    <label class="frm-label" inert for="{{ form.description.id }}">
+    <label class="frm-label" inert for="{{ form.spd_description.id }}">
         {{ descriptionLabel }}
     </label>
     <div class="input-group">
         <span class="input-group-text">
             <i class="{{ faStyle }} fa-fw fa-align-left" aria-hidden="true"></i>
         </span>
-        {{ form.description() }}
+        {{ form.spd_description() }}
     </div>
 </div> {# Description ] #}
 
 {# [ File #}
 <div class="form-group mt-2">
-    <label class="frm-label" inert for="{{ form.spd_file.id }}">{{ fileLabel }}</label>
+    <label class="frm-label" for="{% if insertMode  %}{{ form.upload_file.id }}{% else %}{{ form.original_file_name.id }}{% endif %}">{{ fileLabel}}
+    </label>
     <div class="input-group">
         <span class="input-group-text">
             <i class="{{ faStyle }} fa-fw fa-layer-group" aria-hidden="true"></i>
         </span>
-        {{ form.spd_file() }}
+        {% if insertMode %}
+        {{ form.upload_file() }}
+        {% else %}
+        {{form.original_file_name}}
+        {% endif %}
     </div>
 </div>{# File ] #}
 
 {# [ spd Attributes #}
 <span class="input-group-text mt-2 py-0 justify-content-center unselectable-text">
     <i class="{{ faStyle }} fa-fw fa-user-tag" aria-hidden="true"></i>
-    &nbsp;&nbsp;{{fieldsLabel}}
+    &nbsp;&nbsp;{{fieldsLabel}}{{layerNameWithLabel}}
     {# Icon options: fa-bookmark, #}
 </span>
 <div class=" row">
     <div class="col form-group">
-        <label class="frm-label" inert for="{{ form.field_ID.id }}">
+        <label class="frm-label" inert for="{{ form.field_id.id }}">
             {{ fieldIDLabel }}
         </label>
-        {{ form.field_ID() }}
+        {{ form.field_id() }}
     </div>
     <div class="col form-group">
         <label class="frm-label" inert for="{{ form.field_name.id }}">
@@ -94,12 +94,14 @@ mgd
         {{ form.field_alt_name() }}
     </div>
 
+    {% if insertMode %}
+    {% set field_list = insertFieldsList | default ("[]") | fromjson %}
     <datalist id="{{ fieldListID }}">
         {% for f in field_list %}
         <option value="{{ f }}"></option>
         {% endfor %}
     </datalist>
-
+    {% endif %}
 
 </div> {# spd Attributes ] #}
 

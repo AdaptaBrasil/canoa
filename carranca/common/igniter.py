@@ -113,10 +113,10 @@ def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple[Fuse | 
 
 
 # ---------------------------------------------------------------------------- #
-from ..config.DynamicConfig import DynamicConfig, app_mode_development, app_mode_stage
+from ..config.DynamicConfig import DynamicConfig, app_mode_development
 
 
-def _ignite_config(fuse: Fuse) -> Tuple[DynamicConfig | None, str]:
+def _ignite_config(fuse: Fuse, flask_app_name: str) -> Tuple[DynamicConfig | None, str]:
     """
     Select the config, based in the app_mode (production or debug)
     WARNING: Don't run with debug turned on in production!
@@ -131,8 +131,8 @@ def _ignite_config(fuse: Fuse) -> Tuple[DynamicConfig | None, str]:
         if config is None:
             raise Exception(f"Unknown config mode '{fuse.app_mode}'.")
 
-        if not path.isfile(path.join(config.APP_FOLDER, "main.py")):
-            raise Exception("main.py file not found in the app folder. Check BaseConfig.APP_FOLDER.")
+        if not path.isfile(path.join(config.APP_PATH, flask_app_name)):
+            raise Exception(f"{flask_app_name} file not found in the app folder. Check BaseConfig.APP_PATH.")
 
         config.APP_DEBUGGING = True if fuse.debugging else config.APP_DEBUG
         # REMOVE config.APP_ARGS = fuse.args
@@ -222,7 +222,7 @@ def _ignite_sql_connection(fuse: Fuse, uri: str) -> Tuple[str, str]:
 from .Sidekick import Sidekick
 
 
-def ignite_app(app_name, start_at) -> Tuple[Sidekick, str, bool]:
+def ignite_app(app_name: str, flask_app_name: str, start_at: float) -> Tuple[Sidekick, str, bool]:
     from .Display import Display
 
     global fuse
@@ -240,7 +240,7 @@ def ignite_app(app_name, start_at) -> Tuple[Sidekick, str, bool]:
     fuse.display.debug("The fuse was created.")
 
     # Config
-    config, error = _ignite_config(fuse)
+    config, error = _ignite_config(fuse, flask_app_name)
     if error:
         _log_and_exit(error)
 

@@ -11,9 +11,12 @@ mgd 2026.04.09 -- 30
 
 """
 
+# cspell: words hace
+
 from typing import TypeAlias, Type, List, TypeVar, overload, Optional, cast
 from dataclasses import is_dataclass
 from sqlalchemy import Integer, Column, ColumnExpressionArgument, event, select
+from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import DeclarativeBase, Session, Mapped, mapped_column
 from sqlalchemy.sql.elements import ColumnElement
 
@@ -31,13 +34,18 @@ DBFilter: TypeAlias = ColumnExpressionArgument[bool]
 class CanoaBase(DeclarativeBase):
     """Root declarative base for the Canoa project."""
 
-    __read_only__ = False
-    # table pk ofuscador
-    __id_to_code = IdToCode()
+    __code_seed__ = 7  # default, subclasses may override
+    __read_only__ = False  # default, subclasses may override
+
+    @classmethod
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.__id_to_code = IdToCode(cls.__code_seed__)
+
     # ID Column
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    @property
+    @classmethod
     def table_name(cls) -> str:
         return cls.__tablename__
 
@@ -53,42 +61,62 @@ class CanoaBase(DeclarativeBase):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
     @classmethod
-    def get_row(cls: Type[TModel], id: int, col_names: List[str] = []) -> DBRecords:
-        return cls.get_data(col_names, id)
+    def get_row(cls: Type[TModel], id: int) -> TModel | None:
+        """Get a single ORM instance by id, for insert/edit operations."""
+        with global_sqlalchemy_scoped_session() as db_session:
+            try:
+                return db_session.get(cls, id)
+            except Exception as e:
+                db_session.rollback()
+                sidekick.display.error(f"Error reading data row from table {cls.table_name}: [{e}].")
+                raise Exception(e)
 
     @classmethod
-    def set_row(cls: Type[TModel], row: Type[TModel]) -> None:
+    def set_row(cls: Type[TModel], row: TModel, return_fresh_row: bool = False) -> TModel | None:
         """
         insert ort updates a table record
         """
         db_session: Session
         operation = "inserting" if row.id is None else "updating"
+        fresh_row: TModel | None = None
         with global_sqlalchemy_scoped_session() as db_session:
             try:
                 db_session.add(row)
                 db_session.commit()
+                if return_fresh_row:
+                    db_session.refresh(row)  # explicit re-fetch
+                    fresh_row = row
             except Exception as e:
                 db_session.rollback()
                 sidekick.display.error(f"Error {operation} data record on table {cls.table_name}: [{e}].")
                 raise Exception(e)
 
-        return
+        return fresh_row
 
     @classmethod
     @overload
-    def get_data(cls: Type[TModel], col_names: None = None, where_id: DBFilter | int = 0, order: Optional[Column] = None) -> DBRecords: ...
+    def get_rows(
+        cls: Type[TModel], col_names: None = None, where_or_id: DBFilter | int = 0, order_col: Optional[Column] = None
+    ) -> DBRecords: ...
 
     @classmethod
     @overload
-    def get_data(cls: Type[TModel], col_names: List[str], where_id: DBFilter | int = 0, order: Optional[Column] = None) -> DBRecords: ...
+    def get_rows(
+        cls: Type[TModel], col_names: List[str], where_or_id: DBFilter | int = 0, order_col: Optional[Column] = None
+    ) -> DBRecords: ...
 
     @classmethod
     @overload
-    def get_data(cls: Type[TModel], col_names: Type[TRecord], where_id: DBFilter | int = 0, order: Optional[Column] = None) -> DBRecords: ...
+    def get_rows(
+        cls: Type[TModel], col_names: Type[TRecord], where_or_id: DBFilter | int = 0, order_col: Optional[Column] = None
+    ) -> DBRecords: ...
 
     @classmethod
-    def get_data(
-        cls: Type[TModel], col_names: Type[TRecord] | List[str] | None = None, where_id: DBFilter | int = 0, order: Optional[Column] = None
+    def get_rows(
+        cls: Type[TModel],
+        col_names: Type[TRecord] | List[str] | None = None,
+        where_or_id: DBFilter | int = 0,
+        order_col: Optional[Column] = None,
     ) -> DBRecords:
         """
         Typed data factory with flexible column selection, filtering, and ordering.
@@ -98,19 +126,21 @@ class CanoaBase(DeclarativeBase):
                 - None (default): return all columns as ORM model instances
                 - List[str]: specific column names
                 - Type[TRecord] (dataclass): return dataclass projection
-            where_id: Filter condition:
+            where_or_id: Filter condition:
                 - 0 (default): no filtering
                 - int: filter by id (WHERE id = where_id)
                 - ColumnExpressionArgument[bool]: custom WHERE clause
-            order: Optional column to order results by (ORDER BY order)
+            order_col: Optional column to order_col results by (ORDER BY order_col)
 
         Returns:
             DBRecords wrapping the result rows
         """
         # Determine which columns to select and prepare them for SQL
         selected_cols_names: List[str] = []
+        all_cols = False
         if col_names is None:
             # No selection → select all via ORM model
+            all_cols = True
             selected_cols_names = []
         elif isinstance(col_names, list):
             selected_cols_names = col_names
@@ -120,7 +150,7 @@ class CanoaBase(DeclarativeBase):
         else:
             raise TypeError(f"get_data(col_names) expects None, List[str], or a dataclass type, " f"got {type(col_names).__name__}")
 
-        selected_columns: List[ColumnElement] = [col for col in cls.__table__.columns if col.name in selected_cols_names]
+        selected_columns: List[ColumnElement] = [col for col in cls.__table__.columns if all_cols or col.name in selected_cols_names]
 
         if sidekick.debugging:
             table_col_names = {col.name for col in cls.__table__.columns}
@@ -128,36 +158,38 @@ class CanoaBase(DeclarativeBase):
             if unknown_cols:
                 sidekick.display.error(f"Unknown cols [{', '.join(unknown_cols)}] requested for table {cls.__tablename__}")
 
-        def _get_data(db_session: Session) -> DBRecords:
+        def _get_db_records(db_session: Session) -> DBRecords:
             # Build SELECT statement
             stmt = select(*selected_columns) if selected_columns else select(cls)
 
             # Apply WHERE filter
-            if isinstance(where_id, int) and where_id != 0:
-                stmt = stmt.where(cls.id == where_id)
-            else:
-                where: DBFilter = where_id
+            if not isinstance(where_or_id, int):  # Then is a DBFilter
+                where = cast(DBFilter, where_or_id)
                 stmt = stmt.where(where)
+            elif id := int(where_or_id):  # else if int (can be a false code (see Model.to_id(code)))
+                pk = id if id > 0 else 0
+                stmt = stmt.where(cls.id == pk)
 
-            # Apply ORDER BY
-            if order is not None:
-                stmt = stmt.order_by(order)
+            # Apply ORDER by
+            if order_col is not None:
+                stmt = stmt.order_by(order_col)
 
             rows = db_session.execute(stmt).all()
             return DBRecords(stmt, rows)
 
-        _, _, recs = db_fetch_rows(_get_data, cls.__tablename__)
-        return cast(DBRecords, recs)
+        _, _, recs = db_fetch_rows(_get_db_records, cls.__tablename__)
+        return cast(DBRecords[TModel], recs)
 
 
 class CanoaBaseTable(CanoaBase):
+    __table_args__ = {"schema": "canoa"}
     __abstract__ = True
 
 
 class CanoaBaseView(CanoaBase):
     __abstract__ = True
     __read_only__ = True
-    # Override id to disable autoincrement for views
+    # Override id to disable autoincrement for views (y es como se hace):es-PE
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=False)
 
 

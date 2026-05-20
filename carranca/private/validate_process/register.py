@@ -14,6 +14,8 @@ mgd
 from os import path, remove
 from zlib import crc32
 
+from typing import Tuple
+
 from .Cargo import Cargo
 from ...models.privates import UserDataFiles
 from ...helpers.py_helper import OS_IS_WINDOWS, now
@@ -24,7 +26,7 @@ from ...private.received_files.constants import FILE_ORIGIN_CLOUD, FILE_ORIGIN_L
 
 def register(cargo: Cargo, file_data: object | str) -> Cargo:
 
-    def _save_uploaded_file_locally(full_name: str, file_obj: object) -> tuple[int, int]:
+    def _save_uploaded_file_locally(full_name: str, file_obj: object) -> Tuple[int, int]:
         """saves on local disk the uploaded file"""
         # create the uploaded_file, from file_obj
         with open(full_name, "wb") as file:
@@ -33,7 +35,7 @@ def register(cargo: Cargo, file_data: object | str) -> Cargo:
             file_size = file.write(content)
         return file_size, file_crc32
 
-    def _crc_from_downloaded_file(full_name: str) -> tuple[int, int]:
+    def _crc_from_downloaded_file(full_name: str) -> Tuple[int, int]:
         file_size = path.getsize(full_name)
         file_crc32 = 0
         with open(full_name, "rb") as file:

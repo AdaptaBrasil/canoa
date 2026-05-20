@@ -49,9 +49,12 @@ class DB_Lookup(Protocol):
 
 # Type Alias
 # ----------
+Primitive: TypeAlias = str | int | float | bool
+
 """ A dictionary where both keys and values are strings, loaded form the Database ui_items."""
 DB_Texts: TypeAlias = Dict[str, str]
-DB_Texts_Args = Tuple | Dict | str | None
+DB_Texts_Args: TypeAlias = Tuple | Dict | Primitive | None  #
+
 
 Usual_Dict: TypeAlias = Dict[str, Any]
 JS_Constants: TypeAlias = Dict[str, str]

@@ -6,12 +6,10 @@ Equipe da Canoa -- 2024
 mgd
 """
 
-# cSpell: ignore werkzeug wtforms tmpl urlname uploadfile
+# cSpell: ignore werkzeug wtforms tmpl urlname upload_file
 
-
-from logging import WARN
 from flask import request
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Tuple
 from werkzeug.utils import secure_filename
 
 
@@ -103,7 +101,7 @@ def receive_file() -> Jinja_Template:
 
         received_at = now()
         # Find out what was kind of data was sent: an uploaded file or an URL (download)
-        file_obj = request.files[fform.uploadfile.name] if len(request.files) > 0 else None
+        file_obj = request.files[fform.upload_file.name] if len(request.files) > 0 else None
         task_code += 1  # 2
         url_str = get_form_input_value(fform.urlname.name)
         task_code += 1  # 3
@@ -137,7 +135,7 @@ def receive_file() -> Jinja_Template:
         # Instantiate Process Data helper
         task_code = 13
 
-        def doProcessData() -> tuple[bool, ProcessData]:
+        def doProcessData() -> Tuple[bool, ProcessData]:
             receive_file_cfg = ValidateProcessConfig(sidekick.debugging)
             common_folder = sidekick.config.COMMON_PATH
             pd = ProcessData(

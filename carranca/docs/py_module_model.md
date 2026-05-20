@@ -46,3 +46,8 @@ Demonstrates the **manual override** for template filenames:
 | Defensive dictionary handling | `.pop(key, None)` |
 
 
+---
+<small>_eof_</small>
+
+
+

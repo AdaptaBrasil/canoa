@@ -535,4 +535,12 @@ def get_params(content: str) -> list:
     return params
 
 
+def same_entry(s1: str, s2: str) -> bool:
+    """
+    Compares if two strings are case insensitive equal
+    casefold() is better than lower() for Unicode characters (e.g., German ß).
+    """
+    return s1.casefold() == s2.casefold()
+
+
 # eof

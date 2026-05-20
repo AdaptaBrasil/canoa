@@ -6,7 +6,6 @@
     //  "args": ["--no-reload",
     "version": "0.2.0",
     "configurations": [
-
         {
             "name": "Canoa",
             "type": "debugpy",
@@ -27,6 +26,15 @@
             ],
             "jinja": true,
             "justMyCode": true,
+        },
+        {
+            "name": "Run spd_analysis test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/carranca/internal_tests/gpkg_view.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
         }
     ]
 }

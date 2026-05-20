@@ -75,7 +75,8 @@ class MgmtSepsUser(CanoaBaseView):
     def get_sep_row(sep_id: int) -> Optional["MgmtSepsUser"]:
         """Get one sep"""
         records: DBRecords = MgmtSepsUser._get_sep_list(None, sep_id)
-        return None if records is None or (records.count == 0) else records[0]
+        ## 2026-05-15 pythonic: rem return None if records is None or (records.count == 0) else records[0]
+        return None if records is None or (len(records) == 0) else records[0]
 
     @staticmethod
     def get_sep_list() -> DBRecords:

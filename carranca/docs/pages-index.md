@@ -91,3 +91,6 @@ Core modules for routing, user session management, and data validation processes
     -   `carranca/private/receive_file.py`: Back-end logic that performs initial checks and passes the file to the validation pipeline.
     -   `carranca/templates/private/receive_file.j2`: Jinja2 template that renders the file upload form.
     -   `carranca/static/js/receive_file.js`: Front-end JavaScript to manage the state of the form (e.g., toggling between file upload and URL input).
+
+---
+<small>_eof_</small>

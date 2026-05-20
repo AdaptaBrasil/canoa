@@ -59,7 +59,7 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_Rendered | Response:
             file_name: str
 
         # TRrc grid_data = ExportGrid.get_data(["user_id", "sep_id", "scm_id", "file_origin", "file_name"])
-        grid_data = ExportGrid.get_data(GridFields)
+        grid_data = ExportGrid.get_rows(GridFields)
 
         task_code += 1
         _schemas = schema_data.schemas

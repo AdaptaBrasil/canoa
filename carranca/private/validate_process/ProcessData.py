@@ -1,11 +1,11 @@
 """
-    Process (File, Path structure, user) Data
+Process (File, Path structure, user) Data
 
-    see README.md
-    Part of Canoa `File Validation` Processes
+see README.md
+Part of Canoa `File Validation` Processes
 
-    Equipe da Canoa -- 2024
-    mgd
+Equipe da Canoa -- 2024
+mgd
 """
 
 # cSpell:ignore
@@ -78,13 +78,9 @@ class ProcessData:
             # Path to a common folder to be used by both apps canoa & data_validate
             data_tunnel = path.join(self.apps_parent_path, ProcessData._Folder.data_tunnel)
             # Path where the user's zip file is extracted
-            self.data_tunnel_user_write = path.join(
-                data_tunnel, user_folder, ProcessData._Folder.validate_input
-            )
+            self.data_tunnel_user_write = path.join(data_tunnel, user_folder, ProcessData._Folder.validate_input)
             # Path where the data_validate write the report
-            self.data_tunnel_user_read = path.join(
-                data_tunnel, user_folder, ProcessData._Folder.validate_output
-            )
+            self.data_tunnel_user_read = path.join(data_tunnel, user_folder, ProcessData._Folder.validate_output)
             # An external batch file source (copy from here to 'data_tunnel' if not exists there or this is newer)
             self.batch_source_name = path.join(common_folder, batch_name)
 
@@ -114,14 +110,10 @@ class ProcessData:
         self.path = self._Path(self, user_folder, common_folder, data_validate_folder, batch_name)
         # values are given in receive_file.py
         self.received_file_name = ""
-        self.received_original_name:str = None
+        self.received_original_name: str | None = None
 
-    def working_file_name(self) -> str :
-        return (
-            ''
-            if is_str_none_or_empty(self.received_file_name)
-            else f"{self.file_ticket}_{self.received_file_name}"
-        )
+    def working_file_name(self) -> str:
+        return "" if is_str_none_or_empty(self.received_file_name) else f"{self.file_ticket}_{self.received_file_name}"
 
     def working_file_full_name(self):
         return path.join(self.path.working_folder, self.working_file_name())

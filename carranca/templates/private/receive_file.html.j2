@@ -11,7 +11,7 @@ Extends:
 mgd
 
 --------------------------------------- #}
-{# cSpell:ignore urlname tojson uploadfile #}
+{# cSpell:ignore urlname tojson #}
 
 {% set form_close_btn_text= successButton %}
 {% set dlg_var_icon_url= iconFileUrl %}
@@ -35,12 +35,12 @@ mgd
 
 <!-- { Load File -->
 <div class="form-group mt-3">
-    <label class="frm-label" inert for="{{form.uploadfile.id}}">{{ fileLabel }}</label>
+    <label class="frm-label" inert for="{{form.upload_file.id}}">{{ fileLabel }}</label>
     <div class="input-group">
         <span class="input-group-text">
             <i class="{{ faStyle }} fa-fw fa-upload fa-lg"></i>
         </span>
-        {{ form.uploadfile() }}
+        {{ form.upload_file() }}
     </div>
 </div>
 <!-- Load File } -->

@@ -1,41 +1,28 @@
+<!doctype html>
+<html lang="pt-br">
 {#-
-----------------------
+Keep the
+<!doctype html> tag on the first line.
+-----------------------------------------------
 ./layouts/base.html.j2
------------------------
+-----------------------------------------------
 The Base Template for Canoa
 
-TODO:
-structure:
-==========
-
-</html>
-
-<head>
-    <!-- standard -->
-    <!-- base links -->
-    {%-- base_blc_head_js %}
-    {%-- base_blc_head_css %}
-</head>
-
-<body>
-    :
-    :
-</body>
-
 mgd
---------------------------------------- -#}
+-----------------------------------------------
+/!\ The jinja comments marks:
+#- .. -#
+means remove whitespace after & before the comment
+-#}
 {#- cSpell:ignore endwith fontawesome stylesheet endfor jinja -#}
 
-<!DOCTYPE html>
-<html lang="pt-br">
-
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Canoa {%- if pageTitle -%} &ndash; {{pageTitle}}{% endif %}</title>
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="title" content="Canoa">
     <meta name="author" content="Equipe `Canoa`">
     <meta name="description" content="Canoa">
+    <title>Canoa {%- if pageTitle -%} &ndash; {{pageTitle}}{% endif %}</title>
 
     <link rel="icon" type="image/png" sizes="32x32" href="{{ static_route('img/favicon/favicon-32.png') }}">
     <link rel="icon" type="image/png" sizes="64x64" href="{{ static_route('img/favicon/favicon-64.png') }}">

@@ -74,6 +74,21 @@
       if too many params {{ action_form__submit_cargo(dlg_post_form_id, private_route('sep_mgmt'), 'post', "onsubmit='return doGridCargo()'")}}
     todo:
 
+
+------- 2026 - May ---------------
+    » 05-05 v β 5.60
+    - From today onwards, the names of files uploaded by users,
+    - The names of uploaded Spatial start with S_
+    - Spatial Data upload files
+
+    » 05-20 v β 5.61, db 5.02.0
+      [Spatial Data Files data entry part 2]
+    - The names of uploaded Spatial start with sdf
+    - Data entry completed
+    - Insert without fields modification, ready
+    - SDF analysis and data/values extractor, ready (private.spd_analysis.py)
+
+
 ------- 2026 - April -------------
     - 'recortes' -> Spatial Data
     - Remove ui_db_texts_cache.py

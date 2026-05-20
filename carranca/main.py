@@ -1,6 +1,7 @@
 """
 main.py
   Main Module following the Application Factory Pattern
+  FLASK's APP
 
   Equipe da Canoa -- 2024
   mgd 2024-10-03

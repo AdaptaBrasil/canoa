@@ -14,12 +14,11 @@ Gemini 2025-11-08
 import re
 import json
 import warnings
-from typing import Optional, Dict, Any, Type, List, cast
+from typing import Optional, Tuple, Dict, Any, Type, List, cast
 from datetime import datetime, timedelta
 from .UITextsKeys import UITextsKeys
 from ..helpers.py_helper import camel_to_snake
 from ..helpers.types_helper import DB_Lookup, DB_Texts, DB_Texts_Args
-
 
 # Define a unique object to act as the sentinel default value for dictionary lookups
 _MISSING = object()
@@ -126,9 +125,7 @@ class UIDBTexts:
     Performs runtime type checking only when running in debug mode.
     """
 
-    def __init__(
-        self, data: Dict[str, Any], debugging: bool, ui_dt_format: str = "", db_lookup: DB_Lookup | None = None
-    ):
+    def __init__(self, data: Dict[str, Any], debugging: bool, ui_dt_format: str = "", db_lookup: DB_Lookup | None = None):
         # collect msg keys names
         items = UITextsKeys.Msg.__dict__.items()
         self._msg_keys = [value for key, value in items if not key.startswith("__")]
@@ -192,8 +189,7 @@ class UIDBTexts:
         # This check runs always to enforce the class's contract.
         if not isinstance(value, (str, bool)):
             raise TypeError(
-                f"UIDBTexts only accepts str or bool for assignment, "
-                f"but received type {type(value).__name__} for key '{key}'."
+                f"UIDBTexts only accepts str or bool for assignment, " f"but received type {type(value).__name__} for key '{key}'."
             )
 
         self._data[key] = value
@@ -351,14 +347,10 @@ class UIDBTexts:
         default = KEY_NOT_FOUND_MSG
         nice_key = camel_to_snake(key).replace("_", " ").capitalize()
         key_not_found_msg = self._retrieve_value("keyNotFound", UITextsKeys.Section.error, default, True)
-        section = (
-            self.section + "" if alternative_section == UITextsKeys.Section.current else f", {alternative_section}"
-        )
+        section = self.section + "" if alternative_section == UITextsKeys.Section.current else f", {alternative_section}"
         return key_not_found_msg.format(nice_key, key, section)
 
-    def _set_or_add_msg(
-        self, key: str, alternative_section: str, msg_kind: str, args: DB_Texts_Args = None
-    ) -> tuple[str, str]:
+    def _set_or_add_msg(self, key: str, alternative_section: str, msg_kind: str, args: DB_Texts_Args = None) -> Tuple[str, str]:
         """Retrieves text (local or from DB) and adds it to a dictionary, formatted.
 
         args:
@@ -408,7 +400,7 @@ class UIDBTexts:
                 value = msg_text.format(**args)
             elif isinstance(args, tuple):
                 value = msg_text.format(*args)
-            else:  # str
+            else:  # str | int | ...
                 value = msg_text.format(args)
 
             value = self.try_recursive(key, value)
@@ -421,7 +413,7 @@ class UIDBTexts:
 
         return key, value
 
-    def set_msg_success(self, key: str = "", args: DB_Texts_Args = None) -> tuple[str, str]:
+    def set_msg_success(self, key: str = "", args: DB_Texts_Args = None) -> Tuple[str, str]:
         """
         returns used `key` and the retrieved `msg`
         Removes all other msg
@@ -438,7 +430,7 @@ class UIDBTexts:
         self.display_msg_only = True
         return key, msg
 
-    def set_msg_fatal(self, key: str = "", args: DB_Texts_Args = None) -> tuple[str, str]:
+    def set_msg_fatal(self, key: str = "", args: DB_Texts_Args = None) -> Tuple[str, str]:
         """
         returns used `key` and the retrieved `msg`
         Removes all other msg
@@ -454,19 +446,19 @@ class UIDBTexts:
         self.display_msg_only = True
         return key, msg
 
-    def set_msg_error(self, key: str = "", args: DB_Texts_Args = None) -> tuple[str, str]:
+    def set_msg_error(self, key: str = "", args: DB_Texts_Args = None) -> Tuple[str, str]:
         """returns used `key` and retrieved `msg`"""
         key, msg = self._set_or_add_msg(key, UITextsKeys.Section.error, UITextsKeys.Msg.error, args)
         return key, msg
 
-    def set_msg_info(self, key: str = "", args: DB_Texts_Args = None) -> tuple[str, str]:
+    def set_msg_info(self, key: str = "", args: DB_Texts_Args = None) -> Tuple[str, str]:
         """returns used `key` and retrieved `msg`
         Information texts can be shared with the success section ;—)
         """
         key, msg = self._set_or_add_msg(key, UITextsKeys.Section.success, UITextsKeys.Msg.info, args)
         return key, msg
 
-    def set_msg_warn(self, key: str = "", args: DB_Texts_Args = None) -> tuple[str, str]:
+    def set_msg_warn(self, key: str = "", args: DB_Texts_Args = None) -> Tuple[str, str]:
         """returns used `key` and the retrieved `msg`
         Warning texts can be shared with the error section ;—)
         """

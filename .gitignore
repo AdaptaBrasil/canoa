@@ -36,14 +36,16 @@ instance/*
 
 ## Canoa per git's user
 carranca/static/sep_icons/
-carranca/log_files
+carranca/internal_tests/data
 carranca/shape2geojsn/data
 downloaded_files/
 uploaded_files/
 local_storage/
 exported_data/
+spatial_data/
 data_tunnel/
 user_files/
+log_files/
 
 ## Canoa Linux
 mount-win.sh

@@ -8,10 +8,12 @@ mgd
 import os
 import shutil
 from os import path, makedirs
-from typing import Optional
+from typing import Optional, Tuple
+
+from .py_helper import ms_since_midnight, now
 
 
-def file_full_name_parse(file_full_name: str) -> tuple[str, str, str]:
+def file_full_name_parse(file_full_name: str) -> Tuple[str, str, str]:
     """split full path into 3 components:
     drive, path, filename"""
     drive, path = os.path.splitdrive(file_full_name)
@@ -19,11 +21,11 @@ def file_full_name_parse(file_full_name: str) -> tuple[str, str, str]:
     return (drive, path, filename)
 
 
-def path_remove_last_folder(dir: str) -> str | None:
+def path_remove_last_folder(dir: str) -> str:
     # remove the last folder form the path (~ cd..)
     folders = dir.split(path.sep)
     if len(folders) < 2:
-        return None
+        return ""
     else:
         short_dir = path.sep.join(folders[:-1])
         return short_dir
@@ -86,9 +88,7 @@ def file_must_exist(file_full_name: str, source_full_name: str, replace_if_newer
     except OSError as e:
         from ..common.app_context_vars import sidekick
 
-        sidekick.display.error(
-            f"Error {('replacing' if done else 'copying file')} [{source_full_name}] to [{file_full_name}]: {e}')"
-        )
+        sidekick.display.error(f"Error {('replacing' if done else 'copying file')} [{source_full_name}] to [{file_full_name}]: {e}')")
     finally:
         done = path.isfile(file_full_name)
     return done
@@ -111,6 +111,15 @@ def folder_must_exist(full_path: str) -> bool:
 
 def is_same_file_name(file1: str, file2: str):
     return path.normcase(file1) == path.normcase(file2)
+
+
+def get_unique_filename(base_name: str, ext: str = "") -> str:
+    """Creates a Unique file name based on the amount of mili seconds since midnight"""
+    # https://strftime.org/
+    today_str = now().strftime("%Y-%m-%d")  # 4-2-2_6
+    ms = ms_since_midnight(True)
+    filename = f"{base_name}{today_str}_{ms}{ext}"
+    return filename
 
 
 # eof

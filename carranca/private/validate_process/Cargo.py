@@ -9,7 +9,7 @@ upload_file validation process loop.
 Part of Canoa `File Validation` Processes
 """
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Tuple
 
 from ..receive_file import RECEIVE_FILE_DEFAULT_ERROR
 
@@ -82,7 +82,7 @@ class Cargo:
         msg_exception: str = "",
         next: Optional[dict] = {},
         final: Optional[Usual_Dict] = {},
-    ) -> tuple[int, str, str, object]:
+    ) -> Tuple[int, str, str, object]:
         """
         Updates the class with the 'next' procedure values
 

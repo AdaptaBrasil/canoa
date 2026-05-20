@@ -230,3 +230,6 @@ screen -r canoa
 - Always start Flask with `host='0.0.0.0'` to make it accessible from the internet
 - Screen keeps processes running even after you disconnect
 - Use screen for long-running processes that need to survive terminal closures
+
+---
+<small>_eof_</small>

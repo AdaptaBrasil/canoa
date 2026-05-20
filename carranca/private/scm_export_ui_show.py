@@ -7,8 +7,8 @@ to organize the information to submit to the DB.
 mgd 2025.08
 """
 
-from .sep_icon import do_icon_get_url
 from .scm_data import get_scm_data
+from .sep_icon import do_icon_get_url
 from ..helpers.py_helper import class_to_dict
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.types_helper import Jinja_Template
@@ -35,12 +35,14 @@ def scm_export_ui_show(uiact_rsp: UiActResponse) -> Jinja_Template:
 
         task_code += 1
         schema_data, task_code = get_scm_data(task_code, config, False)
-        task_code += 1
-        grid_data = ExportGrid.get_data()
+        task_code += 1  # 813
+        grid_data = ExportGrid.get_rows()
         task_code += 1
         empty_icon = do_icon_get_url("")
 
         task_code += 1
+        # TODO get names from table
+        # col_names = [ExportGrid.id.name,...]
         col_names = ["id", "sep_id", "scm_id", "file_name", "sep_fullname", "uploaded", "report_errors"]
         js_ui_dict = js_ui_dictionary(ui_db_texts[js_grid_col_meta_info], col_names, task_code)
 

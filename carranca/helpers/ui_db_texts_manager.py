@@ -29,7 +29,6 @@ from ..common.app_constants import APP_LANG
 # === Global 'constants' for HTML ui flask forms =============
 from .. import global_ui_texts_cache
 
-
 # ==== UI Texts Constants ====================================
 Cache_Key: TypeAlias = Tuple[str, str, Optional[str]]
 
@@ -112,7 +111,7 @@ def __get_ui_texts_query(cols: str, table_search: UITexts_TableSearch) -> str:
 
 
 # === Data Retrievers =======================================
-def __get_table_row(table_search: UITexts_TableSearch) -> tuple[str, str]:
+def __get_table_row(table_search: UITexts_TableSearch) -> Tuple[str, str]:
     """returns tuple(text, title) for the item/section pair"""
     from .db_helper import retrieve_rows
 
@@ -304,7 +303,7 @@ def set_msg_info(item: str, ui_db_texts: UIDBTexts, *args) -> str:
     returns `text` for the [item, <curr_section>]
     and adds the pair to `texts` => texts.add(text, 'msgInfo')
     """
-    return _set_or_add_msg(item, "", UITextsKeys.Msg.info, ui_db_texts, *args)
+    return _set_or_add_msg(item, "", UITextsKeys.Msg.info, ui_db_texts, args)
 
 
 def set_msg_warn(item: str, ui_db_texts: UIDBTexts, *args) -> str:
@@ -312,7 +311,7 @@ def set_msg_warn(item: str, ui_db_texts: UIDBTexts, *args) -> str:
     returns text for the [item/'sec_Error'] pair
     and adds pair to texts => texts.add( text, 'msgError')
     """
-    return _set_or_add_msg(item, UITextsKeys.Section.error, UITextsKeys.Msg.warn, ui_db_texts, *args)
+    return _set_or_add_msg(item, UITextsKeys.Section.error, UITextsKeys.Msg.warn, ui_db_texts, args)
 
 
 def set_msg_error(item: str, ui_db_texts: UIDBTexts, *args) -> str:
@@ -320,7 +319,7 @@ def set_msg_error(item: str, ui_db_texts: UIDBTexts, *args) -> str:
     returns text for the [item/'sec_Error'] pair
     and adds pair to texts => texts.add( text, 'msgError')
     """
-    return _set_or_add_msg(item, UITextsKeys.Section.error, UITextsKeys.Msg.error, ui_db_texts, *args)
+    return _set_or_add_msg(item, UITextsKeys.Section.error, UITextsKeys.Msg.error, ui_db_texts, args)
 
 
 def set_msg_success(item: str, ui_db_texts: UIDBTexts, *args) -> str:
@@ -334,7 +333,7 @@ def set_msg_success(item: str, ui_db_texts: UIDBTexts, *args) -> str:
     """
 
     ui_db_texts.reset_messages()
-    msg = _set_or_add_msg(item, UITextsKeys.Section.success, UITextsKeys.Msg.success, ui_db_texts, *args)
+    msg = _set_or_add_msg(item, UITextsKeys.Section.success, UITextsKeys.Msg.success, ui_db_texts, args)
     ui_db_texts.display_msg_only = True
     return msg
 
@@ -347,7 +346,7 @@ def set_msg_fatal(item: str, ui_db_texts: UIDBTexts, *args) -> str:
     2) wipes all ui messages from the data dict
     """
     ui_db_texts.reset_messages()
-    msg = set_msg_error(item or UITextsKeys.Msg.fatal, ui_db_texts, *args)
+    msg = set_msg_error(item or UITextsKeys.Msg.fatal, ui_db_texts, args)
     ui_db_texts.display_msg_only = True
     return msg
 

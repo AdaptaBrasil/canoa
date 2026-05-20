@@ -16,6 +16,8 @@
 │   │
 │   ├── exported_data/         # Working folder for exporting schemas
 │   │
+│   ├── spatial_files/         # Admin uploaded Spatial Data Files
+│   │
 │   └── user_files/            # User-uploaded files
 │
 ├── canoa_stage/               # Paused staging version of Canoa
@@ -62,5 +64,6 @@ export FLASK_RUN_HOST="0.0.0.0"
 # 2025-10-21
 # CANOA_APP_MODE & FLASK_RUN_PORT
 # are defined in each rema.sh
-# eof
 ```
+---
+<small>_eof_</small>

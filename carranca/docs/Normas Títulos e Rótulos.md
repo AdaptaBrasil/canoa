@@ -67,5 +67,5 @@ Se você estiver desenvolvendo sistemas para uso profissional, especialmente par
 
 Se quiser, posso te ajudar a montar um **modelo de formulário com base nas normas**. Deseja?
 
-
 ---
+<small>_eof_</small>

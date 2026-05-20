@@ -20,6 +20,7 @@ class ExportGrid(CanoaBaseTable):
     # Latest user data file by SEP view ()
     __tablename__ = "vw_export_data_files"
 
+    id: Mapped[int] = mapped_column(Integer)
     user_id: Mapped[int] = mapped_column(Integer)
     sep_id: Mapped[int] = mapped_column(Integer)
     scm_id: Mapped[int] = mapped_column(Integer)

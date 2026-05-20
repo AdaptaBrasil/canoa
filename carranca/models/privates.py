@@ -173,11 +173,11 @@ class UserDataFiles(SQLABaseTable):
         return None
 
     # Public insert/update
-    def insert(uTicket: str, **kwargs) -> None:
+    def insert(self, uTicket: str, **kwargs) -> None:
         UserDataFiles._ins_or_upd(True, uTicket, **kwargs)
         return None
 
-    def update(uTicket: str, **kwargs) -> None:
+    def update(self, uTicket: str, **kwargs) -> None:
         UserDataFiles._ins_or_upd(False, uTicket, **kwargs)
         return None
 

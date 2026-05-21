@@ -17,8 +17,6 @@ from wtforms import StringField
 from sqlalchemy import func
 
 # It didn't satisfy Pylance, but I'll leave it as info.
-Choice: TypeAlias = Tuple[str, str]
-Choices: TypeAlias = List[Choice]
 FileData: TypeAlias = Dict[str, Any]
 
 from .wtforms import SpdEdit, SpdInsert, apply_lang_to_string_fields
@@ -27,7 +25,7 @@ from ..common.UIDBTexts import UIDBTexts
 from ..helpers.py_helper import is_str_none_or_empty
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.file_helper import folder_must_exist, get_unique_filename
-from ..helpers.types_helper import Route_Response
+from ..helpers.types_helper import Route_Response, Choice, Choices
 from ..helpers.jinja_helper import process_template
 from ..helpers.uiact_helper import UiActResponseProxy
 from ..common.app_context_vars import sidekick
@@ -323,11 +321,8 @@ def do_spd_edit(data: str) -> Route_Response:
 
             elif form_modified:
                 task_code += 2  # 11
-                ofn = spd_row.original_file_name
-                # CHECK fields
+                # CHECK fields_id,  fields_id
                 fform.populate_obj(spd_row)
-                # as fform.original_file_name is disabled, it clears the value of spd_row :—(
-                spd_row.original_file_name = ofn
                 spd_row.edited_by = app_user.id
                 spd_row.edited_at = func.now()
                 return __save_and_go()

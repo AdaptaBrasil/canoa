@@ -8,7 +8,7 @@ Extends:
 
 mgd
 --------------------------------------- #}
-{# cSpell:ignore tojson unselectable #}
+{# cSpell:ignore tojson unselectable americas #}
 
 {% set dlg_var_icon_url= iconFileUrl %}
 {% extends "./layouts/form.html.j2" %}
@@ -92,6 +92,18 @@ mgd
     </div>
 </div>
 {# Description ] #}
+
+{# [ spd (SPatial Data File #}
+<div class="form-group mt-2">
+    <label class="frm-label" inert for="{{ form.spd_name.id }}"> {{ spdLabel }}</label>
+    <div class="input-group">
+        <span class="input-group-text">
+            <i class="{{ faStyle }} fa-earth-americas" aria-hidden="true"></i>
+        </span>
+        {{ form.spd_name() }}
+    </div>
+</div>
+{# spd ] #}
 
 {# [ Icon #}
 <div class="form-group mt-2">

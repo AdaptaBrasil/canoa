@@ -28,6 +28,11 @@ from ..common.app_context_vars import sidekick
 # ________________________________________________
 # Typical StringField, 'render KeyWord arguments'
 cls_render_kw = {"class": "form-control"}
+# The browser doesn't send disabled input's values, to Flask's forms assumes them empty,
+# so fform.populate_obj will clear there value
+# use readonly
+cls_render_kw_readonly = {"class": "form-control bg-light", "readonly": True}
+
 str_render_kw = {
     **cls_render_kw,
     "autocomplete": "off",
@@ -142,10 +147,7 @@ class SepEdit(FlaskForm):
           lang, disabled, readonly, required
     """
 
-    manager_name = SelectField(
-        "",
-        render_kw={**cls_render_kw, "disabled": True},  # almost
-    )
+    manager_name = SelectField("", render_kw={**cls_render_kw, "disabled": True})
 
     schema_name = StringField(
         "",
@@ -153,17 +155,11 @@ class SepEdit(FlaskForm):
         render_kw={**cls_render_kw, "disabled": True},  # almost always disabled
     )
 
-    sep_name = StringField(
-        "",
-        validators=[Length(min=5, max=140)],  # TODO From DB
-        render_kw=str_render_kw,
-    )
+    sep_name = StringField("", validators=[Length(min=5, max=140)], render_kw=str_render_kw)  # TODO From DB
 
-    description = StringField(
-        "",
-        validators=[InputRequired(), Length(min=5, max=140)],
-        render_kw=str_render_kw,
-    )
+    description = StringField("", validators=[InputRequired(), Length(min=5, max=140)], render_kw=str_render_kw)
+
+    spd_name = SelectField("", render_kw={**select_render_kw})
 
     icon_file = FileField("", render_kw={**cls_render_kw, "accept": ".svg"})
 
@@ -297,7 +293,7 @@ class SpdEdit(SpdForm):
     field_id = SelectField("", validators=[DataRequired()], choices=[], render_kw=select_render_kw)
     field_name = SelectField("", choices=[], render_kw=select_render_kw)
     field_alt_name = SelectField("", choices=[], render_kw=select_render_kw)
-    original_file_name = StringField("", render_kw={**cls_render_kw, "readonly": True, "disabled": True})
+    original_file_name = StringField("", render_kw={**cls_render_kw_readonly})
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

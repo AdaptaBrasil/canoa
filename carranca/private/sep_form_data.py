@@ -1,5 +1,5 @@
 """
-SEP Form data for iInsertion & edition
+SEP Form data for insertion & edition
 
 
 Equipe da Canoa -- 2025
@@ -10,7 +10,7 @@ from enum import IntEnum
 from typing import Tuple, List
 from dataclasses import dataclass
 
-from .wtforms import SepNew
+from .wtforms import SepNew, SepEdit
 from .SepIconMaker import SepIconMaker
 from ..models.public import User
 from ..models.privates import Sep, Schema
@@ -56,7 +56,7 @@ def get_sep_data(
     edit_mode: SepEditMode,
     no_manager: NoManager,
     ui_db_texts: UIDBTexts,
-    form: SepNew,
+    form: SepNew | SepEdit,
     sep_id: int,
     sep_tmp_name: str,
 ) -> Tuple[Sep, Usual_Dict, str]:
@@ -142,6 +142,8 @@ def get_sep_data(
         form.description.data = clean_text(sep_row.description)
         form.icon_file.data = None
         form.manager_name.data = sep_manager
+        form.spd_name.data = sep_row.spd_id
+        # form.spd_name.choices =
         form.manager_name.render_kw["disabled"] = not (edit_mode == SepEditMode.FULL_EDIT)
         if edit_mode == SepEditMode.FULL_EDIT:
             ui_db_texts[SCHEMA_LIST_VALUE] = str(sep_row.id_schema)

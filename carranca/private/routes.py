@@ -263,6 +263,17 @@ def scm_edit(code: str = "?"):
 
 
 @login_required
+@bp_private.route("/spd_grid/<code>", methods=MTD_BOTH)
+def spd_grid(code: str = "?"):
+    """
+    Through this route, the user can edit and insert a Schema
+    """
+    from .spd_grid import get_spd_grid
+
+    return grid_route(code, "spd_edit", get_spd_grid)
+
+
+@login_required
 @bp_private.route("/spd_edit/<code>", methods=MTD_BOTH)
 def spd_edit(code: str = "?"):
     """

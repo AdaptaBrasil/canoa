@@ -26,11 +26,13 @@ from ..private.UserSep import UserSep
 from ..helpers.py_helper import is_str_none_or_empty, to_int
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.user_helper import get_batch_code
+from ..helpers.types_helper import Choices
 from ..helpers.uiact_helper import UiActResponseProxy
 from ..helpers.jinja_helper import process_template
 from ..common.app_context_vars import app_user
 from ..helpers.js_consts_helper import js_form_sec_check
 from ..common.app_error_assistant import ModuleErrorCode, AppStumbled, JumpOut
+from ..models.private.spatial_data_file import SpatialDataFile
 from ..helpers.route_helper import (
     get_private_response_data,
     init_response_vars,
@@ -162,6 +164,9 @@ def do_sep_edit(data: str) -> str:
             fform.sep_name.render_kw["required"] = not input_disabled
             fform.sep_name.render_kw["lang"] = app_user.lang
             fform.description.render_kw["lang"] = app_user.lang
+            # 2026.05
+            _choices: Choices = SpatialDataFile.get_rows(["id", "spd_name"], None, "spd_name_lower")
+            fform.spd_name.choices: Choices = [(r.id, r.spd_name) for r in _choices]
 
         task_code += 1  # 3
         sep_row, ui_select_lists, sep_fullname = get_sep_data(task_code, editMode, no_manager, ui_db_texts, fform, sep_id, sep_fullname)

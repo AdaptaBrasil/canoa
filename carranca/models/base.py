@@ -22,8 +22,9 @@ from sqlalchemy.sql.elements import ColumnElement
 
 from .. import global_sqlalchemy_scoped_session
 from ..private.IdToCode import IdToCode
-from ..helpers.db_helper import db_fetch_rows, col_names_to_columns
+from ..helpers.db_helper import db_fetch_rows
 from ..common.app_context_vars import sidekick
+from ..common.app_error_assistant import AppStumbled, ModuleErrorCode
 from ..helpers.db_records.DBRecords import DBRecords
 
 TModel = TypeVar("TModel", bound="CanoaBase")
@@ -96,19 +97,19 @@ class CanoaBase(DeclarativeBase):
     @classmethod
     @overload
     def get_rows(
-        cls: Type[TModel], col_names: None = None, where_or_id: DBFilter | int = 0, order_col: Optional[Column] = None
+        cls: Type[TModel], col_names: None = None, where_or_id: DBFilter | int = 0, order_col_name: Optional[str] = None
     ) -> DBRecords: ...
 
     @classmethod
     @overload
     def get_rows(
-        cls: Type[TModel], col_names: List[str], where_or_id: DBFilter | int = 0, order_col: Optional[Column] = None
+        cls: Type[TModel], col_names: List[str], where_or_id: DBFilter | int = 0, order_col_name: Optional[str] = None
     ) -> DBRecords: ...
 
     @classmethod
     @overload
     def get_rows(
-        cls: Type[TModel], col_names: Type[TRecord], where_or_id: DBFilter | int = 0, order_col: Optional[Column] = None
+        cls: Type[TModel], col_names: Type[TRecord], where_or_id: DBFilter | int = 0, order_col_name: Optional[str] = None
     ) -> DBRecords: ...
 
     @classmethod
@@ -116,7 +117,7 @@ class CanoaBase(DeclarativeBase):
         cls: Type[TModel],
         col_names: Type[TRecord] | List[str] | None = None,
         where_or_id: DBFilter | int = 0,
-        order_col: Optional[Column] = None,
+        order_col_name: Optional[str] = None,
     ) -> DBRecords:
         """
         Typed data factory with flexible column selection, filtering, and ordering.
@@ -124,55 +125,77 @@ class CanoaBase(DeclarativeBase):
         Args:
             col_names: One of:
                 - None (default): return all columns as ORM model instances
+                - Empty(List) = []: return all columns as ORM model instances
                 - List[str]: specific column names
                 - Type[TRecord] (dataclass): return dataclass projection
             where_or_id: Filter condition:
                 - 0 (default): no filtering
                 - int: filter by id (WHERE id = where_id)
                 - ColumnExpressionArgument[bool]: custom WHERE clause
-            order_col: Optional column to order_col results by (ORDER BY order_col)
+            order_col: Optional column name to order results by (ORDER BY order_col)
 
         Returns:
             DBRecords wrapping the result rows
         """
+
+        error_code = ModuleErrorCode.SQLALCHEMY_BASE_TABLE + 1
+        error_code += 1
+
         # Determine which columns to select and prepare them for SQL
         selected_cols_names: List[str] = []
         all_cols = False
+        order_column: ColumnElement | None = None
         if col_names is None:
             # No selection → select all via ORM model
             all_cols = True
             selected_cols_names = []
         elif isinstance(col_names, list):
             selected_cols_names = col_names
+            all_cols = len(col_names) == 0
         elif is_dataclass(schema := col_names):
             fields = schema.__annotations__.keys()
             selected_cols_names = [name for name in fields]
         else:
-            raise TypeError(f"get_data(col_names) expects None, List[str], or a dataclass type, " f"got {type(col_names).__name__}")
+            raise TypeError(f"get_row() for `col_names` expects  None, List[str], or a dataclass type, " f"got {type(col_names).__name__}")
 
+        error_code += 1
         selected_columns: List[ColumnElement] = [col for col in cls.__table__.columns if all_cols or col.name in selected_cols_names]
+
+        error_code += 1
+        if order_col_name is None:
+            pass
+        elif not isinstance(order_col_name, str):
+            raise TypeError(f"get_row() for `order_col_name` expects None or str, " f"got {type(order_col_name).__name__}")
+        elif (order_column := cls.__table__.columns.get(order_col_name)) is None:
+            raise AppStumbled(
+                f"Unknown column s [{order_col_name}] requested for table {cls.__tablename__} order by.", error_code, False, True
+            )
 
         if sidekick.debugging:
             table_col_names = {col.name for col in cls.__table__.columns}
             unknown_cols: List[str] = [col_name for col_name in selected_cols_names if col_name not in table_col_names]
             if unknown_cols:
-                sidekick.display.error(f"Unknown cols [{', '.join(unknown_cols)}] requested for table {cls.__tablename__}")
+                raise AppStumbled(
+                    f"Unknown cols [{', '.join(unknown_cols)}] requested for table {cls.__tablename__}", error_code, False, True
+                )
 
         def _get_db_records(db_session: Session) -> DBRecords:
             # Build SELECT statement
             stmt = select(*selected_columns) if selected_columns else select(cls)
 
             # Apply WHERE filter
-            if not isinstance(where_or_id, int):  # Then is a DBFilter
+            if where_or_id is None:
+                pass
+            elif not isinstance(where_or_id, int):  # Then is a DBFilter
                 where = cast(DBFilter, where_or_id)
                 stmt = stmt.where(where)
-            elif id := int(where_or_id):  # else if int (can be a false code (see Model.to_id(code)))
+            elif id := int(where_or_id) > -1:  # else if int (can be a false code (see Model.to_id(code))) or Zero (no rows)
                 pk = id if id > 0 else 0
                 stmt = stmt.where(cls.id == pk)
 
             # Apply ORDER by
-            if order_col is not None:
-                stmt = stmt.order_by(order_col)
+            if order_column is not None:
+                stmt = stmt.order_by(order_column)
 
             rows = db_session.execute(stmt).all()
             return DBRecords(stmt, rows)

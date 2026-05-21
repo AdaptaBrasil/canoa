@@ -84,6 +84,9 @@ class ModuleErrorCode(IntEnum):
     # legacy
     LEGACY_STYLE = 1
 
+
+    SQLALCHEMY_BASE_TABLE = 90
+
     # Public Access Control Processes
     ACCESS_CONTROL_LOGIN = 100  # 1-14
     ACCESS_CONTROL_REGISTER = 120  # 1-06

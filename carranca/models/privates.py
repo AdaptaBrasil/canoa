@@ -304,8 +304,8 @@ class Sep(SQLABaseTable):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     id_schema = Column(Integer)
+    id_spf = Column(Integer)
     users_id = Column("mgmt_users_id", Integer)
-    ui_order = Column(Integer)
     ins_by = Column(Integer)
     ins_at = Column(DateTime)
     edt_by = Column(Integer)

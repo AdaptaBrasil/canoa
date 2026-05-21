@@ -69,6 +69,10 @@ Jinja_Template: TypeAlias = str
 Jinja_Rendered: TypeAlias = str
 
 
+# WtForm Select Field
+Choice: TypeAlias = Tuple[str, str]
+Choices: TypeAlias = List[Choice]
+
 Route_Response: TypeAlias = Jinja_Rendered | Flask_Response
 
 Svg_Content: TypeAlias = str

@@ -11,7 +11,6 @@ mgd
 
 from typing import List
 
-from .sep_icon import do_icon_get_url
 from ..helpers.py_helper import class_to_dict
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.uiact_helper import UiActResponseKeys
@@ -21,17 +20,16 @@ from ..helpers.js_consts_helper import js_grid_col_meta_info, js_ui_dictionary
 from ..helpers.ui_db_texts_manager import set_msg_fatal, UITextsKeys
 from ..common.app_error_assistant import ModuleErrorCode, AppStumbled, HTTP_StatusCode
 from ..helpers.db_records.DBRecords import DBRecords
-from ..models.private.mgmt_seps_user import MgmtSepsUser
+from ..models.private.spatial_data_file import SpatialDataFile
 
 
 def get_spd_grid() -> Jinja_Rendered:
 
     def _spd_data_fetch(col_names: List[str]) -> DBRecords:
-        spd_usr_rows = MgmtSepsUser.get_spd_usr(col_names)
+        spd_usr_rows = SpatialDataFile.get_rows(col_names)
         for spd in spd_usr_rows:
             spd_id = spd.id
-            spd.id = MgmtSepsUser.code(spd_id)
-            spd.icon_file_name = do_icon_get_url(spd.icon_file_name, spd_id)
+            spd.id = SpatialDataFile.to_code(spd_id)
 
         return spd_usr_rows
 
@@ -46,20 +44,18 @@ def get_spd_grid() -> Jinja_Rendered:
             raise AppStumbled(msg, task_code, False, True)
 
         task_code += 1  # 3
-        col_names = ["id", "icon_file_name", "scm_name", "name", "user_curr", "visible"]
+        col_names = ["id", "spd_name", "field_id"]
         js_ui_dict = js_ui_dictionary(ui_db_texts[js_grid_col_meta_info], col_names, task_code)
 
         task_code += 1  # 4
-        spd_data = _spd_data_fetch(col_names)
+        spd_rows = _spd_data_fetch(col_names)
 
         task_code += 1  # 5
-        # TODO spd_data[ start_index ]
-        ui_db_texts[UITextsKeys.Form.icon_url] = spd_data[0].icon_file_name if len(spd_data) > 0 else ""
 
         task_code += 1  # 6
         jHtml = process_template(
             tmpl_ffn,
-            spd_data=spd_data.to_list(),
+            spd_rows=spd_rows.to_list(),
             cargo_keys=class_to_dict(UiActResponseKeys),
             **ui_db_texts.data(),
             **js_ui_dict,

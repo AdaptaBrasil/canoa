@@ -1,0 +1,64 @@
+{# ------------------------------------
+
+sep_grid.html.j2
+-----------------
+CRUD for seps
+
+Extends
+"./layouts/grid.html.j2"
+
+2025.05.23
+mgd
+--------------------------------------- #}
+{# cSpell:ignore onclick tojson onsubmit #}
+
+{% set dlg_cls_size= 'modal-lg' %}
+
+{% extends "./layouts/grid.html.j2" %}
+
+
+{# ╒════════════════ Grid Footer ════════════════╕ #}
+{% block grid_blc_footer %}
+<div class="col-auto">
+    {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
+    {{ btn_action(dlg_post_form_id, grdBtnEdit, cargo_keys.edit) }}
+</div>
+<div class="col-auto">
+    {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
+    {{ btn_action(dlg_post_form_id, grdBtnDelete, cargo_keys.delete) }}
+</div>
+{% endblock grid_blc_footer %}
+{# ╘═══════════════ Grid Footer ═════════════════╛ #}
+
+{# ╒════════════════ Grid Forms ═════════════════╕ #}
+{% block grid_blc_forms %}
+
+{% from "includes/_action_forms_and_btns.html.j2" import action_form__post_cargo %}
+{{ action_form__post_cargo(dlg_post_form_id, private_route('spd_grid', code=form_cargo_id), dlg_data_wait_process) }}
+
+{% endblock grid_blc_forms %}
+{# ╘════════════════ Grid Forms ═════════════════╛ #}
+
+
+{# ╒══════════════ Grid JavaScript ══════════════╕ #}
+{% block grid_blc_javascript %}
+
+<script>
+const colMeta = {{ grid_col_meta | tojson | safe }};
+const colCode = colMeta[0].n;
+
+const gridRows = {{ spd_rows | tojson | safe }};
+const cargoKeys = {{ cargo_keys | tojson }};
+const gridID = '{{ grid_id }}';
+const initRow = {{ grid_init_row | default (0) }};
+const cargo = { [cargoKeys.action]: '', [cargoKeys.row_index]: initRow, [cargoKeys.code]: '' };
+
+{% from "includes/_action_forms_and_btns.js.j2" import form_link_action %}
+{{ form_link_action(dlg_post_form_id, form_cargo_id) }}
+</script>
+
+<script src="{{static_route('js/spd_grid.js')}}"></script>
+{% endblock grid_blc_javascript %}
+{# ╘══════════════ Grid JavaScript ══════════════╛ #}
+
+{# eof #}

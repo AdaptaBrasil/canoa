@@ -109,7 +109,10 @@ class CanoaBase(DeclarativeBase):
     @classmethod
     @overload
     def get_rows(
-        cls: Type[TModel], col_names: Type[TRecord], where_or_id: DBFilter | int = 0, order_col_name: Optional[str] = None
+        cls: Type[TModel],
+        col_names: Type[TRecord],
+        where_or_id: DBFilter | int = 0,
+        order_col_name: Optional[str] = None,
     ) -> DBRecords: ...
 
     @classmethod
@@ -156,19 +159,29 @@ class CanoaBase(DeclarativeBase):
             fields = schema.__annotations__.keys()
             selected_cols_names = [name for name in fields]
         else:
-            raise TypeError(f"get_row() for `col_names` expects  None, List[str], or a dataclass type, " f"got {type(col_names).__name__}")
+            raise TypeError(
+                f"get_row() for `col_names` expects  None, List[str], or a dataclass type, "
+                f"got {type(col_names).__name__}"
+            )
 
         error_code += 1
-        selected_columns: List[ColumnElement] = [col for col in cls.__table__.columns if all_cols or col.name in selected_cols_names]
+        selected_columns: List[ColumnElement] = [
+            col for col in cls.__table__.columns if all_cols or col.name in selected_cols_names
+        ]
 
         error_code += 1
         if order_col_name is None:
             pass
         elif not isinstance(order_col_name, str):
-            raise TypeError(f"get_row() for `order_col_name` expects None or str, " f"got {type(order_col_name).__name__}")
+            raise TypeError(
+                f"get_row() for `order_col_name` expects None or str, " f"got {type(order_col_name).__name__}"
+            )
         elif (order_column := cls.__table__.columns.get(order_col_name)) is None:
             raise AppStumbled(
-                f"Unknown column s [{order_col_name}] requested for table {cls.__tablename__} order by.", error_code, False, True
+                f"Unknown column s [{order_col_name}] requested for table {cls.__tablename__} order by.",
+                error_code,
+                False,
+                True,
             )
 
         if sidekick.debugging:
@@ -176,7 +189,10 @@ class CanoaBase(DeclarativeBase):
             unknown_cols: List[str] = [col_name for col_name in selected_cols_names if col_name not in table_col_names]
             if unknown_cols:
                 raise AppStumbled(
-                    f"Unknown cols [{', '.join(unknown_cols)}] requested for table {cls.__tablename__}", error_code, False, True
+                    f"Unknown cols [{', '.join(unknown_cols)}] requested for table {cls.__tablename__}",
+                    error_code,
+                    False,
+                    True,
                 )
 
         def _get_db_records(db_session: Session) -> DBRecords:
@@ -189,7 +205,9 @@ class CanoaBase(DeclarativeBase):
             elif not isinstance(where_or_id, int):  # Then is a DBFilter
                 where = cast(DBFilter, where_or_id)
                 stmt = stmt.where(where)
-            elif id := int(where_or_id) > -1:  # else if int (can be a false code (see Model.to_id(code))) or Zero (no rows)
+            elif (
+                id := int(where_or_id)
+            ) > 0:  # else if int (can be a false code (see Model.to_id(code))) or Zero (no rows)
                 pk = id if id > 0 else 0
                 stmt = stmt.where(cls.id == pk)
 

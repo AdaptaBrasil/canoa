@@ -1,4 +1,4 @@
-# mgd 2025.12.11
+# mgd 2026.04.02
 # python==3.13.*
 # see jinja_helper.py:_detect_duplicate_ids & html_herper
 beautifulsoup4==4.13.3

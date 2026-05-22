@@ -47,7 +47,9 @@ MANAGER_LIST_VALUE = "managerListValue"
 
 def _get_managers(no_manager: NoManager) -> List[Usual_Dict]:
     user_rows = User.get_all_users(User.disabled == False)
-    mng_list = [{"id": no_manager.id, "name": no_manager.name}] + [{"id": user.id, "name": user.username} for user in user_rows]
+    mng_list = [{"id": no_manager.id, "name": no_manager.name}] + [
+        {"id": user.id, "name": user.username} for user in user_rows
+    ]
     return mng_list
 
 
@@ -142,7 +144,7 @@ def get_sep_data(
         form.description.data = clean_text(sep_row.description)
         form.icon_file.data = None
         form.manager_name.data = sep_manager
-        form.spd_name.data = sep_row.spd_id
+        form.spd_name.data = str(sep_row.id_spd)
         # form.spd_name.choices =
         form.manager_name.render_kw["disabled"] = not (edit_mode == SepEditMode.FULL_EDIT)
         if edit_mode == SepEditMode.FULL_EDIT:

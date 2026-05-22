@@ -253,9 +253,13 @@ class ScmEdit(FlaskForm):
 
 # Private form
 class SpdForm(FlaskForm):
-    spd_name = StringField("", validators=[InputRequired(), Length(min=2, max=140)], render_kw={**str_render_kw, "autofocus": "true"})
+    spd_name = StringField(
+        "", validators=[InputRequired(), Length(min=2, max=140)], render_kw={**str_render_kw, "autofocus": "true"}
+    )
 
-    spd_title = StringField("", validators=[InputRequired(), Length(min=2, max=140)], render_kw=str_render_kw)  # TODO read form db
+    spd_title = StringField(
+        "", validators=[InputRequired(), Length(min=2, max=140)], render_kw=str_render_kw
+    )  # TODO read form db
 
     spd_description = StringField("", validators=[Length(min=5, max=140)], render_kw=str_render_kw)
 

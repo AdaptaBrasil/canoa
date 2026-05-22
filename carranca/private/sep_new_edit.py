@@ -104,11 +104,11 @@ def do_sep_edit(data: str) -> str:
                 icon_data.file_name = icon_data.storage.filename
             return icon_data
 
-        def _was_form_sep_modified(sep_row: Sep, form: SepNew | SepEdit) -> Tuple[bool, bool, str, int, int]:
+        def _was_form_sep_modified(sep_row: Sep, form: SepNew | SepEdit) -> Tuple[bool, bool, str, int, int, int]:
             if is_get:
-                return (False, False, "", -1, -1)
+                return (False, False, "", -1, -1, -1)
 
-            id_manager, frm_id_schema, frm_sep_name = (None, 0, "")
+            id_manager, frm_id_schema, frm_sep_name, frm_id_spd = (None, 0, "", 0)
 
             if edit_full_or_ins:
                 frm_id_manager = cast(int, form.manager_list.data)
@@ -116,6 +116,7 @@ def do_sep_edit(data: str) -> str:
                 frm_id_schema = cast(int, form.schema_list.data)
                 frm_visible = cast(bool, form.visible.data)
                 frm_sep_name = get_form_input_value(form.sep_name.name, [Sep.scm_sep])
+                frm_id_spd = to_int(form.spd_name.data)
                 frm_description = get_form_input_value(form.description.name)
             else:
                 frm_visible = cast(bool, form.visible.data)
@@ -132,6 +133,7 @@ def do_sep_edit(data: str) -> str:
                 case SepEditMode.FULL_EDIT:
                     form_modified = (
                         ((id_manager or sep_row.users_id) and (id_manager != sep_row.users_id))
+                        or (frm_id_spd != sep_row.id_spd)
                         or (frm_id_schema != sep_row.id_schema)
                         or (frm_visible != sep_row.visible)
                         or (frm_sep_name != sep_row.name)
@@ -142,7 +144,7 @@ def do_sep_edit(data: str) -> str:
             # remove spaces & '/' (scm_sep) so the user see its modified values (see get_input_text)
             form.description.data = frm_description
             form.sep_name.data = frm_sep_name
-            return form_modified, sep_modified, frm_sep_name, frm_id_schema, id_manager
+            return form_modified, sep_modified, frm_sep_name, frm_id_schema, id_manager, frm_id_spd
 
         def _check_if_icon_is_repeated(sep_id: int, icon_crc: int):
             if msg_repeated := Sep.icon_exist_sep(sep_id, icon_crc) if icon_crc else "":
@@ -166,14 +168,17 @@ def do_sep_edit(data: str) -> str:
             fform.description.render_kw["lang"] = app_user.lang
             # 2026.05
             _choices: Choices = SpatialDataFile.get_rows(["id", "spd_name"], None, "spd_name_lower")
-            fform.spd_name.choices: Choices = [(r.id, r.spd_name) for r in _choices]
+            first_item = [("", "(nenhum)")]  # TODO
+            fform.spd_name.choices: Choices = first_item + [(r.id, r.spd_name) for r in _choices]
 
         task_code += 1  # 3
-        sep_row, ui_select_lists, sep_fullname = get_sep_data(task_code, editMode, no_manager, ui_db_texts, fform, sep_id, sep_fullname)
+        sep_row, ui_select_lists, sep_fullname = get_sep_data(
+            task_code, editMode, no_manager, ui_db_texts, fform, sep_id, sep_fullname
+        )
 
         task_code = ModuleErrorCode.SEP_EDIT.value + 10  # 510
         icon_data = _init_icon_data(fform)
-        form_modified, sep_modified, sep_name, id_schema, id_manager = _was_form_sep_modified(sep_row, fform)
+        form_modified, sep_modified, sep_name, id_schema, id_manager, id_spd = _was_form_sep_modified(sep_row, fform)
         if is_get:
             task_code += 1
             if sep_id and sep_row.icon_crc:
@@ -188,7 +193,9 @@ def do_sep_edit(data: str) -> str:
             raise AppStumbled(msg_error, task_code, True, True)
         elif (
             scm_name := (
-                next((scm["name"] for scm in ui_select_lists[SCHEMA_LIST_KEY] if scm["id"] == id_schema), "?") if edit_full_or_ins else ""
+                next((scm["name"] for scm in ui_select_lists[SCHEMA_LIST_KEY] if scm["id"] == id_schema), "?")
+                if edit_full_or_ins
+                else ""
             )
         ) is None:
             # should never happen, is used to keep the if's one level indentation
@@ -216,6 +223,7 @@ def do_sep_edit(data: str) -> str:
             sep_row.name = sep_name
             sep_row.visible = bool(fform.visible.data)
             sep_row.description = get_form_input_value(fform.description.name)
+            sep_row.id_spd = int(fform.spd_name)
             batch_code = get_batch_code()
 
             if editMode == SepEditMode.INSERT:
@@ -234,6 +242,7 @@ def do_sep_edit(data: str) -> str:
                 # we need `sep_fullname`` in case of error (see except)
                 sep_fullname = Sep.get_fullname(scm_name, sep_row.name)
                 sep_row.users_id = id_manager
+                sep_row.id_spd = id_spd
 
             if schema_changed := ((editMode == SepEditMode.FULL_EDIT) and (id_schema != sep_row.id_schema)):
                 sep_row.id_schema = id_schema

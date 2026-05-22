@@ -49,8 +49,6 @@ ID_ATTRIBUTE_NAME = "id"
 
 
 def _get_choices(file_data: FileData) -> List[Tuple[str, str]]:
-
-    # candidates: list[str] = sorted([k for k, v in file_data["fields"].items() if v["type"] in ["str", "int32"]])
     choices: Choices = sorted(
         [(k, f"{k} | {v['type']}") for k, v in file_data["fields"].items() if v["type"] in ["str", "int32"]],
         key=lambda x: x[0],
@@ -58,7 +56,9 @@ def _get_choices(file_data: FileData) -> List[Tuple[str, str]]:
     return choices
 
 
-def _register_file(spd_row: SpatialDataFile, file_obj: Any, layer: int = 0, analyze_bytes: bool = False) -> Tuple[str, int]:
+def _register_file(
+    spd_row: SpatialDataFile, file_obj: Any, layer: int = 0, analyze_bytes: bool = False
+) -> Tuple[str, int]:
     def __get_extension(fn: str) -> str:
         _, fnx = path.splitext(fn)
         return fnx
@@ -80,7 +80,9 @@ def _register_file(spd_row: SpatialDataFile, file_obj: Any, layer: int = 0, anal
             error += 4
         elif not folder_must_exist(sidekick.config.LOCAL_SPATIAL_DATA_PATH):
             error += 5
-        elif SpatialDataFile.get_rows([SpatialDataFile.id.key], SpatialDataFile.spd_name_lower == func.lower(spd_row.spd_name)):
+        elif SpatialDataFile.get_rows(
+            [SpatialDataFile.id.key], SpatialDataFile.spd_name_lower == func.lower(spd_row.spd_name)
+        ):
             error += 6
         elif len(content := file_obj.read()) < 1024:
             error += 7
@@ -152,6 +154,7 @@ def _prepare_edition(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, spd_edit_
     error_msg = "editionError"
     error = 20
     ffn = ""
+    args = None
     # Unique File Name
     ufn = spd_row.file_name
     file_data: FileData = {}
@@ -161,6 +164,8 @@ def _prepare_edition(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, spd_edit_
         elif not (ffn := path.join(sidekick.config.LOCAL_SPATIAL_DATA_PATH, ufn)):
             error += 6
         elif not path.exists(ffn):
+            # error_msg = "spdEditFileNotFound"
+            # args = (ufn,)
             error += 6
         elif not (jsn_data := spd_row.file_data):
             error += 7
@@ -205,7 +210,9 @@ def _prepare_edition(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, spd_edit_
                 first_item = cast(Choice, ("", ""))
 
             error += 1
-            ui_db_texts["layerNameWithLabel"] = ui_db_texts["layerNameTemplate"].format(file_data["layer"]["name"], len(candidates))  # id
+            ui_db_texts["layerNameWithLabel"] = ui_db_texts["layerNameTemplate"].format(
+                file_data["layer"]["name"], len(candidates)
+            )  # id
 
             error = 0
 
@@ -220,7 +227,7 @@ def _prepare_edition(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, spd_edit_
         # except Exception as cleanup_e:
         #     sidekick.display.error(f"Failed to delete file {ffn}: [{cleanup_e}].")
 
-    return error_msg, error
+    return error_msg, error, args
 
 
 def do_spd_edit(data: str) -> Route_Response:
@@ -278,7 +285,8 @@ def do_spd_edit(data: str) -> Route_Response:
             task_code += 2  # 7
             fform.process(formdata=None, obj=spd_row)
             error_msg, error_code = _prepare_edition(ui_db_texts, spd_row, cast(SpdEdit, fform))
-            # HOJE
+            if error_code > 0:
+                ui_db_texts.set_msg_error(error_msg, error_code)
         else:  # is_post
             task_code += 3  # 8
 

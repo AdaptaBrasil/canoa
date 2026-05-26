@@ -157,7 +157,7 @@ def do_sep_edit(data: str) -> str:
             no_manager = NoManager(name=ui_db_texts["mng_placeholderOption"])
 
             ui_db_texts["formForNew"] = edit_full_or_ins
-            ui_db_texts["formTitle"] = ui_db_texts[f"formTitle{('New' if editMode == SepEditMode.INSERT else 'Edit')}"]
+            ui_db_texts[UITextsKeys.Form.title] = ui_db_texts[f"formTitle{('New' if editMode == SepEditMode.INSERT else 'Edit')}"]
             task_code += 1  # 2
             fform = SepNew() if edit_full_or_ins else SepEdit()
             # Personalized template for this user (see tmpl_form.sep_name for more info):
@@ -172,9 +172,7 @@ def do_sep_edit(data: str) -> str:
             fform.spd_name.choices: Choices = first_item + [(r.id, r.spd_name) for r in _choices]
 
         task_code += 1  # 3
-        sep_row, ui_select_lists, sep_fullname = get_sep_data(
-            task_code, editMode, no_manager, ui_db_texts, fform, sep_id, sep_fullname
-        )
+        sep_row, ui_select_lists, sep_fullname = get_sep_data(task_code, editMode, no_manager, ui_db_texts, fform, sep_id, sep_fullname)
 
         task_code = ModuleErrorCode.SEP_EDIT.value + 10  # 510
         icon_data = _init_icon_data(fform)
@@ -193,9 +191,7 @@ def do_sep_edit(data: str) -> str:
             raise AppStumbled(msg_error, task_code, True, True)
         elif (
             scm_name := (
-                next((scm["name"] for scm in ui_select_lists[SCHEMA_LIST_KEY] if scm["id"] == id_schema), "?")
-                if edit_full_or_ins
-                else ""
+                next((scm["name"] for scm in ui_select_lists[SCHEMA_LIST_KEY] if scm["id"] == id_schema), "?") if edit_full_or_ins else ""
             )
         ) is None:
             # should never happen, is used to keep the if's one level indentation

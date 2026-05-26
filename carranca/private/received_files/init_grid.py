@@ -53,9 +53,7 @@ def init_grid(for_user: int) -> Jinja_Template:
             ]
             users_list.insert(0, ("", ui_db_texts[("noneUser" if len(users_list) == 0 else "selectUser")], True))
             task_code += 1  # 6
-            ui_db_texts[UITextsKeys.Form.title] = ui_db_texts[UITextsKeys.Form.title + "Power"].format(
-                request_user.user_name
-            )
+            ui_db_texts[UITextsKeys.Form.title] = ui_db_texts[UITextsKeys.Form.title + "Power"].format(request_user.user_name)
             user_id = request_user.user_id
         else:  # ignore `for_user`
             task_code += 4  # 6

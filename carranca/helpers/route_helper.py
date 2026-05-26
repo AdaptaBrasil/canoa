@@ -17,13 +17,14 @@ from .py_helper import is_str_none_or_empty, camel_to_snake, clean_text
 from .html_helper import URL_PATH_SEP
 
 # 2/3. This line produce the sidekick-incident
+from .html_helper import icon_url
 from .jinja_helper import Template_File_Full_Name
 from .types_helper import Jinja_Rendered, Flask_Response
 from ..common.UIDBTexts import UIDBTexts
 from ..config.BaseConfig import BaseConfig
+from ..common.UITextsKeys import UITextsKeys
 from .ui_db_texts_manager import init_ui_db_texts
 from ..common.app_error_assistant import ModuleErrorCode
-
 
 ResponseData = Tuple[Jinja_Rendered, bool, UIDBTexts]
 
@@ -160,6 +161,9 @@ def _get_response_data(ui_db_section: str, tmpl_file_name: str, folder: str) -> 
         # db_lookup = cast(DB_Lookup, db_retrieve_text)
         # ui_db_texts = UIDBTexts(db_texts, sidekick.debugging, ui_dt_format, db_lookup)
         ui_db_texts = init_ui_db_texts(ui_db_section)
+        # mgd 2026.05
+        if icon_fn := ui_db_texts.get_str(UITextsKeys.Form.icon_file):
+            ui_db_texts[UITextsKeys.Form.icon_url] = icon_url(icon_fn)
 
     except Exception as e:
         # Re-raise exception to allow it to propagate

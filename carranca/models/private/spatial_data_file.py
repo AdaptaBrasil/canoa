@@ -12,7 +12,7 @@ Equipe da Canoa -- 2026
 
 
 from datetime import datetime
-from sqlalchemy import Text, String, Integer, DateTime, BigInteger, Computed
+from sqlalchemy import Text, Float, String, Integer, DateTime, BigInteger, Computed
 from sqlalchemy.orm import Mapped, mapped_column
 from ..base import CanoaBaseTable
 
@@ -25,8 +25,13 @@ class SpatialDataFile(CanoaBaseTable):
 
     spd_name: Mapped[str] = mapped_column(String(60), nullable=False, unique=True)
     spd_name_lower: Mapped[str] = mapped_column(String(60), Computed(""))
-    spd_description: Mapped[str] = mapped_column(String(120), nullable=True)
     spd_title: Mapped[str] = mapped_column(String(80), nullable=True)
+    spd_description: Mapped[str] = mapped_column(String(120), nullable=True)
+
+    layer_name: Mapped[str] = mapped_column(String(60), nullable=False)
+    layer_crs: Mapped[str] = mapped_column(String(12), nullable=True)
+    layer_health: Mapped[float] = mapped_column(Float, nullable=True)
+    features_count: Mapped[int] = mapped_column(Integer, nullable=True)
 
     field_id: Mapped[str] = mapped_column(String(12), nullable=False)
     field_name: Mapped[str | None] = mapped_column(String(12), nullable=True)

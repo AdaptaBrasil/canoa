@@ -19,7 +19,6 @@ from .types_helper import Jinja_Rendered, Jinja_Template, Template_File_Full_Nam
 from ..common.app_constants import APP_JINJA_TEMPLATE_BUG_FOUND, APP_JINJA_TEMPLATE_BUG_MSG_TECH
 from ..common.app_error_assistant import AppStumbled, ModuleErrorCode
 
-
 _jinja_bug_found = APP_JINJA_TEMPLATE_BUG_FOUND
 _jinja_bug_tech_info = APP_JINJA_TEMPLATE_BUG_MSG_TECH
 
@@ -118,10 +117,7 @@ def _detect_html_errors(rendered_html: str, file_name: str) -> Tuple[list[str], 
     parser.parse(rendered_html)
     y = len(parser.errors) + 2
     output_error = ""
-    msg_error = [
-        f"[{(y + line):02}, {col:03}] {code}, (tag: {ctx.get('name', 'N/A')})"
-        for (line, col), code, ctx in parser.errors
-    ]
+    msg_error = [f"[{(y + line):02}, {col:03}] {code}, (tag: {ctx.get('name', 'N/A')})" for (line, col), code, ctx in parser.errors]
     if parser.errors and file_name:
         try:
             # TODO inject in body
@@ -201,9 +197,7 @@ def process_template(tmpl_ffn: Jinja_Template, **context: Any) -> Jinja_Rendered
             # HTML Errors
             bugged_file = sidekick.config.DEBUG_TEMPLATES_HTML_BUGS_FILE_NAME
             id = current_user.id if is_anyone_logged() else 0
-            bugged_fullname = (
-                path.join(".", sidekick.config.LOG_FILE_FOLDER, bugged_file).format(id) if bugged_file else ""
-            )
+            bugged_fullname = path.join(".", sidekick.config.LOG_FILE_FOLDER, bugged_file).format(id) if bugged_file else ""
             errors, output_error = _detect_html_errors(jHtml_to_display, bugged_fullname)
             if errors:
                 if output_error:
@@ -231,7 +225,8 @@ def process_template(tmpl_ffn: Jinja_Template, **context: Any) -> Jinja_Rendered
         elif not validated and (msg_error := _validate_jinja(jHtml, tmpl_file_name)):
             raise Exception(msg_error) from e
         else:
-            _, msg_error = ui_db_texts.set_msg_error("templateProcessingException", (tmpl_file_name, str(e)))
+            error_code = getattr(e, "error_code", "?")
+            _, msg_error = ui_db_texts.set_msg_error("templateProcessingException", (tmpl_file_name, error_code))
             _, tmpl_ffn, ui_texts = ups_handler(ModuleErrorCode.TEMPLATE_BUG.value, msg_error, e)
             jHtml_to_display = render_template(tmpl_ffn, **ui_texts)
 

@@ -35,7 +35,7 @@ local_texts = {
     Locale.br: {
         default_section: {
             UITextsKeys.Form.title: "Situação Inesperada",
-            UITextsKeys.Form.date_format: "pt-br",
+            UITextsKeys.Form.user_locale: "pt-br",
             UITextsKeys.Form.btn_close: "Entendi",
             UITextsKeys.Form.icon_file: "ups_handler.svg",
         },
@@ -49,7 +49,7 @@ local_texts = {
     Locale.en: {
         default_section: {
             UITextsKeys.Form.title: "Unexpected Situation",
-            UITextsKeys.Form.date_format: "en",
+            UITextsKeys.Form.user_locale: "en",
             UITextsKeys.Form.btn_close: "OK",
             UITextsKeys.Form.icon_file: "ups_handler.svg",
         },
@@ -64,7 +64,7 @@ local_texts = {
         default_section: {
             # cSpell:ignore posible conectarse datos  inténtelo nuevo Situación
             UITextsKeys.Form.title: "Situación Inesperada",
-            UITextsKeys.Form.date_format: "es",
+            UITextsKeys.Form.user_locale: "es",
             UITextsKeys.Form.btn_close: "Entendí",
             UITextsKeys.Form.icon_file: "ups_handler.svg",
         },

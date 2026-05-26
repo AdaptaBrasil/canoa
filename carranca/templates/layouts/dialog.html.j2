@@ -38,6 +38,7 @@ mgd
 --------------------------------------- #}
 {# cSpell:ignore tabindex endfor elif dlgs beforeunload #}
 
+
 {% extends "./layouts/base.html.j2" %}
 
 {% set dlg_main_id= 'dlg-main-id'%}
@@ -97,6 +98,10 @@ Ensure this matches the expected dimensions for dialog icons.
                         <img id="{{dlg_icon_id}}" src="{{dlg_var_icon_url}}" alt="[!]&nbsp;" height="{{dlg_icon_size}}" width="{{dlg_icon_size}}">
                     </span>
                     {% endif %}
+
+                    {# {% if dlg_var_icon_fa %}
+                    <i class="fas fa-vector-square" style="color:#1A5692; font-size:{% if dlg_var_icon_url %};"></i>
+                    {% endif %} #}
                     <span inert>{{formTitle|default(app_name)}}</span>
                 </h5>
                 {% if dlg_close_btn_visible %}

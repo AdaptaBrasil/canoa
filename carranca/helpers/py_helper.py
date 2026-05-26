@@ -186,6 +186,13 @@ def is_str_none_or_empty(s: str | None) -> bool:
     return (s is None) or not isinstance(s, str) or (as_str_strip(s) == "")
 
 
+def IsEmpty(s: str) -> bool:
+    """
+    For the C# veterans out there:
+    """
+    return not bool(s)
+
+
 def is_list_none_or_empty(check: List) -> bool:
     """
     Returns True if the argument is None, not a List, or an empty List

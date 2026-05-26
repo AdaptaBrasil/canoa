@@ -224,7 +224,7 @@ def get_section(section_name: str) -> DB_Texts:
         # if len(items) == 0:
         #     raise KeyError(f"UI texts section '{section_name}' for [{table_cache.locale}] not found or has no items.")
         items.update({UITextsKeys.Section.name: section_name})
-        items.update({UITextsKeys.Form.date_format: table_cache.locale})
+        items.update({UITextsKeys.Form.user_locale: table_cache.locale})
         items.update({UITextsKeys.Form.faStyle: sidekick.config.APP_UI_FONT_AWESOME_STYLE})
 
         _glb = {key: value for key, value in current_app.jinja_env.globals.items() if isinstance(value, str)}

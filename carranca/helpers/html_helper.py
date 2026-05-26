@@ -26,7 +26,7 @@ def url_join(*args: str) -> str:
     return URL_PATH_SEP.join(arg.strip(URL_PATH_SEP) for arg in args)
 
 
-def icon_url(folder: str, file_name: str) -> str:
+def icon_url(file_name: str) -> str:
     """
     Constructs the full URL path for an icon image to be used in an HTML img tag.
 
@@ -38,7 +38,7 @@ def icon_url(folder: str, file_name: str) -> str:
         str: The full URL path of the icon image.
     """
     base_path = os.path.basename(cast(str, current_app.static_folder))
-    icon_url = URL_PATH_SEP + url_join(base_path, folder, file_name)
+    icon_url = URL_PATH_SEP + url_join(base_path, "icons", file_name)
     return icon_url
 
 

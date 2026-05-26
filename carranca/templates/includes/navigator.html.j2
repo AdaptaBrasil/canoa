@@ -79,10 +79,10 @@ cSpell:ignore spatialdata
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{private_route('sep_grid', code=ui_act_shw) }}"
+                            <button class="dropdown-item" href="{{private_route('sep_grid', code=ui_act_shw) }}" disabled
                                 title="Abre grid para editar ou remover setores estrat&eacute;gicos">
                                 Edi&ccedil;&atilde;o e Remo&ccedil;&atilde;o
-                            </a>
+                            </button>
                         </li>
                         <li>
                             <a class="dropdown-item" href="{{private_route('sep_mgmt')}}"
@@ -128,10 +128,10 @@ cSpell:ignore spatialdata
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{private_route('scm_export', code=ui_act_shw)}}"
+                            <button class="dropdown-item" href="{{private_route('scm_export', code=ui_act_shw)}}" disabled
                                 title="Abre a pagina para exportar os esquemas ao BD">
                                 Exporta&ccedil;&atilde;o
-                            </a>
+                            </button>
                         </li>
                     </ul>
                     {# ╘════════ schema menu ════════╛ #}
@@ -149,12 +149,6 @@ cSpell:ignore spatialdata
                             <a class="dropdown-item" href="{{private_route('spd_edit', code=ui_act_add) }}"
                                 title="Abre formul&aacute;rio para adicionar dados espaciais">
                                 Inser&ccedil;&atilde;o
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{private_route('spd_edit', code='410') }}"
-                                title="Abre formul&aacute;rio para adicionar dados espaciais">
-                                Edi&ccedil;&atilde;o Teste
                             </a>
                         </li>
                         <li>

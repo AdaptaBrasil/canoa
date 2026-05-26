@@ -33,46 +33,46 @@ mgd
 {% block dlg_blc_footer_buttons %}
 {% if users_list %}
 <div class="col-auto">
-    <select id="{{sel_id}}" class="form-control form-select">
+    <select id="{{ sel_id }}" class="form-control form-select">
         {% for code, name, enabled in users_list %}
-        <option value="{{code}}" {% if not enabled %}disabled{% endif %}>{{name | safe}}</option>
+        <option value="{{ code }}" {% if not enabled %}disabled{% endif %}>{{ name | safe }}</option>
         {% endfor %}
     </select>
 </div>
 {% endif %}
 {# TODO: from "includes/_action_forms_and_btns.html.j2" import btn_click #}
 <div class="col-auto">
-    <button type="button" onclick="download('{{dnld_F}}')" id="btn{{dnld_F}}" class="form-control frm-main-btn" disabled>
-        {{btnDwnLoadFile}}
+    <button type="button" onclick="download('{{ dnld_F }}')" id="btn{{ dnld_F }}" class="form-control frm-main-btn" disabled>
+        {{ btnDwnLoadFile }}
     </button>
 </div>
 <div class="col-auto">
-    <button type="button" onclick="download('{{dnld_R}}')" id="btn{{dnld_R}}" class="form-control frm-main-btn" disabled>
-        {{btnDwnLoadRprt}}
+    <button type="button" onclick="download('{{ dnld_R }}')" id="btn{{ dnld_R }}" class="form-control frm-main-btn" disabled>
+        {{ btnDwnLoadRprt }}
     </button>
 </div>
 {% endblock dlg_blc_footer_buttons %}
 
 {% block dlg_blc_javascript %}
 <script id="data_to_json">
-    const usersList = {{ users_list | default ([]) | tojson}}
-    const gridRows = ({{ files_rec | default ([]) | tojson}}).map(item => ({ ...item, when: item.when ? new Date(item.when) : null }));
-    const listUser = {{ users_list | default ([]) | tojson}}
-    const colMeta = {{ grid_col_meta | tojson}};
+    const usersList = {{ users_list | default ([]) | tojson }}
+    const gridRows = ({{ files_rec | default ([]) | tojson }}).map(item => ({ ...item, when: item.when ? new Date(item.when) : null }));
+    const listUser = {{ users_list | default ([]) | tojson }}
+    const colMeta = {{ grid_col_meta | tojson }};
 </script>
 <script id="file_download">
-    const gridID = '{{grid_id}}';
-    const dateFormat = '{{userDateFormat}}';
-    const itemNone = '{{itemNone}}';
-    const isPower = {{ user_is_power | tojson}};
-    const btnFile = document.getElementById('btn{{dnld_F}}');
-    const btnRprt = document.getElementById('btn{{dnld_R}}');
+    const gridID = '{{ grid_id }}';
+    const userLocale = '{{ userLocale }}';
+    const itemNone = '{{ itemNone }}';
+    const isPower = {{ user_is_power | tojson }};
+    const btnFile = document.getElementById('btn{{ dnld_F }}');
+    const btnRprt = document.getElementById('btn{{ dnld_R }}');
     let activeID = null;
 
     const download = (t) => {
         if (activeID) {
-            document.getElementById('{{form_cargo_id}}').value = `${activeID}${t}`;;
-            document.getElementById('{{dlg_post_form_id}}').submit();
+            document.getElementById('{{ form_cargo_id }}').value = `${activeID}${t}`;;
+            document.getElementById('{{ dlg_post_form_id }}').submit();
         }
     };
 
@@ -84,7 +84,7 @@ mgd
         btnRprt.disabled = !row.data.report_found;
     };
 
-    document.getElementById('{{sel_id}}').addEventListener('change',
+    document.getElementById('{{ sel_id }}').addEventListener('change',
         (e) => {
             setSleepVeil();
             setTimeout(() => {
@@ -95,7 +95,7 @@ mgd
     );
 </script>
 
-<script src='{{static_route("js/received_files_mgmt.js")}}'></script>
+<script src='{{ static_route("js/received_files_mgmt.js")}}'></script>
 {% endblock dlg_blc_javascript %}
 
 {# ╒════════════════ Dialog Forms ════════════════╕ #}

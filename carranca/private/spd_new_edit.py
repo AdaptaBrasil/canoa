@@ -22,14 +22,15 @@ FileData: TypeAlias = Dict[str, Any]
 from .wtforms import SpdEdit, SpdInsert, apply_lang_to_string_fields
 from .spd_analysis import spd_file_format, spd_info_from_file, spd_info_from_bytes
 from ..common.UIDBTexts import UIDBTexts
-from ..helpers.py_helper import is_str_none_or_empty
+from ..helpers.py_helper import is_str_none_or_empty, IsEmpty
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.file_helper import folder_must_exist, get_unique_filename
+from ..helpers.html_helper import icon_url
 from ..helpers.types_helper import Route_Response, Choice, Choices
 from ..helpers.jinja_helper import process_template
 from ..helpers.uiact_helper import UiActResponseProxy
 from ..common.app_context_vars import sidekick
-from ..helpers.ui_db_texts_manager import set_msg_fatal
+from ..helpers.ui_db_texts_manager import set_msg_fatal, UITextsKeys
 from ..models.private.spatial_data_file import SpatialDataFile
 from ..helpers.route_helper import (
     get_private_response_data,
@@ -45,7 +46,7 @@ from ..common.app_context_vars import app_user
 from ..common.app_error_assistant import ModuleErrorCode, JumpOut
 
 # This name is the standard; until the user informs it, use is.
-ID_ATTRIBUTE_NAME = "id"
+DEFAULT_ID_ATTRIBUTE_NAME = "id"
 
 
 def _get_choices(file_data: FileData) -> List[Tuple[str, str]]:
@@ -56,17 +57,16 @@ def _get_choices(file_data: FileData) -> List[Tuple[str, str]]:
     return choices
 
 
-def _register_file(
-    spd_row: SpatialDataFile, file_obj: Any, layer: int = 0, analyze_bytes: bool = False
-) -> Tuple[str, int]:
+def _do_spd_insert(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, file_obj: Any, layer: int = 0, analyze_bytes: bool = False) -> bool:
     def __get_extension(fn: str) -> str:
         _, fnx = path.splitext(fn)
         return fnx
 
-    error_msg = "registerError"
-    error = 20
+    error_msg = ""
+    error = 0
     ffn = ""
     bytes_format = ""
+
     try:
         if not file_obj:
             error += 1
@@ -80,16 +80,16 @@ def _register_file(
             error += 4
         elif not folder_must_exist(sidekick.config.LOCAL_SPATIAL_DATA_PATH):
             error += 5
-        elif SpatialDataFile.get_rows(
-            [SpatialDataFile.id.key], SpatialDataFile.spd_name_lower == func.lower(spd_row.spd_name)
-        ):
+        elif len(content := file_obj.read()) < 512:
             error += 6
-        elif len(content := file_obj.read()) < 1024:
-            error += 7
         elif (file_crc32 := crc32(content)) < 0:
-            error += 8
+            error += 7
         # elif SpatialDataFile.get_rows([SpatialDataFile.id.key], SpatialDataFile.file_crc32 == file_crc32):
-        #     error += 9
+        #     _, error_msg = ui_db_texts.set_msg_error("errorFileExists", ofn)
+        #     error += 8
+        elif SpatialDataFile.get_rows([SpatialDataFile.id.key], SpatialDataFile.spd_name_lower == func.lower(spd_row.spd_name)):
+            _, error_msg = ui_db_texts.set_msg_error("errorNameExists", spd_row.spd_name)
+            error += 9
         elif analyze_bytes and not (bytes_format := spd_file_format(fex)):
             # raise Exception(f"Unknown Spatial Data File extension <code>{fex}</code>.")
             error += 10
@@ -103,6 +103,7 @@ def _register_file(
             spd_row.registered_at = func.now()
             ffn = path.join(sidekick.config.LOCAL_SPATIAL_DATA_PATH, ufn)
 
+            # After writing the data, if an error occurs raise exception to delete file
             error += 1
             with open(ffn, "wb") as file:
                 spd_row.file_size = file.write(content)
@@ -110,9 +111,10 @@ def _register_file(
             # Assume this fields exists in the layer.
             # Request there values, add 'id' because is typical.
             # Confirmation of the 'real' fields, will be done in spd_edit
-            values_from_fields: List[str] = [ID_ATTRIBUTE_NAME]
+            values_from_fields: List[str] = [DEFAULT_ID_ATTRIBUTE_NAME]
             form_field_list = SpdInsert().field_list
 
+            error += 1
             for f in form_field_list:
                 f_name = getattr(spd_row, f.name)
                 if f_name and not f_name in values_from_fields:
@@ -126,20 +128,33 @@ def _register_file(
                 spd_data = spd_info_from_file(ffn, layer, values_from_fields)
 
             if s := spd_data["error"]:
-                raise Exception(s)
+                _, error_msg = ui_db_texts.set_msg_error("errorMetadataRead", (ofn, s))
+                raise Exception(error_msg)
 
+            layer_data = spd_data["layer"]
+            spd_row.layer_name = layer_data["name"]
+            spd_row.layer_crs = layer_data["crs"]
+            spd_row.layer_health = spd_data["health_score"]["score_pct"]
+            spd_row.features_count = spd_data["features"]["count"]
             spd_row.file_data = json.dumps(spd_data)
 
-            # Now, we have the real list: sanitize attributes
+            # Now, we have the real fields list: sanitize attributes
+            fields_removed: List[str] = []
             candidates = [k for k, _ in _get_choices(spd_data)]
             for f in form_field_list:
                 if getattr(spd_row, f.name) not in candidates:
                     setattr(spd_row, f.name, None)
+                    fields_removed.append(f.name)
 
             error = 0
+            if fields_removed:
+                ui_db_texts.set_msg_success("spdInsertSuccessFields", str(fields_removed))
+            else:
+                ui_db_texts.set_msg_success("spdInsertSuccess")
 
     except Exception as e:
-        sidekick.display.error(f"Error registering SpatialDataFile, step {error}: [{e}].")
+        _, error_msg = ui_db_texts.set_msg_error("spdInsertException", (error, e))
+        sidekick.display.error(error_msg)
         # Clean up: delete the file if it was created
         try:
             if path.exists(ffn):
@@ -147,44 +162,44 @@ def _register_file(
         except Exception as cleanup_e:
             sidekick.display.error(f"Failed to delete file {ffn}: [{cleanup_e}].")
 
-    return error_msg, error
+    if error > 0 and IsEmpty(error_msg):
+        _, error_msg = ui_db_texts.set_msg_error("spdInsertError", error)
+
+    return IsEmpty(error_msg)
 
 
-def _prepare_edition(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, spd_edit_form: SpdEdit) -> Tuple[str, int]:
-    error_msg = "editionError"
-    error = 20
+def _prepare_for_edition(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, spd_edit_form: SpdEdit):
+    "Prepares the data row for a ui edition form"
+    error_msg = ""
+    error = 30
     ffn = ""
-    args = None
     # Unique File Name
     ufn = spd_row.file_name
     file_data: FileData = {}
     try:
         if not folder_must_exist(sidekick.config.LOCAL_SPATIAL_DATA_PATH):
-            error += 5
+            error += 1
         elif not (ffn := path.join(sidekick.config.LOCAL_SPATIAL_DATA_PATH, ufn)):
-            error += 6
+            error += 2
         elif not path.exists(ffn):
-            # error_msg = "spdEditFileNotFound"
-            # args = (ufn,)
-            error += 6
+            _, error_msg = ui_db_texts.set_msg_error("spdEditFileNotFound", ffn)
+            error += 3
         elif not (jsn_data := spd_row.file_data):
-            error += 7
+            error += 4
         elif not (file_data := json.loads(jsn_data)):
-            error += 8
+            error += 5
         else:
-            error += 11
-
+            error += 6
             choices_with_id = _get_choices(file_data)
             candidates = [k for k, _ in choices_with_id]
             # Only 1 list can have 'id':
             # Remove 'id' from the list, add manually for the first list/select (field_id)
             error += 1
             _id = spd_row.field_id
-
             if _id in candidates:
                 pass
-            elif ID_ATTRIBUTE_NAME in candidates:
-                _id = ID_ATTRIBUTE_NAME
+            elif DEFAULT_ID_ATTRIBUTE_NAME in candidates:
+                _id = DEFAULT_ID_ATTRIBUTE_NAME
             else:  # use the first item or "" if no items
                 if len(candidates) == 0:
                     candidates.append("")
@@ -192,7 +207,7 @@ def _prepare_edition(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, spd_edit_
 
             # prepare select options/choices
             # 1) Get the (id, _) tuple that will be the first item of the spd_edit_form.field_list[0]
-            error += 1  # 33
+            error += 1
             first_item: Choice = next(((k, lbl) for k, lbl in choices_with_id if k == _id), (_id, _id))
 
             # 2) Remove (id, _) item from the list, this is 'choices' for the spd_edit_form.field_list[1], [2]...
@@ -210,28 +225,20 @@ def _prepare_edition(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, spd_edit_
                 first_item = cast(Choice, ("", ""))
 
             error += 1
-            ui_db_texts["layerNameWithLabel"] = ui_db_texts["layerNameTemplate"].format(
-                file_data["layer"]["name"], len(candidates)
-            )  # id
-
+            ui_db_texts["layerNameWithLabel"] = ui_db_texts["layerNameTemplate"].format(file_data["layer"]["name"], len(candidates))  # id
             error = 0
 
+        if error > 0 and IsEmpty(error_msg):
+            _, error_msg = ui_db_texts.set_msg_error("spdEditError", error)
+
     except Exception as e:
-        sidekick.display.error(f"Error registering SpatialDataFile, step {error}: [{e}].")
-        # AQUI ERROR
-        # Clean up: delete the file if it was created
-        # TODO only if create (false)
-        # try:
-        #     if path.exists(ffn):
-        #         os.remove(ffn)
-        # except Exception as cleanup_e:
-        #     sidekick.display.error(f"Failed to delete file {ffn}: [{cleanup_e}].")
+        _, error_msg = ui_db_texts.set_msg_error("spdEditException", (e, error))
 
-    return error_msg, error, args
+    return IsEmpty(error_msg)
 
 
-def do_spd_edit(data: str) -> Route_Response:
-    """Spatial DataEdit & Insert Form"""
+def spd_new_or_edit(data: str) -> Route_Response:
+    """Spatial DataEdit & Edit Form"""
 
     action, code, row_index = UiActResponseProxy().decode(data)
 
@@ -267,7 +274,7 @@ def do_spd_edit(data: str) -> Route_Response:
         task_code += 1  # 2
         ui_db_texts["insertMode"] = is_insert
         task_code += 1  # 3
-        ui_db_texts["formTitle"] = ui_db_texts[f"formTitle{'New' if is_insert else 'Edit'}"]
+        ui_db_texts[UITextsKeys.Form.title] = ui_db_texts[f"formTitle{'New' if is_insert else 'Edit'}"]
         task_code += 1  # 4
 
         task_code += 1  # 5
@@ -284,9 +291,7 @@ def do_spd_edit(data: str) -> Route_Response:
         elif is_get and is_edit:
             task_code += 2  # 7
             fform.process(formdata=None, obj=spd_row)
-            error_msg, error_code = _prepare_edition(ui_db_texts, spd_row, cast(SpdEdit, fform))
-            if error_code > 0:
-                ui_db_texts.set_msg_error(error_msg, error_code)
+            _prepare_for_edition(ui_db_texts, spd_row, cast(SpdEdit, fform))
         else:  # is_post
             task_code += 3  # 8
 
@@ -317,15 +322,10 @@ def do_spd_edit(data: str) -> Route_Response:
 
                 file_obj = request.files[(cast(SpdInsert, fform)).upload_file.name] if len(request.files) > 0 else None
                 task_code += 1  # 10
-                error_msg, error_code = _register_file(spd_row, file_obj, True)
-                if error_code == 0:
+                if _do_spd_insert(ui_db_texts, spd_row, file_obj, 0, True):
+                    # Edit | review fields
                     fresh_row = cast(SpatialDataFile, SpatialDataFile.set_row(spd_row, True))
-                    error_msg, error_code = _prepare_edition(ui_db_texts, fresh_row, SpdEdit())
-
-                if error_code == 0:
-                    ui_db_texts.set_msg_success()
-                else:
-                    ui_db_texts.set_msg_error(error_msg, error_code)
+                    _prepare_for_edition(ui_db_texts, fresh_row, SpdEdit())
 
             elif form_modified:
                 task_code += 2  # 11

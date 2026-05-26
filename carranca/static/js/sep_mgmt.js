@@ -89,7 +89,7 @@ const gridOptions = {
         {
             field: colMeta[5].n
             , headerName: colMeta[5].h
-            , valueFormatter: params => params.value ? params.value.toLocaleDateString(dateFormat) : ''
+            , valueFormatter: params => params.value ? params.value.toLocaleDateString(userLocale) : ''
             , flex: 2
         },
         {

@@ -17,7 +17,6 @@ from typing import Optional, List, Final
 from ..common.app_error_assistant import AppStumbled
 from .types_helper import JS_Constants
 
-
 # === Global js constants Keys for JsConstants Jinja Dictionary for j2 grid/form/security ====
 #
 #  Key name const
@@ -95,7 +94,7 @@ def js_ui_dictionary(col_meta_info_txt: str = "", col_names: List[str] = [], tas
             missing_keys = set(col_names) - col_meta_info_names
             # this is a error for the developer
             raise AppStumbled(
-                f"Invalid MetaInfo columns mapping: `{col_meta_info_txt}` <> [{', '.join(col_names)}]. Missing keys: {missing_keys}",
+                f"Invalid MetaInfo columns mapping: `{col_meta_info_txt}` &ne; [{', '.join(col_names)}]. Missing keys: {missing_keys}",
                 task_code,
             )
 

@@ -21,7 +21,7 @@ var respID;
 var itemNone;
 // Grid
 /** @type {string} */
-var dateFormat;
+var userLocale;
 /** @type {string} */
 var colIconUrl;
 /** @type {string} */

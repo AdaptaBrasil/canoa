@@ -29,9 +29,25 @@ const gridOptions = {
     }
     , rowData: gridRows
     , columnDefs: [
-        { field: colCode, hide: true },
-        { field: colMeta[1].n, headerName: colMeta[1].h, flex: 3 },
-        { field: colMeta[2].n, headerName: colMeta[2].h, flex: 3 },
+        { field: colCode, hide: true }, // id
+        { field: colMeta[1].n, headerName: colMeta[1].h, flex: 4 }, // Nome
+        { field: colMeta[2].n, headerName: colMeta[2].h, flex: 2 }, // Camada
+        { field: colMeta[3].n, headerName: colMeta[3].h, flex: 2 }, // src
+        { // qualidade
+            field: colMeta[4].n,
+            headerName: colMeta[4].h,
+            valueFormatter: p => `${Math.round(p.value)}%`,
+            cellStyle: { textAlign: 'right' },
+            flex: 2
+        },
+        { // features
+            field: colMeta[5].n,
+            headerName: colMeta[5].h,
+            valueFormatter: p => new Intl.NumberFormat(userLocale).format(p.value),
+            cellStyle: { textAlign: 'right' },
+            flex: 2
+        },
+        { field: colMeta[6].n, headerName: colMeta[6].h, flex: 3 }, // attributes
     ]
 }; // gridOptions
 

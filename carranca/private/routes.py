@@ -283,9 +283,9 @@ def spd_edit(code: str = "?"):
     if nobody_is_logged():
         return redirect_to(login_route())
     else:
-        from .spd_new_edit import do_spd_edit
+        from .spd_new_edit import spd_new_or_edit
 
-        return do_spd_edit(code)
+        return spd_new_or_edit(code)
 
 
 @login_required

@@ -99,8 +99,9 @@ class BaseConfig(Config):
     # https://docs.fontawesome.com/web/setup/get-started
     # 1. Check if style is available for the plan (free => fas/fa only)
     # 2. Name convention: fas = fa-solid, far = fa-regular, da-light, fa-thin
-    # 3. Fix canoa.css class color
-    APP_UI_FONT_AWESOME_STYLE: str = "fas"
+    # 3. fa-fw centers each icon inside an invisible, making all same width ;—)
+    # 4. In canoa.css class color
+    APP_UI_FONT_AWESOME_STYLE: str = "fas fa-fw"
     APP_UI_DATETIME_FORMAT = "%H:%M %d/%m/%Y"
 
     APP_LINUX_LOCALE = "pt_BR.UTF-8"

@@ -110,7 +110,7 @@ def ups_handler(
     # set the url for the icon IF a file name exists
     icon_file_name = ui_texts.get(UITextsKeys.Form.icon_file)
     if icon_file_name and not ui_texts.get(UITextsKeys.Form.icon_url):
-        ui_texts[UITextsKeys.Form.icon_url] = icon_url("icons", icon_file_name)
+        ui_texts[UITextsKeys.Form.icon_url] = icon_url(icon_file_name)
 
     # before logout
     sidekick.display.error(str(e))

@@ -78,9 +78,9 @@ class UiActResponse:
 
 class UiActResponseProxy:
     # Send response from UI
-    add = "!++"
-    null = "!~~"
-    show = "!##"
+    add = "!--"  # confuse the enemy
+    null = "!~~"  # wavy / null-ish
+    show = "!@@"  # 👀 big crazy eyes
 
     def has_data(self, data: str) -> bool:
         # action:code

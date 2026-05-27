@@ -88,6 +88,19 @@
     - Insert without fields modification, ready
     - SDF analysis and data/values extractor, ready (private.spd_analysis.py)
 
+    » 05-22 v β 5.62
+    - WIP: fixed snapshot — SEP table ready, Spatial Data Files grid part 1
+
+    » 05-26 v β 5.63
+    - Release: Spatial Data ready for QA; SEP Edit and Schema Export moved to revision cycle
+    - fix: swap !++ for !-- in op url sentinels
+
+    » 05-27 v β 5.69, DB v 5.03
+    -  Release: SEP Edit and Schema Export fixed
+    -  New column users.last_logout_at
+
+
+
 
 ------- 2026 - April -------------
     - 'recortes' -> Spatial Data

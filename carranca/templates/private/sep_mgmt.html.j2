@@ -68,6 +68,8 @@ Create a copy of user_list(or empty array), then add (itemNone)
     const respID = '{{ form_cargo_id }}';
     const btnGridSubmit = /** @type {HTMLInputElement} */(document.getElementById('{{dlg_post_btn_id}}'));
     const userLocale = '{{ userLocale  }}';
+    const initRow = {{ grid_init_row | default (0) }};
+    const cargo = { [cargoKeys.action]: '', [cargoKeys.row_index]: initRow, [cargoKeys.code]: '' };
 
 </script>
 <script src="{{static_route('js/sep_mgmt.js')}}"></script>

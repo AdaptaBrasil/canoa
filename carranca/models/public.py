@@ -17,6 +17,7 @@ from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import ColumnExpressionArgument
 from sqlalchemy import (
+    func,
     String,
     select,
     Column,
@@ -64,6 +65,7 @@ class User(SQLABaseTable, UserMixin):
     # OBSOLETE  2026.04.02
     # mgmt_sep_id = Column(Integer, unique=True)
     last_login_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    last_logout_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     # this columns names are confusing, they are for password recovery process, not for email confirmation
     # It should be renamed to "recover_pw_token" and "recover_pw_token_at"
     recover_email_token: Mapped[str | None] = mapped_column(String(100), nullable=True, unique=True)
@@ -101,7 +103,8 @@ class User(SQLABaseTable, UserMixin):
 
     @staticmethod
     def get_where_name_is(name: str) -> "User":
-        return User.get_where(username_lower=to_str(name).lower())
+        # return User.get_where(username_lower=to_str(name).lower())
+        return User.get_where(username_lower=func.lower(name))
 
     @staticmethod
     def get_where_email_is(email: str) -> "User":

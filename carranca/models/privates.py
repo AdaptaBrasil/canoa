@@ -306,6 +306,7 @@ class Sep(SQLABaseTable):
     id_schema = Column(Integer)
     id_spd = Column(Integer)  # FK to SPatial_Data_files
     users_id = Column("mgmt_users_id", Integer)
+    ui_order = Column(Integer)
     ins_by = Column(Integer)
     ins_at = Column(DateTime)
     edt_by = Column(Integer)

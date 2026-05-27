@@ -186,7 +186,7 @@ def is_str_none_or_empty(s: str | None) -> bool:
     return (s is None) or not isinstance(s, str) or (as_str_strip(s) == "")
 
 
-def IsEmpty(s: str) -> bool:
+def is_empty(s: str) -> bool:
     """
     For the C# veterans out there:
     """

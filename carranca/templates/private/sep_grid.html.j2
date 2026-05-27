@@ -54,10 +54,12 @@ mgd
     const initRow = {{ grid_init_row | default (0) }};
     const cargo = { [cargoKeys.action]: '', [cargoKeys.row_index]: initRow, [cargoKeys.code]: '' };
     const icon = /** @type {HTMLImageElement} */(document.getElementById('{{ dlg_icon_id }}'));
-</script>
 
-{% from "includes/_action_forms_and_btns.js.j2" import form_link_action %}
-{{ form_link_action(dlg_post_form_id, form_cargo_id) }}
+    {% from "includes/_action_forms_and_btns.js.j2" import form_link_action %}
+    {{ form_link_action(dlg_post_form_id, form_cargo_id) }}
+    
+</script>
+<script src="{{static_route('js/sep_grid.js')}}"></script>
 
 {% endblock grid_blc_javascript %}
 {# ╘══════════════ Grid JavaScript ══════════════╛ #}

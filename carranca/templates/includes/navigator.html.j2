@@ -12,7 +12,7 @@ TODO Selected menu class-> active
 
 cSpell:ignore unselectable labelledby haspopup noopener noreferrer onclick elif
 cSpell:ignore semi-words: formul estrat gicos sess tojson jinja nbsp endfor j_user inser
-cSpell:ignore &ç ã gico endere
+cSpell:ignore &ç  gico endere
 cSpell:ignore spatialdata
 --------------------------------------- #}
 <nav id="navbar-main" class="navbar fixed-top navbar-expand-sm shadow-sm px-2">
@@ -79,10 +79,10 @@ cSpell:ignore spatialdata
                             </a>
                         </li>
                         <li>
-                            <button class="dropdown-item" href="{{private_route('sep_grid', code=ui_act_shw) }}" disabled
+                            <a class="dropdown-item" href="{{private_route('sep_grid', code=ui_act_shw) }}"
                                 title="Abre grid para editar ou remover setores estrat&eacute;gicos">
                                 Edi&ccedil;&atilde;o e Remo&ccedil;&atilde;o
-                            </button>
+                            </a>
                         </li>
                         <li>
                             <a class="dropdown-item" href="{{private_route('sep_mgmt')}}"
@@ -123,15 +123,16 @@ cSpell:ignore spatialdata
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{private_route('scm_grid', code=ui_act_shw) }}" title="Abre grid para editar ou remover esquemas">
+                            <a class="dropdown-item" href="{{private_route('scm_grid', code=ui_act_shw) }}"
+                                title="Abre grid para editar ou remover esquemas">
                                 Edi&ccedil;&atilde;o e Remo&ccedil;&atilde;o
                             </a>
                         </li>
                         <li>
-                            <button class="dropdown-item" href="{{private_route('scm_export', code=ui_act_shw)}}" disabled
+                            <a class="dropdown-item" href="{{private_route('scm_export', code=ui_act_shw)}}"
                                 title="Abre a pagina para exportar os esquemas ao BD">
                                 Exporta&ccedil;&atilde;o
-                            </button>
+                            </a>
                         </li>
                     </ul>
                     {# ╘════════ schema menu ════════╛ #}
@@ -152,7 +153,8 @@ cSpell:ignore spatialdata
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{private_route('spd_grid', code=ui_act_shw) }}" title="Abre grid para editar dados espaciais">
+                            <a class="dropdown-item" href="{{private_route('spd_grid', code=ui_act_shw) }}"
+                                title="Abre grid para editar dados espaciais">
                                 Edi&ccedil;&atilde;o e Remo&ccedil;&atilde;o
                             </a>
                         </li>

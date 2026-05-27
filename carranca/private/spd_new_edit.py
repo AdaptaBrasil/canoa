@@ -22,7 +22,7 @@ FileData: TypeAlias = Dict[str, Any]
 from .wtforms import SpdEdit, SpdInsert, apply_lang_to_string_fields
 from .spd_analysis import spd_file_format, spd_info_from_file, spd_info_from_bytes
 from ..common.UIDBTexts import UIDBTexts
-from ..helpers.py_helper import is_str_none_or_empty, IsEmpty
+from ..helpers.py_helper import is_str_none_or_empty, is_empty
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.file_helper import folder_must_exist, get_unique_filename
 from ..helpers.html_helper import icon_url
@@ -162,34 +162,38 @@ def _do_spd_insert(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, file_obj: A
         except Exception as cleanup_e:
             sidekick.display.error(f"Failed to delete file {ffn}: [{cleanup_e}].")
 
-    if error > 0 and IsEmpty(error_msg):
+    if error > 0 and is_empty(error_msg):
         _, error_msg = ui_db_texts.set_msg_error("spdInsertError", error)
 
-    return IsEmpty(error_msg)
+    return is_empty(error_msg)
 
 
 def _prepare_for_edition(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, spd_edit_form: SpdEdit):
     "Prepares the data row for a ui edition form"
     error_msg = ""
     error = 30
-    ffn = ""
-    # Unique File Name
-    ufn = spd_row.file_name
     file_data: FileData = {}
-    try:
+
+    def __file_ready(ufn: str) -> int:
+        # Unique File Name
+        file_error = 0
+        ffn = ""
         if not folder_must_exist(sidekick.config.LOCAL_SPATIAL_DATA_PATH):
-            error += 1
+            file_error += 1
         elif not (ffn := path.join(sidekick.config.LOCAL_SPATIAL_DATA_PATH, ufn)):
-            error += 2
+            file_error += 2
         elif not path.exists(ffn):
-            _, error_msg = ui_db_texts.set_msg_error("spdEditFileNotFound", ffn)
-            error += 3
-        elif not (jsn_data := spd_row.file_data):
-            error += 4
+            file_error += 3
+
+        return file_error
+
+    try:
+        if not (jsn_data := spd_row.file_data):
+            error += 1
         elif not (file_data := json.loads(jsn_data)):
-            error += 5
+            error += 2
         else:
-            error += 6
+            error += 3
             choices_with_id = _get_choices(file_data)
             candidates = [k for k, _ in choices_with_id]
             # Only 1 list can have 'id':
@@ -226,15 +230,22 @@ def _prepare_for_edition(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, spd_e
 
             error += 1
             ui_db_texts["layerNameWithLabel"] = ui_db_texts["layerNameTemplate"].format(file_data["layer"]["name"], len(candidates))  # id
+
+            error += 1
+            ufn = spd_row.file_name
+            if (code := __file_ready(ufn)) > 0:
+                # This is a warning because the file is not needed any more. All relevant data is on the db
+                ui_db_texts.set_msg_warn("spdEditFileNotFound", (ufn, code))
+
             error = 0
 
-        if error > 0 and IsEmpty(error_msg):
+        if error > 0 and is_empty(error_msg):
             _, error_msg = ui_db_texts.set_msg_error("spdEditError", error)
 
     except Exception as e:
         _, error_msg = ui_db_texts.set_msg_error("spdEditException", (e, error))
 
-    return IsEmpty(error_msg)
+    return is_empty(error_msg)
 
 
 def spd_new_or_edit(data: str) -> Route_Response:

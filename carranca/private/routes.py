@@ -15,6 +15,7 @@ from __future__ import annotations
 from flask import Blueprint, request
 from typing import Tuple, Callable, cast
 from datetime import datetime
+from sqlalchemy import func
 from flask_login import login_required, current_user
 
 from ..models.public import get_user_where
@@ -354,7 +355,7 @@ def received_file_download():
 
 
 @login_required
-@bp_private.route("/log_me_out", methods=[MTD_GET, MTD_POST])
+@bp_private.route("/log_me_out", methods=MTD_BOTH)
 def log_me_out():
     """
     Finally the logout proc is a Canoa form (and not the js Confirm)
@@ -381,7 +382,6 @@ def email_addr_hub(uid: str = "") -> Route_Response:
         handles the registration email process
 
     """
-
     from ..models.public import User
 
     def __does_user_need_token(user_rec: User) -> bool:
@@ -457,6 +457,18 @@ def logout() -> Flask_Response:
     and the page is redirect to
     login
     """
+    from ..models.public import User, persist_user
+    from ..common.app_context_vars import sidekick
+
+    try:
+        if nobody_is_logged():
+            pass
+        elif user := User.get_where_name_is(current_user.username):
+            user.last_logout_at = func.now()
+            persist_user(user)
+    except Exception as e:
+        sidekick.display.error(f"Error registering user {current_user.id} logout: [{e}].")
+
     internal_logout()
     return redirect_to(login_route())
 

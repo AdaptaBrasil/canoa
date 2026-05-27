@@ -126,7 +126,7 @@ def db_fetch_rows(
         return _do_return_error(e, "Database connection error.")
 
     except Exception as e:
-        return _do_return_error(e, "Error executing SQL.")
+        return _do_return_error(e, "Error executing SQL")
 
 
 def retrieve_rows(query: str) -> Optional[Union[Any, Tuple]]:

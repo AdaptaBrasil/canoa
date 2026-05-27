@@ -58,7 +58,7 @@ def get_scm_data(task_code: int, config: ExportProcessConfig, for_export: bool) 
     if sep_id not in sep_cols:
         sep_cols.insert(0, sep_id)
 
-    task_code += 1
+    task_code += 1 # 808
     scm_rows = SchemaGrid.get_schemas(scm_cols, True)
     schema_list: List[Dict] = []
     sep_rows: List[Sep] = []
@@ -69,7 +69,7 @@ def get_scm_data(task_code: int, config: ExportProcessConfig, for_export: bool) 
         mgmt_list = {user.id: user.username for user in user_rows}
 
     get_icon = Sep.icon_file_name.name in sep_cols
-    task_code += 1
+    task_code += 1 # 809
     mgmt: Opt_Str = None
     scm_col_ign = [] if for_export else [scm_id]
     sep_col_ign = [] if for_export else [sep_id]

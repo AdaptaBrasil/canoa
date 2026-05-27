@@ -45,9 +45,14 @@
         ".env/Lib/site-packages"
     ],
     // === Environment and Interpreter Settings ===
-    // mgd per copitlot  2026.03.05 "python.defaultInterpreterPath": ".env\\Scripts\\python.exe",
+    // mgd per copilot  2026.03.05 "python.defaultInterpreterPath": ".env\\Scripts\\python.exe",
     "python.defaultInterpreterPath": "C:\\Program Files\\Python\\313\\python.exe",
     // mgd I need a couple of empty rules
     "css.lint.emptyRules": "ignore",
-    "python.REPL.enableREPLSmartSend": false
+    "python.REPL.enableREPLSmartSend": false,
+    // mgd per Claude, fix the annoyn Black formater {{ xx }} => { { xx } }
+    "[jinja-html]": {
+        "editor.defaultFormatter": null,
+        "editor.formatOnSave": false
+    },
 }

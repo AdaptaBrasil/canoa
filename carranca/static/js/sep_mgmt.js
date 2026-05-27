@@ -28,12 +28,19 @@ const icon = /** @type {HTMLImageElement} */(document.getElementById(iconID))
 //-------------
 // == Basic Grid
 const gridOptions = {
-    // rowSelection: { mode: 'singleRow', checkboxes: false },
+    // not compatible with designed ui rowSelection: { mode: 'singleRow', checkboxes: false },
     rowSelection: 'single',
     onGridReady: (params) => {
-        const api = params.api
-        const firstRowNode = api.getDisplayedRowAtIndex(0);
-        if (firstRowNode) { setTimeout(() => { firstRowNode.setSelected(true); }, 20); }
+        params.api.sizeColumnsToFit();
+        setTimeout(() => params.api.sizeColumnsToFit(), 100);
+        const row = cargo[cargoKeys.row_index] ?? 0
+        const firstRow = params.api.getDisplayedRowAtIndex(row);
+        if (firstRow) {
+            setTimeout(() => {
+                firstRow.setSelected(true);
+                setActiveRow(firstRow, firstRow.rowIndex);
+            }, 20);
+        }
         setTimeout(() => { api.setFocusedCell(0, colUserNew); }, 40);
     },
     onCellFocused: (event) => {

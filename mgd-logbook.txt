@@ -99,7 +99,8 @@
     -  Release: SEP Edit and Schema Export fixed
     -  New column users.last_logout_at
 
-
+    » 05-27 v β 5.70, DB v 5.03
+    - Release: Spatial Data, #48, #50
 
 
 ------- 2026 - April -------------

@@ -60,7 +60,7 @@ class BaseConfig(Config):
     """ App Identification
         ----------------------------
     """
-
+    # This lines went carranca\common\app_constants.py
     # APP_NAME = APP_NAME
     # APP_VERSION = APP_VERSION
     APP_ROOT = ""  #  f"/{APP_NAME.lower()}"
@@ -71,8 +71,11 @@ class BaseConfig(Config):
     # This is used for generating URLs outside the
     # context of a request
     APPLICATION_ROOT = APP_ROOT
-    SESSION_COOKIE_PATH = APP_ROOT
-    REMEMBER_COOKIE_PATH = APP_ROOT
+    # Use explicit root path for cookies so browsers send a single cookie
+    # Avoid empty APP_ROOT which can lead to duplicate cookies with different
+    # paths being set and sent back by the browser.
+    SESSION_COOKIE_PATH = "/"
+    REMEMBER_COOKIE_PATH = "/"
 
     # This is the final debug state of the app.
     #  See _get_debug_2 & Fuse

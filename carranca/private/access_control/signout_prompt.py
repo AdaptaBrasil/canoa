@@ -16,7 +16,7 @@ from ...common.app_error_assistant import ModuleErrorCode
 from ...helpers.ui_db_texts_manager import UITextsKeys, MSG_DEFAULT
 
 
-def log_me_out() -> Jinja_Rendered | None:
+def signout_prompt() -> Jinja_Rendered | None:
     if is_method_post():
         jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.USER_UI_LOGOUT)
         try:

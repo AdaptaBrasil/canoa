@@ -15,7 +15,7 @@ from ..helpers.py_helper import to_int
 from ..helpers.types_helper import Usual_Dict, Json_Text
 from ..common.app_error_assistant import AppStumbled
 
-DATA_SEPARATOR = "-"
+DATA_SEPARATOR = "_"
 
 
 class UiActResponseKeys:

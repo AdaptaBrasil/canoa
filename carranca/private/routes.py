@@ -12,11 +12,11 @@ mgd
 
 from __future__ import annotations
 
-from flask import Blueprint, request
+from flask import Blueprint, request, make_response
 from typing import Tuple, Callable, cast
 from datetime import datetime
 from sqlalchemy import func
-from flask_login import login_required, current_user
+from flask_login import current_user
 
 from ..models.public import get_user_where
 from ..helpers.py_helper import is_str_none_or_empty, to_str
@@ -36,7 +36,6 @@ from ..helpers.route_helper import (
     get_private_response_data,
     base_route_private,
     private_route,
-    is_method_post,
     is_method_get,
     login_route,
     redirect_to,
@@ -55,10 +54,19 @@ ROUTE_EMAIL_ADDR_HUB = "email_addr_hub"
 # === Test _ route ========================================
 @bp_private.route("/test_route")
 def test_route():
-    return "OK"
+    return "OK ;—"
 
 
 # === Private Routes =======================================
+@bp_private.before_request
+def set_no_cache():
+    """Prevent caching of private pages, so after logout, the user cannot return no navigator."""
+    response = make_response()
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+
 @bp_private.route("/home")
 def home():
     """
@@ -75,7 +83,6 @@ def home():
     return process_template(template, **ui_db_texts.data())
 
 
-@login_required
 @bp_private.route("/sep_mgmt", methods=MTD_BOTH)
 def sep_mgmt():
     """
@@ -97,9 +104,7 @@ def create_ups_jHtml(error: str, code: int = 0) -> Jinja_Rendered:
     return jHtml
 
 
-def uiact_response(
-    code: str,
-) -> Tuple[Jinja_Rendered, UiActResponse | None]:
+def uiact_response(code: str) -> Tuple[Jinja_Rendered, UiActResponse | None]:
     """
     This func decodes a uiact response
     """
@@ -151,7 +156,6 @@ def grid_route(code: str, editor: str, show_grid: Callable[[], Jinja_Rendered]) 
 
     if nobody_is_logged():
         return redirect_to(login_route())
-
     jHtmlOrResp: Route_Response = NEW_FLASK_RESPONSE
     jHtmlError, uiact_rsp = uiact_response(code)
 
@@ -179,19 +183,19 @@ def grid_route(code: str, editor: str, show_grid: Callable[[], Jinja_Rendered]) 
     return jHtmlOrResp
 
 
-@login_required
 @bp_private.route("/sep_grid/<code>", methods=MTD_BOTH)
 def sep_grid(code: str = "?"):
     """
     Through this route, the admin user can CRUD seps and display a grid
     """
+    if nobody_is_logged():
+        return redirect_to(login_route())
+    else:
+        from .sep_grid import get_sep_grid
 
-    from .sep_grid import get_sep_grid
-
-    return grid_route(code, "sep_edit", get_sep_grid)
+        return grid_route(code, "sep_edit", get_sep_grid)
 
 
-@login_required
 @bp_private.route("/sep_edit/<code>", methods=MTD_BOTH)
 def sep_edit(code: str = "?"):
     """
@@ -206,7 +210,6 @@ def sep_edit(code: str = "?"):
     return do_sep_edit(code)
 
 
-@login_required
 @bp_private.route("/scm_export/<code>", methods=MTD_BOTH)
 def scm_export(code: str = "?"):
     """
@@ -237,18 +240,19 @@ def scm_export(code: str = "?"):
     return redirect_to(login_route())
 
 
-@login_required
 @bp_private.route("/scm_grid/<code>", methods=MTD_BOTH)
 def scm_grid(code: str = "?"):
     """
     Through this route, the user can edit and insert a Schema
     """
-    from .scm_grid import get_scm_grid
+    if nobody_is_logged():
+        return redirect_to(login_route())
+    else:
+        from .scm_grid import get_scm_grid
 
-    return grid_route(code, "scm_edit", get_scm_grid)
+        return grid_route(code, "scm_edit", get_scm_grid)
 
 
-@login_required
 @bp_private.route("/scm_edit/<code>", methods=MTD_BOTH)
 def scm_edit(code: str = "?"):
     """
@@ -263,18 +267,19 @@ def scm_edit(code: str = "?"):
         return do_scm_edit(code)
 
 
-@login_required
 @bp_private.route("/spd_grid/<code>", methods=MTD_BOTH)
 def spd_grid(code: str = "?"):
     """
     Through this route, the user can edit and insert a Schema
     """
-    from .spd_grid import get_spd_grid
+    if nobody_is_logged():
+        return redirect_to(login_route())
+    else:
+        from .spd_grid import get_spd_grid
 
-    return grid_route(code, "spd_edit", get_spd_grid)
+        return grid_route(code, "spd_edit", get_spd_grid)
 
 
-@login_required
 @bp_private.route("/spd_edit/<code>", methods=MTD_BOTH)
 def spd_edit(code: str = "?"):
     """
@@ -289,7 +294,6 @@ def spd_edit(code: str = "?"):
         return spd_new_or_edit(code)
 
 
-@login_required
 @bp_private.route("/receive_file", methods=MTD_BOTH)
 def receive_file():
     """
@@ -313,7 +317,6 @@ def receive_file():
         return tmpl
 
 
-@login_required
 @bp_private.route("/received_files_mgmt", methods=MTD_BOTH)
 def received_files_mgmt():
     """
@@ -338,7 +341,6 @@ def received_files_mgmt():
         return jHtml
 
 
-@login_required
 @bp_private.route("/received_file_download", methods=[MTD_POST])
 def received_file_download():
     """
@@ -354,23 +356,26 @@ def received_file_download():
         return rsp
 
 
-@login_required
-@bp_private.route("/log_me_out", methods=MTD_BOTH)
-def log_me_out():
+@bp_private.route("/end_session", methods=MTD_BOTH)
+@bp_private.route("/session_end", methods=MTD_BOTH)
+def session_end():
     """
     Finally the logout proc is a Canoa form (and not the js Confirm)
-    he has send for validation or it's generated report.
+    This actually sign out, and register on thd DB (users.)
     """
     if is_method_get() or nobody_is_logged():
         return redirect_to(login_route())
-    else:
-        from ..private.access_control.logout_user import log_me_out
 
-        jHtml = log_me_out()
-        return jHtml
+    from .access_control.signout_prompt import signout_prompt
+
+    jHtml = signout_prompt()
+    if jHtml is None:
+        internal_logout()
+        return redirect_to(login_route())
+
+    return jHtml
 
 
-@login_required
 @bp_private.route(f"/{ROUTE_EMAIL_ADDR_HUB}", defaults={"uid": ""}, methods=MTD_BOTH)
 @bp_private.route(f"/{ROUTE_EMAIL_ADDR_HUB}/<uid>", methods=MTD_BOTH)
 def email_addr_hub(uid: str = "") -> Route_Response:
@@ -431,7 +436,6 @@ def email_addr_hub(uid: str = "") -> Route_Response:
     return jHtml
 
 
-@login_required
 @bp_private.route("/password_change", methods=MTD_BOTH)
 def password_change():
     """
@@ -467,7 +471,7 @@ def logout() -> Flask_Response:
             user.last_logout_at = func.now()
             persist_user(user)
     except Exception as e:
-        sidekick.display.error(f"Error registering user {current_user.id} logout: [{e}].")
+        sidekick.display.error(f"Error logging out user {current_user.id} logout: [{e}].")
 
     internal_logout()
     return redirect_to(login_route())

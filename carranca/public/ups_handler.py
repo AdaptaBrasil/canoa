@@ -119,7 +119,6 @@ def ups_handler(
     # TODO: send email
     if logout and is_anyone_logged():
         internal_logout()
-
     ups_tmpl_file_name = get_tmpl_full_file_name("ups_page", "home")
 
     return {}, ups_tmpl_file_name, ui_texts

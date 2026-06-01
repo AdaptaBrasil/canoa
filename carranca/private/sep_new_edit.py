@@ -195,20 +195,12 @@ def do_sep_edit(data: str) -> str:
             )
         ) is None:
             # should never happen, is used to keep the if's one level indentation
-            AppStumbled(f"Schema with id {id_schema} was not found.", task_code + 3)
+            raise AppStumbled(f"Schema with id {id_schema} was not found.", task_code + 3)
         elif sep_modified and Sep.full_name_exists(id_schema, sep_name):
             raise Exception(set_msg_error("sepNameRepeated", ui_db_texts, scm_name, sep_name))
         elif (icon_data := get_icon_data(sep_row, icon_data)).error_code > 0:
             # msg {ext} [{hint}-{code}]
-            raise Exception(
-                set_msg_error(
-                    "sepInvalidFormat",
-                    ui_db_texts,
-                    SepIconMaker.ext,
-                    icon_data.error_hint,
-                    icon_data.error_code,
-                )
-            )
+            raise Exception(set_msg_error("sepInvalidFormat", ui_db_texts, SepIconMaker.ext, icon_data.error_hint, icon_data.error_code))
 
         elif not (form_modified or icon_data.ready):
             set_msg_warn("dataUnmodified", ui_db_texts)

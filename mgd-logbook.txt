@@ -74,6 +74,17 @@
       if too many params {{ action_form__submit_cargo(dlg_post_form_id, private_route('sep_mgmt'), 'post', "onsubmit='return doGridCargo()'")}}
     todo:
 
+## Delete >
+Get-ChildItem -Recurse -Filter __pycache__ | Remove-Item -Recurse -Force
+Get-ChildItem -Recurse -Filter *.pyc | Remove-Item -Force
+## compile module
+python -m py_compile carranca/private/routes.py
+
+
+------- 2026 - June --------------
+
+    encode UiActResponseKeys
+
 
 ------- 2026 - May ---------------
     » 05-05 v β 5.60
@@ -101,6 +112,9 @@
 
     » 05-27 v β 5.70, DB v 5.03
     - Release: Spatial Data, #48, #50
+
+
+
 
 
 ------- 2026 - April -------------

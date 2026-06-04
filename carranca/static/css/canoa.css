@@ -15,11 +15,8 @@
     --canoa-dlg-header-bg: #b36920;
     --canoa-dlg-header-color: white;
     --canoa-dlg-body-bg: #fbf3ea;
-    /* ~30 lighter the the button */
-    /* not working :-( --canoa-form-icon-btn-bg: color-mix(in srgb, var(--bg-color) 70%, white); */
-    /* 130 % --canoa-form-icon-btn-bg: #195591; */
     /* brightness(160%) */
-    --canoa-form-icon-btn-bg: #2069B3;
+    --canoa-form-pw-eye-btn-bg: #2069B3;
     --canoa-form-text-color: #814c17;
     --canoa-form-link-color: #814c17;
     --canoa-form-footer-bg: #f8e9d9;
@@ -141,9 +138,15 @@ body {
     padding: 0rem !important;
 }
 
-/* dialog ids */
 #dlg-var-svg-id {
+    /* dialog ids */
     fill: var(--canoa-form-button-bg, red);
+}
+
+.dlg-fa-icon {
+    /* dialog font awesome icon, see FormIcons.py */
+    /* color:#1A5692; */
+    color: var(--canoa-form-label-color);
 }
 
 /* ============================================
@@ -261,7 +264,8 @@ body {
 /* ============================================
  *  carranca\templates\layouts\form.html
  * ============================================ */
-.fas {
+/* .fas { */
+.frm-input-icon {
     /* font awesome solid 'icon' */
     color: var(--canoa-form-icon-color);
 }
@@ -335,19 +339,19 @@ body {
 .frm-pw-eye-btn {
     /* similar to frm-main-btn:hover */
     transition: filter 0.3s ease;
-    background-color: var(--canoa-form-icon-btn-bg);
+    background-color: var(--canoa-form-pw-eye-btn-bg);
 }
 
 .frm-pw-eye-btn:hover {
     filter: brightness(110%);
-    background-color: var(--canoa-form-icon-btn-bg);
+    background-color: var(--canoa-form-pw-eye-btn-bg);
 }
 
 /* override bs that has +!.btn-check */
 .frm-pw-eye-btn:not(.btn-check):active {
     filter: brightness(120%);
     /* override bs */
-    background-color: var(--canoa-form-icon-btn-bg);
+    background-color: var(--canoa-form-pw-eye-btn-bg);
 }
 
 .frm-pw-eye-icon {

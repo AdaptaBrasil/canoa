@@ -57,7 +57,7 @@ DB_Texts_Args: TypeAlias = Tuple | Dict | Primitive | None  #
 
 
 Usual_Dict: TypeAlias = Dict[str, Any]
-JS_Constants: TypeAlias = Dict[str, str]
+JS_Constants: TypeAlias = Dict[str, str | bool]
 
 Sep_Mgmt_Return: TypeAlias = Tuple[str, str, int]
 

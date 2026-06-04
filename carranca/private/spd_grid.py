@@ -12,6 +12,7 @@ mgd
 from typing import List
 
 from .wtforms import SpdEdit
+from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import class_to_dict
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.uiact_helper import UiActResponseKeys
@@ -40,9 +41,9 @@ def get_spd_grid() -> Jinja_Rendered:
         tmpl_ffn, is_get, ui_db_texts = get_private_response_data("spdGrid")
 
         task_code += 1  # 2
-        if not is_get:
-            msg = f"{set_msg_fatal(HTTP_StatusCode.CODE_405.value, ui_db_texts)} (Requested: ${MTD_POST}.)"
-            raise AppStumbled(msg, task_code, False, True)
+        # if not is_get:
+        #     msg = f"{set_msg_fatal(HTTP_StatusCode.CODE_405.value, ui_db_texts)} (Requested: ${MTD_POST}.)"
+        #     raise AppStumbled(msg, task_code, False, True)
 
         task_code += 1  # 3
 
@@ -63,8 +64,9 @@ def get_spd_grid() -> Jinja_Rendered:
             tmpl_ffn,
             spd_rows=spd_rows,
             cargo_keys=class_to_dict(UiActResponseKeys),
+            fi=fi.with_icon("spd"),
             **ui_db_texts.data(),
-            **js_ui_dict,
+            **js_ui_dict
         )
 
     except Exception as e:

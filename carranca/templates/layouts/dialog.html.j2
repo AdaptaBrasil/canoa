@@ -97,11 +97,9 @@ Ensure this matches the expected dimensions for dialog icons.
                     <span class="{%- if 'sep_icons' in dlg_var_icon_url %}dlg-sep_icon-back{% else %}dlg-icon-back{% endif %}">
                         <img id="{{dlg_icon_id}}" src="{{dlg_var_icon_url}}" alt="[!]&nbsp;" height="{{dlg_icon_size}}" width="{{dlg_icon_size}}">
                     </span>
+                    {% elif fi and fi.icon %}
+                    <i class="fas fa-fw dlg-fa-icon {{fi.icon}}" style="font-size: {{ dlg_icon_size }};"></i>
                     {% endif %}
-
-                    {# {% if dlg_var_icon_fa %}
-                    <i class="fas fa-vector-square" style="color:#1A5692; font-size:{% if dlg_var_icon_url %};"></i>
-                    {% endif %} #}
                     <span inert>{{formTitle|default(app_name)}}</span>
                 </h5>
                 {% if dlg_close_btn_visible %}

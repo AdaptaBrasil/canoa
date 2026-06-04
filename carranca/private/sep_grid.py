@@ -22,7 +22,7 @@ from ..helpers.db_records.DBRecords import DBRecords
 from ..models.private.mgmt_seps_user import MgmtSepsUser
 
 
-def get_sep_grid() -> Jinja_Rendered:
+def get_sep_grid(allow_post: bool = False) -> Jinja_Rendered:
 
     def _sep_data_fetch(col_names: List[str]) -> DBRecords:
         sep_usr_rows = MgmtSepsUser.get_seps_usr(col_names)

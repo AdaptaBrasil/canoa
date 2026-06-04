@@ -9,6 +9,7 @@ mgd
 
 from typing import List
 
+from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import class_to_dict
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.uiact_helper import UiActResponseKeys
@@ -52,6 +53,7 @@ def get_scm_grid() -> Jinja_Rendered:
             tmpl_ffn,
             scm_data=scm_data.to_list(),
             cargo_keys=class_to_dict(UiActResponseKeys),
+            fi=fi.with_icon("scm"),
             **ui_db_texts.data(),
             **js_ui_dict,
         )

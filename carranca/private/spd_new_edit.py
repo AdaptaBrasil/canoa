@@ -22,6 +22,7 @@ FileData: TypeAlias = Dict[str, Any]
 from .wtforms import SpdEdit, SpdInsert, apply_lang_to_string_fields
 from .spd_analysis import spd_file_format, spd_info_from_file, spd_info_from_bytes
 from ..common.UIDBTexts import UIDBTexts
+from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import is_str_none_or_empty, is_empty
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.file_helper import folder_must_exist, get_unique_filename
@@ -350,7 +351,7 @@ def spd_new_or_edit(data: str) -> Route_Response:
                 return redirect_to(home_route())
 
         task_code += 12  # ?
-        jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.data(), **form_on_close)
+        jHtml = process_template(tmpl_ffn, form=fform, fi=fi.with_icon("spd"), **ui_db_texts.data(), **form_on_close)
 
     except JumpOut:
         # in an extreme case, tmpl_ffn can be empty

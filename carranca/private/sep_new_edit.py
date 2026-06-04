@@ -23,6 +23,7 @@ from .SepIconMaker import SepIconMaker
 from .sep_icon_data import get_icon_data, IconData
 from .sep_form_data import get_sep_data, SepEditMode, NoManager, SCHEMA_LIST_KEY
 from ..private.UserSep import UserSep
+from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import is_str_none_or_empty, to_int
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.user_helper import get_batch_code
@@ -264,13 +265,7 @@ def do_sep_edit(data: str) -> str:
                 item = f"sepFailed{'Edit' if editMode == SepEditMode.SIMPLE_EDIT else 'New'}"
                 set_msg_fatal(item, ui_db_texts, sep_fullname, task_code)
 
-        jHtml = process_template(
-            tmpl_ffn,
-            form=fform,
-            **ui_db_texts.data(),
-            **ui_select_lists,
-            **form_on_close,
-        )
+        jHtml = process_template(tmpl_ffn, form=fform, fi=fi.with_icon("sep"), **ui_db_texts.data(), **ui_select_lists, **form_on_close)
 
     except JumpOut:
         jHtml = process_template(tmpl_ffn, **ui_db_texts.data())

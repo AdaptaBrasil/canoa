@@ -13,13 +13,15 @@ from typing import TYPE_CHECKING, List, Tuple
 from werkzeug.utils import secure_filename
 
 
+from .wtforms import ReceiveFileForm
 from ..common.Display import Display
+from ..common.UIDBTexts import UIDBTexts
+from ..config.FormIcons import FormIcons as fi
 from ..public.ups_handler import ups_handler
 from ..common.app_context_vars import sidekick, app_user
 from ..common.app_error_assistant import ModuleErrorCode
 from ..config.ValidateProcessConfig import ValidateProcessConfig
 
-from .wtforms import ReceiveFileForm
 
 from ..helpers.py_helper import now, is_str_none_or_empty
 from ..helpers.file_helper import folder_must_exist
@@ -57,7 +59,7 @@ def _do_sep_placeholderOption(fullname: str) -> "UserSep":
 def receive_file() -> Jinja_Template:
 
     # utils
-    def _get_template(error_code: int) -> Jinja_Rendered:
+    def _get_template(ui_db_texts: UIDBTexts, error_code: int) -> Jinja_Rendered:
         seps: "UserSepList" = []
         ui_db_texts[UITextsKeys.Msg.tech] = ""
         ui_db_texts[UITextsKeys.Msg.info] = ""
@@ -72,10 +74,10 @@ def receive_file() -> Jinja_Template:
 
         ui_db_texts[UITextsKeys.Form.icon_url] = seps[0].icon_url if len(seps) > 0 else ""
         seps_list: List[Usual_Dict] = [{"code": sep.code, "fullname": sep.fullname, "icon_url": sep.icon_url} for sep in seps]
-        tmpl = process_template(tmpl_ffn, form=fform, seps=seps_list, **ui_db_texts.data(), **js_ui_dictionary())
+        tmpl = process_template(tmpl_ffn, form=fform, seps=seps_list, fi=fi.with_icon(), **ui_db_texts.data(), **js_ui_dictionary())
         return tmpl
 
-    def _log_issue(msg_type: Display.Kind, error_code: int, msg_id: str, task_code: int, msg_arg: str = "") -> int:
+    def _log_issue(ui_db_texts: UIDBTexts, msg_type: Display.Kind, error_code: int, msg_id: str, task_code: int, msg_arg: str = "") -> int:
         local_error = ModuleErrorCode.RECEIVE_FILE_ADMIT.value + task_code
         show_code = f"{local_error}" if error_code == 0 else f"{error_code}:{task_code}"
 
@@ -90,14 +92,14 @@ def receive_file() -> Jinja_Template:
         sidekick.display.type(msg_type, msg_arg)
         return local_error
 
-    jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.LEGACY_STYLE)
+    jHtml, is_get, ui_texts, task_code = init_response_vars(ModuleErrorCode.LEGACY_STYLE)
     fform = ReceiveFileForm()
 
     try:
-        tmpl_ffn, is_get, ui_db_texts = get_private_response_data("receiveFile")
+        tmpl_ffn, is_get, ui_texts = get_private_response_data("receiveFile")
 
         if is_get:
-            return _get_template(0)
+            return _get_template(ui_texts, 0)
 
         received_at = now()
         # Find out what was kind of data was sent: an uploaded file or an URL (download)
@@ -120,17 +122,17 @@ def receive_file() -> Jinja_Template:
         # Basic check, both, none or bad url
         sep_data = next((sep for sep in app_user.seps if sep.code == sep_code), None)
         if sep_data is None:
-            _log_issue(Display.Kind.WARN, 0, "receiveFileAdmit_bad_sep", task_code + 1, sep_code)  # 7
-            return _get_template(0)
+            _log_issue(ui_texts, Display.Kind.WARN, 0, "receiveFileAdmit_bad_sep", task_code + 1, sep_code)  # 7
+            return _get_template(ui_texts, 0)
         elif has_file and has_url:
-            _log_issue(Display.Kind.WARN, 0, "receiveFileAdmit_both", task_code + 2)  # 8
-            return _get_template(0)
+            _log_issue(ui_texts, Display.Kind.WARN, 0, "receiveFileAdmit_both", task_code + 2)  # 8
+            return _get_template(ui_texts, 0)
         elif not (has_file or has_url):
-            _log_issue(Display.Kind.WARN, 0, "receiveFileAdmit_none", task_code + 3)  # 9
-            return _get_template(0)
+            _log_issue(ui_texts, Display.Kind.WARN, 0, "receiveFileAdmit_none", task_code + 3)  # 9
+            return _get_template(ui_texts, 0)
         elif has_url and is_gd_url_valid(url_str) > 0:
-            _log_issue(Display.Kind.WARN, 0, "receiveFileAdmit_bad_url", task_code + 4)  # 10
-            return _get_template(0)
+            _log_issue(ui_texts, Display.Kind.WARN, 0, "receiveFileAdmit_bad_url", task_code + 4)  # 10
+            return _get_template(ui_texts, 0)
 
         # Instantiate Process Data helper
         task_code = 13
@@ -156,8 +158,8 @@ def receive_file() -> Jinja_Template:
             # TODO check file_obj. file_obj.mimetype file_obj.content_length
         elif not folder_must_exist(pd.path.working_folder):
             task_code += 2  # 16
-            error_code = _log_issue(Display.Kind.ERROR, 0, RECEIVE_FILE_DEFAULT_ERROR, task_code)
-            return _get_template(error_code)
+            error_code = _log_issue(ui_texts, Display.Kind.ERROR, 0, RECEIVE_FILE_DEFAULT_ERROR, task_code)
+            return _get_template(ui_texts, error_code)
         else:
             task_code += 3  # 17
             # {0} Placeholder for the actual file name.
@@ -177,12 +179,12 @@ def receive_file() -> Jinja_Template:
                 sidekick.display.error(f"Download error code {download_code}.")
                 fn = filename if filename else "<ainda sem nome>"
                 task_code += 2  # 19
-                error_code = _log_issue(Display.Kind.ERROR, 0, "receiveFileAdmit_bad_dl", task_code, fn)
-                return _get_template(error_code)
+                error_code = _log_issue(ui_texts, Display.Kind.ERROR, 0, "receiveFileAdmit_bad_dl", task_code, fn)
+                return _get_template(ui_texts, error_code)
 
         pd.received_file_name = secure_filename(pd.received_original_name)
         task_code = 20  # 20
-        ve = ui_db_texts["validExtensions"]
+        ve = ui_texts["validExtensions"]
         valid_extensions = ".zip" if is_str_none_or_empty(ve) else ve.lower().split(",")
 
         task_code += 1  # 21
@@ -192,18 +194,18 @@ def receive_file() -> Jinja_Template:
         error_code, msg_id, _ = process(app_user, sep_data, file_data, pd, received_at, valid_extensions)
 
         if error_code == 0:
-            log_msg = set_msg_success("uploadFileSuccess", ui_db_texts, pd.user_receipt, app_user.email)
+            log_msg = set_msg_success("uploadFileSuccess", ui_texts, pd.user_receipt, app_user.email)
             sidekick.display.debug(log_msg)
         else:
-            _log_issue(Display.Kind.FATAL, error_code, msg_id, task_code, "")
+            _log_issue(ui_texts, Display.Kind.FATAL, error_code, msg_id, task_code, "")
 
-        jHtml = _get_template(error_code)
+        jHtml = _get_template(ui_texts, error_code)
     except Exception as e:
-        error_code = _log_issue(Display.Kind.FATAL, task_code + 1, "", True)
+        error_code = _log_issue(ui_texts, Display.Kind.FATAL, task_code + 1, "", True)
         sidekick.display.fatal(f"{RECEIVE_FILE_DEFAULT_ERROR}: Code {error_code}, Message: {e}.")
-        msg = set_msg_fatal("receiveFileException", ui_db_texts, task_code)
-        _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)
-        jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
+        msg = set_msg_fatal("receiveFileException", ui_texts, task_code)
+        _, tmpl_ffn, ui_texts = ups_handler(task_code, msg, e)
+        jHtml = process_template(tmpl_ffn, **ui_texts)
 
     return jHtml
 

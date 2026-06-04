@@ -18,7 +18,7 @@ class UITextsKeys:
         title = "pageTitle"
 
     class Form:  # & dialog
-        faStyle = "faStyle"  # Font Awesome Style
+        # faStyle = "faStyle"  # OBSOLETE Font Awesome Style
         title = "formTitle"
         icon_file = "iconFile"  # only the icon's name
         icon_url = "iconFileUrl"  # url of an png/svg icon dlg_var_icon_url = iconFileUrl, dlg-var-icon-id

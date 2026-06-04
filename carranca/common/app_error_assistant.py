@@ -113,7 +113,7 @@ class ModuleErrorCode(IntEnum):
     RECEIVE_FILE_PROCESS = 270
     RECEIVE_FILE_EXCEPTION = 100  # this is added, as an exception, process.py
 
-    NEXT_MODULE_ERROR = 400
+    RECEIVED_FILES_MGMT = 300
 
     SEP_EDIT = 500
     SEP_MGMT = 550
@@ -130,9 +130,10 @@ class ModuleErrorCode(IntEnum):
     EMAIL_VERIFY = 860
 
     SPD_EDIT = 900
-    SPD_GRID = 950
+    SPD_GRID = 940
+    SPD_DOWNLOAD = 980
 
-    RECEIVED_FILES_MGMT = 700
+
 
 
 class HTTP_StatusCode(StrEnum):

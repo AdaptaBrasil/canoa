@@ -7,7 +7,7 @@ mgd 2025.10.29 -- 2026.03.20
 
 # cSpell: ignore formdata FlaskForm timestamping
 
-
+from ...config.FormIcons import FormIcons as fi
 from ...public.ups_handler import get_ups_jHtml
 from ...helpers.jinja_helper import Jinja_Rendered, process_template
 from ...helpers.route_helper import get_account_response_data, init_response_vars, private_route, is_method_post
@@ -27,7 +27,7 @@ def signout_prompt() -> Jinja_Rendered | None:
             ui_db_texts.set_value(UITextsKeys.Form.post_route, private_route("logout"))
             ui_db_texts.display_msg_only = True
             task_code += 1
-            jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
+            jHtml = process_template(tmpl_ffn, fi=fi.with_icon("signout"), **ui_db_texts.data())
 
         except Exception as e:
             jHtml = get_ups_jHtml(MSG_DEFAULT, ui_db_texts, task_code, e)

@@ -77,6 +77,7 @@ def download_rec() -> Response:
                 uploaded_name = change_file_ext(uploaded_name, report_ext)
 
             if path.isfile(download_file_name):
+                # TODO mimetype
                 file_response = send_file(download_file_name, as_attachment=True, download_name=uploaded_name)
                 http_status_code = HTTPStatus.OK
             else:  # deleted just now :-(

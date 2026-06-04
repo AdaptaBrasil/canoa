@@ -75,7 +75,7 @@ class CanoaBase(DeclarativeBase):
     @classmethod
     def set_row(cls: Type[TModel], row: TModel, return_fresh_row: bool = False) -> TModel | None:
         """
-        insert ort updates a table record
+        insert or updates a table record
         """
         db_session: Session
         operation = "inserting" if row.id is None else "updating"

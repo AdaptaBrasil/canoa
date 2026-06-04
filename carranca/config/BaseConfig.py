@@ -98,13 +98,6 @@ class BaseConfig(Config):
     # (see table ui_texts, UIDbTexts.py and carranca.py>global_ui_texts_cache: dict)
     # 0= no cache; -1 < 0 infinite; n > 0 = _n_ minutes
     APP_UI_DB_TEXTS_CACHE_LIFETIME_MIN = 0
-    # https://docs.fontawesome.com/web/style/style-cheatsheet
-    # https://docs.fontawesome.com/web/setup/get-started
-    # 1. Check if style is available for the plan (free => fas/fa only)
-    # 2. Name convention: fas = fa-solid, far = fa-regular, da-light, fa-thin
-    # 3. fa-fw centers each icon inside an invisible, making all same width ;—)
-    # 4. In canoa.css class color
-    APP_UI_FONT_AWESOME_STYLE: str = "fas fa-fw"
     APP_UI_DATETIME_FORMAT = "%H:%M %d/%m/%Y"
 
     APP_LINUX_LOCALE = "pt_BR.UTF-8"
@@ -163,7 +156,7 @@ class BaseConfig(Config):
     TESTING: TrueInDebug = None  # <- True if APP_PROPAGATE_DEBUG else False
     DEBUG_TEMPLATES: TrueInDebug = None  # <- True if APP_PROPAGATE_DEBUG else False
     DEBUG_RENDERED_TEMPLATES: TrueInDebug = None  # <- True if APP_PROPAGATE_DEBUG else False
-    DEBUG_TEMPLATES_HTML_BUGS_FILE_NAME = "last-file-with-bugs-{0}.html"  # {user_id}
+    DEBUG_TEMPLATES_HTML_BUGS_FILE_NAME = "last-file-with-bugs-usr_{0}.html"  # {user_id}
     # this does'nt work (spend a day to find out), is SERVER_NAME: SERVER_ADDRESS = ""
     # https://flask.palletsprojects.com/en/latest/config/#SERVER_NAME
     # Inform the application what host and port it is bound to (NO Scheme).

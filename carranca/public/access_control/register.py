@@ -13,8 +13,8 @@ from flask import request
 
 from ..wtforms import RegisterForm
 from ...models.public import User, persist_user
+from ...config.FormIcons import FormIcons as fi
 from ...helpers.pw_helper import internal_logout, is_anyone_logged
-from ...common.UITextsKeys import UITextsKeys
 from ...public.ups_handler import get_ups_jHtml
 from ...helpers.jinja_helper import process_template
 from ...common.app_context_vars import sidekick
@@ -61,7 +61,7 @@ def register():
             ui_db_texts.set_msg_success("welcome")
             # todo welcome e-mail with Token for email confirmation and login after confirmation
 
-        jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.data())
+        jHtml = process_template(tmpl_ffn, form=fform, fi=fi.with_icon("register"), **ui_db_texts.data())
 
     except Exception as e:
         jHtml = get_ups_jHtml("registerException", ui_db_texts, task_code, e)

@@ -12,6 +12,7 @@ from sqlalchemy import func  # func.now() == db-server time
 
 from .wtforms import ScmEdit
 from ..models.privates import Schema
+from ..config.FormIcons import FormIcons as fi
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.jinja_helper import process_template
 from ..helpers.uiact_helper import UiActResponseProxy
@@ -127,7 +128,7 @@ def do_scm_edit(data: str) -> str:
                 return redirect_to(home_route())
 
         task_code += 12  # ?
-        jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.data(), **form_on_close)
+        jHtml = process_template(tmpl_ffn, form=fform, fi=fi.with_icon("scm"), **ui_db_texts.data(), **form_on_close)
 
     except JumpOut:
         # in an extreme case, tmpl_ffn can be empty

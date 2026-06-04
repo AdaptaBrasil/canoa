@@ -13,6 +13,7 @@ from flask_login import current_user
 from ..wtforms import ChangePassword
 from ...models.public import get_user_where
 from ...models.public import persist_user
+from ...config.FormIcons import FormIcons as fi
 from ...helpers.py_helper import is_str_none_or_empty
 from ...helpers.pw_helper import internal_logout, hash_password, verify_password
 from ...public.ups_handler import get_ups_jHtml
@@ -74,7 +75,7 @@ def password_change() -> Jinja_Rendered | Flask_Response:
             task_code += 1  # 9
             internal_logout()
 
-        jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.data())
+        jHtml = process_template(tmpl_ffn, form=fform, fi=fi.with_icon("password_change"), **ui_db_texts.data())
     except Exception as e:
         jHtml = get_ups_jHtml("msgException", ui_db_texts, task_code, e)
 

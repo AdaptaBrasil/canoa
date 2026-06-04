@@ -9,6 +9,7 @@ mgd
 # cSpell:ignore wtforms passwordreset
 from datetime import datetime
 from ...models.public import persist_user, get_user_where
+from ...config.FormIcons import FormIcons as fi
 from ...private.wtforms import ChangePassword
 from ...public.ups_handler import get_ups_jHtml
 from ...helpers.pw_helper import hash_password
@@ -59,7 +60,7 @@ def password_reset(token):
             persist_user(record_to_update, task_code)
             ui_db_texts.set_msg_success()
 
-        jHtml = process_template(jHtml, form=fform, **ui_db_texts.data())
+        jHtml = process_template(jHtml, form=fform, fi=fi.with_icon("password_change"), **ui_db_texts.data())
     except Exception as e:
         jHtml = get_ups_jHtml("msgException", ui_db_texts, task_code, e)
 

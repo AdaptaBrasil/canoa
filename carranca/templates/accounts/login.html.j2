@@ -21,7 +21,7 @@ mgd
 <div class="form-group">
     <label class="frm-label" inert for="{{form.username.name}}">{{ userLabel }}</label>
     <div class="input-group">
-        <span class="input-group-text"><i class="{{ faStyle }} fa-user"></i></span>
+        <span class="input-group-text"><i class="{{ fi.style }} {{ fi.user }}"></i></span>
         {{ form.username() }}
     </div>
 </div>
@@ -30,7 +30,7 @@ mgd
 <!--{ Password  -->
 <div class="form-group mt-2">
     {% from "./includes/_password_field.html.j2" import password_field_input %}
-    {{ password_field_input(form.password, faStyle, passwordLabel, passwordShow) }}
+    {{ password_field_input(form.password, fi, passwordLabel, passwordShow) }}
 </div>
 <!-- Password }-->
 

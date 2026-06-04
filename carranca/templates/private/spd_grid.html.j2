@@ -27,6 +27,11 @@ mgd
     {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
     {{ btn_action(dlg_post_form_id, grdBtnDelete, cargo_keys.delete) }}
 </div>
+<div class="col-auto">
+    {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
+    {{ btn_action(dlg_post_form_id, grdBtnDownload, cargo_keys.download) }}
+</div>
+
 {% endblock grid_blc_footer %}
 {# ╘═══════════════ Grid Footer ═════════════════╛ #}
 
@@ -62,5 +67,15 @@ mgd
 <script src="{{static_route('js/spd_grid.js')}}"></script>
 {% endblock grid_blc_javascript %}
 {# ╘══════════════ Grid JavaScript ══════════════╛ #}
+
+
+{# ╒════════════════ Dialog Forms ════════════════╕ #}
+{% block dlg_blc_forms %}
+
+{# {% from "includes/_action_forms_and_btns.html.j2" import action_form__post_cargo %}
+{{ action_form__post_cargo(dlg_post_form_id, private_route('received_file_download'), dlg_data_wait_process, extra='target="_blank"') }} #}
+
+{% endblock %}
+{# ╘═════════════════ Dialog Forms ════════════════╛ #}
 
 {# eof #}

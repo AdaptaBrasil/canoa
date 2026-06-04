@@ -13,7 +13,7 @@ mgd
 from __future__ import annotations
 
 from flask import Blueprint, request, make_response
-from typing import Tuple, Callable, cast
+from typing import TypeAlias, Callable, Tuple, cast
 from datetime import datetime
 from sqlalchemy import func
 from flask_login import current_user
@@ -45,6 +45,8 @@ from ..helpers.route_helper import (
     MTD_POST,
     MTD_BOTH,
 )
+
+Call_Args: TypeAlias = Callable[[str | None], Jinja_Rendered]
 
 # === module variables ====================================
 bp_private = Blueprint(bp_name(base_route_private), base_route_private, url_prefix="")
@@ -148,7 +150,7 @@ def uiact_response(code: str) -> Tuple[Jinja_Rendered, UiActResponse | None]:
     return jHtml, uiact_rsp
 
 
-def grid_route(code: str, editor: str, show_grid: Callable[[], Jinja_Rendered]) -> Route_Response:
+def grid_route(code: str, editor_name: str, download: Call_Args, show_grid: Call_Args) -> Route_Response:
     """
     This func routes calls from a grid or to a grid. 8—|
     see sep_grid & scm_grid
@@ -166,7 +168,7 @@ def grid_route(code: str, editor: str, show_grid: Callable[[], Jinja_Rendered]) 
     elif uiact_rsp:
 
         def _goto(item_code: str) -> Flask_Response:
-            url = private_route(editor, code=item_code)
+            url = private_route(editor_name, code=item_code)
             return redirect_to(url)
 
         match uiact_rsp.action:
@@ -175,6 +177,10 @@ def grid_route(code: str, editor: str, show_grid: Callable[[], Jinja_Rendered]) 
             case UiActResponseKeys.edit:
                 data = uiact_rsp.encode()
                 jHtmlOrResp = _goto(data)
+            case UiActResponseKeys.download:
+                jHtmlOrResp = download(uiact_rsp.code)
+                # jHtmlOrResp = show_grid()
+                pass
             case UiActResponseKeys.delete:
                 jHtmlOrResp = create_ups_jHtml("The `delete` procedure is under development.")
             case _:
@@ -193,7 +199,7 @@ def sep_grid(code: str = "?"):
     else:
         from .sep_grid import get_sep_grid
 
-        return grid_route(code, "sep_edit", get_sep_grid)
+        return grid_route(code, "sep_edit", "", get_sep_grid)
 
 
 @bp_private.route("/sep_edit/<code>", methods=MTD_BOTH)
@@ -250,7 +256,7 @@ def scm_grid(code: str = "?"):
     else:
         from .scm_grid import get_scm_grid
 
-        return grid_route(code, "scm_edit", get_scm_grid)
+        return grid_route(code, "scm_edit", "", get_scm_grid)
 
 
 @bp_private.route("/scm_edit/<code>", methods=MTD_BOTH)
@@ -276,8 +282,9 @@ def spd_grid(code: str = "?"):
         return redirect_to(login_route())
     else:
         from .spd_grid import get_spd_grid
+        from .spd_download import download_rec
 
-        return grid_route(code, "spd_edit", get_spd_grid)
+        return grid_route(code, "spd_edit", download_rec, get_spd_grid)
 
 
 @bp_private.route("/spd_edit/<code>", methods=MTD_BOTH)

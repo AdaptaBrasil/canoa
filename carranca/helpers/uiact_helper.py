@@ -32,6 +32,7 @@ class UiActResponseKeys:
     delete = "D"
     save = "S"
     export = "X"
+    download = "W"
 
 
 class UiActResponse:

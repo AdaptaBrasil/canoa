@@ -83,8 +83,16 @@ python -m py_compile carranca/private/routes.py
 
 ------- 2026 - June --------------
 
-    encode UiActResponseKeys
+    » 04-06 β 5.61
+    - spd user files download
+    - Form Icons ini & revision
+    - removed APP_UI_FONT_AWESOME_STYLE => FormIcons.style
 
+    »
+    - remove wait icon when spd download
+    - send spd id to validate
+
+        encode UiActResponseKeys
 
 ------- 2026 - May ---------------
     » 05-05 v β 5.60

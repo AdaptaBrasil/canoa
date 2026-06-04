@@ -14,6 +14,7 @@ from flask_login import login_user, logout_user
 
 from ..wtforms import LoginForm
 from ...models.public import User, persist_user
+from ...config.FormIcons import FormIcons as fi
 from ...helpers.py_helper import is_str_none_or_empty, now_as_iso
 from ...helpers.pw_helper import internal_logout, is_anyone_logged, verify_password
 from ...private.RolesAbbr import RolesAbbr
@@ -107,7 +108,7 @@ def do_login():
                 ui_db_texts.set_value("display_footer", "False")
                 ui_db_texts.display_msg_only = True
 
-        jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.data())
+        jHtml = process_template(tmpl_ffn, form=fform, fi=fi.with_icon("login"), **ui_db_texts.data())
 
     except Exception as e:
         jHtml = get_ups_jHtml("loginException", ui_db_texts, task_code, e)

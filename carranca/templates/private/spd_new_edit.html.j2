@@ -21,7 +21,7 @@ mgd
     </label>
     <div class="input-group">
         <span class="input-group-text">
-            <i class="{{ faStyle }} fa-location-dot" aria-hidden="true"></i>
+            <i class="{{ fi.style }} {{ fi.name }}" aria-hidden="true"></i>
         </span>
         {{ form.spd_name() }}
     </div>
@@ -34,7 +34,7 @@ mgd
     </label>
     <div class="input-group">
         <span class="input-group-text">
-            <i class="{{ faStyle }} fa-tag" aria-hidden="true"></i>
+            <i class="{{ fi.style }} {{ fi.title }}" aria-hidden="true"></i>
         </span>
         {{ form.spd_title() }}
     </div>
@@ -46,7 +46,7 @@ mgd
     </label>
     <div class="input-group">
         <span class="input-group-text">
-            <i class="{{ faStyle }} fa-align-left" aria-hidden="true"></i>
+            <i class="{{ fi.style }} {{ fi.description }}" aria-hidden="true"></i>
         </span>
         {{ form.spd_description() }}
     </div>
@@ -58,7 +58,7 @@ mgd
     </label>
     <div class="input-group">
         <span class="input-group-text">
-            <i class="{{ faStyle }} fa-layer-group" aria-hidden="true"></i>
+            <i class="{{ fi.style }} {{ fi.spd }}" aria-hidden="true"></i>
         </span>
         {% if insertMode %}
         {{ form.upload_file() }}
@@ -70,7 +70,7 @@ mgd
 
 {# [ spd Attributes #}
 <span class="input-group-text mt-2 py-0 justify-content-center unselectable-text">
-    <i class="{{ faStyle }} fa-user-tag" aria-hidden="true"></i>
+    <i class="{{ fi.style }} {{ fi.attribute }}" aria-hidden="true"></i>
     &nbsp;&nbsp;{{fieldsLabel}}{{layerNameWithLabel}}
     {# Icon options: fa-bookmark, #}
 </span>

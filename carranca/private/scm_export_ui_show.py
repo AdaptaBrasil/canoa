@@ -9,6 +9,7 @@ mgd 2025.08
 
 from .scm_data import get_scm_data
 from .sep_icon import do_icon_get_url
+from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import class_to_dict
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.types_helper import Jinja_Template
@@ -54,6 +55,7 @@ def scm_export_ui_show(uiact_rsp: UiActResponse) -> Jinja_Template:
             empty_icon=empty_icon,
             cargo_keys=class_to_dict(UiActResponseKeys),
             cargo=uiact_rsp.initial(),
+            fi=fi.with_icon("scm_export"),
             **ui_db_texts.data(),
             **js_ui_dict,
         )

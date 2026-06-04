@@ -9,22 +9,19 @@ mgd 2025-01-14 & 03-18
 
 # cSpell: ignore samp rqst dnld rprt
 
+from .constants import DOWNLOAD_ZIPFILE, DOWNLOAD_REPORT
+from .fetch_users import fetch_user_s
+from .fetch_records import fetch_record_s, ALL_USER_RECS
+
+from ...config.FormIcons import FormIcons as fi
 from ...public.ups_handler import get_ups_jHtml, AppStumbled
 from ...helpers.types_helper import Jinja_Template
 from ...helpers.jinja_helper import process_template
-from ...helpers.route_helper import (
-    get_private_response_data,
-    init_response_vars,
-    MTD_UNEXPECTED_ERROR,
-)
+from ...helpers.route_helper import get_private_response_data, init_response_vars, MTD_UNEXPECTED_ERROR
 from ...common.app_context_vars import app_user
 from ...helpers.js_consts_helper import js_ui_dictionary
-from ...helpers.ui_db_texts_manager import UITextsKeys
 from ...common.app_error_assistant import ModuleErrorCode
-
-from .fetch_users import fetch_user_s
-from .fetch_records import fetch_record_s, ALL_USER_RECS
-from .constants import DOWNLOAD_ZIPFILE, DOWNLOAD_REPORT
+from ...helpers.ui_db_texts_manager import UITextsKeys
 
 
 def init_grid(for_user: int) -> Jinja_Template:
@@ -79,6 +76,7 @@ def init_grid(for_user: int) -> Jinja_Template:
             tmpl_ffn,
             files_rec=file_recs,
             users_list=users_list,
+            fi=fi.with_icon("download_file"),
             **ui_db_texts.data(),
             **js_ui_dict,
         )

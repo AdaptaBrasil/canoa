@@ -15,6 +15,7 @@ from datetime import timedelta, datetime
 from ..wtforms import PasswordRecoveryForm
 from ...models.public import get_user_where, User
 from ...models.public import persist_user
+from ...config.FormIcons import FormIcons as fi
 from ...helpers.py_helper import elapsed_hours
 from ...common.UITextsKeys import UITextsKeys
 from ...public.ups_handler import get_ups_jHtml
@@ -128,7 +129,7 @@ def password_recovery():
             ui_db_texts.set_ui_datetime(key, msg, expires_in_hours)
             ui_db_texts.replace(UITextsKeys.Form.btn_submit, "successButton")
 
-        jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.data())
+        jHtml = process_template(tmpl_ffn, form=fform, fi=fi.with_icon("email"), **ui_db_texts.data())
 
     except Exception as e:
         jHtml = get_ups_jHtml("emailSentException", ui_db_texts, task_code, e)

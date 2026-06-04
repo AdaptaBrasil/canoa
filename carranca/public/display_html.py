@@ -18,6 +18,7 @@ import base64
 
 from typing import List
 from ..common.UIDBTexts import UITextsKeys
+from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import is_str_none_or_empty
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.file_helper import folder_must_exist
@@ -107,6 +108,9 @@ def display_html(docName: str):
 
         images = ui_db_texts.get_str("images")
 
+        # icon
+        icon_key = ui_db_texts.get_str("formIcon")
+
         # a comma separated list of images.ext names available on the db,
         # see below db_images & _prepare_img_files
         task_code += 1
@@ -138,7 +142,7 @@ def display_html(docName: str):
             doc_body_with_imgs = img_change_src_path(body_text, img_folders)
             ui_db_texts.set_value(body_key, doc_body_with_imgs)
 
-        jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
+        jHtml = process_template(tmpl_ffn, fi=fi.with_icon(icon_key), **ui_db_texts.data())
 
     except Exception as e:
         jHtml = get_ups_jHtml("displayDocException", default_texts, task_code, e)

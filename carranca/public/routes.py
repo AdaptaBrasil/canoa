@@ -28,7 +28,6 @@ from ..helpers.route_helper import (
     public_route__password_reset,
 )
 
-
 # === module variables ====================================
 bp_public = Blueprint(bp_name(base_route_public), base_route_public, url_prefix="")
 

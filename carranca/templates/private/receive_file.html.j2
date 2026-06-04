@@ -26,7 +26,7 @@ mgd
     <label class="frm-label" inert for="{{form.schema_sep.id}}">{{ sepLabel }}</label>
     <div class="input-group">
         <span class="input-group-text">
-            <i class="{{ faStyle }} fa-vector-square fa-lg"></i>
+            <i class="{{ fi.style }} {{ fi.scm }}"></i>
         </span>
         {{ form.schema_sep() }}
     </div>
@@ -35,10 +35,10 @@ mgd
 
 <!-- { Load File -->
 <div class="form-group mt-3">
-    <label class="frm-label" inert for="{{form.upload_file.id}}">{{ fileLabel }}</label>
+    <label class="frm-label" inert for="{{ form.upload_file.id }}">{{ fileLabel }}</label>
     <div class="input-group">
         <span class="input-group-text">
-            <i class="{{ faStyle }} fa-upload fa-lg"></i>
+            <i class="{{ fi.style }} {{ fi.local_upload }}"></i>
         </span>
         {{ form.upload_file() }}
     </div>
@@ -47,10 +47,10 @@ mgd
 
 <!-- { Google File -->
 <div class="form-group mt-3">
-    <label class="frm-label" inert for="{{form.urlname.id}}">{{ urlLabel }}</label>
+    <label class="frm-label" inert for="{{ form.urlname.id }}">{{ urlLabel }}</label>
     <div class="input-group">
         <span class="input-group-text">
-            <i class="{{ faStyle }} fa-cloud-upload fa-lg"></i>
+            <i class="{{ fi.style }} {{ fi.cloud_upload }}"></i>
         </span>
         {{ form.urlname() }}
     </div>

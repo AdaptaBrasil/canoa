@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from flask_wtf import FlaskForm
 
 from ..wtforms import EmailTokenForm
+from ...config.FormIcons import FormIcons as fi
 from ...models.public import get_user_where, persist_user
 from ...public.ups_handler import get_ups_jHtml
 from ...helpers.py_helper import is_str_none_or_empty, generate_random, crc16
@@ -36,14 +37,7 @@ def _uid(user_email):
     return f"{crc16('ui_' + user_email):04x}"
 
 
-def _send_email(
-    ui_section: str,
-    email: str,
-    name: str,
-    vars: Usual_Dict,
-    msg_only: bool,
-    fform: FlaskForm,
-) -> Tuple[Jinja_Rendered, bool]:
+def _send_email(ui_section: str, email: str, name: str, vars: Usual_Dict, msg_only: bool, fform: FlaskForm) -> Tuple[Jinja_Rendered, bool]:
 
     jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.EMAIL_CHECK)
     sent = False
@@ -64,7 +58,7 @@ def _send_email(
             ui_db_texts.set_msg_error("emailSentError")
 
         task_code += 1
-        jHtml = process_template(tmpl_ffn, form=fform, **vars, **ui_db_texts.data())
+        jHtml = process_template(tmpl_ffn, form=fform, fi=fi.with_icon("check_email"), **vars, **ui_db_texts.data())
 
     except Exception as e:
         jHtml = get_ups_jHtml("emailSentException", ui_db_texts, task_code, e)
@@ -123,7 +117,7 @@ def send_email_to_test_address(route: str, email: str, name: str) -> Jinja_Rende
             ui_db_texts.replace(UITextsKeys.Form.post_route, private_route(route, uid=""))
             ui_db_texts.display_msg_only = True
             task_code += 1
-            jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
+            jHtml = process_template(tmpl_ffn, fi=fi.with_icon("check_email"), **ui_db_texts.data())
 
         except Exception as e:
             jHtml = get_ups_jHtml(MSG_DEFAULT, ui_db_texts, task_code, e)

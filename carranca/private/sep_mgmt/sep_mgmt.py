@@ -90,8 +90,8 @@ def sep_mgmt() -> str:
         )
 
     except AppStumbled as e:
-        _, tmpl_ffn, ui_db_texts = ups_handler(task_code, "", e)
-        jHtml = process_template(tmpl_ffn, **ui_db_texts.data())
+        _, tmpl_ffn, ui_texts = ups_handler(task_code, "", e)
+        jHtml = process_template(tmpl_ffn, **ui_texts)
 
     except Exception as e:
         jHtml = get_ups_jHtml("gridException", ui_db_texts, task_code, e)

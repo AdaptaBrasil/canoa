@@ -2,11 +2,12 @@
 #
 # mgd 2024-06-21, 2026-03-25 (dont_validate)
 
-# cSpell:ignore reraising dont samp
+# cSpell:ignore reraising dont samp, ffname
 
 import re
 from collections import Counter
 from os import path
+from tkinter import E
 from flask import current_app, render_template
 from jinja2 import Environment, TemplateSyntaxError
 from typing import cast, Any, List, Tuple
@@ -17,6 +18,7 @@ from .py_helper import as_str_strip, now_as_iso
 from .file_helper import file_full_name_parse
 from .types_helper import Jinja_Rendered, Jinja_Template, Template_File_Full_Name
 from ..common.app_constants import APP_JINJA_TEMPLATE_BUG_FOUND, APP_JINJA_TEMPLATE_BUG_MSG_TECH
+from ..common.app_context_vars import sidekick
 from ..common.app_error_assistant import AppStumbled, ModuleErrorCode
 
 _jinja_bug_found = APP_JINJA_TEMPLATE_BUG_FOUND
@@ -106,7 +108,7 @@ def _detect_duplicate_ids(rendered_html: str) -> List[str]:
     return [f"#{id_} ({n}&times;)" for id_, n in counts.items() if n > 1]
 
 
-def _detect_html_errors(rendered_html: str, file_name: str) -> Tuple[list[str], str]:
+def _detect_html_errors(rendered_html: str) -> List[str]:
     """Parses the rendered HTML with html5lib and returns a list of
     human-readable error messages with line/col position.
     html5lib is the strictest HTML5-compliant parser available.
@@ -116,20 +118,11 @@ def _detect_html_errors(rendered_html: str, file_name: str) -> Tuple[list[str], 
     parser = html5lib.HTMLParser(strict=False)
     parser.parse(rendered_html)
     y = len(parser.errors) + 2
-    output_error = ""
-    msg_error = [f"[{(y + line):02}, {col:03}] {code}, (tag: {ctx.get('name', 'N/A')})" for (line, col), code, ctx in parser.errors]
-    if parser.errors and file_name:
-        try:
-            # TODO inject in body
-            with open(file_name, "w", encoding="utf-8") as f:
-                f.write(f"<!-- ===== Parse erros found in {file_name} at {now_as_iso()} ====\n")
-                for line in msg_error:
-                    f.write(f"\t{line}\n")
-                f.write("-->\n")
-                f.write(rendered_html)
-        except Exception as e:
-            output_error = f"Error save log file {file_name}: [{e}]."
-    return msg_error, output_error
+    errors = [
+        f"[{(y + line):02}, {col:03}] {code}, (tag: {ctx.get('name', 'N/A')})"
+        for (line, col), code, ctx in parser.errors
+    ]
+    return errors
 
 
 # Jinja Processor
@@ -145,73 +138,81 @@ def process_text(text: str, **context: Any) -> str:
     return text
 
 
+def _save_and_raise(jHtml_to_display: str, errors: str | List[str], ffname: str, j2_file_name: str) -> None:
+
+    output_error = ""
+    display_error = ""
+    try:
+        with open(ffname, "w", encoding="utf-8") as f:
+            f.write(f"<!-- ===== Erros found in {j2_file_name} at {now_as_iso()} ====\n")
+            if isinstance(errors, list):
+                for line in errors:
+                    display_error = f"{display_error}." if display_error else line
+                    f.write(f"<br>\t» {line}\n")
+            elif display_error := errors:
+                f.write(f"<br>\t »{errors}\n")
+            f.write("<br> -->\n")
+            f.write(jHtml_to_display)
+    except Exception as e:
+        output_error = f"Error saving log file {ffname}: [{e}]."
+        sidekick.display.error(output_error)
+
+    msg_file = "" if output_error else f"<br>see output file <samp>{ffname}</samp>."
+    msg_error = f"Jinja error: {display_error} in template: <code>{j2_file_name}</code>{msg_file}"
+
+    raise AppStumbled(
+        msg_error,
+        ModuleErrorCode.TEMPLATE_BUG.value,
+        False,
+        False,
+        None,
+        _jinja_bug_tech_info,
+    )
+    # <-
+
+
 def process_template(tmpl_ffn: Jinja_Template, **context: Any) -> Jinja_Rendered:
     # Avoid importing sidekick during app initialization
-    from ..common.app_context_vars import sidekick
     from .ui_db_texts_manager import init_ui_db_texts
 
     jHtml_to_display: Jinja_Rendered = ""
     jHtml: Jinja_Rendered = ""
     validated = False
     errors: List[str] = []
-    tmpl_file_name = "?"
+    j2_fname = "?"
     ui_db_texts = init_ui_db_texts("")
     try:
-        _, _, tmpl_file_name = file_full_name_parse(tmpl_ffn)
+        _, _, j2_fname = file_full_name_parse(tmpl_ffn)
         if sidekick.config.DEBUG_TEMPLATES:
             file_fn = path.join(sidekick.config.TEMPLATES_FOLDER, tmpl_ffn)
             jHtml = _load_template(file_fn)
-            _validate_jinja(jHtml, tmpl_file_name, True)
+            _validate_jinja(jHtml, j2_fname, True)
             validated = True
 
         jHtml = render_template(tmpl_ffn, **context)
         jHtml_to_display = _clean_html(jHtml)
 
-        detect_jinja_errors = True
+        if sidekick.config.DEBUG_RENDERED_TEMPLATES:
+            bugged_file = sidekick.config.DEBUG_TEMPLATES_HTML_BUGS_FILE_NAME
+            id = current_user.id if is_anyone_logged() else 0
+            folder = sidekick.config.LOG_FILE_FOLDER
+            bugged_ffname = path.join(".", folder, bugged_file).format(id) if bugged_file else ""
 
-        if detect_jinja_errors and sidekick.config.DEBUG_RENDERED_TEMPLATES:
             # Duplicated IDs
             dup_ids = _detect_duplicate_ids(jHtml_to_display)
             if dup_ids:
-                raise AppStumbled(
-                    f"{_jinja_bug_found}: duplicate HTML ids {dup_ids}<br><br>in template: <code>{tmpl_file_name}</code>",
-                    ModuleErrorCode.TEMPLATE_BUG.value,
-                    False,
-                    False,
-                    None,
-                    _jinja_bug_tech_info,
-                )
+                msg_error = f"duplicate HTML ids {dup_ids}"
+                _save_and_raise(jHtml_to_display, msg_error, bugged_ffname, j2_fname)
 
             # Jinja leftovers
             errors = _detect_jinja_runtime_errors(jHtml_to_display)
             if errors:
-                raise AppStumbled(
-                    f"{_jinja_bug_found}: {errors}<br><br>in template: <code>{tmpl_file_name}</code>",
-                    ModuleErrorCode.TEMPLATE_BUG.value,
-                    False,
-                    False,
-                    None,
-                    _jinja_bug_tech_info,
-                )
+                _save_and_raise(jHtml_to_display, errors, bugged_ffname, j2_fname)
 
             # HTML Errors
-            bugged_file = sidekick.config.DEBUG_TEMPLATES_HTML_BUGS_FILE_NAME
-            id = current_user.id if is_anyone_logged() else 0
-            bugged_fullname = path.join(".", sidekick.config.LOG_FILE_FOLDER, bugged_file).format(id) if bugged_file else ""
-            errors, output_error = _detect_html_errors(jHtml_to_display, bugged_fullname)
+            errors = _detect_html_errors(jHtml_to_display)
             if errors:
-                if output_error:
-                    sidekick.display.error(output_error)
-                msg_file = "" if output_error else f"see output file <samp>{bugged_fullname}</samp><br><br>"
-                msg_error = f"<code>{errors}</code>"
-                raise AppStumbled(
-                    f"{_jinja_bug_found}: {msg_file}{msg_error}",
-                    ModuleErrorCode.TEMPLATE_BUG.value,
-                    False,
-                    False,
-                    None,
-                    _jinja_bug_tech_info,
-                )
+                _save_and_raise(jHtml_to_display, errors, bugged_ffname, j2_fname)
 
     except Exception as e:
         from ..public.ups_handler import ups_handler
@@ -219,14 +220,14 @@ def process_template(tmpl_ffn: Jinja_Template, **context: Any) -> Jinja_Rendered
         if isinstance(e, TemplateSyntaxError):
             e = cast(TemplateSyntaxError, e)
             raise AppStumbled(
-                f"Error in template '{tmpl_file_name}', line {e.lineno}: {e.message}.",
+                f"Error in template '{j2_fname}', line {e.lineno}: {e.message}.",
                 ModuleErrorCode.TEMPLATE_ERROR.value,
             )
-        elif not validated and (msg_error := _validate_jinja(jHtml, tmpl_file_name)):
+        elif not validated and (msg_error := _validate_jinja(jHtml, j2_fname)):
             raise Exception(msg_error) from e
         else:
             error_code = getattr(e, "error_code", "?")
-            _, msg_error = ui_db_texts.set_msg_error("templateProcessingException", (tmpl_file_name, error_code))
+            _, msg_error = ui_db_texts.set_msg_error("templateProcessingException", (j2_fname, error_code))
             _, tmpl_ffn, ui_texts = ups_handler(ModuleErrorCode.TEMPLATE_BUG.value, msg_error, e)
             jHtml_to_display = render_template(tmpl_ffn, **ui_texts)
 

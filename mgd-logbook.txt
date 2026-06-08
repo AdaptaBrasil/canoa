@@ -88,11 +88,19 @@ python -m py_compile carranca/private/routes.py
     - Form Icons ini & revision
     - removed APP_UI_FONT_AWESOME_STYLE => FormIcons.style
 
-    »
-    - remove wait icon when spd download
-    - send spd id to validate
+    » 0-8-06 β 5.62
+    - spd download with 'formTarget'
+    - allow spd download only for power
+    - always save Jinja bugged templates for debugging (see: jinja_helper._save_and_raise)
+    - shared (one per group!) {% from "includes/..." import btn_action %}
+    - rename frm-main-btn => frm-foot-btn
+    - display_html with external icon (see formIcon)
 
-        encode UiActResponseKeys
+    » TODO
+    - send spd id to validate
+    - templates\includes\_action_forms_and_btns.html.j2
+        btn_submit === btn_close_dlg (use only btn_submit)
+    - encode UiActResponseKeys
 
 ------- 2026 - May ---------------
     » 05-05 v β 5.60
@@ -1752,7 +1760,7 @@ TODO:
 
     ## Small Tasks ##
         - init_form_vars create a 'error tmpl'
-        - check use o frm-main-btn in *.j2
+        - check use o frm-foot-btn in *.j2
         - share jinja_cache templates + texts (see route_helper templates_found)
         - Login Remember not always working
         - Tmpl for error Internal Error

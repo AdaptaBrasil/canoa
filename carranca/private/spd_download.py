@@ -59,13 +59,15 @@ def download_rec(code: str) -> Response:
             _not_found(task_code + 3)
         elif len(db_records := SpatialDataFile.get_rows(["id", "spd_name", _ufn, _ofn], id)) != 1:
             _not_found(task_code + 4)
-        elif not (file_name := db_records[0][_ofn]):
+        elif not (file_name := db_records[0][_ufn]):
+            _not_found(task_code + 5)
+        elif not (original_name := db_records[0][_ofn]):
             _not_found(task_code + 5)
         elif not path.isfile(ffn := path.join(sidekick.config.LOCAL_SPATIAL_DATA_PATH, file_name)):
             _not_found(task_code + 6)
         else:
             task_code += 7
-            file_response = send_file(ffn, as_attachment=True, download_name=file_name)
+            file_response = send_file(ffn, as_attachment=True, download_name=original_name)
             http_status_code = file_response.status_code
 
     except Exception as e:

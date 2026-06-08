@@ -310,7 +310,7 @@ body {
     accent-color: var(--canoa-form-button-bg);
 }
 
-.frm-main-btn {
+.frm-foot-btn {
     color: var(--canoa-form-button-color);
     border: 10px;
     font-size: 1.1rem;
@@ -320,24 +320,24 @@ body {
     background-color: var(--canoa-form-button-bg);
 }
 
-.frm-main-btn:hover {
+.frm-foot-btn:hover {
     /* same as fillcolor of carranca\static\icons\ups_handler.svg */
     filter: brightness(130%);
 }
 
-.frm-main-btn:active {
-    /* 30% + frm-main-btn:hover */
+.frm-foot-btn:active {
+    /* 30% + frm-foot-btn:hover */
     filter: brightness(160%);
 }
 
-.frm-main-btn:disabled {
+.frm-foot-btn:disabled {
     color: var(--canoa-form-button-color);
     filter: brightness(70%);
     background-color: var(--canoa-form-button-bg);
 }
 
 .frm-pw-eye-btn {
-    /* similar to frm-main-btn:hover */
+    /* similar to frm-foot-btn:hover */
     transition: filter 0.3s ease;
     background-color: var(--canoa-form-pw-eye-btn-bg);
 }

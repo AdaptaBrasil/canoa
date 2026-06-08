@@ -85,12 +85,11 @@ mgd
 
 {# ╒════════════════ Dialog Footer ═══════════════╛ #}
 {% block dlg_blc_footer_buttons %}
+{% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
 <div class="col-auto">
-    {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
     {{ btn_action(dlg_post_form_id, dlgBtnSaveArrange, cargo_keys.save, "disabled") }}
 </div>
 <div class="col-auto">
-    {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
     {{ btn_action(dlg_post_form_id, dlgBtnExport, cargo_keys.export) }}
 </div>
 {% endblock dlg_blc_footer_buttons %}

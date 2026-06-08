@@ -12,8 +12,7 @@ TODO Selected menu class-> active
 
 cSpell:ignore unselectable labelledby haspopup noopener noreferrer onclick elif
 cSpell:ignore semi-words: formul estrat gicos sess tojson jinja nbsp endfor j_user inser
-cSpell:ignore &ç  gico endere
-cSpell:ignore spatialdata
+cSpell:ignore &ç gico endere spatialdata
 --------------------------------------- #}
 <nav id="navbar-main" class="navbar fixed-top navbar-expand-sm shadow-sm px-2">
     {% set menu_header= app_menu('menuHeaders') %}
@@ -106,10 +105,10 @@ cSpell:ignore spatialdata
                 {# ╘════════════════════ DD Menu: strategicSector ═══════════════════════╛ #}
 
 
-                {# ╒════════════════════════════════ Power User Menu ══════════════════════════════╕ #}
+                {# ╒════════════════════ DD Menu: schema ════════════════════════════════╕ #}
+                {# ╒════════════════════ Power User Menu ══════════════════════════════╕ #}
                 {% if j_user.power %}
 
-                {# ╒════════════════════ DD Menu: schema ════════════════════════════════╕ #}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle unselectable-text {{nav_button_state}}" href="#" id="menu-schema" role="button" data-bs-toggle="dropdown">
                         {{menu_header['schema']}}
@@ -137,7 +136,11 @@ cSpell:ignore spatialdata
                     </ul>
                     {# ╘════════ schema menu ════════╛ #}
                 </li>
+
+                {% endif %}
+                {# ╘════════════════════ Power User Menu ══════════════════════════════╛ #}
                 {# ╘════════════════════ DD Menu: schema ════════════════════════════════╛ #}
+
 
                 {# ╒════════════════════ DD Menu: spatialData ═══════════════════════════╕ #}
                 <li class="nav-item dropdown">
@@ -145,28 +148,34 @@ cSpell:ignore spatialdata
                         data-bs-toggle="dropdown">
                         {{menu_header['spatialData']}}
                     </a>
+
                     <ul class="dropdown-menu">
+                    {# ╒════════════════════ Power User Menu ══════════════════════════════╕ #}
+                    {% if j_user.power %}
                         <li>
                             <a class="dropdown-item" href="{{private_route('spd_edit', code=ui_act_add) }}"
                                 title="Abre formul&aacute;rio para adicionar dados espaciais">
                                 Inser&ccedil;&atilde;o
                             </a>
                         </li>
+
                         <li>
                             <a class="dropdown-item" href="{{private_route('spd_grid', code=ui_act_shw) }}"
-                                title="Abre grid para editar dados espaciais">
-                                Edi&ccedil;&atilde;o e Remo&ccedil;&atilde;o
+                                title="Abre grid de gest&atilde;o">
+                                Gest&atilde;o
                             </a>
                         </li>
-
+                    {% else %}
+                        <li>
+                            <a class="dropdown-item" href="{{private_route('spd_grid', code=ui_act_shw) }}"
+                                title="Abre grid de download">
+                                Baixar Arquivos
+                            </a>
+                        </li>
+                    {% endif %}
                     </ul>
                 </li>
                 {# ╘════════════════════ DD Menu: spatialData ═══════════════════════════╛ #}
-
-
-                {# ╘════════════════════════════════ Power User Menu ══════════════════════════════════╛ #}
-                {% endif %}
-
 
                 {# ╒════════════════════ DD Menu: documents ═════════════════════════════╕ #}
                 <li class="nav-item dropdown">

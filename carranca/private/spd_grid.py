@@ -17,10 +17,9 @@ from ..helpers.py_helper import class_to_dict
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.uiact_helper import UiActResponseKeys
 from ..helpers.jinja_helper import Jinja_Rendered, process_template
-from ..helpers.route_helper import MTD_POST, get_private_response_data, init_response_vars
+from ..helpers.route_helper import get_private_response_data, init_response_vars
 from ..helpers.js_consts_helper import js_grid_col_meta_info, js_ui_dictionary
-from ..helpers.ui_db_texts_manager import set_msg_fatal
-from ..common.app_error_assistant import ModuleErrorCode, AppStumbled, HTTP_StatusCode
+from ..common.app_error_assistant import ModuleErrorCode
 from ..helpers.db_records.DBRecords import DBRecords
 from ..models.private.spatial_data_file import SpatialDataFile
 
@@ -65,6 +64,7 @@ def get_spd_grid() -> Jinja_Rendered:
             spd_rows=spd_rows,
             cargo_keys=class_to_dict(UiActResponseKeys),
             fi=fi.with_icon("spd"),
+            user_is_pw=False,
             **ui_db_texts.data(),
             **js_ui_dict
         )

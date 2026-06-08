@@ -11,19 +11,21 @@ Equipe da Canoa -- 2024
 mgd
 """
 
-# cSpell:ignore updt
+# cSpell:ignore updt ffname
 
 import os
 import base64
 
-from typing import List
+from flask import current_app
+from typing import List, cast
+
 from ..common.UIDBTexts import UITextsKeys
 from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import is_str_none_or_empty
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.file_helper import folder_must_exist
 from ..helpers.route_helper import init_response_vars
-from ..helpers.html_helper import img_filenames, img_change_src_path
+from ..helpers.html_helper import img_filenames, img_change_src_path, url_join, URL_PATH_SEP
 from ..helpers.jinja_helper import process_template, process_text
 from ..common.app_context_vars import sidekick
 from ..common.app_error_assistant import ModuleErrorCode, AppStumbled
@@ -56,7 +58,9 @@ def __prepare_img_files(html_images: List[str], db_images: List[str], img_local_
         q = len(missing_files)
         qtd = "One" if q == 1 else f"{q}"
         p = "" if q == 1 else "s"
-        sidekick.display.warn(f"{qtd} image record{p} missing for [sectorSpecifications] in database: {', '.join(missing_files)}.")
+        sidekick.display.warn(
+            f"{qtd} image record{p} missing for [sectorSpecifications] in database: {', '.join(missing_files)}."
+        )
         return True  # some files missing, but I can't fix it :-(
 
     for file in available_files:
@@ -80,6 +84,7 @@ def __prepare_img_files(html_images: List[str], db_images: List[str], img_local_
 
 def display_html(docName: str):
 
+    form_icon_key = "formIcon"
     tmpl_ffn = "./home/document.html.j2"
     section = docName
     jHtml, _, default_texts, task_code = init_response_vars(ModuleErrorCode.DISPLAY_HTML_DOC)
@@ -108,19 +113,22 @@ def display_html(docName: str):
 
         images = ui_db_texts.get_str("images")
 
-        # icon
-        icon_key = ui_db_texts.get_str("formIcon")
-
         # a comma separated list of images.ext names available on the db,
         # see below db_images & _prepare_img_files
         task_code += 1
-        db_images = [] if is_str_none_or_empty(images) else [s.strip() for s in images.split(",")]  # list of img names in db
+        db_images = (
+            [] if is_str_none_or_empty(images) else [s.strip() for s in images.split(",")]
+        )  # list of img names in db
 
         task_code += 1  # 173
-        html_images = [] if is_str_none_or_empty(body_text) else sorted(img_filenames(body_text))  # list of img tags in HTML
+        html_images = (
+            [] if is_str_none_or_empty(body_text) else sorted(img_filenames(body_text))
+        )  # list of img tags in HTML
+
+        static_folder: str = "static"  # cast(str, current_app.static_folder)
 
         task_code += 1
-        img_folders = ["static", "docs", section, "images"]
+        img_folders = [static_folder, "docs", section, "images"]
         img_local_path = os.path.join(sidekick.config.APP_PATH, *img_folders)
         task_code += 1
         if is_str_none_or_empty(body_text):
@@ -141,6 +149,15 @@ def display_html(docName: str):
             img_folders.insert(0, os.sep)
             doc_body_with_imgs = img_change_src_path(body_text, img_folders)
             ui_db_texts.set_value(body_key, doc_body_with_imgs)
+
+        icon_key = ""
+        if not (form_icon := ui_db_texts.get_str(form_icon_key)):
+            pass
+        elif fi.get(form_icon):
+            icon_key = form_icon
+        elif os.path.exists(os.path.join(*img_folders, form_icon)):
+            icon_url = URL_PATH_SEP + url_join(static_folder, *img_folders, form_icon)
+            ui_db_texts.set_value(UITextsKeys.Form.icon_url, icon_url)
 
         jHtml = process_template(tmpl_ffn, fi=fi.with_icon(icon_key), **ui_db_texts.data())
 

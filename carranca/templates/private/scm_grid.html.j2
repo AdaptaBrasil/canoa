@@ -19,12 +19,11 @@ mgd
 
 {# ╒════════════════ Grid Footer ════════════════╕ #}
 {% block grid_blc_footer %}
+{% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
 <div class="col-auto">
-    {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
     {{ btn_action(dlg_post_form_id, grdBtnEdit, cargo_keys.edit) }}
 </div>
 <div class="col-auto">
-    {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
     {{ btn_action(dlg_post_form_id, grdBtnDelete, cargo_keys.delete) }}
 </div>
 

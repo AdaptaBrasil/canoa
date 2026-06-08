@@ -19,19 +19,18 @@ mgd
 
 {# ╒════════════════ Grid Footer ════════════════╕ #}
 {% block grid_blc_footer %}
+{% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
+{% if jinja_user().power %}
+    <div class="col-auto">
+        {{ btn_action(dlg_post_form_id, grdBtnEdit, cargo_keys.edit) }}
+    </div>
+    <div class="col-auto">
+        {{ btn_action(dlg_post_form_id, grdBtnDelete, cargo_keys.delete) }}
+    </div>
+{% endif %}
 <div class="col-auto">
-    {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
-    {{ btn_action(dlg_post_form_id, grdBtnEdit, cargo_keys.edit) }}
+    {{ btn_action(dlg_post_form_id, grdBtnDownload, cargo_keys.download, 'formTarget="_blank"') }}
 </div>
-<div class="col-auto">
-    {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
-    {{ btn_action(dlg_post_form_id, grdBtnDelete, cargo_keys.delete) }}
-</div>
-<div class="col-auto">
-    {% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
-    {{ btn_action(dlg_post_form_id, grdBtnDownload, cargo_keys.download) }}
-</div>
-
 {% endblock grid_blc_footer %}
 {# ╘═══════════════ Grid Footer ═════════════════╛ #}
 
@@ -62,7 +61,6 @@ mgd
     {% from "includes/_action_forms_and_btns.js.j2" import form_link_action %}
     {{ form_link_action(dlg_post_form_id, form_cargo_id) }}
 </script>
-{# This file is read - only because, when saved, this upper line loses its Jinja formatting. #}
 
 <script src="{{static_route('js/spd_grid.js')}}"></script>
 {% endblock grid_blc_javascript %}
@@ -71,9 +69,6 @@ mgd
 
 {# ╒════════════════ Dialog Forms ════════════════╕ #}
 {% block dlg_blc_forms %}
-
-{# {% from "includes/_action_forms_and_btns.html.j2" import action_form__post_cargo %}
-{{ action_form__post_cargo(dlg_post_form_id, private_route('received_file_download'), dlg_data_wait_process, extra='target="_blank"') }} #}
 
 {% endblock %}
 {# ╘═════════════════ Dialog Forms ════════════════╛ #}

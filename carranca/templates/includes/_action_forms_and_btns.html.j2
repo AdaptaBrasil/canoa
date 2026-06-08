@@ -14,9 +14,15 @@ mgd
 Spell:ignore endmacro preid onclick
 #}
 
+{# --
+The default caption buttons are in English:
+    it is understandable for the user and
+    also indicates that
+    the button is awaiting a value from the developer.
+-- #}
+
 {# -- Post form: includes security token & cargo -- #}
 {% macro action_form__post_cargo(form_id, action_route, dlg_wait_process, extra='')%}
-{# FORM: Canoa POST form #}
 <form id="{{form_id}}" method="post" action="{{action_route}}" {{dlg_wait_process}} {{extra}}>
     <input type="hidden" name="{{safe_token.cargo}}" id="{{safe_token.cargo}}">
     <input type="hidden" name="{{safe_token.key}}" value="{{safe_token.value}}">
@@ -24,30 +30,28 @@ Spell:ignore endmacro preid onclick
 {% endmacro %}
 
 
-
 {# -- Close Button: [x] of layouts/dialog.html.j2 -- #}
 {% macro btn_close_dlg(form_id, btn_id, caption, extra='') %}
-<button type="submit" form="{{form_id}}" id="{{btn_id}}" class="frm-main-btn form-cancel" {{extra}}>
+<button type="submit" form="{{form_id}}" id="{{btn_id}}" class="frm-foot-btn" {{extra}}>
     {{caption | default('Close')}}
 </button>
 {% endmacro %}
 
-{# -- Submit Button -- #}
-{% macro btn_submit(form_id, btn_id, caption, extra='' ) %}
-<button type="submit" form="{{form_id}}" id="{{btn_id}}" class="frm-main-btn form-submit" {{extra}}>
-    {# --
-    The default caption is in English: it is understandable for the user and also indicates that
-    the button is awaiting a value from the developer.
-    -- #}
+
+{# -- Submit Button of form with ID form_id -- #}
+{% macro btn_submit(form_id, btn_id, caption, extra='') %}
+<button type="submit" form="{{form_id}}" id="{{btn_id}}" class="frm-foot-btn" {{extra}}>
     {{caption | default('Save')}}
 </button>
 {% endmacro %}
 
+
 {# -- Button to linked through ui_constant, creates it 'own' ID -- #}
-{% macro btn_action(action_form__id, caption, cmd= '', attrib= '')%}
-<button type="submit" class="frm-main-btn form-submit btn-action" form="{{action_form__id}}" id="{{do_btn_id(cmd, caption)}}" {{attrib}}>
+{% macro btn_action(form_id, caption, cmd= '', extra= '')%}
+<button type="submit" form="{{form_id}}" id="{{do_btn_id(cmd, caption)}}" class="frm-foot-btn" {{extra}}>
     {{caption}}
 </button>
 {% endmacro %}
 {# -- Button #}
+
 {# eof #}

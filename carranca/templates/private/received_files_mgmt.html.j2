@@ -42,12 +42,12 @@ mgd
 {% endif %}
 {# TODO: from "includes/_action_forms_and_btns.html.j2" import btn_click #}
 <div class="col-auto">
-    <button type="button" onclick="download('{{ dnld_F }}')" id="btn{{ dnld_F }}" class="form-control frm-main-btn" disabled>
+    <button type="button" onclick="download('{{ dnld_F }}')" id="btn{{ dnld_F }}" class="form-control frm-foot-btn" disabled>
         {{ btnDwnLoadFile }}
     </button>
 </div>
 <div class="col-auto">
-    <button type="button" onclick="download('{{ dnld_R }}')" id="btn{{ dnld_R }}" class="form-control frm-main-btn" disabled>
+    <button type="button" onclick="download('{{ dnld_R }}')" id="btn{{ dnld_R }}" class="form-control frm-foot-btn" disabled>
         {{ btnDwnLoadRprt }}
     </button>
 </div>
@@ -71,7 +71,7 @@ mgd
 
     const download = (t) => {
         if (activeID) {
-            document.getElementById('{{ form_cargo_id }}').value = `${activeID}${t}`;;
+            document.getElementById('{{ form_cargo_id }}').value = `${activeID}${t}`;
             document.getElementById('{{ dlg_post_form_id }}').submit();
         }
     };

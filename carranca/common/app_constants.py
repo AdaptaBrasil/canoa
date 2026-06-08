@@ -16,13 +16,10 @@ app_constants.py
 APP_NAME = "Canoa"
 
 # &beta; major.minor
-APP_VERSION = "β 5.71"  # 2026-06-04
+APP_VERSION = "β 5.72"  # 2026-06-08
 
 # default user HTML/DB lang/locale (see table users.lang)
 APP_LANG = "pt-br"
-
-# App icon color
-APP_ICON_COLOR = "#1A5692"
 
 # the file that displays handled exceptions (see \helpers\jinja_helper.py)
 APP_UPS_HTML_PAGE_FILE_NAME = "ups_page.html.j2"

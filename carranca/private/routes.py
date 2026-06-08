@@ -122,7 +122,11 @@ def uiact_response(code: str) -> Tuple[Jinja_Rendered, UiActResponse | None]:
         def _get_result() -> Tuple[Jinja_Rendered, UiActResponse | None]:
             uiact_rsp = None
             jHtmlError: Jinja_Rendered = ""
-            cmd_text: Json_Text = request.args.get(js_form_cargo_id, "") if rqs_method == MTD_GET else request.form.get(js_form_cargo_id, "")
+            cmd_text: Json_Text = (
+                request.args.get(js_form_cargo_id, "")
+                if rqs_method == MTD_GET
+                else request.form.get(js_form_cargo_id, "")
+            )
             if is_str_none_or_empty(cmd_text):
                 jHtmlError = create_ups_jHtml(_get_error("empty"))
             elif not (uiact_rsp := UiActResponse(cmd_text)):
@@ -158,6 +162,7 @@ def grid_route(code: str, editor_name: str, download: Call_Args, show_grid: Call
 
     if nobody_is_logged():
         return redirect_to(login_route())
+    
     jHtmlOrResp: Route_Response = NEW_FLASK_RESPONSE
     jHtmlError, uiact_rsp = uiact_response(code)
 
@@ -179,8 +184,6 @@ def grid_route(code: str, editor_name: str, download: Call_Args, show_grid: Call
                 jHtmlOrResp = _goto(data)
             case UiActResponseKeys.download:
                 jHtmlOrResp = download(uiact_rsp.code)
-                # jHtmlOrResp = show_grid()
-                pass
             case UiActResponseKeys.delete:
                 jHtmlOrResp = create_ups_jHtml("The `delete` procedure is under development.")
             case _:

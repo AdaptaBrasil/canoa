@@ -88,7 +88,7 @@ python -m py_compile carranca/private/routes.py
     - Form Icons ini & revision
     - removed APP_UI_FONT_AWESOME_STYLE => FormIcons.style
 
-    » 0-8-06 β 5.62
+    » 08-06 β 5.62
     - spd download with 'formTarget'
     - allow spd download only for power
     - always save Jinja bugged templates for debugging (see: jinja_helper._save_and_raise)
@@ -96,7 +96,13 @@ python -m py_compile carranca/private/routes.py
     - rename frm-main-btn => frm-foot-btn
     - display_html with external icon (see formIcon)
 
+    » 08-06 β 5.62a
+    - from jinja_helper.py remove 'from tkinter import E'
+
+    ------
+    » 08-06 β 5.63
     » TODO
+    - first time spd -> ins is opened, takes a long time
     - send spd id to validate
     - templates\includes\_action_forms_and_btns.html.j2
         btn_submit === btn_close_dlg (use only btn_submit)

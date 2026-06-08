@@ -7,10 +7,9 @@
 import re
 from collections import Counter
 from os import path
-from tkinter import E
 from flask import current_app, render_template
 from jinja2 import Environment, TemplateSyntaxError
-from typing import cast, Any, List, Tuple
+from typing import cast, Any, List
 from flask_login import current_user
 
 from .pw_helper import is_anyone_logged
@@ -118,10 +117,7 @@ def _detect_html_errors(rendered_html: str) -> List[str]:
     parser = html5lib.HTMLParser(strict=False)
     parser.parse(rendered_html)
     y = len(parser.errors) + 2
-    errors = [
-        f"[{(y + line):02}, {col:03}] {code}, (tag: {ctx.get('name', 'N/A')})"
-        for (line, col), code, ctx in parser.errors
-    ]
+    errors = [f"[{(y + line):02}, {col:03}] {code}, (tag: {ctx.get('name', 'N/A')})" for (line, col), code, ctx in parser.errors]
     return errors
 
 

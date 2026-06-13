@@ -163,7 +163,7 @@ def _get_response_data(ui_db_section: str, tmpl_file_name: str, folder: str) -> 
         ui_db_texts = init_ui_db_texts(ui_db_section)
         # mgd 2026.05
         if icon_fn := ui_db_texts.get_str(UITextsKeys.Form.icon_file):
-            ui_db_texts[UITextsKeys.Form.icon_url] = icon_url(icon_fn)
+            ui_db_texts.set_value(UITextsKeys.Form.icon_url, icon_url(icon_fn))
 
     except Exception as e:
         # Re-raise exception to allow it to propagate

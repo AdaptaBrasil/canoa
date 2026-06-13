@@ -108,6 +108,16 @@ python -m py_compile carranca/private/routes.py
         btn_submit === btn_close_dlg (use only btn_submit)
     - encode UiActResponseKeys
 
+
+    ---- next, remove:
+    TODO: SEP_DATA 
+
+    - user_seps: "UserSepsRtn" = LocalProxy(__get_user_seps)
+    - jinja page for templates/home/page-http-error.html
+    do: # UPDATE ui_db_texts
+
+
+
 ------- 2026 - May ---------------
     » 05-05 v β 5.60
     - From today onwards, the names of files uploaded by users,

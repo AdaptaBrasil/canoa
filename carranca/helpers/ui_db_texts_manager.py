@@ -145,13 +145,13 @@ def _msg_not_found() -> str:  ## THIS IS OUTDATED ##
     return mnf
 
 
-def _set_or_add_msg(item: str, section: str, name: str, ui_db_texts: UIDBTexts, args: tuple | dict | None = None) -> str:
+def _set_or_add_msg(item_key: str, section: str, msg_key: str, ui_db_texts: UIDBTexts, args: tuple | dict | None = None) -> str:
     """Retrieves text and adds it to a dictionary.
 
     Args:
         item: The item identifier.
         section: The section identifier.
-        name: The key for the dictionary entry. see UITextsKeys.Msg
+        msg_key: The key for the dictionary entry, one of UITextsKeys.Msg
         ui_db_texts: UIDBTexts.
         args: Optional arguments for formatting the retrieved text.
 
@@ -166,8 +166,8 @@ def _set_or_add_msg(item: str, section: str, name: str, ui_db_texts: UIDBTexts, 
     """
     from ..common.app_context_vars import sidekick
 
-    # take the default value for Item
-    item = item or name
+    # take the key value
+    item = item_key or msg_key
     # search in the messages dict
     msg_text: str = ui_db_texts.get_msg(item) if ui_db_texts else ""
 
@@ -198,7 +198,8 @@ def _set_or_add_msg(item: str, section: str, name: str, ui_db_texts: UIDBTexts, 
         value = msg_text
 
     if ui_db_texts and value:  # add or refresh
-        ui_db_texts[name] = value
+        ui_db_texts.set_value(msg_key, value)
+        # ui_db_texts[name] = value
 
     return value
 

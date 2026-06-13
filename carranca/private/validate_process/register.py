@@ -16,7 +16,7 @@ from zlib import crc32
 
 from typing import Tuple
 
-from .Cargo import Cargo
+from .Cargo import Next_Cargo, Cargo
 from ...models.privates import UserDataFiles
 from ...helpers.py_helper import OS_IS_WINDOWS, now
 from ...common.app_context_vars import sidekick
@@ -24,7 +24,7 @@ from ...common.app_error_assistant import ModuleErrorCode
 from ...private.received_files.constants import FILE_ORIGIN_CLOUD, FILE_ORIGIN_LOCAL
 
 
-def register(cargo: Cargo, file_data: object | str) -> Cargo:
+def register(cargo: Cargo, file_data: object | str) -> Next_Cargo:
 
     def _save_uploaded_file_locally(full_name: str, file_obj: object) -> Tuple[int, int]:
         """saves on local disk the uploaded file"""
@@ -68,6 +68,7 @@ def register(cargo: Cargo, file_data: object | str) -> Cargo:
             user_dataFiles_key,
             id_users=cargo.user.id,
             id_sep=cargo.sep_data.id,  # this is an FK
+            id_spd=cargo.sep_data.spd_id,
             user_receipt=cargo.pd.user_receipt,
             app_version=cargo.app_version,
             process_version=cargo.process_version,

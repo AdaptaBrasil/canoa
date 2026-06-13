@@ -5,11 +5,11 @@
 # cSpell:ignore reraising dont samp, ffname
 
 import re
-from collections import Counter
 from os import path
 from flask import current_app, render_template
 from jinja2 import Environment, TemplateSyntaxError
 from typing import cast, Any, List
+from collections import Counter
 from flask_login import current_user
 
 from .pw_helper import is_anyone_logged
@@ -22,6 +22,7 @@ from ..common.app_error_assistant import AppStumbled, ModuleErrorCode
 
 _jinja_bug_found = APP_JINJA_TEMPLATE_BUG_FOUND
 _jinja_bug_tech_info = APP_JINJA_TEMPLATE_BUG_MSG_TECH
+
 
 
 # === Helpers ===

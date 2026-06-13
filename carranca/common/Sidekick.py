@@ -39,7 +39,7 @@ Sidekick
 # cSpell:ignore sqlalchemy mgd appcontext
 
 from flask import Flask, current_app
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 from logging import Logger
 from datetime import datetime
 from flask_login import current_user
@@ -55,6 +55,8 @@ class Sidekick:
     """
     A handy hub for sidekick objects for flask + Python (ƒ+py)
     """
+
+    _echoing = False
 
     def __init__(self, config: "DynamicConfig", display: Display):
 
@@ -83,7 +85,7 @@ class Sidekick:
 
     @property
     def user(self) -> "User":
-        _user: "User" = current_user
+        _user: "User" = cast("User", current_user)
         return _user
 
     @property
@@ -103,10 +105,18 @@ class Sidekick:
             # Todo create a buffer
             return
 
+        if self._echoing:
+            # avoid a  recursive error
+            return
+
+        self._echoing = True
         try:
             user_id = f"{(current_user.id if current_user.is_active else 0):03d}"
         except Exception as e:
+            self.app_log.debug(f"Current user load error in {self.__class__.__name__}: [{e}]")
             user_id = "usr!"
+        finally:
+            self._echoing = False
 
         text = f"{user_id}|{log_text}"
 

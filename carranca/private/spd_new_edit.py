@@ -26,7 +26,6 @@ from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import is_str_none_or_empty, is_empty
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.file_helper import folder_must_exist, get_unique_filename
-from ..helpers.html_helper import icon_url
 from ..helpers.types_helper import Route_Response, Choice, Choices
 from ..helpers.jinja_helper import process_template
 from ..helpers.uiact_helper import UiActResponseProxy
@@ -35,14 +34,13 @@ from ..helpers.ui_db_texts_manager import set_msg_fatal, UITextsKeys
 from ..models.private.spatial_data_file import SpatialDataFile
 from ..helpers.route_helper import (
     get_private_response_data,
-    init_response_vars,
     get_form_input_value,
+    init_response_vars,
     private_route,
     login_route,
     redirect_to,
     home_route,
 )
-
 from ..common.app_context_vars import app_user
 from ..common.app_error_assistant import ModuleErrorCode, JumpOut
 
@@ -64,38 +62,38 @@ def _do_spd_insert(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, file_obj: A
         return fnx
 
     error_msg = ""
-    error = 0
+    error_code = 0
     ffn = ""
     bytes_format = ""
 
     try:
         if not file_obj:
-            error += 1
+            error_code += 1
         elif is_str_none_or_empty(ofn := file_obj.filename):
             # Original file name
-            error += 2
+            error_code += 2
         elif is_str_none_or_empty(fex := __get_extension(ofn)):
-            error += 3
+            error_code += 3
         elif is_str_none_or_empty(ufn := get_unique_filename(f"sdf_{app_user.code}_", fex)):
             # Unique file name
-            error += 4
+            error_code += 4
         elif not folder_must_exist(sidekick.config.LOCAL_SPATIAL_DATA_PATH):
-            error += 5
+            error_code += 5
         elif len(content := file_obj.read()) < 512:
-            error += 6
+            error_code += 6
         elif (file_crc32 := crc32(content)) < 0:
-            error += 7
-        # elif SpatialDataFile.get_rows([SpatialDataFile.id.key], SpatialDataFile.file_crc32 == file_crc32):
-        #     _, error_msg = ui_db_texts.set_msg_error("errorFileExists", ofn)
-        #     error += 8
+            error_code += 7
+        elif SpatialDataFile.get_rows([SpatialDataFile.id.key], SpatialDataFile.file_crc32 == file_crc32):
+            _, error_msg = ui_db_texts.set_msg_error("errorFileExists", ofn)
+            error_code += 8
         elif SpatialDataFile.get_rows([SpatialDataFile.id.key], SpatialDataFile.spd_name_lower == func.lower(spd_row.spd_name)):
             _, error_msg = ui_db_texts.set_msg_error("errorNameExists", spd_row.spd_name)
-            error += 9
+            error_code += 9
         elif analyze_bytes and not (bytes_format := spd_file_format(fex)):
             # raise Exception(f"Unknown Spatial Data File extension <code>{fex}</code>.")
-            error += 10
+            error_code += 10
         else:
-            error += 11
+            error_code += 11
             spd_row.original_file_name = ofn
             # Unique File Name
             spd_row.file_name = ufn
@@ -105,7 +103,7 @@ def _do_spd_insert(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, file_obj: A
             ffn = path.join(sidekick.config.LOCAL_SPATIAL_DATA_PATH, ufn)
 
             # After writing the data, if an error occurs raise exception to delete file
-            error += 1
+            error_code += 1
             with open(ffn, "wb") as file:
                 spd_row.file_size = file.write(content)
 
@@ -115,21 +113,21 @@ def _do_spd_insert(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, file_obj: A
             values_from_fields: List[str] = [DEFAULT_ID_ATTRIBUTE_NAME]
             form_field_list = SpdInsert().field_list
 
-            error += 1
+            error_code += 1
             for f in form_field_list:
                 f_name = getattr(spd_row, f.name)
                 if f_name and not f_name in values_from_fields:
                     values_from_fields.append(f_name)
 
             if analyze_bytes:
-                error += 1
+                error_code += 1
                 spd_data = spd_info_from_bytes(content, bytes_format, layer, values_from_fields)
             else:
-                error += 2
+                error_code += 2
                 spd_data = spd_info_from_file(ffn, layer, values_from_fields)
 
-            if s := spd_data["error"]:
-                _, error_msg = ui_db_texts.set_msg_error("errorMetadataRead", (ofn, s))
+            if error_info := spd_data["error"]:
+                _, error_msg = ui_db_texts.set_msg_error("errorMetadataRead", (ofn, error_info))
                 raise Exception(error_msg)
 
             layer_data = spd_data["layer"]
@@ -147,24 +145,26 @@ def _do_spd_insert(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, file_obj: A
                     setattr(spd_row, f.name, None)
                     fields_removed.append(f.name)
 
-            error = 0
+            error_code = 0
             if fields_removed:
                 ui_db_texts.set_msg_success("spdInsertSuccessFields", str(fields_removed))
             else:
                 ui_db_texts.set_msg_success("spdInsertSuccess")
 
     except Exception as e:
-        _, error_msg = ui_db_texts.set_msg_error("spdInsertException", (error, e))
+        _, error_msg = ui_db_texts.set_msg_error("spdInsertException", (error_code, e))
         sidekick.display.error(error_msg)
-        # Clean up: delete the file if it was created
+
+    if error_code > 0:
         try:
+            # Clean up: delete the file if it was created
             if path.exists(ffn):
                 os.remove(ffn)
         except Exception as cleanup_e:
             sidekick.display.error(f"Failed to delete file {ffn}: [{cleanup_e}].")
 
-    if error > 0 and is_empty(error_msg):
-        _, error_msg = ui_db_texts.set_msg_error("spdInsertError", error)
+        if not error_msg:
+            _, error_msg = ui_db_texts.set_msg_error("spdInsertError", error_code)
 
     return is_empty(error_msg)
 

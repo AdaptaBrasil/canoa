@@ -105,11 +105,11 @@ def do_sep_edit(data: str) -> str:
                 icon_data.file_name = icon_data.storage.filename
             return icon_data
 
-        def _was_form_sep_modified(sep_row: Sep, form: SepNew | SepEdit) -> Tuple[bool, bool, str, int, int, int]:
+        def _was_form_sep_modified(sep_row: Sep, form: SepNew | SepEdit) -> Tuple[bool, bool, str, int, int, int | None]:
             if is_get:
-                return (False, False, "", -1, -1, -1)
+                return (False, False, "", -1, -1, None)
 
-            id_manager, frm_id_schema, frm_sep_name, frm_id_spd = (None, 0, "", 0)
+            id_manager, frm_id_schema, frm_sep_name, frm_id_spd = (None, 0, "", None)
 
             if edit_full_or_ins:
                 frm_id_manager = cast(int, form.manager_list.data)
@@ -117,7 +117,8 @@ def do_sep_edit(data: str) -> str:
                 frm_id_schema = cast(int, form.schema_list.data)
                 frm_visible = cast(bool, form.visible.data)
                 frm_sep_name = get_form_input_value(form.sep_name.name, [Sep.scm_sep])
-                frm_id_spd = to_int(form.spd_name.data)
+                id_spd = to_int(form.spd_name.data)
+                frm_id_spd = id_spd if id_spd > 0 else None
                 frm_description = get_form_input_value(form.description.name)
             else:
                 frm_visible = cast(bool, form.visible.data)
@@ -154,7 +155,7 @@ def do_sep_edit(data: str) -> str:
 
         task_code += 1  # 1
         tmpl_ffn, is_get, ui_db_texts = get_private_response_data("sepNewEdit")
-        if True:  # prepare ui_db_texts & insert & edit form
+        if True:  # is_get prepare ui_db_texts & insert & edit form
             no_manager = NoManager(name=ui_db_texts["mng_placeholderOption"])
 
             ui_db_texts["formForNew"] = edit_full_or_ins
@@ -212,7 +213,7 @@ def do_sep_edit(data: str) -> str:
             sep_row.name = sep_name
             sep_row.visible = bool(fform.visible.data)
             sep_row.description = get_form_input_value(fform.description.name)
-            sep_row.id_spd = int(fform.spd_name)
+            sep_row.id_spd = id_spd
             batch_code = get_batch_code()
 
             if editMode == SepEditMode.INSERT:

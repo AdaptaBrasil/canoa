@@ -8,7 +8,6 @@ mgd
 
 # cSpell:ignore sqlalchemy wtforms
 
-from typing import Any
 from flask import request
 
 from ..wtforms import RegisterForm
@@ -23,7 +22,6 @@ from ...helpers.route_helper import (
     get_account_response_data,
     get_form_input_value,
     init_response_vars,
-    public_route,
 )
 
 

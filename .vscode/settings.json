@@ -42,17 +42,23 @@
     "python.analysis.indexing": false,
     "python.analysis.typeCheckingMode": "standard",
     "python.analysis.extraPaths": [
-        ".env/Lib/site-packages"
+        ".venv/Lib/site-packages"
     ],
     // === Environment and Interpreter Settings ===
     // mgd per copilot  2026.03.05 "python.defaultInterpreterPath": ".env\\Scripts\\python.exe",
-    "python.defaultInterpreterPath": "C:\\Program Files\\Python\\v313\\python.exe",
+    // "python.defaultInterpreterPath": "C:\\Program Files\\Python\\v313\\python.exe",
+    // mgd per Claude, python + flake8 2026/06/11
+    // "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+    "python.defaultInterpreterPath": "D:\\Projects\\AdaptaBrasil\\Canoa\\.venv\\Scripts\\python.exe",
+    "flake8.interpreter": [
+        "D:\\Projects\\AdaptaBrasil\\Canoa\\.venv\\Scripts\\python.exe"
+    ],
     // mgd I need a couple of empty rules
     "css.lint.emptyRules": "ignore",
     "python.REPL.enableREPLSmartSend": false,
     // mgd per Claude, fix the annoyn Black formater {{ xx }} => { { xx } }
     "[jinja-html]": {
         "editor.defaultFormatter": null,
-        "editor.formatOnSave": false
+        "editor.formatOnSave": false,
     },
 }

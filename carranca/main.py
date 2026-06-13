@@ -114,7 +114,7 @@ else:
 # elif if app_debug and not
 
 #     if sidekick.config.APP_AUTO_RERUN and app_debug:
-#         sidekick.display.warning(
+#         sidekick.display.warn(
 #             "You are running the app with both debug and auto-reload. This is not recommended."
 #         )
 #     app.run(debug=app_debug)

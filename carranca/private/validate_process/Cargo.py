@@ -8,8 +8,9 @@ upload_file validation process loop.
 
 Part of Canoa `File Validation` Processes
 """
+
 from datetime import datetime
-from typing import Optional, Tuple
+from typing import TypeAlias, Optional, Tuple
 
 from ..receive_file import RECEIVE_FILE_DEFAULT_ERROR
 
@@ -20,6 +21,8 @@ from ...config.ValidateProcessConfig import ValidateProcessConfig
 
 from ..UserSep import UserSep
 from .ProcessData import ProcessData
+
+Next_Cargo: TypeAlias = Tuple[int, str, str, "Cargo"]
 
 
 class Cargo:
@@ -61,9 +64,9 @@ class Cargo:
         self.submit_started_at: datetime | None = None
         self.email_started_at: datetime | None = None
         """ same as file ticket, a unique key in table UserDataFiles """
-        self.table_udf_key = None
+        self.table_udf_key: str = ""
 
-    def file_registered(self, unique_key) -> bool:
+    def file_registered(self, unique_key: str) -> bool:
         self.table_udf_key = unique_key
         return True
 
@@ -82,7 +85,7 @@ class Cargo:
         msg_exception: str = "",
         next: Optional[dict] = {},
         final: Optional[Usual_Dict] = {},
-    ) -> Tuple[int, str, str, object]:
+    ) -> Next_Cargo:
         """
         Updates the class with the 'next' procedure values
 
@@ -93,8 +96,8 @@ class Cargo:
             next (dict):              parameters for the `next` procedure
             final (dict):             collects items for the final result: `return final`
 
-        Returns:
-            tuple:
+        Returns
+          Next_Cargo
             int   error code (0 no error)
             str   an entry in vw_ui_texts
             str   exception error message, to be logged, in order to assist in the debugging process

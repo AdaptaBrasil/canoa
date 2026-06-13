@@ -46,6 +46,7 @@ class ValidateProcessConfig:
     def __init__(self, debug=False):  #: BaseConfig
         # dv_app `data_validate` app output file name and extension
         self.output_file = OutputFile(name="data_report", ext=".pdf")
+        self.spd_data_file = OutputFile(name="spd_data", ext=".json")
         self.dv_app = DataValidateApp(
             batch="run_validate." + ("bat" if OS_IS_WINDOWS else "sh"),  # TODO: OS_IS_LINUX
             folder="data_validate",  # ./<common_folder>/<folder>/python main.py
@@ -60,7 +61,7 @@ class ValidateProcessConfig:
             na_out_folder="--output_folder",
         )
         # remove data_validate temporary files from (...data_tunnel/<user_code>/
-        self.remove_tmp_files = True
+        self.remove_tmp_files = False
         _debug = ValidateProcessConfig._debug_process  # hard coded debug flag
         self.debug_process = debug if _debug is None else bool(_debug)
         self.stdout_result_pattern = r"<\{\"data_validate\":.*?}>"

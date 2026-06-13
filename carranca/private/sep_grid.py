@@ -28,7 +28,7 @@ def get_sep_grid(allow_post: bool = False) -> Jinja_Rendered:
         sep_usr_rows = MgmtSepsUser.get_seps_usr(col_names)
         for sep in sep_usr_rows:
             sep_id = sep.id
-            sep.id = MgmtSepsUser.code(sep_id)
+            sep.id = MgmtSepsUser.to_code(sep_id)
             sep.icon_file_name = do_icon_get_url(sep.icon_file_name, sep_id)
 
         return sep_usr_rows

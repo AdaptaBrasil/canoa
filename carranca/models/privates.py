@@ -63,6 +63,7 @@ class UserDataFiles(SQLABaseTable):
     id = Column(Integer, primary_key=True, autoincrement=True)
     ticket = Column(String(40), unique=True)
     id_sep = Column(Integer)  # fk
+    id_spd = Column(Integer)  # fk  spatial_data_files
     id_users = Column(Integer)  # fk
     log_file_name = Column(String(200))  # use in case of error
     # register, file info
@@ -115,7 +116,7 @@ class UserDataFiles(SQLABaseTable):
     # registered_at, at insert
     # db_version
     # email_sent_at, when email_sent = T
-    # error_at, at error_code not 0
+    # error_at, when error_code not 0
     # Special
     # error_handled, when admin handles the error (TODO)
 
@@ -173,11 +174,13 @@ class UserDataFiles(SQLABaseTable):
         return None
 
     # Public insert/update
-    def insert(self, uTicket: str, **kwargs) -> None:
+    @staticmethod
+    def insert(uTicket: str, **kwargs) -> None:
         UserDataFiles._ins_or_upd(True, uTicket, **kwargs)
         return None
 
-    def update(self, uTicket: str, **kwargs) -> None:
+    @staticmethod
+    def update(uTicket: str, **kwargs) -> None:
         UserDataFiles._ins_or_upd(False, uTicket, **kwargs)
         return None
 

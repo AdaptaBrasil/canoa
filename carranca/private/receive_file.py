@@ -9,7 +9,7 @@ mgd
 # cSpell: ignore werkzeug wtforms tmpl urlname upload_file
 
 from flask import request
-from typing import TYPE_CHECKING, List, Tuple
+from typing import TYPE_CHECKING, Any, List, Tuple
 from werkzeug.utils import secure_filename
 
 
@@ -30,6 +30,8 @@ from ..helpers.types_helper import Jinja_Template, Usual_Dict, Jinja_Rendered
 from ..helpers.route_helper import get_private_response_data, get_form_input_value, init_response_vars
 from ..helpers.dwnLd_goo_helper import is_gd_url_valid, download_public_google_file
 from ..helpers.js_consts_helper import js_ui_dictionary
+from .validate_process.ProcessData import ProcessData
+from ..models.private.spatial_data_file import SpatialDataFile
 from ..helpers.ui_db_texts_manager import (
     UITextsKeys,
     set_msg_success,
@@ -37,7 +39,6 @@ from ..helpers.ui_db_texts_manager import (
     set_msg_fatal,
     set_msg_warn,
 )
-from .validate_process.ProcessData import ProcessData
 
 if TYPE_CHECKING:
     from .UserSep import UserSep, UserSepList
@@ -52,27 +53,35 @@ def _do_sep_placeholderOption(fullname: str) -> "UserSep":
     from .SepIconMaker import SepIconMaker
     from .UserSep import UserSep
 
-    sep_fake = UserSep(-1, "", "", fullname, "", False, SepIconMaker.none_file, do_icon_get_url(""))  # empty
+    id_fake = -1
+    name_fake = ""
+    sep_fake = UserSep(
+        id_fake, name_fake, id_fake, name_fake, name_fake, fullname, "", False, SepIconMaker.none_file, do_icon_get_url("")
+    )  # empty
     return sep_fake
 
 
 def receive_file() -> Jinja_Template:
+    # Leave it here, unless you know why you need to change it.
+    from .validate_process.process import process
 
     # utils
     def _get_template(ui_db_texts: UIDBTexts, error_code: int) -> Jinja_Rendered:
+        # UPDATE ui_db_texts
         seps: "UserSepList" = []
-        ui_db_texts[UITextsKeys.Msg.tech] = ""
-        ui_db_texts[UITextsKeys.Msg.info] = ""
+        ui_db_texts.reset_messages()
+        # mew ui_db_texts ui_db_texts[UITextsKeys.Msg.tech] = ""
+        # ui_db_texts[UITextsKeys.Msg.info] = ""
         if error_code != 0:
-            ui_db_texts[UITextsKeys.Msg.tech] = sidekick.log_filename
+            ui_db_texts.set_value(UITextsKeys.Msg.tech, sidekick.log_filename)
         elif not (seps := [sep for sep in app_user.seps]):
-            ui_db_texts[UITextsKeys.Msg.warn] = ui_db_texts["noSEPassigned"]
+            ui_db_texts.set_msg_warn("noSEPassigned")
             seps: "UserSepList" = []
         elif len(seps) > 1:
-            sep_placeholder_option = _do_sep_placeholderOption(ui_db_texts["placeholderOption"])
+            sep_placeholder_option = _do_sep_placeholderOption(ui_db_texts.get_str("placeholderOption"))
             seps.insert(0, sep_placeholder_option)
 
-        ui_db_texts[UITextsKeys.Form.icon_url] = seps[0].icon_url if len(seps) > 0 else ""
+        ui_db_texts.set_value(UITextsKeys.Form.icon_url, seps[0].icon_url if len(seps) > 0 else "")
         seps_list: List[Usual_Dict] = [{"code": sep.code, "fullname": sep.fullname, "icon_url": sep.icon_url} for sep in seps]
         tmpl = process_template(tmpl_ffn, form=fform, seps=seps_list, fi=fi.with_icon(), **ui_db_texts.data(), **js_ui_dictionary())
         return tmpl
@@ -80,7 +89,7 @@ def receive_file() -> Jinja_Template:
     def _log_issue(ui_db_texts: UIDBTexts, msg_type: Display.Kind, error_code: int, msg_id: str, task_code: int, msg_arg: str = "") -> int:
         local_error = ModuleErrorCode.RECEIVE_FILE_ADMIT.value + task_code
         show_code = f"{local_error}" if error_code == 0 else f"{error_code}:{task_code}"
-
+        # UPDATE ui_db_texts
         match msg_type:
             case Display.Kind.WARN:
                 msg_arg = set_msg_warn(msg_id, ui_db_texts, show_code, msg_arg)
@@ -91,6 +100,19 @@ def receive_file() -> Jinja_Template:
 
         sidekick.display.type(msg_type, msg_arg)
         return local_error
+
+    # def _update_sep_data( sep_data : UserSep):
+    #     # TODO: SEP_DATA Temporary: until the view MgmtSepsUser is updated
+    #     # MgmtSepsUser
+    #     # spd_id = Column(Integer)
+    #     # spd_name = Column(String(100))
+    #     # spd_file = Column(String(100))
+
+    #     spd_id = sep_data.id
+    #     sep_row = Sep
+    #     spd_row: SpatialDataFile = SpatialDataFile.get_row(spd_id)
+    #                 spd_row.file_name = ufn
+    #         spd_row.file_crc32 = file_crc32
 
     jHtml, is_get, ui_texts, task_code = init_response_vars(ModuleErrorCode.LEGACY_STYLE)
     fform = ReceiveFileForm()
@@ -103,7 +125,7 @@ def receive_file() -> Jinja_Template:
 
         received_at = now()
         # Find out what was kind of data was sent: an uploaded file or an URL (download)
-        file_obj = request.files[fform.upload_file.name] if len(request.files) > 0 else None
+        file_obj: Any = request.files[fform.upload_file.name] if len(request.files) > 0 else None
         task_code += 1  # 2
         url_str = get_form_input_value(fform.urlname.name)
         task_code += 1  # 3
@@ -119,7 +141,7 @@ def receive_file() -> Jinja_Template:
 
         # get the select SEP
 
-        # Basic check, both, none or bad url
+        # Basic file origin check: both, none or bad url
         sep_data = next((sep for sep in app_user.seps if sep.code == sep_code), None)
         if sep_data is None:
             _log_issue(ui_texts, Display.Kind.WARN, 0, "receiveFileAdmit_bad_sep", task_code + 1, sep_code)  # 7
@@ -185,12 +207,14 @@ def receive_file() -> Jinja_Template:
         pd.received_file_name = secure_filename(pd.received_original_name)
         task_code = 20  # 20
         ve = ui_texts["validExtensions"]
-        valid_extensions = ".zip" if is_str_none_or_empty(ve) else ve.lower().split(",")
+        valid_extensions = [".zip"] if is_str_none_or_empty(ve) else ve.lower().split(",")
 
         task_code += 1  # 21
-        from .validate_process.process import process
+        # TODO: SEP_DATA
+        ## _update_sep_data(sep_data)
 
-        task_code += 1  # 22
+        task_code += 1  # 21
+
         error_code, msg_id, _ = process(app_user, sep_data, file_data, pd, received_at, valid_extensions)
 
         if error_code == 0:

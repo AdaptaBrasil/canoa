@@ -106,6 +106,9 @@ def process(
         `proc` Template:
         def proc(cargo: Cargo, param1, param2, ...) -> cargo:
           ''' process ....
+
+        # mgd test
+        D:/Projects/AdaptaBrasil/Canoa/user_files/uploaded/00212/00212_2026-06-11_ei9358_se_saude_07_08.zip
     """
     for current_module in [check, register, unzip, submit, email]:
         current_module_name = current_module.__name__

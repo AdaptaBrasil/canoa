@@ -11,8 +11,8 @@ mgd
 
 from typing import TYPE_CHECKING, List
 
-from .IdToCode import IdToCode
 from ..helpers.types_helper import Error_Message
+from ..models.private.mgmt_seps_user import MgmtSepsUser
 
 if TYPE_CHECKING:
     type UserSepList = List["UserSep"]
@@ -30,21 +30,20 @@ class UserSep:
     see .models.MgmtUserSeps
     """
 
-    # obfuscate the id when is public
-    id_to_code = IdToCode()
-
     @staticmethod
     def to_id(code: str) -> int:
-        return UserSep.id_to_code.decode(code)
+        return MgmtSepsUser.to_id(code)
 
     @property
     def code(self) -> str:
-        return UserSep.id_to_code.encode(self.id)
+        return MgmtSepsUser.to_code(self.id)
 
     def __init__(
         self,
         id: int,
         name: str,
+        spd_id: int,
+        spd_name: str,
         scm_name: str,
         fullname: str,
         description: str,
@@ -56,6 +55,8 @@ class UserSep:
 
         self.id = id
         self.name = name
+        self.spd_id = spd_id
+        self.spd_name = spd_name
         self.scm_name = scm_name
         self.fullname = fullname
         self.description = description
@@ -65,6 +66,8 @@ class UserSep:
 
     id: int
     name: str
+    spd_id: int
+    spd_name: str
     scm_name: str
     fullname: str
     description: str

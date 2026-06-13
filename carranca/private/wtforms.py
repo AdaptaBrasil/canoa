@@ -28,6 +28,7 @@ from ..common.app_context_vars import sidekick
 # ________________________________________________
 # Typical StringField, 'render KeyWord arguments'
 cls_render_kw = {"class": "form-control"}
+
 # The browser doesn't send disabled input's values, to Flask's forms assumes them empty,
 # so fform.populate_obj will clear there value
 # use readonly
@@ -104,28 +105,19 @@ class ReceiveFileForm(FlaskForm):
 class ChangePassword(FlaskForm):
     current_password = PasswordField(
         "",
-        validators=[
-            InputRequired(),
-            Length(**sidekick.config.DB_len_val_for_pw.wtf_val()),
-        ],
+        validators=[InputRequired(), Length(**sidekick.config.DB_len_val_for_pw.wtf_val())],
         render_kw=cls_render_kw,
     )
 
     password = PasswordField(
         "",
-        validators=[
-            InputRequired(),
-            Length(**sidekick.config.DB_len_val_for_pw.wtf_val()),
-        ],
+        validators=[InputRequired(), Length(**sidekick.config.DB_len_val_for_pw.wtf_val())],
         render_kw=cls_render_kw,
     )
 
     confirm_password = PasswordField(
         "",
-        validators=[
-            InputRequired(),
-            Length(**sidekick.config.DB_len_val_for_pw.wtf_val()),
-        ],
+        validators=[InputRequired(), Length(**sidekick.config.DB_len_val_for_pw.wtf_val())],
         render_kw=cls_render_kw,
     )
 
@@ -253,17 +245,14 @@ class ScmEdit(FlaskForm):
 
 # Private form
 class SpdForm(FlaskForm):
-    spd_name = StringField(
-        "", validators=[InputRequired(), Length(min=2, max=140)], render_kw={**str_render_kw, "autofocus": "true"}
-    )
+    spd_name = StringField("", validators=[InputRequired(), Length(min=2, max=140)], render_kw={**str_render_kw, "autofocus": "true"})
 
-    spd_title = StringField(
-        "", validators=[InputRequired(), Length(min=2, max=140)], render_kw=str_render_kw
-    )  # TODO read form db
+    spd_title = StringField("", validators=[InputRequired(), Length(min=2, max=140)], render_kw=str_render_kw)  # TODO read form db
 
     spd_description = StringField("", validators=[Length(min=5, max=140)], render_kw=str_render_kw)
 
 
+# Derived Private form
 class SpdInsert(SpdForm):
     _len_val = [Length(min=2, max=8)]
     # field_attributes.list is accessed outside (see .\private\spd_new_edit.py:do_spd_edit)
@@ -292,6 +281,7 @@ class SpdInsert(SpdForm):
             field.data = str(ins_ph[i]) if ins_ph[i] else None
 
 
+# Derived Private form
 class SpdEdit(SpdForm):
 
     field_id = SelectField("", validators=[DataRequired()], choices=[], render_kw=select_render_kw)

@@ -84,7 +84,7 @@ def ups_handler(
     caller_function = inspect.stack()[1].function
 
     # default texts that can be use in the form (see ups_page)
-    context_texts = {
+    context_texts: dict[str, str | int | bool] = {
         UITextsKeys.Msg.tech: tech_msg,
         UITextsKeys.Msg.warn: user_msg,
         UITextsKeys.Msg.error: error_msg,

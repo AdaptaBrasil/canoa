@@ -10,7 +10,7 @@ mgd
 
 # cSpell:ignore
 
-from .Cargo import Cargo
+from .Cargo import Next_Cargo, Cargo
 from ...models.privates import UserDataFiles
 from ...common.app_context_vars import sidekick
 from ...common.app_error_assistant import ModuleErrorCode
@@ -18,7 +18,7 @@ from ...helpers.py_helper import now_as_text, now
 from ...helpers.email_helper import RecipientsDic, RecipientsList, send_email
 
 
-def email(cargo: Cargo, user_report_full_name) -> Cargo:
+def email(cargo: Cargo, user_report_full_name) -> Next_Cargo:
     """
     Send an email to the user with the
     data_validate report attached.

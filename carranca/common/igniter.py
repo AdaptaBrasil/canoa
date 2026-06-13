@@ -17,7 +17,7 @@
 # It is only run once.
 
 import time, os.path as path
-from typing import cast, Tuple, Optional, TYPE_CHECKING
+from typing import Tuple, Optional
 
 
 from .Args import Args

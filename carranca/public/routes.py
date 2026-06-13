@@ -9,7 +9,7 @@ mgd
 """
 
 # cSpell:ignore errorhandler
-
+from http import HTTPStatus
 from flask import Blueprint, render_template
 
 # from flask_login import LoginManager
@@ -140,27 +140,27 @@ def docs(publicDocName: str):
 
 # Common Errors -------------------------------------------
 # 403 Forbidden
-@bp_public.errorhandler(403)
+@bp_public.errorhandler(HTTPStatus.FORBIDDEN)
 def access_forbidden(error):
-    return render_template("home/page-403.html"), 403
+    return render_template(f"home/page-{HTTPStatus.FORBIDDEN}.html"), HTTPStatus.FORBIDDEN
 
 
 # 404 Not Found
-@bp_public.errorhandler(404)
+@bp_public.errorhandler(HTTPStatus.NOT_FOUND)
 def not_found_error(error):
-    return render_template("home/page-404.html"), 404
+    return render_template(f"home/page-{HTTPStatus.NOT_FOUND}.html"), HTTPStatus.NOT_FOUND
 
 
 # 500 Internal Server Error
-@bp_public.errorhandler(500)
+@bp_public.errorhandler(HTTPStatus.INTERNAL_SERVER_ERROR)
 def internal_error(error):
-    return render_template("home/page-500.html"), 500
+    return render_template(f"home/page-{HTTPStatus.INTERNAL_SERVER_ERROR}.html"), HTTPStatus.INTERNAL_SERVER_ERROR
 
 
-# Unauthorized Access -------------------------------------
+# 401 Unauthorized Access  ---------------------------------
 @global_login_manager.unauthorized_handler
 def unauthorized_handler():
-    return render_template("home/page-403.html"), 403
+    return render_template(f"home/page-{HTTPStatus.UNAUTHORIZED}.html"), HTTPStatus.UNAUTHORIZED
 
 
 # eof

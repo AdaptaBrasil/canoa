@@ -15,8 +15,7 @@ mgd 2026.04.09 -- 30
 
 from typing import TypeAlias, Type, List, TypeVar, overload, Optional, cast
 from dataclasses import is_dataclass
-from sqlalchemy import Integer, Column, ColumnExpressionArgument, event, select
-from sqlalchemy.exc import DatabaseError
+from sqlalchemy import Integer, ColumnExpressionArgument, event, select
 from sqlalchemy.orm import DeclarativeBase, Session, Mapped, mapped_column
 from sqlalchemy.sql.elements import ColumnElement
 
@@ -134,7 +133,11 @@ class CanoaBase(DeclarativeBase):
             where_or_id: Filter condition:
                 - 0 (default): no filtering
                 - int: filter by id (WHERE id = where_id)
-                - ColumnExpressionArgument[bool]: custom WHERE clause
+                - ColumnExpressionArgument[bool]: custom WHERE clause, eg:
+                    TModel.spd_id == spd_id
+                    TModel.status.in_(["a", "b"])
+                    TModel.name.ilike("%foo%")
+                    and_(TModel.a == 1, TModel.b == 2)
             order_col: Optional column name to order results by (ORDER BY order_col)
 
         Returns:
@@ -145,48 +148,44 @@ class CanoaBase(DeclarativeBase):
         error_code += 1
 
         # Determine which columns to select and prepare them for SQL
-        selected_cols_names: List[str] = []
+        requested_col_names: List[str] = []
         all_cols = False
         order_column: ColumnElement | None = None
         if col_names is None:
             # No selection → select all via ORM model
             all_cols = True
-            selected_cols_names = []
+            requested_col_names = []
         elif isinstance(col_names, list):
-            selected_cols_names = col_names
+            requested_col_names = col_names
             all_cols = len(col_names) == 0
         elif is_dataclass(schema := col_names):
             fields = schema.__annotations__.keys()
-            selected_cols_names = [name for name in fields]
+            requested_col_names = [name for name in fields]
         else:
-            raise TypeError(
-                f"get_row() for `col_names` expects  None, List[str], or a dataclass type, "
-                f"got {type(col_names).__name__}"
-            )
+            raise TypeError(f"get_row() for `col_names` expects  None, List[str], or a dataclass type, " f"got {type(col_names).__name__}")
 
         error_code += 1
-        selected_columns: List[ColumnElement] = [
-            col for col in cls.__table__.columns if all_cols or col.name in selected_cols_names
-        ]
+        # Keep the requested order
+        # selected_columns: List[ColumnElement] = [
+        #     col for col in cls.__table__.columns if all_cols or col.name in selected_cols_names
+        # ]
+        col_map = {col.name: col for col in cls.__table__.columns}
+        selected_columns: List[ColumnElement] = (
+            list(cls.__table__.columns) if all_cols else [col_map[name] for name in requested_col_names if name in col_map]
+        )
 
         error_code += 1
         if order_col_name is None:
             pass
         elif not isinstance(order_col_name, str):
-            raise TypeError(
-                f"get_row() for `order_col_name` expects None or str, " f"got {type(order_col_name).__name__}"
-            )
+            raise TypeError(f"get_row() for `order_col_name` expects None or str, " f"got {type(order_col_name).__name__}")
         elif (order_column := cls.__table__.columns.get(order_col_name)) is None:
-            raise AppStumbled(
-                f"Unknown column s [{order_col_name}] requested for table {cls.__tablename__} order by.",
-                error_code,
-                False,
-                True,
-            )
+            msg = f"Unknown column s [{order_col_name}] requested for table {cls.__tablename__} order by."
+            raise AppStumbled(msg, error_code, False, True)
 
         if sidekick.debugging:
             table_col_names = {col.name for col in cls.__table__.columns}
-            unknown_cols: List[str] = [col_name for col_name in selected_cols_names if col_name not in table_col_names]
+            unknown_cols: List[str] = [col_name for col_name in requested_col_names if col_name not in table_col_names]
             if unknown_cols:
                 raise AppStumbled(
                     f"Unknown cols [{', '.join(unknown_cols)}] requested for table {cls.__tablename__}",
@@ -205,9 +204,7 @@ class CanoaBase(DeclarativeBase):
             elif not isinstance(where_or_id, int):  # Then is a DBFilter
                 where = cast(DBFilter, where_or_id)
                 stmt = stmt.where(where)
-            elif (
-                id := int(where_or_id)
-            ) > 0:  # else if int (can be a false code (see Model.to_id(code))) or Zero (no rows)
+            elif (id := int(where_or_id)) > 0:  # else if int (can be a false code (see Model.to_id(code))) or Zero (no rows)
                 pk = id if id > 0 else 0
                 stmt = stmt.where(cls.id == pk)
 

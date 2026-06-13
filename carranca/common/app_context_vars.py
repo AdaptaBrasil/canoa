@@ -32,10 +32,9 @@ mgd
 # cSpell:ignore mgmt sepsusr usrlist
 import sys
 from flask import has_request_context, g
-from typing import TYPE_CHECKING, Callable, Optional, Any, List
+from typing import TYPE_CHECKING, Callable, Optional, List, cast, Any
 from flask_login import current_user
 from werkzeug.local import LocalProxy
-
 
 # from ..private.AppUser import AppUser
 # went to TYPE_CHECKING & Inside _get_app_user
@@ -52,7 +51,7 @@ if TYPE_CHECKING:
 
 _locks = {}
 _locks_lock = Lock()
-RUN_WITH_LOCKS = True  # debug _get_scoped_var
+RUN_WITH_LOCKS = False  # to DEBUG _get_scoped_var set to False
 
 
 def local_sidekick():
@@ -147,7 +146,6 @@ def __prepare_user_seps() -> "UserSepsRtn":
     from ..private.sep_icon import do_icon_get_url
     from ..helpers.pw_helper import is_anyone_logged
     from ..helpers.py_helper import class_to_dict
-    from ..helpers.types_helper import Usual_Dict
     from ..models.private.mgmt_seps_user import MgmtSepsUser
 
     user_id: int = current_user.id if is_anyone_logged() else -1
@@ -159,11 +157,11 @@ def __prepare_user_seps() -> "UserSepsRtn":
         except Exception as e:
             return str(e)
 
-        seps: List[Usual_Dict] = []
+        seps: List[UserSep] = []
         for sep_row in sep_usr_rows:
             item = UserSep(**sep_row)
             item.icon_url = do_icon_get_url(item.icon_file_name, item.id)
-            dic = class_to_dict(item)
+            dic: UserSep = cast(UserSep, class_to_dict(item))
             # as `g` only saves 'simple' classes convert it to a Dict
             seps.append(dic)
 
@@ -193,9 +191,9 @@ def __get_user_seps() -> "UserSepList":
 # Proxies
 # =========================================================
 
-app_user: "AppUser" = LocalProxy(__get_app_user)
-user_seps: "UserSepsRtn" = LocalProxy(__get_user_seps)
-jinja_user: Optional["JinjaUser"] = LocalProxy(__get_jinja_user)
+app_user: "AppUser" = cast("AppUser", LocalProxy(__get_app_user))
+user_seps: "UserSepsRtn" = cast("UserSepsRtn", LocalProxy(__get_user_seps))
+jinja_user: Optional["JinjaUser"] = cast(Optional["JinjaUser"], LocalProxy(__get_jinja_user))
 
 
 def __getattr__(name):

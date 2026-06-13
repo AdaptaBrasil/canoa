@@ -14,20 +14,20 @@ mgd
 from os import path
 from typing import List
 
-from ...helpers.py_helper import is_str_none_or_empty, now
+from ...helpers.py_helper import is_str_none_or_empty, to_int, now
 from ...helpers.db_helper import get_str_field_length
 from ...helpers.file_helper import file_must_exist, folder_must_exist, is_same_file_name
 from ...common.app_context_vars import sidekick
 from ...common.app_error_assistant import ModuleErrorCode
 
 from ...models.privates import UserDataFiles
-from .Cargo import Cargo
+from .Cargo import Next_Cargo, Cargo
 
 
-def check(cargo: Cargo, file_data: object | str, valid_ext: List[str]) -> Cargo:
+def check(cargo: Cargo, file_data: object | str, valid_ext: List[str]) -> Next_Cargo:
     error_code = 0
     msg_exception = ""
-    task_code = 0
+    task_code = -1
     cs = cargo.pd
     cargo.check_started_at = now()
     receive_method = "downloaded" if cs.file_was_downloaded else "uploaded"
@@ -45,6 +45,8 @@ def check(cargo: Cargo, file_data: object | str, valid_ext: List[str]) -> Cargo:
             task_code = 4
         elif is_str_none_or_empty(cargo.receive_file_cfg.output_file.ext):
             task_code = 5
+        elif is_str_none_or_empty(cargo.receive_file_cfg.spd_data_file.name) and (cargo.sep_data.spd_id > 0):
+            task_code = 6
         elif len(cs.received_file_name) > file_name_max_len:
             task_code = 7
         elif not any(cs.received_file_name.lower().endswith(ext.strip().lower()) for ext in valid_ext):
@@ -59,11 +61,7 @@ def check(cargo: Cargo, file_data: object | str, valid_ext: List[str]) -> Cargo:
             task_code = 13
         elif not path.isfile(cs.path.batch_source_name):
             task_code = 14
-        elif not file_must_exist(
-            cs.path.batch_full_name,
-            cs.path.batch_source_name,
-            True,
-        ):
+        elif not file_must_exist(cs.path.batch_full_name, cs.path.batch_source_name, True):
             task_code = 15
         else:
             task_code = 0
@@ -73,9 +71,7 @@ def check(cargo: Cargo, file_data: object | str, valid_ext: List[str]) -> Cargo:
                 sidekick.display.info(
                     f"{proc}The {receive_method} file [{cs.received_original_name}] has been renamed to [{cs.received_file_name}]."
                 )
-            sidekick.display.info(
-                f"{proc}The {receive_method} file [{cs.received_file_name}] was successfully verified."
-            )
+            sidekick.display.info(f"{proc}The {receive_method} file [{cs.received_file_name}] was successfully verified.")
         else:
             sidekick.display.error(
                 f"{proc}The {receive_method} file [{cs.received_file_name}] failed in module `check` with code {task_code}."

@@ -15,7 +15,7 @@ import shutil
 import asyncio
 from os import path, stat, access, X_OK
 
-from .Cargo import Cargo
+from .Cargo import Next_Cargo, Cargo
 from ...models.privates import UserDataFiles
 from .run_validator import run_validator
 from ...helpers.file_helper import change_file_ext
@@ -110,7 +110,7 @@ def _store_report_result(
             sidekick.display.error(f"Error saving data_validate result: {result_json_str} [{e}]")
 
 
-def submit(cargo: Cargo) -> Cargo:
+def submit(cargo: Cargo) -> Next_Cargo:
     """
     Submit the unzip files to app `data_validate` and
     wait for the report
@@ -157,9 +157,7 @@ def submit(cargo: Cargo) -> Cargo:
             raise Exception(f"The `{_cfg.dv_app.ui_name}` module caller [{batch_full_name}] was not found.")
         elif OS_IS_LINUX and not access(batch_full_name, X_OK):
             batch_has_run_permission = False
-            sidekick.display.warn(
-                f"{proc}Account doesn't have the necessary permissions to execute '{batch_full_name}'."
-            )
+            sidekick.display.warn(f"{proc}Account doesn't have the necessary permissions to execute '{batch_full_name}'.")
 
         result_ext = _cfg.output_file.ext.lower()  # ⚠️ keep always the same case (all lower)
         final_report_file_name = f"{_cfg.output_file.name}{result_ext}"
@@ -210,9 +208,7 @@ def submit(cargo: Cargo) -> Cargo:
             )
         elif stat(final_report_full_name).st_size < 200:
             task_code += 2  # 9
-            raise Exception(
-                f"\n{sidekick.app_name}: The report has an invalid size of = {stat(final_report_full_name).st_size}b."
-            )
+            raise Exception(f"\n{sidekick.app_name}: The report has an invalid size of = {stat(final_report_full_name).st_size}b.")
         else:
             # ⚠️ PDF is moved to /canoa/user_files/uploaded/<user_id>
             # copy the final_report file to the same folder and
@@ -243,25 +239,19 @@ def submit(cargo: Cargo) -> Cargo:
                     shutil.rmtree(folder)
                     sidekick.display.info(proc + msg + "removed.")
                 else:
-                    sidekick.display.warning(proc + msg + "not found.")
+                    sidekick.display.warn(proc + msg + "not found.")
 
             if cargo.receive_file_cfg.remove_tmp_files:
                 _remove_folder(_path_read)
                 _remove_folder(_path_write)
             else:
-                sidekick.display.info(
-                    f"{proc}The intermediate process folders contents was *not* removed, as requested."
-                )
+                sidekick.display.info(f"{proc}The intermediate process folders contents was *not* removed, as requested.")
         except Exception as e:
-            sidekick.display.warning(
-                f"{proc}The intermediate process folders contents were *not* removed because of an error [{e}]."
-            )
+            sidekick.display.warn(f"{proc}The intermediate process folders contents were *not* removed because of an error [{e}].")
 
     # goto email.py
     if error_code == 0:
-        sidekick.display.info(
-            f"{proc}The unzipped files were submitted to '{_cfg.dv_app.ui_name}' and a report was successfully generated."
-        )
+        sidekick.display.info(f"{proc}The unzipped files were submitted to '{_cfg.dv_app.ui_name}' and a report was successfully generated.")
     else:
         sidekick.display.error(
             f"{proc}There was a problem submitting the files to '{_cfg.dv_app.ui_name}'. Error code [{error_code}] and exit code [{exit_code}]."

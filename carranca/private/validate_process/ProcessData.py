@@ -24,12 +24,7 @@ class ProcessData:
     """
 
     class _User:
-        def __init__(
-            self,
-            downloaded: str,
-            uploaded: str,
-            folder: str,
-        ):
+        def __init__(self, downloaded: str, uploaded: str, folder: str):
             self.downloaded = path.join(downloaded, folder)
             self.uploaded = path.join(uploaded, folder)
             self.folder = folder
@@ -91,13 +86,7 @@ class ProcessData:
             self.data_validate = path.join(self.apps_parent_path, data_validate_folder)
 
     def __init__(
-        self,
-        user_code: str,
-        user_folder: str,
-        common_folder: str,
-        data_validate_folder: str,
-        batch_name: str,
-        file_was_downloaded: bool,
+        self, user_code: str, user_folder: str, common_folder: str, data_validate_folder: str, batch_name: str, file_was_downloaded: bool
     ):
         self._user_folder = user_folder
         # This is a unique key for the file name and a unique key in the data base

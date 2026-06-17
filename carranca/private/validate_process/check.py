@@ -52,17 +52,27 @@ def check(cargo: Cargo, file_data: object | str, valid_ext: List[str]) -> Next_C
         elif not any(cs.received_file_name.lower().endswith(ext.strip().lower()) for ext in valid_ext):
             task_code = 8
         # elif not response.headers.get('Content-Type') == ct in valid_content_types.split(',')): #check if really zip
-        # task_code = 10
+        # task_code = 9
         elif not folder_must_exist(cs.path.working_folder):
-            task_code = 11
+            task_code = 10
         elif not folder_must_exist(cs.path.data_tunnel_user_read):
-            task_code = 12
+            task_code = 11
         elif not folder_must_exist(cs.path.data_tunnel_user_write):
-            task_code = 13
+            task_code = 12
         elif not path.isfile(cs.path.batch_source_name):
-            task_code = 14
+            task_code = 13
         elif not file_must_exist(cs.path.batch_full_name, cs.path.batch_source_name, True):
-            task_code = 15
+            task_code = 14
+        # TODO:
+        # elif ( minutes_to_die := try_lock(cs.path.data_tunnel_user_write) > 0:
+        # if lock not exist OR lock is old:
+        #    delete folder content
+        #    create lock
+        # else:
+        #    return error and time do delete lock
+        # msg_exception = Folder is in use for other x min, wait and try again
+        # open("_validating.lock", "x")
+        # task_code = 15
         else:
             task_code = 0
 

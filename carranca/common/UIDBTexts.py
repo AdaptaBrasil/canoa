@@ -270,6 +270,7 @@ class UIDBTexts:
         for k_msg in self.msg_keys:
             self._data.pop(k_msg, None)
 
+        return
     # -- Message manipulation
 
     def get_ui_datetime(self, add_unit: int, dt_from: datetime, unit: str = "hours"):

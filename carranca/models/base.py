@@ -61,7 +61,7 @@ class CanoaBase(DeclarativeBase):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
     @classmethod
-    def get_row(cls: Type[TModel], id: int) -> TModel | None:
+    def get_row(cls: Type[TModel], id: int) -> TModel:  # | None (can be, test)
         """Get a single ORM instance by id, for insert/edit operations."""
         with global_sqlalchemy_scoped_session() as db_session:
             try:

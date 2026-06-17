@@ -245,9 +245,9 @@ def submit(cargo: Cargo) -> Next_Cargo:
                 _remove_folder(_path_read)
                 _remove_folder(_path_write)
             else:
-                sidekick.display.info(f"{proc}The intermediate process folders contents was *not* removed, as requested.")
+                sidekick.display.info(f"{proc}The contents of the intermediate process folders were *not* removed, as requested.")
         except Exception as e:
-            sidekick.display.warn(f"{proc}The intermediate process folders contents were *not* removed because of an error [{e}].")
+            sidekick.display.warn(f"{proc}The contents of the intermediate process folders were *not* removed due to an error. [{e}].")
 
     # goto email.py
     if error_code == 0:

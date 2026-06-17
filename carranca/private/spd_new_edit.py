@@ -43,6 +43,7 @@ from ..helpers.route_helper import (
 )
 from ..common.app_context_vars import app_user
 from ..common.app_error_assistant import ModuleErrorCode, JumpOut
+from .spd_analysis import SPD_DATA_KEY_FIELDS
 
 # This name is the standard; until the user informs it, use is.
 DEFAULT_ID_ATTRIBUTE_NAME = "id"
@@ -50,7 +51,7 @@ DEFAULT_ID_ATTRIBUTE_NAME = "id"
 
 def _get_choices(file_data: FileData) -> List[Tuple[str, str]]:
     choices: Choices = sorted(
-        [(k, f"{k} | {v['type']}") for k, v in file_data["fields"].items() if v["type"] in ["str", "int32"]],
+        [(k, f"{k} | {v['type']}") for k, v in file_data[SPD_DATA_KEY_FIELDS].items() if v["type"] in ["str", "int32"]],
         key=lambda x: x[0],
     )
     return choices

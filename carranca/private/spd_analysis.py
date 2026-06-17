@@ -41,6 +41,11 @@ SPD_EXT_SHP = ["shp"]
 SPD_FORMAT_GEOJSON = "GeoJSON"
 SPD_EXT_GEOJSON = ["geojson", "json"]
 
+SPD_DATA_KEY_FIELDS = "fields"
+SPD_DATA_KEY_VALUES = "values"
+SPF_DATA_KET_HAS_VALUES = "has_values"
+
+
 # Unified list of (format, extensions)
 SPD_FORMATS = [
     (SPD_FORMAT_GPKG, SPD_EXT_GPKG),
@@ -210,11 +215,11 @@ def _get_spd_info(
                 "total_count": len(series),
                 "non_null_count": len(non_null),
                 "unique_count": unique_vals_len,
-                "has_values": has_values,
+                SPF_DATA_KET_HAS_VALUES: has_values,
             }
 
-        spd_data[f := "fields"] = fields
-        spd_data[f := "values"] = values
+        spd_data[f := SPD_DATA_KEY_FIELDS] = fields
+        spd_data[f := SPD_DATA_KEY_VALUES] = values
 
     except Exception as e:
         # Note: f might still hold the previous attribute if the failure happens before assignment

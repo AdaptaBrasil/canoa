@@ -90,7 +90,7 @@ def register(cargo: Cargo, file_data: object | str) -> Next_Cargo:
         # After registered, table_udf_key has a value, set in cargo.file_registered
         # so process.end knows what to do (update or skip)
         file_registered = cargo.file_registered(user_dataFiles_key)
-        sidekick.display.info("[register]: The file information was inserted into the database.")
+        sidekick.display.info("[register]: The file information record was inserted into the table.")
     except Exception as e:
         error_code = ModuleErrorCode.RECEIVE_FILE_REGISTER.value + task_code
         msg_exception = str(e)

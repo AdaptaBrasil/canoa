@@ -84,7 +84,6 @@ class ModuleErrorCode(IntEnum):
     # legacy
     LEGACY_STYLE = 1
 
-
     SQLALCHEMY_BASE_TABLE = 90
 
     # Public Access Control Processes
@@ -108,9 +107,10 @@ class ModuleErrorCode(IntEnum):
     RECEIVE_FILE_CHECK = 210
     RECEIVE_FILE_REGISTER = 230
     RECEIVE_FILE_UNZIP = 240
-    RECEIVE_FILE_SUBMIT = 250
-    RECEIVE_FILE_EMAIL = 260
-    RECEIVE_FILE_PROCESS = 270
+    RECEIVE_FILE_GEODATA = 250
+    RECEIVE_FILE_SUBMIT = 260
+    RECEIVE_FILE_EMAIL = 270
+    RECEIVE_FILE_PROCESS = 280
     RECEIVE_FILE_EXCEPTION = 100  # this is added, as an exception, process.py
 
     RECEIVED_FILES_MGMT = 300
@@ -132,8 +132,6 @@ class ModuleErrorCode(IntEnum):
     SPD_EDIT = 900
     SPD_GRID = 940
     SPD_DOWNLOAD = 980
-
-
 
 
 class HTTP_StatusCode(StrEnum):

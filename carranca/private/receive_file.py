@@ -69,7 +69,6 @@ def receive_file() -> Jinja_Template:
     def _get_template(ui_db_texts: UIDBTexts, error_code: int) -> Jinja_Rendered:
         # UPDATE ui_db_texts
         seps: "UserSepList" = []
-        ui_db_texts.reset_messages()
         # mew ui_db_texts ui_db_texts[UITextsKeys.Msg.tech] = ""
         # ui_db_texts[UITextsKeys.Msg.info] = ""
         if error_code != 0:
@@ -92,11 +91,11 @@ def receive_file() -> Jinja_Template:
         # UPDATE ui_db_texts
         match msg_type:
             case Display.Kind.WARN:
-                msg_arg = set_msg_warn(msg_id, ui_db_texts, show_code, msg_arg)
+                _, msg_arg = ui_db_texts.set_msg_warn(msg_id, (show_code, msg_arg))
             case Display.Kind.ERROR:
-                msg_arg = set_msg_error(msg_id, ui_db_texts, show_code, msg_arg)
+                _, msg_arg = ui_db_texts.set_msg_error(msg_id, (show_code, msg_arg))
             case Display.Kind.FATAL:
-                msg_arg = set_msg_fatal(msg_id, ui_db_texts, show_code, msg_arg)
+                _, msg_arg = ui_db_texts.set_msg_fatal(msg_id, (show_code, msg_arg))
 
         sidekick.display.type(msg_type, msg_arg)
         return local_error

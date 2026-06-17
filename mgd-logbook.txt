@@ -42,16 +42,19 @@
             - if is saving -> set flag not to leave
             - save form state, to enable/disable menu
             - if [OK] -> disable form buttons (double click)
-        » Change logout alert to Canoa form
-        » About -> display db version
         » ajax
-        » Linux
-            - check no x permission on run_validate Linux
         » DB
             - drop columns users.mgmt_batch_code, mgmt_sep_at, mgmt_sep_id
             - drop view vw_mgmt_user_sep & trigger
             - drop columns log_user_sep.sep_new, id_sep_old
             - SchemaSEP
+
+
+        A user can not be disabled if it has a SEP, cannot be assigned a sep if is disabled
+        Check  carranca\templates\private\sep_mgmt.html.j2
+        if too many params {{ action_form__submit_cargo(dlg_post_form_id, private_route('sep_mgmt'), 'post', "onsubmit='return doGridCargo()'")}}
+        todo:
+
 
         » Flask 2026.02.20, 04.16
             # double idsS
@@ -64,22 +67,20 @@
                 {% endblock dlg_blc_forms %}
             {% endif %}
 
+
+-----------------------------------------------------------
+  Commands
+  ## Delete >
+    Get-ChildItem -Recurse -Filter __pycache__ | Remove-Item -Recurse -Force
+    Get-ChildItem -Recurse -Filter *.pyc | Remove-Item -Force
+  ## compile module
+    python -m py_compile carranca/private/routes.py
+
+
 -----------------------------------------------------------
   Logbook
   Atualizar versão em app_constants.py
 -----------------------------------------------------------
-
-   	A user can not be disabled if it has a SEP, cannot be assigned a sep if is disabled
-    Check  carranca\templates\private\sep_mgmt.html.j2
-      if too many params {{ action_form__submit_cargo(dlg_post_form_id, private_route('sep_mgmt'), 'post', "onsubmit='return doGridCargo()'")}}
-    todo:
-
-## Delete >
-Get-ChildItem -Recurse -Filter __pycache__ | Remove-Item -Recurse -Force
-Get-ChildItem -Recurse -Filter *.pyc | Remove-Item -Force
-## compile module
-python -m py_compile carranca/private/routes.py
-
 
 ------- 2026 - June --------------
 
@@ -99,22 +100,24 @@ python -m py_compile carranca/private/routes.py
     » 08-06 β 5.62a
     - from jinja_helper.py remove 'from tkinter import E'
 
-    ------
-    » 08-06 β 5.63
+    » 08-17 β 5.9  (lost mgd-logs)
+    - feat: Generate and save Spatial Data IDs file as part of the validation process
+    - fix bugs (introduced by collaterals improvements) in data_validate modules
+
+
     » TODO
     - first time spd -> ins is opened, takes a long time
-    - send spd id to validate
+    - create module [spddata] for the 'validate_process' (see unzip.py)
     - templates\includes\_action_forms_and_btns.html.j2
         btn_submit === btn_close_dlg (use only btn_submit)
     - encode UiActResponseKeys
-
-
-    ---- next, remove:
-    TODO: SEP_DATA 
-
+    - create one (nice) template for HTTP Errors (see .\templates\home\page-*.html)
+    - detect a change in the form for requesting confirmation to leave the page.
     - user_seps: "UserSepsRtn" = LocalProxy(__get_user_seps)
     - jinja page for templates/home/page-http-error.html
-    do: # UPDATE ui_db_texts
+    - SEP Log viewer
+
+
 
 
 
@@ -144,8 +147,6 @@ python -m py_compile carranca/private/routes.py
 
     » 05-27 v β 5.70, DB v 5.03
     - Release: Spatial Data, #48, #50
-
-
 
 
 

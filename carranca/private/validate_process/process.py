@@ -138,12 +138,7 @@ def process(
             sidekick.display.info(_log("No record was inserted"))
         elif error_code == 0:
             try:
-                UserDataFiles.update(
-                    cargo.table_udf_key,
-                    error_code=0,
-                    success_text=msg_success,
-                    z_process_end_at=process_ended,
-                )
+                UserDataFiles.update(cargo.table_udf_key, error_code=0, success_text=msg_success, z_process_end_at=process_ended)
                 _updated(0)
             except Exception as e:
                 error_code = ModuleErrorCode.RECEIVE_FILE_PROCESS.value + 1
@@ -178,6 +173,7 @@ def process(
         sidekick.display.fatal(_log(msg_exception))
 
     finally:
+        # TODO: remove data_tunnel, including process.lock
         sidekick.display.info(_log(f"The validation process end with error code [{error_code}]"))
         sidekick.display.set_elapsed_output(elapsed_output)
 

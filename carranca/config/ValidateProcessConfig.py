@@ -16,9 +16,9 @@ mgd
 
 # cSpell:ignore
 
+from enum import IntEnum
 from typing import NamedTuple
 from ..helpers.py_helper import OS_IS_WINDOWS, get_envvar
-from ..helpers.email_helper import RecipientsDic
 
 
 class OutputFile(NamedTuple):
@@ -43,10 +43,20 @@ class DataValidateApp(NamedTuple):
 class ValidateProcessConfig:
     _debug_process = None  # None -> set by param debug (see flag_debug)
 
+    class SpdDataExport(IntEnum):
+        NONE = 0
+        ID = 1
+        FIELDS = 2  # spatial_data_files.field_ID, .field_name, .field_alt_name
+        ATTRIBUTES = 3  # All atributes in file_data:fields.has_values
+        FULL = 4
+
     def __init__(self, debug=False):  #: BaseConfig
         # dv_app `data_validate` app output file name and extension
         self.output_file = OutputFile(name="data_report", ext=".pdf")
         self.spd_data_file = OutputFile(name="spd_data", ext=".json")
+        # send noto data_validate full
+        # export Spatial data to data_validate full content of spatial_data_files.file_data:json | only values.id:[]
+        self.spd_data_export = self.SpdDataExport.ATTRIBUTES
         self.dv_app = DataValidateApp(
             batch="run_validate." + ("bat" if OS_IS_WINDOWS else "sh"),  # TODO: OS_IS_LINUX
             folder="data_validate",  # ./<common_folder>/<folder>/python main.py
@@ -61,7 +71,7 @@ class ValidateProcessConfig:
             na_out_folder="--output_folder",
         )
         # remove data_validate temporary files from (...data_tunnel/<user_code>/
-        self.remove_tmp_files = False
+        self.remove_tmp_files = True
         _debug = ValidateProcessConfig._debug_process  # hard coded debug flag
         self.debug_process = debug if _debug is None else bool(_debug)
         self.stdout_result_pattern = r"<\{\"data_validate\":.*?}>"

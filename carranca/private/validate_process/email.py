@@ -1,6 +1,6 @@
 """
-Fifth & last step:
-- Send an email to the user, attach the validation report.
+Sixth and final step:
+    Send an email to the user, attach the validation report.
 
 Part of Canoa `File Validation` Processes
 

@@ -15,7 +15,7 @@ from os import path
 from ..private.IdToCode import IdToCode
 from ..helpers.py_helper import Usual_Dict, ms_since_midnight, now
 from ..helpers.types_helper import Opt_List_Of_Str
-from ..helpers.file_helper import folder_must_exist
+from ..helpers.file_helper import ensure_folder_exists
 from ..common.app_context_vars import sidekick, app_user
 
 
@@ -52,7 +52,7 @@ class ExportProcessConfig:
     def output_full_file_name(self):
         if not self._full_file_name:
             _file = f"canoa_data_{app_user.code}_{self._started:%Y-%m-%d}-{ms_since_midnight(True, self._started)}.zip"
-            if folder_must_exist(self.output_path) is False:
+            if ensure_folder_exists(self.output_path) is False:
                 raise Exception(f"Output folder not found and cannot created [{self.output_path}]")
 
             self._full_file_name = path.join(self.output_path, _file)

@@ -40,6 +40,12 @@ FormIcons: FormIconsDict = FormIconsDict(
     {
         "style": "fas fa-fw frm-input-icon",  # fa style for all icons
         "icon": "",  # this is a place holder: fi.icon = fi.sep
+        # msg_only
+        "error": "fa-octagon",
+        "fatal": "fa-bomb",
+        "info": "fa-circle-info",
+        "success": "fa-square-check",
+        "warn": "fa-triangle-exclamation",
         # Common
         "name": "fa-location-dot",
         "title": "fa-tag",

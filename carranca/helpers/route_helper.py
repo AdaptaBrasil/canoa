@@ -125,9 +125,16 @@ def is_method_post() -> bool:
     return is_get
 
 
-def get_form_input_value(name: str, not_allowed: str = "") -> str:
+def get_form_input_value(name: str | None, not_allowed: str = "") -> str:
+    """
+    name: str | None
+    is to avoid Pylance `hint` that a field can be UnboundField
+    eg: [ (variable) schema_sep: SelectField | UnboundField   ]
+    """
+
     text = request.form.get(name)
-    return "" if text is None else clean_text(text, not_allowed)
+    value = "" if text is None else clean_text(text, not_allowed)
+    return value
 
 
 def get_tmpl_full_file_name(tmpl: str, folder: str) -> Template_File_Full_Name:
@@ -154,14 +161,7 @@ def _get_response_data(ui_db_section: str, tmpl_file_name: str, folder: str) -> 
     try:
         tmpl_file_name = tmpl_file_name if tmpl_file_name else camel_to_snake(ui_db_section)
         tmpl_full_file_name = get_tmpl_full_file_name(tmpl_file_name, folder)
-        # 2026.04.02
-        # db_texts = get_db_texts(ui_db_section)
-        # ## add to ui_db_texts useful values  of 'general use'
-        # ui_dt_format = sidekick.config.APP_UI_DATETIME_FORMAT
-        # db_lookup = cast(DB_Lookup, db_retrieve_text)
-        # ui_db_texts = UIDBTexts(db_texts, sidekick.debugging, ui_dt_format, db_lookup)
         ui_db_texts = init_ui_db_texts(ui_db_section)
-        # mgd 2026.05
         if icon_fn := ui_db_texts.get_str(UITextsKeys.Form.icon_file):
             ui_db_texts.set_value(UITextsKeys.Form.icon_url, icon_url(icon_fn))
 
@@ -208,7 +208,8 @@ def init_response_vars(error_code: ModuleErrorCode) -> Tuple[*ResponseData, int]
 
     ui_dt_format = sidekick.config.APP_UI_DATETIME_FORMAT
     is_get = is_method_post()
-    return "", is_get, UIDBTexts({}, False, ui_dt_format, None), (error_code.value if error_code else 1)
+    ui_db_texts = UIDBTexts({}, False, ui_dt_format, None)
+    return "", is_get, ui_db_texts, (error_code.value if error_code else 1)
 
 
 def redirect_to(route: str, message: Optional[str] = None) -> Flask_Response:

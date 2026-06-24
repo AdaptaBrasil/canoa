@@ -71,7 +71,8 @@ class ValidateProcessConfig:
             na_out_folder="--output_folder",
         )
         # remove data_validate temporary files from (...data_tunnel/<user_code>/
-        self.remove_tmp_files = True
+        # /!\ set to False ONLY for debugging process
+        self.remove_user_folders = True
         _debug = ValidateProcessConfig._debug_process  # hard coded debug flag
         self.debug_process = debug if _debug is None else bool(_debug)
         self.stdout_result_pattern = r"<\{\"data_validate\":.*?}>"

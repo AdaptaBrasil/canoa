@@ -5,12 +5,12 @@
 class UITextsKeys:
     ## see carranca\templates\includes\backend-msg.html.j2
     class Msg:
-        info = "msgInfo"
-        warn = "msgWarn"
         error = "msgError"
-        success = "msgSuccess"
         fatal = "msgFatal"
+        info = "msgInfo"
+        success = "msgSuccess"
         tech = "msgTech"  # This is an internal type of message, not from db
+        warn = "msgWarn"
         # displays only message, no form, inputs/buttons (see .carranca/templates/layouts/form.html.j2 & dialog.html.j2)
         display_msg_only = "msgOnly"
 

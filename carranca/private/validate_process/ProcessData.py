@@ -8,7 +8,7 @@ Equipe da Canoa -- 2024
 mgd
 """
 
-# cSpell:ignore
+# cSpell:ignore pylance
 
 from os import path
 
@@ -33,6 +33,7 @@ class ProcessData:
         # names are from the point of view of ''data_validate''
         validate_output = "report"  # 'data_validate' writes is output here
         validate_input = "data"  # reads input (unzip files) from here
+        validate_lock = "_lock"  # per user TTL Lock folder & file 2025.06
         # this is a shared folder
         data_tunnel = "data_tunnel"
         # this is a local folder to keep all uploaded files
@@ -42,7 +43,25 @@ class ProcessData:
         # this is a local for uploaded, downloaded & others users files
         user_files = "user_files"
 
+    class _Lock:
+        # processing lock for a user folder.
+        file_name = "_validating.lock"
+        """
+        SELECT
+            AVG(EXTRACT(EPOCH FROM (z_process_end_at - a_received_at)) / 60) AS avg_minutes
+        FROM canoa.user_data_files
+        WHERE report_ready_at IS NOT null and error_code = 0
+        """
+        # today 2026.06.23 is 1.54  min
+        # Time To Live in minutes
+        ttl_min = 8
+
     class _Path:
+        # to assist pylance
+        data_tunnel_user_write = ""
+        data_tunnel_user_read = ""
+        data_tunnel_user_lock = ""
+
         def __init__(
             self,
             si,
@@ -76,6 +95,8 @@ class ProcessData:
             self.data_tunnel_user_write = path.join(data_tunnel, user_folder, ProcessData._Folder.validate_input)
             # Path where the data_validate write the report
             self.data_tunnel_user_read = path.join(data_tunnel, user_folder, ProcessData._Folder.validate_output)
+            # Path where a Lock with TTL file is created
+            self.data_tunnel_user_lock = path.join(data_tunnel, user_folder, ProcessData._Folder.validate_lock)
             # An external batch file source (copy from here to 'data_tunnel' if not exists there or this is newer)
             self.batch_source_name = path.join(common_folder, batch_name)
 
@@ -100,6 +121,8 @@ class ProcessData:
         # values are given in receive_file.py
         self.received_file_name = ""
         self.received_original_name = ""
+        # lock
+        self.lock = self._Lock()
 
     def working_file_name(self) -> str:
         return "" if is_str_none_or_empty(self.received_file_name) else f"{self.file_ticket}_{self.received_file_name}"

@@ -1,4 +1,6 @@
 """
+Fourth
+
 Performs the complete validation process:
     1. Check: file name, validates name, create folders
     2. Register: save process info( user, file, & times) in DB.users_files
@@ -72,7 +74,8 @@ def process(
         return f"process: Exception: [{e}]; {current_module_name}.Exception: [{msg_exc}], Code [{code}]."
 
     def _log(msg):
-        return f"[process]: {msg}."
+        log = f"[process]: {msg}"
+        return log + "" if log.endswith(".") else "."
 
     def _updated(code):
         msg_ok = "The process ended without error and t" if code == 0 else "T"

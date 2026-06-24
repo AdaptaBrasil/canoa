@@ -13,7 +13,7 @@ from typing import Optional
 
 # from ..models.private import Sep
 from ..helpers.py_helper import is_str_none_or_empty
-from ..helpers.file_helper import folder_must_exist
+from ..helpers.file_helper import ensure_folder_exists
 from ..helpers.types_helper import Svg_Content
 from ..common.app_context_vars import sidekick
 from ..common.app_error_assistant import AppStumbled, JumpOut
@@ -77,7 +77,7 @@ def do_icon_get_url(icon_file_name: str | None, sep_id: Optional[int] = None) ->
     icon_url = SepIconMaker.get_url(icon_file_name)
 
     content: Svg_Content = ""
-    if not folder_must_exist(SepIconMaker.local_path):
+    if not ensure_folder_exists(SepIconMaker.local_path):
         # TODO: express this error more clearly
         sidekick.display.error(f"Cannot create folder [{SepIconMaker.local_path}]")
         return ""

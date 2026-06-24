@@ -25,7 +25,7 @@ from ..common.UIDBTexts import UIDBTexts
 from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import is_str_none_or_empty, is_empty
 from ..public.ups_handler import get_ups_jHtml
-from ..helpers.file_helper import folder_must_exist, get_unique_filename
+from ..helpers.file_helper import ensure_folder_exists, get_unique_filename
 from ..helpers.types_helper import Route_Response, Choice, Choices
 from ..helpers.jinja_helper import process_template
 from ..helpers.uiact_helper import UiActResponseProxy
@@ -78,7 +78,7 @@ def _do_spd_insert(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, file_obj: A
         elif is_str_none_or_empty(ufn := get_unique_filename(f"sdf_{app_user.code}_", fex)):
             # Unique file name
             error_code += 4
-        elif not folder_must_exist(sidekick.config.LOCAL_SPATIAL_DATA_PATH):
+        elif not ensure_folder_exists(sidekick.config.LOCAL_SPATIAL_DATA_PATH):
             error_code += 5
         elif len(content := file_obj.read()) < 512:
             error_code += 6
@@ -180,7 +180,7 @@ def _prepare_for_edition(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, spd_e
         # Unique File Name
         file_error = 0
         ffn = ""
-        if not folder_must_exist(sidekick.config.LOCAL_SPATIAL_DATA_PATH):
+        if not ensure_folder_exists(sidekick.config.LOCAL_SPATIAL_DATA_PATH):
             file_error += 1
         elif not (ffn := path.join(sidekick.config.LOCAL_SPATIAL_DATA_PATH, ufn)):
             file_error += 2
@@ -310,7 +310,10 @@ def spd_new_or_edit(data: str) -> Route_Response:
 
             #  helpers
             def __modified(input, field, is_mod):
-                if "disabled" in input.render_kw or "readonly" in input.render_kw:
+                def __is_true(attrib: str) -> bool:
+                    return attrib in input.render_kw and input.render_kw[attrib]
+
+                if __is_true("disabled") or __is_true("readonly"):
                     return is_mod
                 ui_value = get_form_input_value(input.name) if input.type == StringField.__name__ else input.data
                 _mod = field != ui_value

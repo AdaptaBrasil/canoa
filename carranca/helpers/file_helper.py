@@ -21,9 +21,9 @@ def file_full_name_parse(file_full_name: str) -> Tuple[str, str, str]:
     return (drive, path, filename)
 
 
-def path_remove_last_folder(dir: str) -> str:
+def path_remove_last_folder(folder_path: str) -> str:
     # remove the last folder form the path (~ cd..)
-    folders = dir.split(path.sep)
+    folders = folder_path.split(path.sep)
     if len(folders) < 2:
         return ""
     else:
@@ -94,7 +94,7 @@ def file_must_exist(file_full_name: str, source_full_name: str, replace_if_newer
     return done
 
 
-def folder_must_exist(full_path: str) -> bool:
+def ensure_folder_exists(full_path: str) -> bool:
     done = path.isdir(full_path)
     try:
         if not done:

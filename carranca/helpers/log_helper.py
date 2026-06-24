@@ -11,7 +11,7 @@ from flask import Flask
 from typing import Tuple
 from logging.handlers import RotatingFileHandler
 
-from .file_helper import get_unique_filename, folder_must_exist
+from .file_helper import get_unique_filename, ensure_folder_exists
 
 
 # ---------------------------------------------------------------------------- #
@@ -31,7 +31,7 @@ def do_log_file(
         file_name = get_unique_filename(f"{app.name}_", ".log")
 
         task = "file_folder"
-        if not folder_must_exist(file_folder):
+        if not ensure_folder_exists(file_folder):
             msg_error = f"Cannot create log's files folder [{file_folder}]."
         else:
             task = "full_name"

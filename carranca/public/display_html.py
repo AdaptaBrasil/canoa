@@ -23,7 +23,7 @@ from ..common.UIDBTexts import UITextsKeys
 from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import is_str_none_or_empty
 from ..public.ups_handler import get_ups_jHtml
-from ..helpers.file_helper import folder_must_exist
+from ..helpers.file_helper import ensure_folder_exists
 from ..helpers.route_helper import init_response_vars
 from ..helpers.html_helper import img_filenames, img_change_src_path, url_join, URL_PATH_SEP
 from ..helpers.jinja_helper import process_template, process_text
@@ -42,7 +42,7 @@ def __prepare_img_files(html_images: List[str], db_images: List[str], img_local_
         if is_img_local_path_ready and os.path.exists(os.path.join(img_local_path, file_name)):
             missing_files.remove(file_name)  # this img is not missing.
 
-    if not folder_must_exist(img_local_path):
+    if not ensure_folder_exists(img_local_path):
         sidekick.display.error(f"Cannot create folder [{img_local_path}] to keep the HTML's images.")
         return False
 
@@ -58,9 +58,7 @@ def __prepare_img_files(html_images: List[str], db_images: List[str], img_local_
         q = len(missing_files)
         qtd = "One" if q == 1 else f"{q}"
         p = "" if q == 1 else "s"
-        sidekick.display.warn(
-            f"{qtd} image record{p} missing for [sectorSpecifications] in database: {', '.join(missing_files)}."
-        )
+        sidekick.display.warn(f"{qtd} image record{p} missing for [sectorSpecifications] in database: {', '.join(missing_files)}.")
         return True  # some files missing, but I can't fix it :-(
 
     for file in available_files:
@@ -116,14 +114,10 @@ def display_html(docName: str):
         # a comma separated list of images.ext names available on the db,
         # see below db_images & _prepare_img_files
         task_code += 1
-        db_images = (
-            [] if is_str_none_or_empty(images) else [s.strip() for s in images.split(",")]
-        )  # list of img names in db
+        db_images = [] if is_str_none_or_empty(images) else [s.strip() for s in images.split(",")]  # list of img names in db
 
         task_code += 1  # 173
-        html_images = (
-            [] if is_str_none_or_empty(body_text) else sorted(img_filenames(body_text))
-        )  # list of img tags in HTML
+        html_images = [] if is_str_none_or_empty(body_text) else sorted(img_filenames(body_text))  # list of img tags in HTML
 
         static_folder: str = "static"  # cast(str, current_app.static_folder)
 

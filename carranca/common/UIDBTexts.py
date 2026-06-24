@@ -271,6 +271,7 @@ class UIDBTexts:
             self._data.pop(k_msg, None)
 
         return
+
     # -- Message manipulation
 
     def get_ui_datetime(self, add_unit: int, dt_from: datetime, unit: str = "hours"):
@@ -484,6 +485,15 @@ class UIDBTexts:
     @display_msg_only.setter
     def display_msg_only(self, value: bool) -> None:
         self[UITextsKeys.Msg.display_msg_only] = value
+
+    def active_msgs(self) -> List[str]:
+        # TODO: 2026.06.24 (René) set a default icon for the Info/Warn/Error...
+        # when is in display_msg_only mode
+        result = []
+        for k_msg in self.msg_keys:
+            if self._data.get(k_msg, None):
+                result.append(k_msg)
+        return result
 
 
 # eof

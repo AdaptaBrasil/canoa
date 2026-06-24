@@ -1,7 +1,8 @@
 """
 First step:
-- Simple file validations
-- Check if exist or create process folders
+    - Validate key file restrictions.
+    - Lock the process to ensure that the user can only submit one file at a time.
+    - Verify the existence of processing folders and ensure the rest of the infrastructure is ready.
 
 Part of Canoa `File Validation` Processes
 
@@ -10,13 +11,12 @@ mgd
 """
 
 # cSpell:ignore werkzeug ext
-
 from os import path
 from typing import List
 
-from ...helpers.py_helper import is_str_none_or_empty, to_int, now
 from ...helpers.db_helper import get_str_field_length
-from ...helpers.file_helper import file_must_exist, folder_must_exist, is_same_file_name
+from ...helpers.py_helper import is_str_none_or_empty, now
+from ...helpers.file_helper import file_must_exist, ensure_folder_exists, is_same_file_name
 from ...common.app_context_vars import sidekick
 from ...common.app_error_assistant import ModuleErrorCode
 
@@ -32,6 +32,7 @@ def check(cargo: Cargo, file_data: object | str, valid_ext: List[str]) -> Next_C
     cargo.check_started_at = now()
     receive_method = "downloaded" if cs.file_was_downloaded else "uploaded"
     proc = "[check]: "
+
     try:
         file_name_max_len = get_str_field_length(UserDataFiles, "file_name")
 
@@ -51,41 +52,32 @@ def check(cargo: Cargo, file_data: object | str, valid_ext: List[str]) -> Next_C
             task_code = 7
         elif not any(cs.received_file_name.lower().endswith(ext.strip().lower()) for ext in valid_ext):
             task_code = 8
-        # elif not response.headers.get('Content-Type') == ct in valid_content_types.split(',')): #check if really zip
-        # task_code = 9
-        elif not folder_must_exist(cs.path.working_folder):
+        elif not ensure_folder_exists(cs.path.working_folder):
+            task_code = 9
+        elif not ensure_folder_exists(cs.path.data_tunnel_user_read):
             task_code = 10
-        elif not folder_must_exist(cs.path.data_tunnel_user_read):
+        elif not ensure_folder_exists(cs.path.data_tunnel_user_write):
             task_code = 11
-        elif not folder_must_exist(cs.path.data_tunnel_user_write):
+        elif not ensure_folder_exists(cs.path.data_tunnel_user_lock):
             task_code = 12
         elif not path.isfile(cs.path.batch_source_name):
             task_code = 13
         elif not file_must_exist(cs.path.batch_full_name, cs.path.batch_source_name, True):
             task_code = 14
-        # TODO:
-        # elif ( minutes_to_die := try_lock(cs.path.data_tunnel_user_write) > 0:
-        # if lock not exist OR lock is old:
-        #    delete folder content
-        #    create lock
-        # else:
-        #    return error and time do delete lock
-        # msg_exception = Folder is in use for other x min, wait and try again
-        # open("_validating.lock", "x")
-        # task_code = 15
         else:
             task_code = 0
 
-        if task_code == 0:
+        # check done
+        if task_code > 0:
+            sidekick.display.error(
+                f"{proc}The {receive_method} file [{cs.received_file_name}] failed in module `check` with code {task_code}."
+            )
+        else:
             if not is_same_file_name(cs.received_original_name, cs.received_file_name):
                 sidekick.display.info(
                     f"{proc}The {receive_method} file [{cs.received_original_name}] has been renamed to [{cs.received_file_name}]."
                 )
             sidekick.display.info(f"{proc}The {receive_method} file [{cs.received_file_name}] was successfully verified.")
-        else:
-            sidekick.display.error(
-                f"{proc}The {receive_method} file [{cs.received_file_name}] failed in module `check` with code {task_code}."
-            )
 
     except Exception as e:
         msg_exception = str(e)

@@ -1,5 +1,6 @@
 """
-Fourth step: Submit to validation
+Fifth step:
+    Submit to validation
 
 Part of Canoa `File Validation` Processes
 
@@ -16,21 +17,15 @@ import asyncio
 from os import path, stat, access, X_OK
 
 from .Cargo import Next_Cargo, Cargo
-from ...models.privates import UserDataFiles
 from .run_validator import run_validator
+from ...models.privates import UserDataFiles
 from ...helpers.file_helper import change_file_ext
 from ...common.app_context_vars import sidekick
 from ...common.app_error_assistant import ModuleErrorCode
 from ...helpers.py_helper import is_str_none_or_empty, now, OS_IS_LINUX
 
 
-def _store_report_result(
-    ui_name: str,
-    stdout_result_pattern: str,
-    cargo: Cargo,
-    std_out_str: str,
-):
-
+def _store_report_result(ui_name: str, stdout_result_pattern: str, cargo: Cargo, std_out_str: str):
     # -------------------------------------
     # Expected <{"data_validate": {"version": "0.5.02", "report": {"errors": 676, "warnings": 609, "tests": 31}}}>
 
@@ -144,6 +139,7 @@ def submit(cargo: Cargo) -> Next_Cargo:
     _path_read = cargo.pd.path.data_tunnel_user_read
     _path_write = cargo.pd.path.data_tunnel_user_write
     _cfg = cargo.receive_file_cfg
+    std_out_str = "?"
     try:
         task_code += 1  # 2
         # shortcuts
@@ -181,6 +177,7 @@ def submit(cargo: Cargo) -> Next_Cargo:
             task_code += 1  # 6
         except Exception as e:
             msg_exception = str(e)
+            std_out_str = "!"
             raise
 
         # Ok, final report should be waiting for us ;—)
@@ -188,7 +185,7 @@ def submit(cargo: Cargo) -> Next_Cargo:
         cargo.report_ready_at = now()
 
         task_code += 1  # 7
-        if not path.exists(final_report_full_name):
+        if not path.isfile(final_report_full_name):
             task_code += 1  # 8
 
             def _x(std_str: str) -> str:
@@ -219,35 +216,13 @@ def submit(cargo: Cargo) -> Next_Cargo:
             task_code += 3  # 10
             shutil.move(final_report_full_name, user_report_full_name)
             task_code += 1  # 11
-            error_code = 0 if path.exists(user_report_full_name) else task_code
+            error_code = 0 if path.isfile(user_report_full_name) else task_code
     except Exception as e:
         error_code = task_code + ModuleErrorCode.RECEIVE_FILE_SUBMIT.value
         msg_exception = str(e)
         sidekick.display.fatal(f"{proc}{msg_exception}")
     finally:
-        _store_report_result(
-            _cfg.dv_app.ui_name,
-            _cfg.stdout_result_pattern,
-            cargo,
-            std_out_str,
-        )
-        try:
-
-            def _remove_folder(folder: str):
-                msg = f"The intermediate process folder '{folder}' was "
-                if path.exists(folder) and path.isdir(folder):
-                    shutil.rmtree(folder)
-                    sidekick.display.info(proc + msg + "removed.")
-                else:
-                    sidekick.display.warn(proc + msg + "not found.")
-
-            if cargo.receive_file_cfg.remove_tmp_files:
-                _remove_folder(_path_read)
-                _remove_folder(_path_write)
-            else:
-                sidekick.display.info(f"{proc}The contents of the intermediate process folders were *not* removed, as requested.")
-        except Exception as e:
-            sidekick.display.warn(f"{proc}The contents of the intermediate process folders were *not* removed due to an error. [{e}].")
+        _store_report_result(_cfg.dv_app.ui_name, _cfg.stdout_result_pattern, cargo, std_out_str)
 
     # goto email.py
     if error_code == 0:

@@ -1,6 +1,6 @@
 """
-Third step:
-- Unzip the uploaded file to a common folder with `data_validate` app
+Fourth step:
+    Unzip the uploaded file to a common folder with `data_validate` app
 
 Part of Canoa `File Validation` Processes
 

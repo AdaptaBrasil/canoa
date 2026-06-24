@@ -1,7 +1,7 @@
 """
 Second step:
-- Save the file with a unique name in Uploaded_file
-- Create a record in table user_data_files (UserDataFiles)
+    - Register the file in the user_data_files table with a unique name and process information.\
+    - The record will be updated upon completion of the process and at other steps.
 
 Part of Canoa `File Validation` Processes
 
@@ -68,7 +68,7 @@ def register(cargo: Cargo, file_data: object | str) -> Next_Cargo:
             user_dataFiles_key,
             id_users=cargo.user.id,
             id_sep=cargo.sep_data.id,  # this is an FK
-            id_spd=cargo.sep_data.spd_id,
+            id_spd=cargo.sep_data.spd_id,  # this is an FK
             user_receipt=cargo.pd.user_receipt,
             app_version=cargo.app_version,
             process_version=cargo.process_version,

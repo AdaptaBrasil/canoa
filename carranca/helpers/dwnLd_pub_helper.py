@@ -66,7 +66,6 @@ def download_public_file(url, filename, guess_extension_if_not_provided=True) ->
         task_code += 1
         _, file_ext = path.splitext(filename)
         ext_is_empty = is_str_none_or_empty(file_ext)
-        # is_folder = filename.endswith(path.sep)
         rename_it = guess_extension_if_not_provided and ext_is_empty
 
         task_code += 1

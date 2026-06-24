@@ -16,7 +16,7 @@ app_constants.py
 APP_NAME = "Canoa"
 
 # &beta; major.minor
-APP_VERSION = "β 5.9"  # 2026-06-17
+APP_VERSION = "β 5.11"  # 2026-06-24
 
 # default user HTML/DB lang/locale (see table users.lang)
 APP_LANG = "pt-br"

@@ -100,9 +100,30 @@
     » 08-06 β 5.62a
     - from jinja_helper.py remove 'from tkinter import E'
 
-    » 08-17 β 5.9  (lost mgd-logs)
+    » 17-08 β 5.9  (lost mgd-logs)
     - feat: Generate and save Spatial Data IDs file as part of the validation process
     - fix bugs (introduced by collaterals improvements) in data_validate modules
+
+    » 24-08 β 5.10
+    - feat: Add per-user TTL file lock to prevent concurrent validation submissions
+        Acquires an 8-minute file lock in a dedicated `_lock` folder per user
+        before processing begins; releases it in `finally` alongside the other
+        user folders. Folder cleanup is moved from `submit.py` to
+        `receive_file.py` so both init-clean and exit-clean happen at the same
+        boundary.
+
+    - Rename `folder_must_exist` → `ensure_folder_exists` site-wide
+    - Rename `remove_tmp_files` → `remove_user_folders`
+    - Add MIME-type check for uploaded ZIP files
+    Working on:
+    - Add msg-type icons (error/fatal/info/success/warn) to FormIcons
+    - Add `UIDBTexts.active_msgs()` helper
+
+    » 24-08 β 5.11
+    init: start of general revision
+        This commit is the baseline for a full review of the validation process
+        (receive_file + validate_process/*)
+
 
 
     » TODO

@@ -10,7 +10,7 @@ mgd
 import time
 import shutil
 import mimetypes
-from os import path
+from os import path, remove
 from math import ceil
 from flask import request
 from typing import TYPE_CHECKING, Any, List, Tuple
@@ -35,7 +35,7 @@ from ..helpers.route_helper import get_private_response_data, get_form_input_val
 from ..helpers.dwnLd_goo_helper import is_gd_url_valid, download_public_google_file
 from ..helpers.js_consts_helper import js_ui_dictionary
 from .validate_process.ProcessData import ProcessData
-from ..helpers.ui_db_texts_manager import UITextsKeys, set_msg_success, set_msg_fatal
+from ..helpers.ui_db_texts_manager import UITextsKeys, set_msg_fatal
 
 if TYPE_CHECKING:
     from .UserSep import UserSep, UserSepList
@@ -63,7 +63,7 @@ def receive_file() -> Jinja_Template:
     from .validate_process.process import process
 
     # [ "IANA-registered standard", "Legacy Windows non-standard MIME", "...and just in case a new one"]
-    valid_content_types = f"application/zip,application/x-zip-compressed,{mimetypes.guess_type("file.zip")}"
+    valid_content_types = f"application/zip,application/x-zip-compressed,{(mimetypes.guess_type("file.zip"))[0]}"
     tmpl_ffn = ""
     fform = ReceiveFileForm()
     jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.LEGACY_STYLE)
@@ -84,8 +84,6 @@ def receive_file() -> Jinja_Template:
             seps.insert(0, sep_placeholder_option)
 
         ui_db_texts.set_value(UITextsKeys.Form.icon_url, seps[0].icon_url if len(seps) > 0 else "")
-        if ui_db_texts.display_msg_only:
-            fi_icon = ui_db_texts.get
 
         seps_list: List[Usual_Dict] = [{"code": sep.code, "fullname": sep.fullname, "icon_url": sep.icon_url} for sep in seps]
         tmpl = process_template(tmpl_ffn, form=fform, seps=seps_list, fi=fi.with_icon(), **ui_db_texts.data(), **js_ui_dictionary())
@@ -150,9 +148,8 @@ def receive_file() -> Jinja_Template:
     def _try_lock_process(ui_db_texts: UIDBTexts, pd: ProcessData, task_code: int) -> bool:
         """
         Checks/acquires the processing lock for a user folder.
-        Returns 0 if lock acquired (caller may proceed).
-        Returns minutes remaining (>0) if folder is locked by another process.
-        Return < 0 if an error occurred
+        Returns True if lock acquired (caller may proceed), False if not
+        Errors are prepared bt _log_issue(...)
         """
 
         def _log(remaining_min: int):
@@ -168,7 +165,13 @@ def receive_file() -> Jinja_Template:
                 _log(ceil(remaining))
                 return False
 
-        # stale lock, fall through to delete + recreate
+            # maybe a 'stale lock left by a crashed process' — remove before recreating
+            try:
+                remove(lock_file)
+            except OSError:
+                pass  # another concurrent request may have just removed it — that's fine
+
+        # create it
         try:
             open(lock_file, "x").close()
             result = True
@@ -204,8 +207,6 @@ def receive_file() -> Jinja_Template:
         # file_data holds a 'str' or an 'obj'
         task_code += 1  # 6
         file_data = url_str if has_url else file_obj
-
-        # get the select SEP
 
         # Basic file origin check: both, none or bad url
         sep_data = next((sep for sep in app_user.seps if sep.code == sep_code), None)
@@ -251,7 +252,7 @@ def receive_file() -> Jinja_Template:
             return _get_template(ui_db_texts, error_code)
         elif not _try_lock_process(ui_db_texts, pd, task_code + 2):  # 17
             return _get_template(ui_db_texts, 0)
-        elif not _cleanup_user_folders("init:", pd, True, False):
+        elif not _cleanup_user_folders("init", pd, True, False):
             task_code += 4  # 18
             error_code = _log_issue(ui_db_texts, Display.Kind.FATAL, 0, RECEIVE_FILE_DEFAULT_ERROR, task_code)
             return _get_template(ui_db_texts, error_code)
@@ -285,11 +286,10 @@ def receive_file() -> Jinja_Template:
         ve = ui_db_texts["validExtensions"]
         valid_extensions = [".zip"] if is_str_none_or_empty(ve) else ve.lower().split(",")
 
-        task_code += 1  # 24
+        task_code += 1  # 26
         error_code, msg_id, _ = process(app_user, sep_data, file_data, pd, received_at, valid_extensions)
 
         if error_code == 0:
-            # log_msg = set_msg_success("uploadFileSuccess", ui_db_texts, pd.user_receipt, app_user.email)
             _, msg = ui_db_texts.set_msg_success("uploadFileSuccess", (pd.user_receipt, app_user.email))
             sidekick.display.debug(msg)
         else:
@@ -297,7 +297,7 @@ def receive_file() -> Jinja_Template:
 
         jHtml = _get_template(ui_db_texts, error_code)
     except Exception as e:
-        error_code = _log_issue(ui_db_texts, Display.Kind.FATAL, task_code + 1, "", True)
+        error_code = _log_issue(ui_db_texts, Display.Kind.FATAL, task_code + 1, "", task_code)
         sidekick.display.fatal(f"{RECEIVE_FILE_DEFAULT_ERROR}: Code {error_code}, Message: {e}.")
         msg = set_msg_fatal("receiveFileException", ui_db_texts, task_code)
         _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)

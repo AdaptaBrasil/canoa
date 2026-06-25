@@ -4,7 +4,7 @@ Fifth step:
 
 Part of Canoa `File Validation` Processes
 
-Equipe da Canoa -- 2024—2025
+Equipe da Canoa -- 2024 —— 06.2026
 mgd
 """
 
@@ -121,7 +121,7 @@ def submit(cargo: Cargo) -> Next_Cargo:
     error_code = 0
     msg_exception = ""
     task_code = 1
-    std_out_str = None
+    std_out_str = "?"
     std_err_str = None
     exit_code = 0
     cargo.submit_started_at = now()
@@ -139,7 +139,6 @@ def submit(cargo: Cargo) -> Next_Cargo:
     _path_read = cargo.pd.path.data_tunnel_user_read
     _path_write = cargo.pd.path.data_tunnel_user_write
     _cfg = cargo.receive_file_cfg
-    std_out_str = "?"
     try:
         task_code += 1  # 2
         # shortcuts

@@ -1,9 +1,9 @@
 """
-Fourth step B: Run the validation process
-
+Helper: builds and runs the `data_validate` subprocess asynchronously.
+Called by submit.py.
 Part of Canoa `File Validation` Processes
 
-Equipe da Canoa -- 2024—2025
+Equipe da Canoa - 2024 —— 06.2026
 mgd
 """
 
@@ -24,7 +24,7 @@ from ...helpers.py_helper import (
 
 async def run_validator(
     batch_full_name: str,
-    data_validate_path,
+    data_validate_path: str,
     d_v: DataValidateApp,
     input_folder: str,
     output_folder: str,
@@ -65,9 +65,7 @@ async def run_validator(
     stderr = None
     exit_code = 0
     try:
-        process = await asyncio.create_subprocess_exec(
-            *run_command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-        )
+        process = await asyncio.create_subprocess_exec(*run_command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 
         # Wait for the process to complete
         stdout, stderr = await process.communicate()
@@ -75,7 +73,6 @@ async def run_validator(
         # Get the exit code of the process
         exit_code = process.returncode
         sidekick.display.debug(f"{proc}{d_v.ui_name} ended with code {exit_code}.")
-    
 
     except Exception as e:
         err_msg = f"{proc}{d_v.ui_name}.running: {e}, Code [{exit_code}]."

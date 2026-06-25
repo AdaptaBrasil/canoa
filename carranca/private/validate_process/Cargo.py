@@ -1,4 +1,4 @@
-# Equipe da Canoa -- 2024
+# Equipe da Canoa -- 2024  —— 06.2026
 #
 # mgd
 # cSpell:ignore ext
@@ -83,8 +83,8 @@ class Cargo:
         error_code: int,
         msg_error: str = "",
         msg_exception: str = "",
-        next: Optional[dict] = {},
-        final: Optional[Usual_Dict] = {},
+        next: Optional[dict] = None,
+        final: Optional[Usual_Dict] = None,
     ) -> Next_Cargo:
         """
         Updates the class with the 'next' procedure values
@@ -107,9 +107,8 @@ class Cargo:
         self.error_code = error_code
         self.msg_error = Cargo.default_error if is_str_none_or_empty(msg_error) else msg_error
         self.msg_exception = msg_exception
-        self.next = dict(next)  # new next procedure parameters
-        self.final.update(final)  # keep data though loops
-        # TODO self.elapsed.push(now())
+        self.next = dict(next or {})  # new next procedure parameters
+        self.final.update(final or {})  # keep data though loops
         return (self.error_code, self.msg_error, self.msg_exception, self)
 
 

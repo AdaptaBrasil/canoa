@@ -1,30 +1,29 @@
 """
-Fourth
-
 Performs the complete validation process:
-    1. Check: file name, validates name, create folders
-    2. Register: save process info( user, file, & times) in DB.users_files
-    3. Unzip unzip the uploaded file
-    4. Submit, sends the file to the `data_validate`
-    5. Email, data_validate output is sent via email
+    1. Check:    validate file name, size, and process infrastructure
+    2. Register: save process info (user, file, & times) in DB.users_files
+    3. Unzip:    unzip the uploaded file to the data_tunnel shared folder
+    4. Spdata:   export spatial data IDs/attributes for `data_validate`
+    5. Submit:   send the unzipped files to `data_validate` and wait for the report
+    6. Email:    send the validation report to the user
 
     Cargo
-        is a class to shares: ProcessData, Params, args, and return values between the 5 modules.
+        is a class that shares: ProcessData, Params, args, and return values between the modules.
 
     ProcessData
-        is a class that keep the files & folders names
+        is a class that keeps the file & folder names
 
     Params
-        is as class that has the values of Configurable parameters of each module
+        is a class that holds configurable parameters for each module
 
 
 Part of Canoa `File Validation` Processes
 
-Equipe da Canoa -- 2024
+Equipe da Canoa -- 2024 —— 06.2026
 mgd
 """
 
-# cSpell:ignore ext
+# cSpell:ignore ext spddata
 # pyright: reportAttributeAccessIssue=false
 
 from typing import List, Tuple
@@ -43,6 +42,7 @@ from .ProcessData import ProcessData
 
 from .check import check
 from .unzip import unzip
+from .spdata import spddata
 from .email import email
 from .submit import submit
 from .register import register
@@ -75,7 +75,7 @@ def process(
 
     def _log(msg):
         log = f"[process]: {msg}"
-        return log + "" if log.endswith(".") else "."
+        return log + ("" if log.endswith(".") else ".")
 
     def _updated(code):
         msg_ok = "The process ended without error and t" if code == 0 else "T"
@@ -113,7 +113,7 @@ def process(
         # mgd test
         D:/Projects/AdaptaBrasil/Canoa/user_files/uploaded/00212/00212_2026-06-11_ei9358_se_saude_07_08.zip
     """
-    for current_module in [check, register, unzip, submit, email]:
+    for current_module in [check, register, unzip, spddata, submit, email]:
         current_module_name = current_module.__name__
         try:
             cargo, next_module_params = _get_next_params(cargo)
@@ -176,7 +176,6 @@ def process(
         sidekick.display.fatal(_log(msg_exception))
 
     finally:
-        # TODO: remove data_tunnel, including process.lock
         sidekick.display.info(_log(f"The validation process end with error code [{error_code}]"))
         sidekick.display.set_elapsed_output(elapsed_output)
 

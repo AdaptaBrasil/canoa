@@ -6,7 +6,7 @@ First step:
 
 Part of Canoa `File Validation` Processes
 
-Equipe da Canoa -- 2024
+Equipe da Canoa -- 2024 —— 06.2026
 mgd
 """
 
@@ -58,12 +58,10 @@ def check(cargo: Cargo, file_data: object | str, valid_ext: List[str]) -> Next_C
             task_code = 10
         elif not ensure_folder_exists(cs.path.data_tunnel_user_write):
             task_code = 11
-        elif not ensure_folder_exists(cs.path.data_tunnel_user_lock):
-            task_code = 12
         elif not path.isfile(cs.path.batch_source_name):
-            task_code = 13
+            task_code = 12
         elif not file_must_exist(cs.path.batch_full_name, cs.path.batch_source_name, True):
-            task_code = 14
+            task_code = 13
         else:
             task_code = 0
 

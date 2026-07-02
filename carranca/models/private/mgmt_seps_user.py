@@ -78,11 +78,7 @@ class MgmtSepsUser(CanoaBaseView):
         return MgmtSepsUser._get_user_sep_list(None, None)
 
     @staticmethod
-    def get_seps_usr(
-        col_names: List[str],
-        user_id: Optional[int] = None,
-        sep_id: Optional[int] = None,
-    ) -> DBRecords:
+    def get_seps_usr(col_names: List[str], user_id: Optional[int] = None, sep_id: Optional[int] = None) -> DBRecords:
         """
         Returns
         1) `vw_mgmt_seps_user` DB view that has the necessary columns to

@@ -40,18 +40,10 @@ from werkzeug.local import LocalProxy
 # went to TYPE_CHECKING & Inside _get_app_user
 # from ..private.JinjaUser import JinjaUser
 
-# local lock control
-from threading import Lock
-
 if TYPE_CHECKING:
     from ..private.UserSep import UserSepList, UserSepsRtn
     from ..private.AppUser import AppUser
     from ..private.JinjaUser import JinjaUser
-
-
-_locks = {}
-_locks_lock = Lock()
-RUN_WITH_LOCKS = False  # to DEBUG _get_scoped_var set to False
 
 
 def local_sidekick():
@@ -62,51 +54,23 @@ def local_sidekick():
 
 def __get_scoped_var(var_name: str, do_var_creator: Callable[[], Any]) -> Any:
     """
-    Returns a value, from the current request context (g) under the var_name , creating it if necessary.
+    Returns a value from the current request context (g), creating it if necessary.
     """
-
-    if not has_request_context():  # no g
+    if not has_request_context():
         raise RuntimeError(f"Request context is required to retrieve `{var_name}`.")
 
-    _CREATION_FAILED = object()
-
-    var_value = None
-    if RUN_WITH_LOCKS:
-        with _locks_lock:
-            if var_name not in _locks:
-                _locks[var_name] = Lock()
-
-        with _locks[var_name]:
-            if hasattr(g, var_name):
-                var_value = getattr(g, var_name)
-                if var_value is _CREATION_FAILED:
-                    raise RuntimeError(f"Previous attempt to create `{var_name}` failed.")
-                return var_value
-            else:
-                try:
-                    var_value = do_var_creator()
-                    if var_value is None:
-                        raise ValueError(...)
-                    setattr(g, var_name, var_value)
-                    return var_value
-                except Exception as e:
-                    setattr(g, var_name, _CREATION_FAILED)
-                    raise RuntimeError(f"Scoped variable creator {do_var_creator} raised an exception [{e}].")
-
-    elif not hasattr(g, var_name):
+    if not hasattr(g, var_name):
         try:
             var_value = do_var_creator()
             if var_value is None:
                 raise ValueError(f"{do_var_creator} returned None for `{var_name}`.")
             setattr(g, var_name, var_value)
-            local_sidekick().display.info(f"{var_name} create of type: {type(var_value)}")
+            local_sidekick().display.info(f"{var_name} created, type: {type(var_value)}")
         except Exception as e:
             raise RuntimeError(f"Scoped variable creator {do_var_creator} raised an exception [{e}].")
-
         return var_value
     else:
-        var_value = getattr(g, var_name)
-        return var_value
+        return getattr(g, var_name)
 
 
 # App User
@@ -140,49 +104,41 @@ def __get_jinja_user() -> Optional["JinjaUser"]:
 
 # User SEPs
 # -----------
+# IMPROVEMENT: make this an ajax call
 def __prepare_user_seps() -> "UserSepsRtn":
 
     from ..private.UserSep import UserSep
     from ..private.sep_icon import do_icon_get_url
     from ..helpers.pw_helper import is_anyone_logged
-    from ..helpers.py_helper import class_to_dict
     from ..models.private.mgmt_seps_user import MgmtSepsUser
 
     user_id: int = current_user.id if is_anyone_logged() else -1
 
     try:
-        try:
-            local_sidekick().display.debug("user_sep start creation...")
-            sep_usr_rows = MgmtSepsUser.get_user_sep_list(user_id)
-        except Exception as e:
-            return str(e)
+        sep_usr_rows = MgmtSepsUser.get_user_sep_list(user_id)
+    except Exception as e:
+        return str(e)
 
-        seps: List[UserSep] = []
-        for sep_row in sep_usr_rows:
-            item = UserSep(**sep_row)
-            item.icon_url = do_icon_get_url(item.icon_file_name, item.id)
-            dic: UserSep = cast(UserSep, class_to_dict(item))
-            # as `g` only saves 'simple' classes convert it to a Dict
-            seps.append(dic)
+    seps: List[UserSep] = []
+    for sep_row in sep_usr_rows:
+        item = UserSep(**sep_row)
+        item.icon_url = do_icon_get_url(item.icon_file_name, item.id)
+        seps.append(item)
 
-    finally:
-        local_sidekick().display.debug("user_sep was created.")
-
+    local_sidekick().display.debug(f"user_seps created: {len(seps)} item(s).")
     return seps
 
 
 def __get_user_seps() -> "UserSepList":
-    from ..private.UserSep import UserSep
-
     result = []
     if app_user is None:
         local_sidekick().display.error("No current user to retrieve SEP data.")
-    else:  # convert simple dict to UserSep again
-        list_dic = __get_scoped_var("_user_seps", __prepare_user_seps)
-        if list_dic is None or not isinstance(list_dic, list):
-            local_sidekick().display.error(f"An error occurred getting sep from user {app_user.id}: [{type(list_dic)}] → {str(list_dic)}.")
+    else:
+        seps = __get_scoped_var("_user_seps", __prepare_user_seps)
+        if seps is None or not isinstance(seps, list):
+            local_sidekick().display.error(f"Error getting seps for user {app_user.id}: [{type(seps)}] → {str(seps)}.")
         else:
-            result: "UserSepList" = [UserSep(**item) for item in list_dic]
+            result = seps
 
     return result
 

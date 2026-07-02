@@ -7,7 +7,7 @@ Equipe da Canoa -- 2024
 mgd
 """
 
-# cSpell: ignore werkzeug wtforms tmpl mgmt jscmd
+# cSpell: ignore werkzeug wtforms tmpl mgmt jscmd proje
 
 
 from __future__ import annotations
@@ -57,6 +57,21 @@ ROUTE_EMAIL_ADDR_HUB = "email_addr_hub"
 @bp_private.route("/test_route")
 def test_route():
     return "OK ;—"
+
+
+@bp_private.route("/test_backend_msg")
+def test_backend_msg():
+    return process_template(
+        "./private/test_backend_msg.html.j2",
+        formTitle="Backend Msg &mdash; Layout Test",
+        msgOnly=True,
+        msgPrompt="Deseja realmente encerrar a sess&atilde;o?",
+        msgInfo="Info: arquivo recebido e registrado.",
+        msgSuccess="Arquivo processado com sucesso. Todos os dados espaciais foram validados e importados.",
+        msgWarn="Aten&ccedil;&atilde;o: o prazo de valida&ccedil;&atilde;o expira em 2&nbsp;dias. Ap&oacute;s esse prazo o processo ser&aacute; encerrado automaticamente e o arquivo ser&aacute; descartado.",
+        msgError="Erro ao processar o arquivo: o formato GeoPackage enviado n&atilde;o &eacute; compat&iacute;vel com a vers&atilde;o atual do validador. Verifique o arquivo, corrija a proje&ccedil;&atilde;o e tente novamente.",
+        msgTech="AttributeError: &lsquo;NoneType&rsquo; object has no attribute &lsquo;id&rsquo; &mdash; <code>data_validate.py</code>, line&nbsp;42, task_code=7. Upstream: <code>spatial_data_file.py</code>, line&nbsp;318, in _read_layer.",
+    )
 
 
 # === Private Routes =======================================
@@ -122,11 +137,7 @@ def uiact_response(code: str) -> Tuple[Jinja_Rendered, UiActResponse | None]:
         def _get_result() -> Tuple[Jinja_Rendered, UiActResponse | None]:
             uiact_rsp = None
             jHtmlError: Jinja_Rendered = ""
-            cmd_text: Json_Text = (
-                request.args.get(js_form_cargo_id, "")
-                if rqs_method == MTD_GET
-                else request.form.get(js_form_cargo_id, "")
-            )
+            cmd_text: Json_Text = request.args.get(js_form_cargo_id, "") if rqs_method == MTD_GET else request.form.get(js_form_cargo_id, "")
             if is_str_none_or_empty(cmd_text):
                 jHtmlError = create_ups_jHtml(_get_error("empty"))
             elif not (uiact_rsp := UiActResponse(cmd_text)):
@@ -162,7 +173,7 @@ def grid_route(code: str, editor_name: str, download: Call_Args, show_grid: Call
 
     if nobody_is_logged():
         return redirect_to(login_route())
-    
+
     jHtmlOrResp: Route_Response = NEW_FLASK_RESPONSE
     jHtmlError, uiact_rsp = uiact_response(code)
 
@@ -372,8 +383,24 @@ def session_end():
     """
     Finally the logout proc is a Canoa form (and not the js Confirm)
     This actually sign out, and register on thd DB (users.)
+
+    ADM users only flush the UI-texts cache here and stay logged in
+    (see clear_ui_texts_cache()) instead of signing out.
     """
-    if is_method_get() or nobody_is_logged():
+    if nobody_is_logged():
+        return redirect_to(login_route())
+
+    from ..common.app_context_vars import app_user, sidekick
+
+    if app_user.is_power:
+        from ..helpers.route_helper import home_route
+        from ..helpers.ui_db_texts_manager import clear_ui_texts_cache
+
+        n = clear_ui_texts_cache()
+        sidekick.display.info(f"UI texts cache cleared ({n} entries) by power user {app_user.name}.")
+        return redirect_to(request.referrer or home_route())
+
+    if is_method_get():
         return redirect_to(login_route())
 
     from .access_control.signout_prompt import signout_prompt

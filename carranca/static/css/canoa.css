@@ -115,20 +115,17 @@ body {
     justify-content: center;
 }
 
-.dlg-sep-icon-back {
+/* Project chief request: SEP icons background must match AdaptaBrasil's background color */
+.dlg-icon-sep-class {
     background-color: var(--adaptabrasil-back-color);
     vertical-align: middle;
     display: inline-block;
     padding: 1px;
 }
 
-.dlg-icon-back {
+.dlg-icon-back-class {
     vertical-align: middle;
     display: inline-block;
-}
-
-.dlg-icon-img {
-    /* This ruleset is empty and contains no declarations */
 }
 
 .dlg-footer {
@@ -238,27 +235,15 @@ body {
  * ============================================ */
 
 .backend-msg-alert {
-    /* Set position to relative for absolute positioning of the icon if needed */
-    /* position: relative; */
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    text-align: left;
 }
 
 .backend-msg-icon {
-    /* Use absolute positioning to move it to the true corner */
-    /* position: absolute;
-    top: 0.2rem;
-    left: 0.2rem;
-    font-size: 1.5rem;
-    line-height: 1; */
-    display: none;
-    /*
-        Error	❌ (Heavy X)	fa-xmark	\f00d
-        Fatal Error	💀 (Skull)	fa-skull-crossbones	\f714
-        Warn / Alert	⚠️ (Warning Sign)	fa-triangle-exclamation	\f071
-        Info	ℹ️ (Info Source)	fa-circle-info	\f05a
-        Tech Info	⚙️ (Gear)	fa-gears (or fa-gear)	\f085 (or \f013)
-        Success	✅ (Check Mark)	fa-circle-check	\f058
-    */
-
+    flex-shrink: 0;
+    margin-top: 0.15rem;
 }
 
 /* ============================================
@@ -357,6 +342,18 @@ body {
 .frm-pw-eye-icon {
     color: var(--canoa-form-button-color);
 }
+
+/* ============================================
+ * Canoa carranca\templates\home\document.html.j2
+ * ============================================ */
+.doc-about-icon {
+    color: var(--canoa-form-label-color);
+}
+
+.dlg-ups-icon {
+    color: var(--canoa-form-label-color);
+}
+
 
 /* ============================================
  *          responsive design

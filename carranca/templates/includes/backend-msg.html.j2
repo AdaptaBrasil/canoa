@@ -2,7 +2,9 @@
 ./includes/backend-msg.html.j2
 ---------------------------------
 
-Displays HTML messages (Warn, Error, Success, Info, Technical)
+Displays HTML messages (Prompt, Error, Warn, Success, Info, Technical)
+Hierarchy: most severe first. Prompt is not a severity, it's a question —
+rendered with no color and no icon, see UIDBTexts.set_msg_prompt().
 See carranca\common\UITextsKeys.py
 
 mgd
@@ -10,35 +12,43 @@ mgd
 {# cSpell:ignore #}
 
 
-{% if msgInfo or msgWarn or msgError or msgSuccess or msgTech %}
+{% if msgPrompt or msgInfo or msgWarn or msgError or msgSuccess or msgTech %}
 {# ╒═════════════════ Display if Any Message Available ═════════════════╕ #}
 <div class="text-center text-md-center">
     <h6 class="font-weight-normal">
 
         {% set first_msg = True %}
 
-        {# ┄┄┄┄┄ Warning ┄┄┄┄┄ #}
-        {% if msgWarn %}
-        <div class="alert alert-warning {% if not first_msg %}mt-1{% endif %} mb-0">
-            <i class="backend-msg-icon" inert>⚠️</i>
-            <div>{{ msgWarn | safe }}</div>
+        {# ┄┄┄┄┄ Prompt ┄┄┄┄┄ #}
+        {% if msgPrompt %}
+        <div class="alert backend-msg-alert {% if not first_msg %}mt-1{% endif %} mb-0">
+            <div>{{ msgPrompt | safe }}</div>
         </div>
         {% set first_msg = False %}
         {% endif %}
 
         {# ┄┄┄┄┄ Error ┄┄┄┄┄ #}
         {% if msgError %}
-        <div class="alert alert-danger {% if not first_msg %}mt-1{% endif %} mb-0">
-            <i class="backend-msg-icon" inert>🛑</i>
+        <div class="alert alert-danger backend-msg-alert {% if not first_msg %}mt-1{% endif %} mb-0">
+            <i class="backend-msg-icon {{ fi.style }} {{ fi.error }} me-1" aria-hidden="true"></i>
             <div>{{ msgError | safe }}</div>
+        </div>
+        {% set first_msg = False %}
+        {% endif %}
+
+        {# ┄┄┄┄┄ Warning ┄┄┄┄┄ #}
+        {% if msgWarn %}
+        <div class="alert alert-warning backend-msg-alert {% if not first_msg %}mt-1{% endif %} mb-0">
+            <i class="backend-msg-icon {{ fi.style }} {{ fi.warn }} me-1" aria-hidden="true"></i>
+            <div>{{ msgWarn | safe }}</div>
         </div>
         {% set first_msg = False %}
         {% endif %}
 
         {# ┄┄┄┄┄ Success ┄┄┄┄┄ #}
         {% if msgSuccess %}
-        <div class="alert alert-success {% if not first_msg %}mt-1{% endif %} mb-0">
-            <i class="backend-msg-icon" inert>⭐</i>
+        <div class="alert alert-success backend-msg-alert {% if not first_msg %}mt-1{% endif %} mb-0">
+            <i class="backend-msg-icon {{ fi.style }} {{ fi.success }} me-1" aria-hidden="true"></i>
             <div>{{ msgSuccess | safe }}</div>
         </div>
         {% set first_msg = False %}
@@ -46,8 +56,8 @@ mgd
 
         {# ┄┄┄┄┄ Information ┄┄┄┄┄ #}
         {% if msgInfo %}
-        <div class="alert alert-info {% if not first_msg %}mt-1{% endif %} mb-0">
-            <i class="backend-msg-icon" inert>🛈</i>
+        <div class="alert alert-info backend-msg-alert {% if not first_msg %}mt-1{% endif %} mb-0">
+            <i class="backend-msg-icon {{ fi.style }} {{ fi.info }} me-1" aria-hidden="true"></i>
             <div>{{ msgInfo | safe }}</div>
         </div>
         {% set first_msg = False %}
@@ -55,8 +65,8 @@ mgd
 
         {# ┄┄┄┄┄ Technical ┄┄┄┄┄ #}
         {% if msgTech %}
-        <div class="alert alert-dark {% if not first_msg %}mt-1{% endif %} mb-0">
-            <i class="backend-msg-icon" inert>⚙️</i>
+        <div class="alert alert-dark backend-msg-alert {% if not first_msg %}mt-1{% endif %} mb-0">
+            <i class="backend-msg-icon {{ fi.style }} {{ fi.tech }} me-1" aria-hidden="true"></i>
             <div>{{ msgTech | safe }}</div>
         </div>
         {% set first_msg = False %}

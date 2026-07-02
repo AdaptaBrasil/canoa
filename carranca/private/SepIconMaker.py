@@ -77,7 +77,7 @@ class SepIconMaker:
 
     @classmethod
     def none_content(cls) -> Svg_Content:
-        return cls.content_for("darkgrey", "?", stroke_opacity="0.45")
+        return cls.content_for("darkgrey", "?", stroke_opacity="0.80")
 
 
 SYSTEM_ICONS = [SepIconMaker.none_file, SepIconMaker.empty_file, SepIconMaker.error_file]

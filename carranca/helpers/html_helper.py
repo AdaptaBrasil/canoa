@@ -42,6 +42,39 @@ def icon_url(file_name: str) -> str:
     return icon_url
 
 
+def icon_svg_inline(svg_file_path: str) -> str:
+    """Load an SVG file for inline HTML embedding.
+
+    Strips the XML declaration, adds a viewBox derived from the fixed dimensions
+    if one is absent, then replaces fixed width/height with 100% so the parent
+    element controls the rendered size.
+    Returns an empty string on any error.
+    """
+    import re
+
+    try:
+        with open(svg_file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        content = re.sub(r"<\?xml[^>]+\?>\s*", "", content)
+
+        def _fix_svg_tag(m: re.Match) -> str:
+            tag = m.group(0)
+            if "viewBox" not in tag:
+                w = re.search(r'\bwidth="(\d+)"', tag)
+                h = re.search(r'\bheight="(\d+)"', tag)
+                if w and h:
+                    tag = tag[:-1] + f' viewBox="0 0 {w.group(1)} {h.group(1)}">'
+            tag = re.sub(r'\bwidth="[^"]*"', 'width="100%"', tag)
+            tag = re.sub(r'\bheight="[^"]*"', 'height="100%"', tag)
+            return tag
+
+        content = re.sub(r"<svg\b[^>]*>", _fix_svg_tag, content, count=1)
+        return content.strip()
+    except Exception:
+        return ""
+
+
 def img_change_src_path(html_content: str, new_img_folder: list) -> str:
     # Change img tag `src` path to a new_img_path & return the modified html
     import os

@@ -117,18 +117,39 @@
     - Add MIME-type check for uploaded ZIP files
     Working on:
     - Add msg-type icons (error/fatal/info/success/warn) to FormIcons
-    - Add `UIDBTexts.active_msgs()` helper
 
     » 24-08 β 5.11
     init: start of general revision
         This commit is the baseline for a full review of the validation process
         (receive_file + validate_process/*)
 
+    » 24-08  β 5.12
+    feat: First code revision with Claude:  data validate process completed
 
+    » 25-08 —— 02-07 β 5.13
+        - Improve app_context_var: __get_scoped_var
+          Remove Locks:  'from threading import Lock'
+        - UIDBTexts.py
+            . now msg_* has icons;
+            . new set_msg_ask(... ) for prompts, part 1;
+            . about has an icon;
+            . removed unused active_msgs();
+            . New test route /private/test_backend_msg + template test_backend_msg.html.j2
+              for visually checking all message states
+        - html_helper
+            .  new icon_svg_inline() to work tests on SVG back color (not fully implemented)
+            .
+        - validate process:
+            create module [spddata]
+        - other minor fixes
+        - new var dlg_fa_size, for Font Awesome icon size
+
+
+    » git commands
+        last commit msg:  git log -1 --pretty=%B
 
     » TODO
     - first time spd -> ins is opened, takes a long time
-    - create module [spddata] for the 'validate_process' (see unzip.py)
     - templates\includes\_action_forms_and_btns.html.j2
         btn_submit === btn_close_dlg (use only btn_submit)
     - encode UiActResponseKeys

@@ -27,6 +27,7 @@ dlg_cls_top | default('mt-5')
 
 dlg_icon_id | 'dlg-var-icon-id' // the id of the icon
 
+dlg_var_icon_class // a class for this icon, defaults to
 dlg_var_icon_url // the url to an icon to set on the dialog header, if none, no icon is displayed
 dlg_icon_size | '32px' // the icon size h=w
 dlg_var_style
@@ -61,6 +62,7 @@ mgd
 {% set dlg_close_action_url= dlgFormCloseAction | default('/login') %}
 
 {% set dlg_icon_size= dlg_icon_size | default('32px') %}
+{% set dlg_fa_size= dlg_fa_size | default('24px') %} # Font Awesome form icon size
 {#
 SepIconConfig.content_for() is a function that determines the default
 size for icons based on application settings.
@@ -93,12 +95,16 @@ Ensure this matches the expected dimensions for dialog icons.
             {# ╒════════════════════ Header ════════════════════════════╕ #}
             <div id="dlg-modal-content-header-id" class="modal-header dlg-header">
                 <h5 class="modal-title dlg-title">
-                    {% if dlg_var_icon_url %}
-                    <span class="{%- if 'sep_icons' in dlg_var_icon_url %}dlg-sep_icon-back{% else %}dlg-icon-back{% endif %}">
-                        <img id="{{dlg_icon_id}}" src="{{dlg_var_icon_url}}" alt="[!]&nbsp;" height="{{dlg_icon_size}}" width="{{dlg_icon_size}}">
+                    {% if iconSvgContent %}
+                    <span id="{{dlg_icon_id}}" class="dlg-icon-back-class {{dlg_var_icon_class | default('')}}" style="width:{{dlg_icon_size}};height:{{dlg_icon_size}};">
+                        {{ iconSvgContent | safe }}
+                    </span>
+                    {% elif dlg_var_icon_url %}
+                    <span class="{%- if 'sep_icons' in dlg_var_icon_url %}dlg-icon-sep-class{% else %}dlg-icon-back-class{% endif %}">
+                        <img id="{{dlg_icon_id}}" src="{{dlg_var_icon_url}}" alt="[!]&nbsp;" height="{{dlg_icon_size}}" width="{{dlg_icon_size}}" {% if dlg_var_icon_class %}class="{{dlg_var_icon_class}}"{% endif %}>
                     </span>
                     {% elif fi and fi.icon %}
-                    <i class="fas fa-fw dlg-fa-icon {{fi.icon}}" style="font-size: {{ dlg_icon_size }};"></i>
+                    <i class="fas fa-fw dlg-fa-icon {{fi.icon}}" style="font-size: {{ dlg_fa_size }};"></i>
                     {% endif %}
                     <span inert>{{formTitle|default(app_name)}}</span>
                 </h5>

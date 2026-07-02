@@ -14,6 +14,7 @@ https://docs.fontawesome.com/web/setup/get-started
 
 """
 
+# cSpell:ignore xmark
 
 class FormIconsDict(dict):
     def __getattr__(self, name: str):
@@ -41,11 +42,12 @@ FormIcons: FormIconsDict = FormIconsDict(
         "style": "fas fa-fw frm-input-icon",  # fa style for all icons
         "icon": "",  # this is a place holder: fi.icon = fi.sep
         # msg_only
-        "error": "fa-octagon",
+        "error": "fa-circle-exclamation",
         "fatal": "fa-bomb",
         "info": "fa-circle-info",
         "success": "fa-square-check",
         "warn": "fa-triangle-exclamation",
+        "tech": "fa-wrench",
         # Common
         "name": "fa-location-dot",
         "title": "fa-tag",

@@ -21,14 +21,23 @@ def file_full_name_parse(file_full_name: str) -> Tuple[str, str, str]:
     return (drive, path, filename)
 
 
+def path_get_last_folder(folder_path: str) -> str:
+    folders = folder_path.split(path.sep)
+    if len(folders) < 1:
+        return ""
+    else:
+        last_folder = folders[-1]
+        return last_folder
+
+
 def path_remove_last_folder(folder_path: str) -> str:
     # remove the last folder form the path (~ cd..)
     folders = folder_path.split(path.sep)
     if len(folders) < 2:
         return ""
     else:
-        short_dir = path.sep.join(folders[:-1])
-        return short_dir
+        short_path = path.sep.join(folders[:-1])
+        return short_path
 
 
 def change_file_ext(file: str, ext: str = ""):

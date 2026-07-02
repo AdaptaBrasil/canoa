@@ -361,7 +361,7 @@ class Sep(SQLABaseTable):
         return sep_row
 
     @staticmethod
-    def get_content(id: int) -> Optional[Svg_Content]:
+    def get_content(id: int) -> tuple[Svg_Content, Optional[str]]:
         """
         Returns the content of the icon_svg (useful for creating a file)
         """

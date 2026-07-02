@@ -22,7 +22,6 @@ from ...public.ups_handler import get_ups_jHtml
 from ...helpers.email_helper import RecipientsList, RecipientsDic, send_email
 from ...helpers.jinja_helper import process_template
 from ...common.app_error_assistant import ModuleErrorCode
-from ...helpers.ui_db_texts_manager import set_msg_fatal
 from ...helpers.route_helper import (
     public_route,
     get_form_input_value,
@@ -94,7 +93,7 @@ def password_recovery():
             task_code += 1  # 5
         elif user_rec is None:
             task_code += 2  # 6
-            set_msg_fatal("emailNotRegistered", ui_db_texts)
+            ui_db_texts.set_msg_fatal("emailNotRegistered")
         elif __has_active_token(user_rec.recover_email_token_at):
             task_code += 3  # 7
             text_expiry = ui_db_texts.get_ui_datetime(expires_in_hours, user_rec.recover_email_token_at)
@@ -102,19 +101,19 @@ def password_recovery():
             ui_db_texts.display_msg_only = True
         elif not is_external_ip_ready(sidekick.config):
             task_code += 4  # 8
-            set_msg_fatal("noExternalIP", ui_db_texts)
+            ui_db_texts.set_msg_fatal("noExternalIP")
         elif (code := __can_request_password_recovery()) > 0:
             task_code += 5  # 9
-            set_msg_fatal("cannotRequestPwRecovery", ui_db_texts, code)
+            ui_db_texts.set_msg_fatal("cannotRequestPwRecovery", code)
         elif (user_name := user_rec.username) is None:
             # save user_name, before saving record (after saving, cannot be read)
             task_code += 6  # 10
-            set_msg_fatal("cannotSaveToken", ui_db_texts, 1)
+            ui_db_texts.set_msg_fatal("cannotSaveToken", 1)
         elif (token := secrets.token_urlsafe()) is None:
             task_code += 7  # 11
-            set_msg_fatal("cannotSaveToken", ui_db_texts, 2)
+            ui_db_texts.set_msg_fatal("cannotSaveToken", 2)
         elif (code := __save_token(token, user_rec, task_code=+8)) > 0:  # 10
-            set_msg_fatal("cannotSaveToken", ui_db_texts, code)
+            ui_db_texts.set_msg_fatal("cannotSaveToken", code)
         else:
             task_code += 9  # 12
             route_me = public_route(public_route__password_reset, token=token)

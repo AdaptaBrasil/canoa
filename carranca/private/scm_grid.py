@@ -16,7 +16,6 @@ from ..helpers.uiact_helper import UiActResponseKeys
 from ..helpers.jinja_helper import Jinja_Rendered, process_template
 from ..helpers.route_helper import MTD_POST, get_private_response_data, init_response_vars
 from ..helpers.js_consts_helper import js_grid_col_meta_info, js_ui_dictionary
-from ..helpers.ui_db_texts_manager import set_msg_fatal
 from ..common.app_error_assistant import ModuleErrorCode, AppStumbled, HTTP_StatusCode
 from ..models.private.schema_grid import SchemaGrid
 
@@ -38,7 +37,8 @@ def get_scm_grid() -> Jinja_Rendered:
 
         task_code += 1  # 2
         if not is_get:
-            msg = f"{set_msg_fatal(HTTP_StatusCode.CODE_405.value, ui_db_texts)} (Requested: ${MTD_POST}.)"
+            _, msg_fatal = ui_db_texts.set_msg_fatal(HTTP_StatusCode.CODE_405.value)
+            msg = f"{msg_fatal} (Requested: ${MTD_POST}.)"
             raise AppStumbled(msg, task_code, False, True)
 
         task_code += 1  # 3

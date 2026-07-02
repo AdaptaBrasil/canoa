@@ -14,7 +14,6 @@ from ..helpers.uiact_helper import UiActResponseKeys, UiActResponse
 from ..helpers.types_helper import Jinja_Template
 from ..helpers.jinja_helper import process_template
 from ..helpers.route_helper import get_private_response_data, init_response_vars
-from ..helpers.ui_db_texts_manager import set_msg_success, MSG_DEFAULT
 from ..common.app_error_assistant import ModuleErrorCode
 from ..config.ExportProcessConfig import ExportProcessConfig
 
@@ -54,7 +53,7 @@ def scm_export_ui_save(uiact_rsp: UiActResponse) -> Jinja_Template:
         Sep.save_ui_order(items, task_code)
 
         task_code += 1
-        set_msg_success(MSG_DEFAULT, ui_db_texts)
+        ui_db_texts.set_msg_success()
 
         task_code += 1
         jHtml = process_template(tmpl_ffn, cargo_keys=class_to_dict(UiActResponseKeys), **ui_db_texts.data())

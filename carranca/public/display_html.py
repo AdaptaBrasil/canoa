@@ -17,15 +17,15 @@ import os
 import base64
 
 from flask import current_app
-from typing import List, cast
+from typing import List
 
 from ..common.UIDBTexts import UITextsKeys
 from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import is_str_none_or_empty
 from ..public.ups_handler import get_ups_jHtml
-from ..helpers.file_helper import ensure_folder_exists
+from ..helpers.file_helper import ensure_folder_exists, path_get_last_folder
 from ..helpers.route_helper import init_response_vars
-from ..helpers.html_helper import img_filenames, img_change_src_path, url_join, URL_PATH_SEP
+from ..helpers.html_helper import img_filenames, img_change_src_path, url_join, URL_PATH_SEP, icon_svg_inline
 from ..helpers.jinja_helper import process_template, process_text
 from ..common.app_context_vars import sidekick
 from ..common.app_error_assistant import ModuleErrorCode, AppStumbled
@@ -119,7 +119,7 @@ def display_html(docName: str):
         task_code += 1  # 173
         html_images = [] if is_str_none_or_empty(body_text) else sorted(img_filenames(body_text))  # list of img tags in HTML
 
-        static_folder: str = "static"  # cast(str, current_app.static_folder)
+        static_folder = path_get_last_folder(current_app.static_folder or "")  # : str = "static"
 
         task_code += 1
         img_folders = [static_folder, "docs", section, "images"]
@@ -150,8 +150,13 @@ def display_html(docName: str):
         elif fi.get(form_icon):
             icon_key = form_icon
         elif os.path.exists(os.path.join(*img_folders, form_icon)):
-            icon_url = URL_PATH_SEP + url_join(static_folder, *img_folders, form_icon)
-            ui_db_texts.set_value(UITextsKeys.Form.icon_url, icon_url)
+            icon_url_val = URL_PATH_SEP + url_join(*img_folders, form_icon)
+            ui_db_texts.set_value(UITextsKeys.Form.icon_url, icon_url_val)
+            # The idea was to change the color of the svg icon
+            # if form_icon.lower().endswith(".svg"):
+            #     svg_content = icon_svg_inline(os.path.join(img_local_path, form_icon))
+            #     if svg_content:
+            #         ui_db_texts.set_value("iconSvgContent", svg_content)
 
         jHtml = process_template(tmpl_ffn, fi=fi.with_icon(icon_key), **ui_db_texts.data())
 

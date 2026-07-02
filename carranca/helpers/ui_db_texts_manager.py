@@ -18,11 +18,11 @@ TODO:
 from flask import current_app
 from flask_login import current_user
 
-from typing import TypeAlias, Optional, Tuple, Any, cast
+from typing import Optional, Tuple, Any, cast
 from .pw_helper import is_anyone_logged
 from .py_helper import is_str_none_or_empty, clean_text
-from .types_helper import DB_Texts, DB_Lookup
-from ..common.UIDBTexts import UIDBTexts
+from .types_helper import DB_Texts, DB_Lookup, UI_Texts_Cache_Key
+from ..common.UIDBTexts import UIDBTexts, CACHE_UI_TEXTS
 from ..common.UITextsKeys import UITextsKeys
 from ..common.app_constants import APP_LANG
 
@@ -30,9 +30,9 @@ from ..common.app_constants import APP_LANG
 from .. import global_ui_texts_cache
 
 # ==== UI Texts Constants ====================================
-Cache_Key: TypeAlias = Tuple[str, str, Optional[str]]
+Cache_Key = UI_Texts_Cache_Key
 
-# use the default message key. eg set_msg_info(MSG_DEFAULT, ui_db_texts, time_info) MSG_DEFAULT -> 'msgInfo'
+# use the default message key. eg ui_db_texts.set_msg_info(MSG_DEFAULT, time_info) MSG_DEFAULT -> 'msgInfo'
 MSG_DEFAULT: str = ""
 
 
@@ -71,7 +71,7 @@ class UITexts_TableSearch:
 
     def get_info_value(self) -> dict:
         cache_value = global_ui_texts_cache.get(UITexts_TableSearch._CACHE_INTERNAL_INFO_KEY, {})
-        return cache_value
+        return cast(dict, cache_value)
 
     @property
     def as_tuple(self) -> Cache_Key:
@@ -84,6 +84,24 @@ class UITexts_TableSearch:
 class MsgNotFound:
     cache: Optional[str] = None
     default = "The message with key '{0}' was not found in §: {1}."
+
+
+# === Cache control ==========================================
+def clear_ui_texts_cache() -> int:
+    """
+    The 'rope': empties every UI-text cache so DB text edits are picked up
+    without restarting Canoa. Clears:
+    - global_ui_texts_cache (get_section() / db_retrieve_text())
+    - UIDBTexts.CACHE_UI_TEXTS (UIDBTexts._retrieve_value(), eg. ui_datetime, keyNotFound)
+    - MsgNotFound.cache
+
+    Returns the number of entries removed (handy for a log line).
+    """
+    count = len(global_ui_texts_cache) + len(CACHE_UI_TEXTS)
+    global_ui_texts_cache.clear()
+    CACHE_UI_TEXTS.clear()
+    MsgNotFound.cache = None
+    return count
 
 
 # === current user's locale  ================================
@@ -145,79 +163,18 @@ def _msg_not_found() -> str:  ## THIS IS OUTDATED ##
     return mnf
 
 
-def _set_or_add_msg(item_key: str, section: str, msg_key: str, ui_db_texts: UIDBTexts, args: tuple | dict | None = None) -> str:
-    """Retrieves text and adds it to a dictionary.
-
-    Args:
-        item: The item identifier.
-        section: The section identifier.
-        msg_key: The key for the dictionary entry, one of UITextsKeys.Msg
-        ui_db_texts: UIDBTexts.
-        args: Optional arguments for formatting the retrieved text.
-
-    Returns:
-        The formatted text.
-
-    mgd 2025-10-30
-    Check if texts contains the required item
-    This will allow to set the items of sections [secSuccess, secError]
-    in the 'current' section.
-
-    """
-    from ..common.app_context_vars import sidekick
-
-    # take the key value
-    item = item_key or msg_key
-    # search in the messages dict
-    msg_text: str = ui_db_texts.get_msg(item) if ui_db_texts else ""
-
-    if not msg_text:
-        # search in the items dict
-        msg_text = ui_db_texts.get_str(item) if ui_db_texts else ""
-
-    if len(ui_db_texts) == 0:
-        # TODO: ui_db_texts can have no items, the next error message mask this situation. TODO:
-        sidekick.display.warn(f"Warning: ui_db_texts[{ui_db_texts.section}] has no items.")
-
-    if section and not msg_text:
-        msg_text = db_retrieve_text(item, section)
-
-    try:
-        if is_str_none_or_empty(msg_text):
-            value = ""
-        elif not args:
-            value = msg_text
-        elif isinstance(args, dict):
-            value = msg_text.format(**args)
-        elif isinstance(args, tuple):
-            value = msg_text.format(*args)
-        else:  # simple
-            value = msg_text.format(args)
-    except Exception as e:
-        sidekick.display.error(f"UIDBTexts, msg [{msg_text}] render error: [{e}].")
-        value = msg_text
-
-    if ui_db_texts and value:  # add or refresh
-        ui_db_texts.set_value(msg_key, value)
-        # ui_db_texts[name] = value
-
-    return value
-
-
 # Cached Texts retrievers ==================================
 def get_section(section_name: str) -> DB_Texts:
     """
     returns a DBTexts of the 'section_name' from table vw_ui_texts
     """
-    from ..common.app_context_vars import sidekick
-
     if is_str_none_or_empty(section_name):
         return {}
 
     table_cache = UITexts_TableSearch(ui_texts_locale(), section_name)
 
     if table_cache.exists():
-        return table_cache.get_text()
+        return cast(DB_Texts, table_cache.get_text())
     else:  # not in cache, retrieve section
         query = __get_ui_texts_query("item, text", table_cache)
         items = _get_query_as_dict(query) or {}
@@ -295,60 +252,6 @@ def init_ui_db_texts(ui_db_section: str) -> UIDBTexts:
     ui_db_texts = UIDBTexts(db_texts, sidekick.debugging, ui_dt_format, db_lookup)
 
     return ui_db_texts
-
-
-## ----- OBSOLETE  2026.04.02-----------
-def set_msg_info(item: str, ui_db_texts: UIDBTexts, *args) -> str:
-    """
-    returns `text` for the [item, <curr_section>]
-    and adds the pair to `texts` => texts.add(text, 'msgInfo')
-    """
-    return _set_or_add_msg(item, "", UITextsKeys.Msg.info, ui_db_texts, args)
-
-
-def set_msg_warn(item: str, ui_db_texts: UIDBTexts, *args) -> str:
-    """
-    returns text for the [item/'sec_Error'] pair
-    and adds pair to texts => texts.add( text, 'msgError')
-    """
-    return _set_or_add_msg(item, UITextsKeys.Section.error, UITextsKeys.Msg.warn, ui_db_texts, args)
-
-
-def set_msg_error(item: str, ui_db_texts: UIDBTexts, *args) -> str:
-    """
-    returns text for the [item/'sec_Error'] pair
-    and adds pair to texts => texts.add( text, 'msgError')
-    """
-    return _set_or_add_msg(item, UITextsKeys.Section.error, UITextsKeys.Msg.error, ui_db_texts, args)
-
-
-def set_msg_success(item: str, ui_db_texts: UIDBTexts, *args) -> str:
-    """
-    returns `text` for the [item, <curr_section>] | [item, 'sec_Success'] pair
-    (of the vw_ui_texts view)
-    and adds the pair to `texts` => texts.add(text, 'msgSuccess')
-
-    Finally sets ui_db_texts.Msg.display_msg_only = True, so the form only displays
-    the message (no other form inputs)
-    """
-
-    ui_db_texts.reset_messages()
-    msg = _set_or_add_msg(item, UITextsKeys.Section.success, UITextsKeys.Msg.success, ui_db_texts, args)
-    ui_db_texts.display_msg_only = True
-    return msg
-
-
-def set_msg_fatal(item: str, ui_db_texts: UIDBTexts, *args) -> str:
-    """
-    Same as add_msg_error, but
-    1) sets  ui_db_texts.display_msg_only = True,
-       so the form only displays the message (no other form inputs)
-    2) wipes all ui messages from the data dict
-    """
-    ui_db_texts.reset_messages()
-    msg = set_msg_error(item or UITextsKeys.Msg.fatal, ui_db_texts, args)
-    ui_db_texts.display_msg_only = True
-    return msg
 
 
 # eof

@@ -20,7 +20,7 @@ from werkzeug.utils import secure_filename
 from .wtforms import ReceiveFileForm
 from ..common.Display import Display
 from ..common.UIDBTexts import UIDBTexts
-from ..config.FormIcons import FormIcons as fi
+
 from ..public.ups_handler import ups_handler
 from ..common.app_context_vars import sidekick, app_user
 from ..common.app_error_assistant import ModuleErrorCode
@@ -35,7 +35,7 @@ from ..helpers.route_helper import get_private_response_data, get_form_input_val
 from ..helpers.dwnLd_goo_helper import is_gd_url_valid, download_public_google_file
 from ..helpers.js_consts_helper import js_ui_dictionary
 from .validate_process.ProcessData import ProcessData
-from ..helpers.ui_db_texts_manager import UITextsKeys, set_msg_fatal
+from ..helpers.ui_db_texts_manager import UITextsKeys
 
 if TYPE_CHECKING:
     from .UserSep import UserSep, UserSepList
@@ -86,7 +86,7 @@ def receive_file() -> Jinja_Template:
         ui_db_texts.set_value(UITextsKeys.Form.icon_url, seps[0].icon_url if len(seps) > 0 else "")
 
         seps_list: List[Usual_Dict] = [{"code": sep.code, "fullname": sep.fullname, "icon_url": sep.icon_url} for sep in seps]
-        tmpl = process_template(tmpl_ffn, form=fform, seps=seps_list, fi=fi.with_icon(), **ui_db_texts.data(), **js_ui_dictionary())
+        tmpl = process_template(tmpl_ffn, form=fform, seps=seps_list, **ui_db_texts.data(), **js_ui_dictionary())
         return tmpl
 
     def _log_issue(ui_db_texts: UIDBTexts, msg_type: Display.Kind, error_code: int, msg_id: str, task_code: int, msg_arg: str = "") -> int:
@@ -299,7 +299,7 @@ def receive_file() -> Jinja_Template:
     except Exception as e:
         error_code = _log_issue(ui_db_texts, Display.Kind.FATAL, task_code + 1, "", task_code)
         sidekick.display.fatal(f"{RECEIVE_FILE_DEFAULT_ERROR}: Code {error_code}, Message: {e}.")
-        msg = set_msg_fatal("receiveFileException", ui_db_texts, task_code)
+        _, msg = ui_db_texts.set_msg_fatal("receiveFileException", task_code)
         _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)
         jHtml = process_template(tmpl_ffn, **ui_db_texts)
     finally:

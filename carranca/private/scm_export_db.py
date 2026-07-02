@@ -24,7 +24,6 @@ from ..helpers.route_helper import get_private_response_data, init_response_vars
 from ..models.private.ExportGrid import ExportGrid
 from ..config.ExportProcessConfig import ExportProcessConfig
 from ..common.app_error_assistant import ModuleErrorCode
-from ..helpers.ui_db_texts_manager import set_msg_error, set_msg_success, MSG_DEFAULT
 
 
 def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_Rendered | Response:
@@ -82,12 +81,8 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_Rendered | Response:
             def _str(what: str, list: List) -> str:
                 return f"<br>{what}: [{list}],"
 
-            set_msg_error(
-                "msgError",
-                ui_db_texts,
-                (_str("Files", file_missing) + _str("Schema", scm_missing) + _str("SEP", sep_missing))[:-1],
-                task_code,
-            )
+            missing_msg = (_str("Files", file_missing) + _str("Schema", scm_missing) + _str("SEP", sep_missing))[:-1]
+            ui_db_texts.set_msg_error("msgError", (missing_msg, task_code))
         else:
             task_code += 2
             schema_dict = class_to_dict(schema_data)
@@ -98,7 +93,7 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_Rendered | Response:
                 for row in file_info:
                     zipf.write(row.ffn, arcname=row.name)
 
-            set_msg_success(MSG_DEFAULT, ui_db_texts)
+            ui_db_texts.set_msg_success()
             # TODO:
             # <!-- JavaScript to trigger download -->
             # <script>

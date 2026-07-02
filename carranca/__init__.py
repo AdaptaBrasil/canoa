@@ -17,12 +17,13 @@ from sqlalchemy.orm import scoped_session
 from typing import cast, Dict, List
 from .common.Sidekick import Sidekick
 from .helpers.py_helper import OS_IS_LINUX
+from .helpers.types_helper import UI_Texts_Cache
 
 # App Global variables:
 global_sidekick: Sidekick
 global_login_manager: LoginManager
 global_sqlalchemy_scoped_session: scoped_session
-global_ui_texts_cache: Dict[str, str] = {}
+global_ui_texts_cache: UI_Texts_Cache = {}
 
 """
 'scoped' refers to the management of SQLAlchemy `Session` objects within a specific scope,
@@ -110,6 +111,7 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
     from .helpers.uiact_helper import UiActResponseProxy
     from .helpers.route_helper import private_route, public_route, static_route
     from .helpers.js_consts_helper import js_form_sec_key, js_form_cargo_id, js_form_sec_value
+    from .config.FormIcons import FormIcons as _fi
 
     def __get_app_menu(sub_menu_name: str) -> DB_Texts:
         sub_menu: DB_Texts = {}
@@ -125,7 +127,7 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
 
         return sub_menu
 
-    def __get_jinja_user() -> JinjaUser | None:
+    def __jinja_user_for_template() -> JinjaUser | None:
         if is_anyone_logged():  # 'import jinja_user' only when a user is logged
             from .common.app_context_vars import jinja_user
 
@@ -171,7 +173,7 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
         private_route=private_route,
         public_route=public_route,
         do_btn_id=__do_btn_id,
-        jinja_user=__get_jinja_user,
+        jinja_user=__jinja_user_for_template,
         is_anyone_logged=__is_anyone_logged,
         app_menu=__get_app_menu,
         sep_menu=__get_user_sep_menu_list,
@@ -179,6 +181,7 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
         ui_act_add=UiActResponseProxy.add,
         ui_act_shw=UiActResponseProxy.show,
         safe_token={"key": js_form_sec_key, "value": js_form_sec_value(), "cargo": js_form_cargo_id},
+        fi=_fi,
     )
 
     app.jinja_env.filters["fromjson"] = json.loads

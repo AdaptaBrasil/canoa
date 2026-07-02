@@ -14,6 +14,7 @@ Gemini 2025-11-08
 import re
 import json
 import warnings
+
 from typing import Optional, Tuple, Dict, Any, Type, List, cast
 from datetime import datetime, timedelta
 from .UITextsKeys import UITextsKeys
@@ -37,6 +38,12 @@ CACHE_UI_TEXTS: DB_Texts = {}
 
 # User Interface Database Texts
 class UIDBTexts:
+    """
+    A dictionary wrapper for UI texts (loaded from the DB) providing strongly typed access methods
+    (e.g., .get_str(), .get_bool(), .get_float()) and dictionary-like access for strings via __getitem__.
+    Performs runtime type checking only when running in debug mode.
+    """
+
     # -------------------------------------------------------------
     # Internal helper methods for value retrieval and type checking
     def _get_value(self, key: str) -> Any:
@@ -119,12 +126,6 @@ class UIDBTexts:
         ui_dt_str = self._retrieve_value("ui_datetime", UITextsKeys.Section.success, self.ui_dt_format, True)
         return ui_dt_str
 
-    """
-    A dictionary wrapper for UI texts (loaded in the DB) providing strongly typed access methods
-    (e.g., .get_str(), .get_bool(), .get_float()) and dictionary-like access for strings via __getitem__.
-    Performs runtime type checking only when running in debug mode.
-    """
-
     def __init__(self, data: Dict[str, Any], debugging: bool, ui_dt_format: str = "", db_lookup: DB_Lookup | None = None):
         # collect msg keys names
         items = UITextsKeys.Msg.__dict__.items()
@@ -132,6 +133,7 @@ class UIDBTexts:
 
         # filter all msg to _msg dict
         self._msg = {k: v for k, v in data.items() if k in self.msg_keys}
+        self.display_msg_only = False  # initialize 'special' msg
         # filter get all 'texts' into _data dict
         self._data = {k: v for k, v in data.items() if k not in self.msg_keys}
 
@@ -143,10 +145,14 @@ class UIDBTexts:
 
     def data(self) -> Dict[str, Any]:
         """
-        Returns the raw, underlying dictionary for use with unpacking into template calls
+        returns a **copy** of `_data` (mutating it does not affect the instance)
+        with `display_msg_only` merged in.
         e.g., render_template( tmpl_ffn, **ui_texts.data() )
         """
-        return self._data
+
+        _data = self._data.copy()
+        _data[UITextsKeys.Msg.display_msg_only] = self.display_msg_only
+        return _data
 
     def format(self, key: str, *args) -> str:
         """
@@ -343,8 +349,6 @@ class UIDBTexts:
 
         return result
 
-    # def try_date_day(self, key: str, value: str) -> str:
-
     def _key_not_found_ui_msg(self, key: str, alternative_section: str) -> str:
         default = KEY_NOT_FOUND_MSG
         nice_key = camel_to_snake(key).replace("_", " ").capitalize()
@@ -385,7 +389,7 @@ class UIDBTexts:
             msg_text = self.get_str(key)
 
         if len(self) == 0 and self.section:
-            # TODO: ui_db_texts can have no items, the next error message mask this situation. TODO:
+            # TODO: ui_db_texts can have no items; the error message below masks this situation.
             sidekick.display.error(f"Error: ui_db_texts[{self.section}] has no items.")
 
         if msg_text or (alternative_section == UITextsKeys.Section.current):
@@ -460,6 +464,15 @@ class UIDBTexts:
         key, msg = self._set_or_add_msg(key, UITextsKeys.Section.success, UITextsKeys.Msg.info, args)
         return key, msg
 
+    def set_msg_prompt(self, key: str = "", args: DB_Texts_Args = None) -> Tuple[str, str]:
+        """returns used `key` and the retrieved `msg`
+        Prompt/confirmation text — rendered as a colorless, icon-less alert
+        (see backend-msg.html.j2). No shared DB fallback section exists for
+        prompts, so lookup is restricted to the current section.
+        """
+        key, msg = self._set_or_add_msg(key, UITextsKeys.Section.current, UITextsKeys.Msg.prompt, args)
+        return key, msg
+
     def set_msg_warn(self, key: str = "", args: DB_Texts_Args = None) -> Tuple[str, str]:
         """returns used `key` and the retrieved `msg`
         Warning texts can be shared with the error section ;—)
@@ -480,20 +493,12 @@ class UIDBTexts:
     @property
     def display_msg_only(self) -> bool:
         """True when configured to display only messages (no form inputs, etc)."""
-        return self.get_bool(UITextsKeys.Msg.display_msg_only, False)
+        key = UITextsKeys.Msg.display_msg_only
+        return bool(self._msg.get(key, False))
 
     @display_msg_only.setter
     def display_msg_only(self, value: bool) -> None:
-        self[UITextsKeys.Msg.display_msg_only] = value
-
-    def active_msgs(self) -> List[str]:
-        # TODO: 2026.06.24 (René) set a default icon for the Info/Warn/Error...
-        # when is in display_msg_only mode
-        result = []
-        for k_msg in self.msg_keys:
-            if self._data.get(k_msg, None):
-                result.append(k_msg)
-        return result
+        self._msg[UITextsKeys.Msg.display_msg_only] = bool(value)
 
 
 # eof

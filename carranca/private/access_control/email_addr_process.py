@@ -106,13 +106,14 @@ def send_email_to_test_address(route: str, email: str, name: str) -> Jinja_Rende
         jHtml, _ = _send_email("emailToTestEmail", email, name, {}, True, fform)
 
     else:
+        # TODO: button [Didn't received your email :-( ]
         jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.EMAIL_CHECK)
         try:
             tmpl_ffn, _, ui_db_texts = get_account_response_data("emailToTestEmail", "user_prompt")
             task_code += 1
             masked_email = _mask_email(email)
             task_code += 1
-            ui_db_texts.set_msg_info("requestEmailText", masked_email)
+            ui_db_texts.set_msg_prompt("requestEmailText", masked_email)
             ui_db_texts.replace(UITextsKeys.Form.btn_submit, "acceptEmailBtn")
             ui_db_texts.replace(UITextsKeys.Form.post_route, private_route(route, uid=""))
             ui_db_texts.display_msg_only = True
@@ -141,7 +142,7 @@ def send_and_wait_verify_token(email: str, name: str, uid: str) -> Jinja_Rendere
 
     vars = {}
     token_saved = False
-    if is_method_post():
+    if is_method_get():
         digit_count = sidekick.config.EMAIL_VERIFY_TOKEN_DIGIT_COUNT
         token = generate_random(digit_count)
         _update_token(token)
@@ -166,7 +167,7 @@ def explain_email_addr_proc(route: str, user_email: str) -> Jinja_Rendered:
     task_code += 10
     try:
         tmpl_ffn, _, ui_db_texts = get_account_response_data("verifySentToken", "user_prompt")
-        ui_db_texts.set_msg_info("acceptEmail")
+        ui_db_texts.set_msg_prompt("acceptEmail")
         ui_db_texts[UITextsKeys.Form.btn_submit] = ui_db_texts["acceptEmailBtn"]
         ui_db_texts.set_value(UITextsKeys.Form.post_route, private_route(route, uid=_uid(user_email)))
         ui_db_texts.display_msg_only = True

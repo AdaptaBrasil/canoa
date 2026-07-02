@@ -24,7 +24,6 @@ from ...helpers.types_helper import Usual_Dict
 from ...helpers.route_helper import MTD_GET, get_private_response_data, init_response_vars
 from ...common.app_error_assistant import HTTP_StatusCode, ModuleErrorCode, AppStumbled
 from ...helpers.js_consts_helper import js_form_sec_check, js_form_cargo_id, js_grid_col_meta_info
-from ...helpers.ui_db_texts_manager import set_msg_error
 
 
 def download_rec() -> Response:
@@ -48,7 +47,8 @@ def download_rec() -> Response:
             return f"{caption}: [{db_record[USER_RECEIPT]}]."
 
         if is_get:
-            msg = f"{set_msg_error(HTTP_StatusCode.CODE_405.value, ui_db_texts)} (Requested: ${MTD_GET}.)"
+            _, msg_error = ui_db_texts.set_msg_error(HTTP_StatusCode.CODE_405.value)
+            msg = f"{msg_error} (Requested: ${MTD_GET}.)"
             _raise(msg, HTTPStatus.METHOD_NOT_ALLOWED)
 
         task_code += 1  # 2
@@ -57,18 +57,18 @@ def download_rec() -> Response:
 
         if not is_str_none_or_empty(msg_key := js_form_sec_check()):
             task_code += 1  # 3
-            msg = set_msg_error(msg_key, ui_db_texts)
+            _, msg = ui_db_texts.set_msg_error(msg_key)
             _raise(msg, HTTPStatus.UNAUTHORIZED)
         elif not ((rec_id > 0) and rec_type in [DOWNLOAD_REPORT, DOWNLOAD_ZIPFILE]):
             task_code += 2  # 4
-            msg = set_msg_error("secKeyViolation", ui_db_texts)
+            _, msg = ui_db_texts.set_msg_error("secKeyViolation")
             _raise(msg, HTTPStatus.BAD_REQUEST, True)
         else:
             task_code += 3  # 5
             no_sep = ui_db_texts["itemNone"]
             db_records, download_file_name, uploaded_name, report_ext = fetch_record_s(no_sep, rec_id, IGNORE_USER)
             if len(db_records) != 1:
-                msg = set_msg_error("noRecord", ui_db_texts)
+                _, msg = ui_db_texts.set_msg_error("noRecord")
                 _raise(msg, HTTPStatus.NOT_FOUND)
 
             if rec_type == DOWNLOAD_REPORT:
@@ -81,7 +81,8 @@ def download_rec() -> Response:
                 file_response = send_file(download_file_name, as_attachment=True, download_name=uploaded_name)
                 http_status_code = HTTPStatus.OK
             else:  # deleted just now :-(
-                msg = f"{set_msg_error("fileNotFound", ui_db_texts)} {_get_receipt(db_records[0])}"
+                _, msg_error = ui_db_texts.set_msg_error("fileNotFound")
+                msg = f"{msg_error} {_get_receipt(db_records[0])}"
                 _raise(msg, HTTPStatus.GONE)
 
     except Exception as e:

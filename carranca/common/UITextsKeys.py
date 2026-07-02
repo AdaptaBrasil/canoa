@@ -5,6 +5,7 @@
 class UITextsKeys:
     ## see carranca\templates\includes\backend-msg.html.j2
     class Msg:
+        prompt = "msgPrompt"  # prompt/confirmation text, rendered with no color and no icon
         error = "msgError"
         fatal = "msgFatal"
         info = "msgInfo"

@@ -23,12 +23,15 @@ mgd 2025-03-05
 
 import html
 import inspect
+import os
 from typing import Tuple, Any
+
+from flask import current_app
 
 from ..common.UIDBTexts import UIDBTexts
 from ..helpers.py_helper import is_str_none_or_empty
 from ..helpers.pw_helper import internal_logout, is_anyone_logged
-from ..helpers.html_helper import icon_url
+from ..helpers.html_helper import icon_url, icon_svg_inline
 from ..helpers.jinja_helper import process_template
 from ..helpers.types_helper import Template_File_Full_Name, Jinja_Rendered, DB_Texts_Args
 from ..helpers.route_helper import get_tmpl_full_file_name
@@ -111,6 +114,11 @@ def ups_handler(
     icon_file_name = ui_texts.get(UITextsKeys.Form.icon_file)
     if icon_file_name and not ui_texts.get(UITextsKeys.Form.icon_url):
         ui_texts[UITextsKeys.Form.icon_url] = icon_url(icon_file_name)
+        if icon_file_name.lower().endswith(".svg"):
+            svg_path = os.path.join(current_app.static_folder, "icons", icon_file_name)
+            svg_content = icon_svg_inline(svg_path)
+            if svg_content:
+                ui_texts["iconSvgContent"] = svg_content
 
     # before logout
     sidekick.display.error(str(e))

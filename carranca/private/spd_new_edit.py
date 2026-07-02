@@ -30,7 +30,7 @@ from ..helpers.types_helper import Route_Response, Choice, Choices
 from ..helpers.jinja_helper import process_template
 from ..helpers.uiact_helper import UiActResponseProxy
 from ..common.app_context_vars import sidekick
-from ..helpers.ui_db_texts_manager import set_msg_fatal, UITextsKeys
+from ..helpers.ui_db_texts_manager import UITextsKeys
 from ..models.private.spatial_data_file import SpatialDataFile
 from ..helpers.route_helper import (
     get_private_response_data,
@@ -282,7 +282,8 @@ def spd_new_or_edit(data: str) -> Route_Response:
 
         spd_row: SpatialDataFile | None = SpatialDataFile() if is_insert else SpatialDataFile.get_row(spd_id)
         if spd_row is None:
-            raise JumpOut(set_msg_fatal("spdEditNotFound", ui_db_texts), task_code + 1)
+            _, msg_fatal = ui_db_texts.set_msg_fatal("spdEditNotFound")
+            raise JumpOut(msg_fatal, task_code + 1)
 
         task_code += 1  # 2
         ui_db_texts["insertMode"] = is_insert

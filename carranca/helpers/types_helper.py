@@ -55,6 +55,10 @@ Primitive: TypeAlias = str | int | float | bool
 DB_Texts: TypeAlias = Dict[str, str]
 DB_Texts_Args: TypeAlias = Tuple | Dict | Primitive | None  #
 
+""" Key for global_ui_texts_cache: (section_lower, locale, item | None). """
+UI_Texts_Cache_Key: TypeAlias = Tuple[str, str, Optional[str]]
+UI_Texts_Cache: TypeAlias = Dict[UI_Texts_Cache_Key, DB_Texts | str]
+
 
 Usual_Dict: TypeAlias = Dict[str, Any]
 JS_Constants: TypeAlias = Dict[str, str | bool]

@@ -21,7 +21,6 @@ from ..helpers.route_helper import MTD_GET, get_private_response_data, init_resp
 from ..common.app_context_vars import sidekick
 from ..helpers.js_consts_helper import js_form_sec_check
 from ..common.app_error_assistant import HTTP_StatusCode, ModuleErrorCode, AppStumbled
-from ..helpers.ui_db_texts_manager import set_msg_error
 from ..models.private.spatial_data_file import SpatialDataFile
 
 
@@ -43,17 +42,18 @@ def download_rec(code: str) -> Response:
             raise AppStumbled(msg, task_code, log_out, True)
 
         def _not_found(task_code: int):
-            msg = set_msg_error("noRecord", ui_db_texts, task_code)
+            _, msg = ui_db_texts.set_msg_error("noRecord", task_code)
             _raise(msg, HTTPStatus.NOT_FOUND)
             return
 
         if is_get:
             task_code += 1
-            msg = f"{set_msg_error(HTTP_StatusCode.CODE_405.value, ui_db_texts)} (Requested: ${MTD_GET}.)"
+            _, msg_error = ui_db_texts.set_msg_error(HTTP_StatusCode.CODE_405.value)
+            msg = f"{msg_error} (Requested: ${MTD_GET}.)"
             _raise(msg, HTTPStatus.METHOD_NOT_ALLOWED)
         elif not is_str_none_or_empty(msg_key := js_form_sec_check()):
             task_code += 2
-            msg = set_msg_error(msg_key, ui_db_texts)
+            _, msg = ui_db_texts.set_msg_error(msg_key)
             _raise(msg, HTTPStatus.UNAUTHORIZED)
         elif (id := SpatialDataFile.to_id(code)) < 1:
             _not_found(task_code + 3)

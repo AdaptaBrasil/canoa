@@ -22,7 +22,7 @@ def signout_prompt() -> Jinja_Rendered | None:
         try:
             tmpl_ffn, _, ui_db_texts = get_account_response_data("userUiLogout", "user_prompt")
             task_code += 1
-            ui_db_texts.set_msg_info(MSG_DEFAULT, app_user.name)
+            ui_db_texts.set_msg_prompt("confirm", app_user.name)
             ui_db_texts.set_value(UITextsKeys.Form.size, "frm-size")
             ui_db_texts.set_value(UITextsKeys.Form.post_route, private_route("logout"))
             ui_db_texts.display_msg_only = True

@@ -13,8 +13,6 @@ declare
 begin
     -- spell:ignore mgmt plpgsql
 
-	-- /!\ Keep a copy of this file updated in carranca\private\seps_mgmt\vw_mgmt_seps_user__on_upd.sql
-
     -- TODO:
     -- Get message string from vw_ui_texts
 

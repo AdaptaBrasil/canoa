@@ -17,11 +17,11 @@
 ## Files involved
 
 ### 📂 Python
-> carranca/private/seps_mgmt/
-- `init_grid.py` *(main module)*
-- `keys-values.py` *(front-end ↔ back-end keys/values, via class)*
+> carranca/private/sep_mgmt/
+- `sep_mgmt.py` *(main module)*
+- `keys_values.py` *(front-end ↔ back-end keys/values, via class)*
 - `save_to_db.py`
-- `mgmt_notify.py`
+- `sep_mgmt_notify.py`
 
 ### 📂 Jinja
 > carranca/templates/private/
@@ -32,8 +32,10 @@
 - `sep_mgmt.js`
 
 ### 📂 SQLAlchemy
-> carranca/private/
-- `models[MgmtUserSeps]`
+> carranca/models/private/
+- `MgmtSepsUser` (`mgmt_seps_user.py`)
+- `LogUserSep` (`log_user_sep.py`)
+- `LogUserSepGrid` (`log_user_sep_grid.py`) — read-only audit-log grid, 2026-07-15
 
 ---
 
@@ -41,6 +43,7 @@
 
 ### 🏛 **Views**
 - `vw_mgmt_seps_user`
+- `vw_log_user_sep` — read-only, added 2026-07-15 to support the (still unbuilt) admin UI for the "Registrar (logar) a criação e remoção de setores estratégicos" issue
 
 ### 🔄 **Triggers**
 - `vw_mgmt_seps_user__upd` _(instead of update)_
@@ -52,6 +55,12 @@
 - `log_user_sep`
 
 ### 📊 **Columns**
-- `sep.mgmt_sep_id`
-- `sep.mgmt_sep_at`
+- `sep.mgmt_users_id`
+- `sep.mgmt_users_at`
 - `sep.mgmt_batch_code`
+
+---
+
+## Obsolete (removed 2026-07-15)
+
+`vw_mgmt_user_sep` / `vw_mgmt_user_sep__on_upd` — the v1.0 "one user ↔ one SEP" trigger (`users.mgmt_sep_id`-based). Already marked `COMMENT ON VIEW ... IS 'OBSOLETE'` in the DB; the matching `.sql` file in this folder was deleted from the repo since it referenced columns (`log_user_sep.id_sep_old`/`sep_new`) that no longer exist in the current schema.

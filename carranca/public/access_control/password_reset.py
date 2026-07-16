@@ -8,7 +8,7 @@ mgd
 
 # cSpell:ignore wtforms passwordreset
 from datetime import datetime
-from ...models.public import persist_user, get_user_where
+from ...models.public.user import User
 from ...config.FormIcons import FormIcons as fi
 from ...private.wtforms import ChangePassword
 from ...public.ups_handler import get_ups_jHtml
@@ -48,7 +48,7 @@ def password_reset(token):
             ui_db_texts.set_msg_warn("invalidPasswordLength", (sidekick.config.DB_len_val_for_pw.min, sidekick.config.DB_len_val_for_pw.max))
         elif password != confirm_password:
             ui_db_texts.set_msg_error("passwordsAreDifferent")
-        elif (record_to_update := get_user_where(recover_email_token=token_str)) is None:
+        elif (record_to_update := User.get_where(recover_email_token=token_str)) is None:
             ui_db_texts.set_msg_fatal("invalidToken")
         elif not __is_token_valid(record_to_update.recover_email_token_at, 5):
             ui_db_texts.set_msg_fatal("expiredToken")
@@ -57,7 +57,7 @@ def password_reset(token):
             record_to_update.password = hash_password(password)
             record_to_update.recover_email_token = None
             task_code += 1  # 5
-            persist_user(record_to_update, task_code)
+            User.set_row(record_to_update)
             ui_db_texts.set_msg_success()
 
         jHtml = process_template(jHtml, form=fform, fi=fi.with_icon("password_change"), **ui_db_texts.data())

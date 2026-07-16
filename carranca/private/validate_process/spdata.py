@@ -52,7 +52,7 @@ def spddata(cargo: Cargo) -> Next_Cargo:
         export_type = cargo.receive_file_cfg.spd_data_export
         export_types = cargo.receive_file_cfg.SpdDataExport
 
-        spd_id = -1 if export_type == export_types.NONE else cargo.sep_data.spd_id
+        spd_id = -1 if export_type == export_types.NONE else (cargo.sep_data.spd_id or -1)
         data_dic: Dict_Field_Values = {}
 
         if spd_id > 0 and (spd_data := SpatialDataFile.get_row(spd_id)) and (data_dic := json.loads(spd_data.file_data)):

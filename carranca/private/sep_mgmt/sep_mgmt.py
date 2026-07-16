@@ -8,9 +8,9 @@ SEP Management and User assignment
 
 import json
 from flask import request
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, cast
 
-from ...models.public import User
+from ...models.public.user import User
 from ...models.private.mgmt_seps_user import MgmtSepsUser
 
 from ..sep_icon import do_icon_get_url
@@ -57,7 +57,7 @@ def sep_mgmt() -> str:
         col_names: List[str] = list(class_to_dict(SepMgmtGridCols).values())
         js_ui_dict = js_ui_dictionary(ui_db_texts[js_grid_col_meta_info], col_names, task_code)
 
-        sep_data = []
+        sep_data: ListOfDBRecords = []
         item_none = ui_db_texts["itemNone"]
         item_none = "(None)" if is_str_none_or_empty(item_none) else item_none
         if is_get:
@@ -69,7 +69,7 @@ def sep_mgmt() -> str:
             raise AppStumbled(msg, task_code, True, True)
         else:
             task_code += 3  # 6
-            txt_response = request.form.get(js_form_cargo_id)
+            txt_response = cast(str, request.form.get(js_form_cargo_id))
             json_response: Dict[str, str] = json.loads(txt_response)
             msg_success, msg_error_save_and_email, task_code = _save_and_email(json_response, ui_db_texts, task_code)
             sep_data, user_list = _sep_data_fetch(item_none, col_names)

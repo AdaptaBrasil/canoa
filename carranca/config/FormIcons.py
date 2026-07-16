@@ -77,6 +77,7 @@ FormIcons: FormIconsDict = FormIconsDict(
         "check_email": "fa-envelope-circle-check",
         "login": "fa-arrow-right-to-bracket",
         "signout": "fa-arrow-right-from-bracket",
+        "cache_clear": "fa-broom",
         "register": "fa-person-circle-plus",
         "email": "fa-envelope",
         "user": "fa-user",

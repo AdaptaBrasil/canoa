@@ -1,10 +1,7 @@
 """
  SpatialDataFile Table
 
-
-
 Equipe da Canoa -- 2026
-
 
 """
 

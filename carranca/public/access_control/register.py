@@ -11,7 +11,7 @@ mgd
 from flask import request
 
 from ..wtforms import RegisterForm
-from ...models.public import User, persist_user
+from ...models.public.user import User
 from ...config.FormIcons import FormIcons as fi
 from ...helpers.pw_helper import internal_logout, is_anyone_logged
 from ...public.ups_handler import get_ups_jHtml
@@ -54,7 +54,7 @@ def register():
             task_code += 1  # 4
             new_user_rec = User(**request.form)
             task_code += 1  # 5
-            persist_user(new_user_rec, task_code)
+            User.set_row(new_user_rec)
             task_code += 1  # 6
             ui_db_texts.set_msg_success("welcome")
             # todo welcome e-mail with Token for email confirmation and login after confirmation

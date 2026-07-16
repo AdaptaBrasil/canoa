@@ -13,7 +13,7 @@ from sqlalchemy import func
 from flask_login import login_user, logout_user
 
 from ..wtforms import LoginForm
-from ...models.public import User, persist_user
+from ...models.public.user import User
 from ...config.FormIcons import FormIcons as fi
 from ...helpers.py_helper import is_str_none_or_empty, now_as_iso
 from ...helpers.pw_helper import internal_logout, is_anyone_logged, verify_password
@@ -72,7 +72,7 @@ def do_login():
                 task_code += 2  # 13
                 user.password_failures = user.password_failures + 1
                 ui_db_texts.set_msg_error("userOrPwdIsWrong")
-                persist_user(user, task_code)
+                User.set_row(user)
             elif user.disabled:
                 task_code += 3  # 14
                 ui_db_texts.set_msg_error("userIsDisabled")
@@ -98,7 +98,7 @@ def do_login():
                 sidekick.display.info(msg)
                 task_code += 1  # 22
                 # user obj is `lost` here
-                persist_user(user, task_code)
+                User.set_row(user)
                 task_code += 1  # 23
                 if user_email_verified:
                     return redirect_to(home_route())

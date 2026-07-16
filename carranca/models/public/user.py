@@ -1,50 +1,35 @@
 """
-Public Tables
+ User Table
 Part of Public Access Control Processes
 
 Equipe da Canoa -- 2024
-mgd
+
 """
 
-# cSpell:ignore nullable sqlalchemy joinedload, SQLA
-
-from carranca import global_sqlalchemy_scoped_session, global_login_manager
+# cSpell:ignore nullable sqlalchemy joinedload
 
 from flask import Request
-from typing import Optional, Any, List
+from typing import Any, List, Optional
 from datetime import datetime
-from sqlalchemy.exc import DatabaseError
-from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import ColumnExpressionArgument
-from sqlalchemy import (
-    func,
-    String,
-    select,
-    Column,
-    Integer,
-    Boolean,
-    DateTime,
-    Computed,
-    ForeignKey,
-    LargeBinary,
-)
-from sqlalchemy.orm import relationship, joinedload, Mapped, mapped_column
+from sqlalchemy import Boolean, Column, Computed, DateTime, ForeignKey, Integer, LargeBinary, String, func, select
 from flask_login import UserMixin
+from sqlalchemy.orm import Mapped, Session, joinedload, mapped_column, relationship
+from sqlalchemy.sql.expression import ColumnExpressionArgument
 
-from ..helpers.db_records.DBRecords import DBRecords
+from ... import global_login_manager
+from .role import Role
+from ..base import CanoaBaseTable
+from ...helpers.pw_helper import hash_password
+from ...helpers.db_helper import db_fetch_rows
+from ...helpers.py_helper import is_str_none_or_empty
+from ...common.app_constants import APP_LANG
+from ...helpers.db_records.DBRecords import DBRecords
 
-from ..models import SQLABaseTable
-from ..helpers.pw_helper import hash_password
-from ..helpers.py_helper import is_str_none_or_empty, to_str
-from ..helpers.db_helper import db_fetch_rows
-from ..private.RolesAbbr import RolesAbbr
-from ..common.app_constants import APP_LANG
 
-
-# --- Table ---
-class User(SQLABaseTable, UserMixin):
+class User(CanoaBaseTable, UserMixin):
 
     __tablename__ = "users"
+    __code_seed__ = 12
 
     # https://docs.sqlalchemy.org/en/13/core/type_basics.html
     # 2026-02-20:
@@ -53,12 +38,13 @@ class User(SQLABaseTable, UserMixin):
     # see carranca\public\access_control\password_recovery.py
     # for example of how it simplifies the code and avoids mistakes in type annotations
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    id_role: Mapped[int] = mapped_column(Integer, ForeignKey("roles.id"))
+    # id: in CanoaBase
+    # registered_at, disabled_at, password_changed_at, email_changed_at: DB-trigger managed, not mapped here
+    id_role: Mapped[int] = mapped_column(Integer, ForeignKey("canoa.roles.id"))
     lang: Mapped[str | None] = mapped_column(String(8), default=APP_LANG)
     username: Mapped[str] = mapped_column(String(100), unique=True)
     username_lower: Mapped[str] = mapped_column(String(100), Computed(""))
-    email: Mapped[str] = mapped_column(String(64), unique=True)
+    email: Mapped[str] = mapped_column(String(100), unique=True)
     disabled: Mapped[bool] = mapped_column(Boolean, default=False)
 
     password: Mapped[bytes] = mapped_column(LargeBinary)
@@ -103,12 +89,11 @@ class User(SQLABaseTable, UserMixin):
 
     @staticmethod
     def get_where_name_is(name: str) -> "User":
-        # return User.get_where(username_lower=to_str(name).lower())
         return User.get_where(username_lower=func.lower(name))
 
     @staticmethod
     def get_where_email_is(email: str) -> "User":
-        return User.get_where(email=to_str(email).lower())
+        return User.get_where(email=func.lower(email))
 
     @staticmethod
     def get_where(**filter: Any) -> "User":
@@ -145,66 +130,8 @@ class User(SQLABaseTable, UserMixin):
         return seps_recs
 
 
-# --- Table ---
-class Role(SQLABaseTable):
-    """
-    User's role in Canoa
-    """
-
-    __tablename__ = "roles"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(200))
-    abbr: Mapped[str] = mapped_column(String(3))  # see user_roles.py
-    users: Mapped["User"] = relationship("User", back_populates="role")
-
-
-def get_user_where(**filter: Any) -> User:
-    """
-    Select a user by a unique filter
-    """
-    from ..common.app_context_vars import sidekick
-
-    user = None
-    db_session: Session
-    with global_sqlalchemy_scoped_session() as db_session:
-        try:
-            # stmt = select(User).filter_by(**filter)
-            # user =  db_session.execute(stmt).scalar_one_or_none()
-            user = db_session.query(User).options(joinedload(User.role)).filter_by(**filter).first()
-        except Exception as e:
-            user = None
-            sidekick.display.error(f"Error retrieving user {filter}: [{e}].")
-
-    return user
-
-
-def persist_user(record: User, task_code: int = 1) -> None:
-    """
-    Updates a user's record
-    """
-    from ..common.app_context_vars import sidekick
-
-    with global_sqlalchemy_scoped_session() as db_session:
-        task_code = 0
-        try:
-            task_code += 1
-            if db_session.object_session(record) is not None:
-                sidekick.display.debug("User record needs an expunge.")
-                task_code += 2
-                db_session.expunge(record)
-            task_code = 3
-            db_session.add(record)
-            task_code += 1
-            db_session.commit()
-        except Exception as e:
-            db_session.rollback()
-            e.task_code = task_code
-            raise DatabaseError(e)
-
-
-# -- Important for user flask manager ---------------------
-
-
+# -- Important for flask's user manager ---------------------
+# ---------------------------------------------------------
 @global_login_manager.user_loader
 def user_loader(id: str) -> UserMixin | None:
     """

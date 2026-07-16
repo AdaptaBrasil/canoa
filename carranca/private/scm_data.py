@@ -12,8 +12,8 @@ from typing import Optional, Tuple, Dict, List
 from pathlib import Path
 
 from .sep_icon import do_icon_get_url
-from ..models.public import User
-from ..models.privates import Sep
+from ..models.public.user import User
+from ..models.private.sep import Sep
 from ..helpers.py_helper import Usual_Dict
 from ..helpers.types_helper import Opt_Str
 from ..config.ExportProcessConfig import ExportProcessConfig

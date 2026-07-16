@@ -21,7 +21,7 @@ Sep_UI_Order: TypeAlias = List[Tuple[int, int]]
 
 
 def scm_export_ui_save(uiact_rsp: UiActResponse) -> Jinja_Template:
-    from ..models.privates import Sep
+    from ..models.private.sep import Sep
 
     jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SCM_EXPORT_UI_SAVE)
     try:

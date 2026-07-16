@@ -18,7 +18,6 @@ from datetime import datetime
 from sqlalchemy import func
 from flask_login import current_user
 
-from ..models.public import get_user_where
 from ..helpers.py_helper import is_str_none_or_empty, to_str
 from ..helpers.pw_helper import internal_logout, nobody_is_logged
 from ..public.ups_handler import ups_handler
@@ -376,7 +375,7 @@ def received_file_download():
         rsp = download_rec()
         return rsp
 
-
+# Dyslexia-proof
 @bp_private.route("/end_session", methods=MTD_BOTH)
 @bp_private.route("/session_end", methods=MTD_BOTH)
 def session_end():
@@ -384,21 +383,22 @@ def session_end():
     Finally the logout proc is a Canoa form (and not the js Confirm)
     This actually sign out, and register on thd DB (users.)
 
-    ADM users only flush the UI-texts cache here and stay logged in
-    (see clear_ui_texts_cache()) instead of signing out.
+    Power users can Shift+click the Logout menu item (?clear_cache=1) to
+    just flush the UI-texts cache and stay logged in (see clear_ui_texts_cache()),
+    instead of signing out. A plain click always signs out, power user or not.
     """
     if nobody_is_logged():
         return redirect_to(login_route())
 
     from ..common.app_context_vars import app_user, sidekick
 
-    if app_user.is_power:
-        from ..helpers.route_helper import home_route
+    if app_user.is_power and request.args.get("clear_cache") == "1":
         from ..helpers.ui_db_texts_manager import clear_ui_texts_cache
+        from .access_control.signout_prompt import cache_flushed_prompt
 
         n = clear_ui_texts_cache()
         sidekick.display.info(f"UI texts cache cleared ({n} entries) by power user {app_user.name}.")
-        return redirect_to(request.referrer or home_route())
+        return cache_flushed_prompt(n)
 
     if is_method_get():
         return redirect_to(login_route())
@@ -424,7 +424,7 @@ def email_addr_hub(uid: str = "") -> Route_Response:
         handles the registration email process
 
     """
-    from ..models.public import User
+    from ..models.public.user import User
 
     def __does_user_need_token(user_rec: User) -> bool:
         if is_str_none_or_empty(user_rec.verify_email_token):
@@ -439,7 +439,7 @@ def email_addr_hub(uid: str = "") -> Route_Response:
     if nobody_is_logged():
         return redirect_to(login_route())
 
-    elif not (user_rec := get_user_where(email=current_user.email)) or user_rec.disabled:
+    elif not (user_rec := User.get_where(email=current_user.email)) or user_rec.disabled:
         # Maybe just deleted | disable?  | ?
         return redirect_to(login_route())
 
@@ -498,7 +498,7 @@ def logout() -> Flask_Response:
     and the page is redirect to
     login
     """
-    from ..models.public import User, persist_user
+    from ..models.public.user import User
     from ..common.app_context_vars import sidekick
 
     try:
@@ -506,7 +506,7 @@ def logout() -> Flask_Response:
             pass
         elif user := User.get_where_name_is(current_user.username):
             user.last_logout_at = func.now()
-            persist_user(user)
+            User.set_row(user)
     except Exception as e:
         sidekick.display.error(f"Error logging out user {current_user.id} logout: [{e}].")
 

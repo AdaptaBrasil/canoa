@@ -147,6 +147,7 @@ class RaiseIf:
     """
 
     ignite_no_sql_conn = True
+    ignite_roles_mismatch = True
 
 
 # eof

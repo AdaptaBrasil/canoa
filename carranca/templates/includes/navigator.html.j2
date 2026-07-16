@@ -243,9 +243,17 @@ cSpell:ignore &ç gico endere spatialdata
                             <hr class="dropdown-divider">
                         </li>
                         <li>
+                            {% if j_user.power %}
+                            <a class="dropdown-item" href="{{private_route('session_end')}}"
+                                onclick="if(event.shiftKey){event.preventDefault();window.location.href='{{private_route('session_end', clear_cache=1)}}';}"
+                                title="Encerramento da sess&atilde;o (Shift+clique limpa o cache da UI e mant&eacute;m a sess&atilde;o)">
+                                Sair de {{app_name}}
+                            </a>
+                            {% else %}
                             <a class="dropdown-item" href="{{private_route('session_end')}}" title="Encerramento da sess&atilde;o">
                                 Sair de {{app_name}}
                             </a>
+                            {% endif %}
                         </li>
                     </ul>
                     {% endif %}

@@ -46,15 +46,15 @@ RECEIVE_FILE_DEFAULT_ERROR: str = "uploadFileError"
 
 
 def _do_sep_placeholderOption(fullname: str) -> "UserSep":
+    from .SepIconMaker import SepIconMaker, SEP_NO_ICON
     from .sep_icon import do_icon_get_url
-    from .SepIconMaker import SepIconMaker
     from .UserSep import UserSep
 
     id_fake = -1
     name_fake = ""
     sep_fake = UserSep(
-        id_fake, name_fake, id_fake, name_fake, name_fake, fullname, "", False, SepIconMaker.none_file, do_icon_get_url("")
-    )  # empty
+        id_fake, name_fake, id_fake, name_fake, name_fake, fullname, "", False, SepIconMaker.none_file, do_icon_get_url(SEP_NO_ICON)
+    )  # no SEP selected yet
     return sep_fake
 
 

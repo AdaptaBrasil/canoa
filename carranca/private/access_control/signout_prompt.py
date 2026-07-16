@@ -33,3 +33,24 @@ def signout_prompt() -> Jinja_Rendered | None:
             jHtml = get_ups_jHtml(MSG_DEFAULT, ui_db_texts, task_code, e)
 
         return jHtml
+
+
+def cache_flushed_prompt(n: int) -> Jinja_Rendered:
+    """
+    Informs a power user that the UI-texts cache was just flushed (n entries),
+    shown instead of signing out (see routes.py:session_end, ?clear_cache=1).
+    """
+    jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.USER_UI_LOGOUT)
+    try:
+        tmpl_ffn, _, ui_db_texts = get_account_response_data("userUiLogout", "user_prompt")
+        task_code += 1
+        ui_db_texts.set_msg_prompt("cacheFlushed", n)
+        ui_db_texts.set_value(UITextsKeys.Form.size, "frm-size")
+        ui_db_texts.display_msg_only = True
+        task_code += 1
+        jHtml = process_template(tmpl_ffn, fi=fi.with_icon("cache_clear"), **ui_db_texts.data())
+
+    except Exception as e:
+        jHtml = get_ups_jHtml(MSG_DEFAULT, ui_db_texts, task_code, e)
+
+    return jHtml

@@ -11,7 +11,7 @@ from wtforms import StringField
 from sqlalchemy import func  # func.now() == db-server time
 
 from .wtforms import ScmEdit
-from ..models.privates import Schema
+from ..models.private.schema import Schema
 from ..config.FormIcons import FormIcons as fi
 from ..public.ups_handler import get_ups_jHtml
 from ..helpers.jinja_helper import process_template
@@ -82,7 +82,6 @@ def do_scm_edit(data: str) -> str:
 
         if is_get and is_insert:
             task_code += 1  # 5
-            scm_row.id = None
             scm_row.visible = False
             scm_row.color = ui_db_texts["colorDefaultValue"]  # "#00000"  # RR GG BB
         elif is_get and is_edit:
@@ -105,7 +104,7 @@ def do_scm_edit(data: str) -> str:
             def __save_and_go():
                 fform.populate_obj(scm_row)
                 #  scm_row.visible = scm_row.visible == "y"  # TODO
-                scm_row.color = scm_row.color.upper()
+                scm_row.color = (scm_row.color or "").upper()
                 Schema.save(scm_row)
                 return redirect_to(process_on_end)
 

@@ -8,7 +8,7 @@ mgd 2025.08
 """
 
 from .scm_data import get_scm_data
-from .sep_icon import do_icon_get_url
+from .sep_icon import do_icon_get_url, SEP_EMPTY_ICON
 from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import class_to_dict
 from ..public.ups_handler import get_ups_jHtml
@@ -39,7 +39,7 @@ def scm_export_ui_show(uiact_rsp: UiActResponse) -> Jinja_Template:
         task_code += 1  # 813
         grid_data = ExportGrid.get_rows()
         task_code += 1
-        empty_icon = do_icon_get_url("")
+        empty_icon = do_icon_get_url(SEP_EMPTY_ICON)
 
         task_code += 1
         # TODO get names from table

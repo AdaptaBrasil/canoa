@@ -6,20 +6,20 @@ Equipe da Canoa -- 2024
 mgd 2024-11-16
 """
 
-# cSpell:ignore mgmt
+# cSpell:ignore mgmt darkgrey
 
 from os import path, remove
 from typing import Optional
 
-from ..models.privates import Sep
-from ..helpers.py_helper import is_str_none_or_empty
+from ..models.private.sep import Sep
+from ..helpers.py_helper import is_str_none_or_empty, to_str
 from ..helpers.file_helper import ensure_folder_exists
 from ..helpers.types_helper import Svg_Content
 from ..common.app_context_vars import sidekick
 from ..common.app_error_assistant import AppStumbled, JumpOut
 
 from .SepIcon import ICON_MIN_SIZE
-from .SepIconMaker import SepIconMaker, SYSTEM_ICONS
+from .SepIconMaker import SepIconMaker, SYSTEM_ICONS, SEP_NO_ICON, SEP_EMPTY_ICON
 
 
 def icon_refresh(ifn_old: str, ifn_new: str, sep_id: int) -> bool:
@@ -68,9 +68,12 @@ def do_icon_get_url(icon_file_name: str | None, sep_id: Optional[int] = None) ->
     returns the file's url
     """
 
-    if icon_file_name is None:
+    if icon_file_name == SEP_NO_ICON:
         icon_file_name = SepIconMaker.none_file
-    elif icon_file_name == "":
+    elif to_str(icon_file_name) == SEP_EMPTY_ICON:
+        # param `icon_file_name`
+        #    comes from table
+        #   sep.icon_file_name that can be Null
         icon_file_name = SepIconMaker.empty_file
 
     file_full_name = SepIconMaker.get_full_name(icon_file_name)

@@ -11,8 +11,7 @@ mgd
 from flask_login import current_user
 
 from ..wtforms import ChangePassword
-from ...models.public import get_user_where
-from ...models.public import persist_user
+from ...models.public.user import User
 from ...config.FormIcons import FormIcons as fi
 from ...helpers.py_helper import is_str_none_or_empty
 from ...helpers.pw_helper import internal_logout, hash_password, verify_password
@@ -44,7 +43,7 @@ def password_change() -> Jinja_Rendered | Flask_Response:
         task_code += 1  # 3
         confirm_password = "" if is_get else get_form_input_value(fform.confirm_password.name)
         task_code += 1  # 4
-        user_rec = None if is_get else get_user_where(id=current_user.id)
+        user_rec = None if is_get else User.get_where(id=current_user.id)
         task_code += 1  # 5
 
         if is_get:
@@ -69,7 +68,7 @@ def password_change() -> Jinja_Rendered | Flask_Response:
             task_code += 1  # 6
             user_rec.password = hash_password(password)
             task_code += 1  # 7
-            persist_user(user_rec, task_code)
+            User.set_row(user_rec)
             task_code += 1  # 8
             ui_db_texts.set_msg_success()
             task_code += 1  # 9

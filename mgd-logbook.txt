@@ -1,7 +1,7 @@
 #spell:ignore onclick jinja apikey bingint vw_sepcombined andrade inpe nginx getusermail passwordrecovery changepassword resetpassword
 #spell:ignore desloga sepcombined especificacaosetor suporteusuariogrupo suporteusuarioelemento tmpl wtforms getuseremail getusermail requestemail
 #spell:ignore venv ccedil atilde receivefile datetime saude uix unsync healthcheck
-#spell:ignore Setorista sendgrid linux cnpq ajax mgmt SQLA sqla gmail varchar onsubmit
+#spell:ignore Setorista sendgrid linux cnpq ajax mgmt SQLA sqla gmail varchar onsubmit dedup pycache spddata tkinter
 
 
 ------------- Use of / in schema/SEP -------------
@@ -82,14 +82,59 @@
   Atualizar versão em app_constants.py
 -----------------------------------------------------------
 
+    » git commands
+        last commit msg:  git log -1 --pretty=%B
+
+
+
+------- 2025 - July --------------
+
+    » 2026-07-06 Full tests, fix this log's June dates
+
+    » 2026-07-08 — 15 β 5.80 DB v5.10 Database Entities full revision
+        - Compare DB DLL
+        - Use sqlAlchemy.orm => map all tables and views
+        - isolated table/views each in its own file (see: models/private/ & models/public/)
+        - Check Table 'role.abbr' against RolesAbr.py
+        - Adm Helper: Clear UIDBTexts when adm user click the logout menu.
+        - fix circular import role.py <-> user.py (TYPE_CHECKING)
+        - fix ForeignKey("roles.id") -> "canoa.roles.id" (schema-qualified)
+        - fix vw_user_data_files_count: view had no 'id', ALTER VIEW RENAME COLUMN user_id -> id (so can be child of )
+        - fix crc32 stored as int4 instead of int8 (sep.icon_crc, user_data_files/received_files.file_crc32)
+        - fix varchar length drift vs DB (users.email, roles.name, user_data_files.*)
+        - SepIconMaker: new SEP_NO_ICON/SEP_EMPTY_ICON sentinels, fix none/empty icon mismatch (was corrupting shared system icon files)
+        - sep_icon_data.py: crc16 -> zlib.crc32 for icon dedup
+        - igniter.py: new _check_roles_abbr() startup check (roles.abbr vs RolesAbbr.py)
+        - Logout: Shift+click trick for power users (plain click now always signs out; cache-clear is opt-in), new cache_flushed_prompt
+        - remove get_user_where/persist_user duplication -> User.get_where/CanoaBase.set_row
+        - CanoaBase.set_row: generalized session-expunge handling (was User-only), added task_code diagnostics
+        - class_property moved SepIconMaker.py -> py_helper.py (shared), fixed CanoaBase.table_name (was printing bound method, not the name)
+
+
+    - check carranca\helpers\user_helper.py spatial_data_file_full_name
+
+
+    » TODO
+    - first time spd -> ins is opened, takes a long time
+    - templates\includes\_action_forms_and_btns.html.j2
+        btn_submit === btn_close_dlg (use only btn_submit)
+    - encode UiActResponseKeys
+    - create one (nice) template for HTTP Errors (see .\templates\home\page-*.html)
+    - detect a change in the form for requesting confirmation to leave the page.
+    - user_seps: "UserSepsRtn" = LocalProxy(__get_user_seps)
+    - jinja page for templates/home/page-http-error.html
+    - SEP Log viewer
+
+
+
 ------- 2026 - June --------------
 
-    » 04-06 β 5.61
+    » 2026-06-04 β 5.61
     - spd user files download
     - Form Icons ini & revision
     - removed APP_UI_FONT_AWESOME_STYLE => FormIcons.style
 
-    » 08-06 β 5.62
+    » 2026-06-08 β 5.62
     - spd download with 'formTarget'
     - allow spd download only for power
     - always save Jinja bugged templates for debugging (see: jinja_helper._save_and_raise)
@@ -97,14 +142,14 @@
     - rename frm-main-btn => frm-foot-btn
     - display_html with external icon (see formIcon)
 
-    » 08-06 β 5.62a
+    » 2026-06-08 β 5.62a
     - from jinja_helper.py remove 'from tkinter import E'
 
-    » 17-08 β 5.9  (lost mgd-logs)
+    » 2026-06-17 β 5.9  (lost mgd-logs)
     - feat: Generate and save Spatial Data IDs file as part of the validation process
     - fix bugs (introduced by collaterals improvements) in data_validate modules
 
-    » 24-08 β 5.10
+    » 2026-06-24 β 5.10
     - feat: Add per-user TTL file lock to prevent concurrent validation submissions
         Acquires an 8-minute file lock in a dedicated `_lock` folder per user
         before processing begins; releases it in `finally` alongside the other
@@ -118,15 +163,15 @@
     Working on:
     - Add msg-type icons (error/fatal/info/success/warn) to FormIcons
 
-    » 24-08 β 5.11
+    » 2026-06-24 β 5.11
     init: start of general revision
         This commit is the baseline for a full review of the validation process
         (receive_file + validate_process/*)
 
-    » 24-08  β 5.12
+    » 2026-06-24 β 5.12
     feat: First code revision with Claude:  data validate process completed
 
-    » 25-08 —— 02-07 β 5.13
+    » 2026-06-25 —— 07-02 β 5.13
         - Improve app_context_var: __get_scoped_var
           Remove Locks:  'from threading import Lock'
         - UIDBTexts.py
@@ -145,49 +190,31 @@
         - new var dlg_fa_size, for Font Awesome icon size
 
 
-    » git commands
-        last commit msg:  git log -1 --pretty=%B
-
-    » TODO
-    - first time spd -> ins is opened, takes a long time
-    - templates\includes\_action_forms_and_btns.html.j2
-        btn_submit === btn_close_dlg (use only btn_submit)
-    - encode UiActResponseKeys
-    - create one (nice) template for HTTP Errors (see .\templates\home\page-*.html)
-    - detect a change in the form for requesting confirmation to leave the page.
-    - user_seps: "UserSepsRtn" = LocalProxy(__get_user_seps)
-    - jinja page for templates/home/page-http-error.html
-    - SEP Log viewer
-
-
-
-
-
 ------- 2026 - May ---------------
-    » 05-05 v β 5.60
+    » 2026-05-05 v β 5.60
     - From today onwards, the names of files uploaded by users,
     - The names of uploaded Spatial start with S_
     - Spatial Data upload files
 
-    » 05-20 v β 5.61, db 5.02.0
+    » 2026-05-20 v β 5.61, db 5.02.0
       [Spatial Data Files data entry part 2]
     - The names of uploaded Spatial start with sdf
     - Data entry completed
     - Insert without fields modification, ready
     - SDF analysis and data/values extractor, ready (private.spd_analysis.py)
 
-    » 05-22 v β 5.62
+    » 2026-05-22 v β 5.62
     - WIP: fixed snapshot — SEP table ready, Spatial Data Files grid part 1
 
-    » 05-26 v β 5.63
+    » 2026-05-26 v β 5.63
     - Release: Spatial Data ready for QA; SEP Edit and Schema Export moved to revision cycle
     - fix: swap !++ for !-- in op url sentinels
 
-    » 05-27 v β 5.69, DB v 5.03
+    » 2026-05-27 v β 5.69, DB v 5.03
     -  Release: SEP Edit and Schema Export fixed
     -  New column users.last_logout_at
 
-    » 05-27 v β 5.70, DB v 5.03
+    » 2026-05-27 v β 5.70, DB v 5.03
     - Release: Spatial Data, #48, #50
 
 

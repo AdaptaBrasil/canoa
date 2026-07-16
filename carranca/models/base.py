@@ -22,6 +22,7 @@ from sqlalchemy.sql.elements import ColumnElement
 from .. import global_sqlalchemy_scoped_session
 from ..private.IdToCode import IdToCode
 from ..helpers.db_helper import db_fetch_rows
+from ..helpers.py_helper import class_property
 from ..common.app_context_vars import sidekick
 from ..common.app_error_assistant import AppStumbled, ModuleErrorCode
 from ..helpers.db_records.DBRecords import DBRecords
@@ -45,7 +46,7 @@ class CanoaBase(DeclarativeBase):
     # ID Column
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    @classmethod
+    @class_property
     def table_name(cls) -> str:
         return cls.__tablename__
 
@@ -80,15 +81,25 @@ class CanoaBase(DeclarativeBase):
         operation = "inserting" if row.id is None else "updating"
         fresh_row: TModel | None = None
         with global_sqlalchemy_scoped_session() as db_session:
+            task_code = 1
             try:
+                if db_session.object_session(row) is not None:
+                    task_code = 2
+                    # row is still attached to a stale/different session (e.g. current_user) — reattach it here
+                    sidekick.display.debug(f"{cls.__name__} record needs an expunge.")
+                    db_session.expunge(row)
+
+                task_code = 3
                 db_session.add(row)
+                task_code = 4
                 db_session.commit()
                 if return_fresh_row:
+                    task_code = 5
                     db_session.refresh(row)  # explicit re-fetch
                     fresh_row = row
             except Exception as e:
                 db_session.rollback()
-                sidekick.display.error(f"Error {operation} data record on table {cls.table_name}: [{e}].")
+                sidekick.display.error(f"Error {operation} data record on table {cls.table_name}: [{e}], task code [{task_code}].")
                 raise Exception(e)
 
         return fresh_row

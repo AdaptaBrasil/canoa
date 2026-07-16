@@ -47,7 +47,7 @@ from ..helpers.ui_db_texts_manager import UITextsKeys
 
 def do_sep_edit(data: str) -> str:
     """SEP Edit & Insert Form"""
-    from ..models.privates import Sep
+    from ..models.private.sep import Sep
 
     SVG_MIME = "image/svg+xml"
 

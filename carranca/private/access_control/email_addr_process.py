@@ -14,7 +14,7 @@ from flask_wtf import FlaskForm
 
 from ..wtforms import EmailTokenForm
 from ...config.FormIcons import FormIcons as fi
-from ...models.public import get_user_where, persist_user
+from ...models.public.user import User
 from ...public.ups_handler import get_ups_jHtml
 from ...helpers.py_helper import is_str_none_or_empty, generate_random, crc16
 from ...helpers.types_helper import Usual_Dict
@@ -25,7 +25,6 @@ from ...helpers.route_helper import (
     get_form_input_value,
     init_response_vars,
     private_route,
-    is_method_post,
     is_method_get,
 )
 from ...common.app_context_vars import sidekick
@@ -135,9 +134,9 @@ def send_and_wait_verify_token(email: str, name: str, uid: str) -> Jinja_Rendere
 
     def _update_token(token: int | None):
         # Persistence triggers the DB's automated timestamping
-        user_rec = get_user_where(email=email)
+        user_rec = User.get_where(email=email)
         user_rec.verify_email_token = str(token)
-        persist_user(user_rec)
+        User.set_row(user_rec)
         return
 
     vars = {}
@@ -207,14 +206,14 @@ def verify_sent_token(email: str, db_token: str, email_sent_at: datetime) -> Jin
             _set_msg_error(code + 2, "msg_TokenNotFound")
         elif not (db_token == ui_token):
             ui_db_texts.set_msg_error("wrongToken")
-        elif not (user_rec := get_user_where(email=email)):
+        elif not (user_rec := User.get_where(email=email)):
             _set_msg_error(code + 4, "msg_UserNotFound")
         elif has_token_expired(email_sent_at):
             _set_msg_error(code + 5, "msg_TokenExpired")
         else:
             code += 6
             user_rec.verify_email_token = ui_token + "*"  # the key to unlock the e-mail.
-            persist_user(user_rec)
+            User.set_row(user_rec)
             ui_db_texts.set_msg_success()
 
         jHtml = process_template(tmpl_ffn, form=fform, **ui_db_texts.data())

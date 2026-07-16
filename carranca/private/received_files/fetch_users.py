@@ -8,7 +8,7 @@ Equipe da Canoa -- 2025
 mgd 2025-01-14 & 03-18
 """
 
-from ...models.privates import ReceivedFilesCount
+from ...models.private.received_files_count import ReceivedFilesCount
 from ...common.app_context_vars import app_user
 
 from ...helpers.db_records.DBRecords import DBRecords

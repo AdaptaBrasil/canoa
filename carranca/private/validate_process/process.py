@@ -29,7 +29,7 @@ mgd
 from typing import List, Tuple
 from datetime import datetime
 
-from ...models.privates import UserDataFiles
+from ...models.private.user_data_files import UserDataFiles
 
 from ..AppUser import AppUser
 from ..UserSep import UserSep

@@ -11,11 +11,10 @@ Equipe da Canoa -- 2025.07.24
 #
 # cSpell:ignore: nullable sqlalchemy sessionmaker sep ssep scm sepsusr usrlist SQLA duovigesimal
 
-from sqlalchemy import Computed, Boolean, Column, Integer, String, select
-from sqlalchemy.orm import Session
+from sqlalchemy import Computed, Boolean, Integer, String, select
+from sqlalchemy.orm import Mapped, mapped_column, Session
 
 from ..base import CanoaBaseView
-from ...private.IdToCode import IdToCode
 from ...helpers.db_helper import db_fetch_rows, col_names_to_columns
 from ...helpers.types_helper import Opt_List_Of_Str
 from ...helpers.db_records.DBRecords import DBRecords
@@ -24,21 +23,16 @@ from ...helpers.db_records.DBRecords import DBRecords
 # --- View ---
 class SchemaGrid(CanoaBaseView):
     __tablename__ = "vw_schema_grid"
+    __code_seed__ = 10
 
-    name = Column(String(100))
-    color = Column(String(9))
-    title = Column(String(140))
-    visible = Column(Boolean)
-    sep_count = Column(Integer)
-    v_sep_count = Column(Integer, Computed(""))  # visible sep
-    ui_order = Column(Integer, Computed(""))  # vw_schema_grid is Ordered by this column
-    sep_v2t = Column(String(11), Computed(""))  # visible / total
-
-    id_to_code = IdToCode()
-
-    @staticmethod
-    def code(id: int) -> str:
-        return SchemaGrid.id_to_code.encode(id)
+    name: Mapped[str | None] = mapped_column(String(100))
+    color: Mapped[str | None] = mapped_column(String(9))
+    title: Mapped[str | None] = mapped_column(String(140))
+    visible: Mapped[bool | None] = mapped_column(Boolean)
+    sep_count: Mapped[int | None] = mapped_column(Integer)
+    v_sep_count: Mapped[int | None] = mapped_column(Integer, Computed(""))  # visible sep
+    ui_order: Mapped[int | None] = mapped_column(Integer, Computed(""))  # vw_schema_grid is Ordered by this column
+    sep_v2t: Mapped[str | None] = mapped_column(String(11), Computed(""))  # visible / total
 
     # TODO refactor to self.get_data()
     @staticmethod

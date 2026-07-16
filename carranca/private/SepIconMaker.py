@@ -16,11 +16,6 @@ from ..helpers.route_helper import static_route
 from ..helpers.types_helper import Svg_Content
 
 
-class class_property(property):
-    def __get__(self, instance, owner):
-        return self.fget(owner)
-
-
 class SepIconMaker:
 
     ext = "svg"
@@ -34,9 +29,9 @@ class SepIconMaker:
 
     @staticmethod
     def get_file_name(icon_file_name: str) -> str:
-        if icon_file_name is None:
+        if icon_file_name == SEP_NO_ICON:
             return SepIconMaker.none_file
-        elif to_str(icon_file_name) == "":
+        elif to_str(icon_file_name) == SEP_EMPTY_ICON:
             return SepIconMaker.empty_file
         else:
             return icon_file_name
@@ -81,6 +76,10 @@ class SepIconMaker:
 
 
 SYSTEM_ICONS = [SepIconMaker.none_file, SepIconMaker.empty_file, SepIconMaker.error_file]
+
+# do_icon_get_url() input sentinels — see SepIconMaker.none_content()/empty_content()
+SEP_NO_ICON: str = "\t\t"  # no SEP *selected* yet (darkgrey "?" placeholder)
+SEP_EMPTY_ICON: str = ""  # SEP *exists*, but no icon was ever uploaded (near-invisible box)
 
 # TODO new Python
 # class MetaSepIconConfig(type):

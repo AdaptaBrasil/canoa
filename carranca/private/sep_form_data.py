@@ -12,8 +12,9 @@ from dataclasses import dataclass
 
 from .wtforms import SepNew, SepEdit
 from .SepIconMaker import SepIconMaker
-from ..models.public import User
-from ..models.privates import Sep, Schema
+from ..models.public.user import User
+from ..models.private.sep import Sep
+from ..models.private.schema import Schema
 from ..private.UserSep import UserSep
 from ..common.UIDBTexts import UIDBTexts
 from ..helpers.py_helper import to_int, clean_text

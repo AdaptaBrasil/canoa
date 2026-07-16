@@ -5,14 +5,14 @@ Equipe da Canoa -- 2025
 """
 
 import re
+from zlib import crc32
 from os.path import splitext
 from dataclasses import dataclass
 from werkzeug.datastructures import FileStorage
 
 from .sep_icon import ICON_MIN_SIZE
 from .SepIconMaker import SepIconMaker
-from ..models.privates import Sep
-from ..helpers.py_helper import crc16
+from ..models.private.sep import Sep
 
 
 @dataclass
@@ -58,7 +58,7 @@ def get_icon_data(sep_row: Sep, icon_data: IconData) -> IconData:
         icon_data.error_code = 6
     elif (sep_row.icon_svg or "") != (data or ""):
         icon_data.content = data
-        icon_data.crc = crc16(data)
+        icon_data.crc = crc32(data.encode("utf-8"))
         icon_data.ready = True
 
     return icon_data

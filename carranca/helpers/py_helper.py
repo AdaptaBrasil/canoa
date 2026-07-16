@@ -32,6 +32,13 @@ OS_IS_MAC = OS_NAME_IS == "Darwin"
 CODE_UTF_8 = "utf-8"
 
 
+class class_property(property):
+    """A read-only property accessible on the class itself, not just instances (cls.prop, no parens)."""
+
+    def __get__(self, instance, owner):
+        return self.fget(owner)
+
+
 class JSONObject:
     def __init__(self, d: Usual_Dict):
         for key, value in d.items():

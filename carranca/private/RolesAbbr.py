@@ -23,7 +23,7 @@ from enum import Enum
 
 
 class RolesAbbr(Enum):
-    Void = "VOID"  # not initializer
+    Void = "VOD"  # not initialized/Deactivated
     Admin = "ADM"
     Setorista = "SEP"
     Support = "SPT"

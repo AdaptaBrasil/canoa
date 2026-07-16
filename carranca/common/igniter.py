@@ -7,7 +7,7 @@
    mgd 2024-10-01--07
 """
 
-# cSpell:ignore sqlalchemy app_name cssless sendgrid ENDC mandatories elap
+# cSpell:ignore sqlalchemy app_name cssless sendgrid ENDC mandatories elap abbrs
 
 # -- ⚠️ ----------------------------------
 # This module uses `local imports`
@@ -216,6 +216,39 @@ def _ignite_sql_connection(fuse: Fuse, uri: str) -> Tuple[str, str]:
     return error, db_version
 
 
+# ---------------------------------------------------------------------------- #
+def _check_roles_abbr(fuse: Fuse, uri: str) -> str:
+    """
+    Confirm that every `abbr` in the `roles` table has a matching member
+    in `carranca.private.RolesAbbr.RolesAbbr`, catching DB/code drift early.
+    """
+    from sqlalchemy import create_engine, text
+    from ..private.RolesAbbr import RolesAbbr
+
+    error = ""
+    try:
+        engine = create_engine(uri)
+        with engine.connect() as connection:
+            result = connection.execute(text("select abbr from canoa.roles"))
+            db_abbrs = {row[0].strip() for row in result}
+
+        known_abbrs = {r.value for r in RolesAbbr}
+        unknown_abbrs = db_abbrs - known_abbrs
+
+        if unknown_abbrs:
+            error = _ERROR_MSG.format(
+                __name__,
+                "checking roles.abbr against RolesAbbr",
+                f"DB has abbr(s) {sorted(unknown_abbrs)} not present in RolesAbbr. Update carranca/private/RolesAbbr.py.",
+            )
+        else:
+            fuse.display.debug(f"All {len(db_abbrs)} role abbreviations in the DB match RolesAbbr (in RolesAbbr.py).")
+    except Exception as e:
+        error = _ERROR_MSG.format(__name__, "checking table roles.abbr against RolesAbbr.py", str(e))
+
+    return error
+
+
 # - ---------------------------------------------------------------------------- #
 # - Public --------------------------------------------------------------------- #
 # - ---------------------------------------------------------------------------- #
@@ -263,6 +296,15 @@ def ignite_app(app_name: str, flask_app_name: str, start_at: float) -> Tuple[Sid
     else:
         errors += 1
         fuse.display.error(error)
+
+    # Check that all DB role abbreviations are known to RolesAbbr
+    error = _check_roles_abbr(fuse, config.SQLALCHEMY_DATABASE_URI)
+    if error:
+        if RaiseIf.ignite_roles_mismatch:
+            _log_and_exit(error)
+        else:
+            errors += 1
+            fuse.display.error(error)
 
     # Create the session shared 'sidekick'
     sidekick = Sidekick(config, fuse.display)

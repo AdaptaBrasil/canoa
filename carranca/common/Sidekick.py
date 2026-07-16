@@ -34,6 +34,9 @@ Sidekick
           see:
           app_context_vars.py
 
+  Claude checked this file and found no errors at 2026-07-15
+  (added the missing FATAL/unknown-kind cases in _echo's match)
+
 """
 
 # cSpell:ignore sqlalchemy mgd appcontext
@@ -42,12 +45,12 @@ from flask import Flask, current_app
 from typing import TYPE_CHECKING, cast
 from logging import Logger
 from datetime import datetime
-from flask_login import current_user
 from .Display import Display
+from flask_login import current_user
 from ..common.app_constants import APP_NAME
 
 if TYPE_CHECKING:
-    from ..models.public import User
+    from ..models.public.user import User
     from ..config.DynamicConfig import DynamicConfig  # Avoid Circular 2024.11.03
 
 
@@ -60,7 +63,7 @@ class Sidekick:
 
     def __init__(self, config: "DynamicConfig", display: Display):
 
-        # from ..models.public import User # Avoid early access
+        # from ..models.public.user import User # Avoid early access
 
         self.config: DynamicConfig = config
         self.app_name = APP_NAME
@@ -121,6 +124,8 @@ class Sidekick:
         text = f"{user_id}|{log_text}"
 
         match kind:
+            case Display.Kind.PROMPT | Display.Kind.ELAPSED | Display.Kind.USER:
+                pass  # not logged, console only
             case Display.Kind.INFO:
                 self.app_log.info(text)
             case Display.Kind.WARN:
@@ -129,6 +134,11 @@ class Sidekick:
                 self.app_log.error(text)
             case Display.Kind.DEBUG:
                 self.app_log.debug(text)
+            case Display.Kind.FATAL:
+                self.app_log.critical(text)
+            case _:
+                self.app_log.critical(f"Unknown kind '{kind}', with text:")
+                self.app_log.info(text)
 
     def __str__(self):
         return f"{self.__class__.__name__} the ƒ+py dev's companion"

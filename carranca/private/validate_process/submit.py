@@ -18,7 +18,7 @@ from os import path, stat, access, X_OK
 
 from .Cargo import Next_Cargo, Cargo
 from .run_validator import run_validator
-from ...models.privates import UserDataFiles
+from ...models.private.user_data_files import UserDataFiles
 from ...helpers.file_helper import change_file_ext
 from ...common.app_context_vars import sidekick
 from ...common.app_error_assistant import ModuleErrorCode
@@ -30,8 +30,7 @@ def _store_report_result(ui_name: str, stdout_result_pattern: str, cargo: Cargo,
     # Expected <{"data_validate": {"version": "0.5.02", "report": {"errors": 676, "warnings": 609, "tests": 31}}}>
 
     def _local_result(error: str) -> str:
-        error_encoded = json.dumps(error)
-        return f'{{"{ui_name}": {{"local_error": "{error_encoded}."}}}}'
+        return json.dumps({ui_name: {"local_error": f"{error}."}})
 
     # ---- defaults (safe for DB update) ----
     dv_version = "?"

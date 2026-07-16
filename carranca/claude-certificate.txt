@@ -1,0 +1,14 @@
+# Claude review certificate — Canoa
+#
+# Ledger of files Claude has reviewed for bugs/errors, each stamped with a
+# header comment in the source file itself (see that file's docstring).
+# This ledger lets `tools/check_claude_seals.py` detect when a certified
+# file has changed since its review, so the seal can be treated as stale.
+#
+# Format (pipe-delimited, one entry per file):
+#   relative/path/from/repo/root.py|YYYY-MM-DD|crc32_hex
+#
+# crc32_hex is zlib.crc32() of the full file content (including the seal
+# comment) at the time of the review, formatted as 8 lowercase hex digits.
+
+carranca/common/Sidekick.py|2026-07-15|a7f11830

@@ -13,8 +13,7 @@ import secrets
 from datetime import timedelta, datetime
 
 from ..wtforms import PasswordRecoveryForm
-from ...models.public import get_user_where, User
-from ...models.public import persist_user
+from ...models.public.user import User
 from ...config.FormIcons import FormIcons as fi
 from ...helpers.py_helper import elapsed_hours
 from ...common.UITextsKeys import UITextsKeys
@@ -44,7 +43,7 @@ def password_recovery():
         fform = PasswordRecoveryForm()
         requested_email = "" if is_get else get_form_input_value(fform.user_email.name).lower()
         task_code += 1  # 3
-        user_rec = None if is_get else get_user_where(email=requested_email)
+        user_rec = None if is_get else User.get_where(email=requested_email)
         task_code += 1  # 4
         expires_in_hours = sidekick.config.EMAIL_RECOVER_TOKEN_EXPIRES_HOURS
 
@@ -84,7 +83,7 @@ def password_recovery():
             code = 10
             user_rec.recover_email_token = token
             code += 1
-            persist_user(user_rec, task_code)
+            User.set_row(user_rec)
             code = 0
             return code
 

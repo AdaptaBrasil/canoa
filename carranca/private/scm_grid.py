@@ -29,7 +29,7 @@ def get_scm_grid() -> Jinja_Rendered:
             scm_rows = SchemaGrid.get_schemas(col_names)
             for record in scm_rows:
                 scm_id = record.id
-                record.id = SchemaGrid.code(scm_id)
+                record.id = SchemaGrid.to_code(scm_id)
             return scm_rows
 
         task_code += 1  # 1

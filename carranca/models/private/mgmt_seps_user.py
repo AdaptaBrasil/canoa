@@ -95,20 +95,6 @@ class MgmtSepsUser(CanoaBaseView):
 
         seps_recs = MgmtSepsUser.get_rows(col_names, filter)
 
-        # def _get_data(db_session: Session):
-        #     sel_cols = col_names_to_columns(col_names, MgmtSepsUser.__table__.columns)
-
-        #     stmt = select(*sel_cols) if sel_cols else select(MgmtSepsUser)
-        #     if user_id is not None:  # then filter
-        #         stmt = stmt.where(MgmtSepsUser.user_id == user_id)
-        #     if sep_id is not None:  # then filter
-        #         stmt = stmt.where(MgmtSepsUser.id == sep_id)
-
-        #     # Sequence[Row[Tuple[MgmtSepsUser]]]
-        #     rows: List[Row] = db_session.execute(stmt).all()
-        #     recs = DBRecords(stmt, rows)
-        #     return recs
-        # _, _, seps_recs = db_fetch_rows(_get_data, MgmtSepsUser.__tablename__)
         return seps_recs
 
 

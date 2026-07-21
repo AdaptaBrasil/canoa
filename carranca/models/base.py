@@ -7,15 +7,15 @@ This class subclasses SQLAlchemy's DeclarativeBase (2.0+ requirement)
 and serves as the single shared base for all ORM mappings in the project.
 
 
-mgd 2026.04.09 -- 30
+mgd 2026.04.09—30, 2026.07.01—20
 
 """
 
-# cspell: words hace
+# cspell: words hace ilike
 
 from typing import TypeAlias, Type, List, TypeVar, overload, Optional, cast
-from dataclasses import is_dataclass
 from sqlalchemy import Integer, ColumnExpressionArgument, event, select
+from dataclasses import is_dataclass
 from sqlalchemy.orm import DeclarativeBase, Session, Mapped, mapped_column
 from sqlalchemy.sql.elements import ColumnElement
 

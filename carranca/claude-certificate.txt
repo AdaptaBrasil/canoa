@@ -1,14 +1,49 @@
 # Claude review certificate — Canoa
 #
-# Ledger of files Claude has reviewed for bugs/errors, each stamped with a
-# header comment in the source file itself (see that file's docstring).
-# This ledger lets `tools/check_claude_seals.py` detect when a certified
-# file has changed since its review, so the seal can be treated as stale.
+# Ledger of files Claude has reviewed for bugs/errors. Source files are kept
+# clean (no in-file stamp) -- the narrative of what was found/fixed lives in
+# claude-mgd-fixes.md instead. This ledger lets `tools/check_claude_seals.py`
+# detect when a certified file has changed since its review, so the seal
+# can be treated as stale.
 #
 # Format (pipe-delimited, one entry per file):
 #   relative/path/from/repo/root.py|YYYY-MM-DD|crc32_hex
 #
-# crc32_hex is zlib.crc32() of the full file content (including the seal
-# comment) at the time of the review, formatted as 8 lowercase hex digits.
+# crc32_hex is zlib.crc32() of the full file content at the time of the
+# review, formatted as 8 lowercase hex digits.
 
-carranca/common/Sidekick.py|2026-07-15|a7f11830
+carranca/common/Sidekick.py|2026-07-15|0c8fd8d7
+carranca/common/Args.py|2026-07-20|ec35e25b
+carranca/common/Display.py|2026-07-16|a95c7475
+carranca/common/app_context_vars.py|2026-07-16|01fdfb83
+carranca/common/UIDBTexts.py|2026-07-16|b538e4f2
+carranca/common/UITextsKeys.py|2026-07-20|1196c410
+carranca/common/app_error_assistant.py|2026-07-16|054e2e57
+carranca/common/igniter.py|2026-07-16|7f36b3bf
+carranca/common/app_constants.py|2026-07-16|fe9eb5db
+carranca/private/received_files/init_grid.py|2026-07-18|32de0c97
+carranca/models/private/sep.py|2026-07-20|92b82554
+carranca/private/sep_log_grid.py|2026-07-20|710e5383
+carranca/static/js/sep_log_grid.js|2026-07-20|e81540f7
+carranca/templates/private/sep_log_grid.html.j2|2026-07-20|3096fe4a
+carranca/helpers/js_consts_helper.py|2026-07-20|ae98a15c
+carranca/templates/layouts/dialog.html.j2|2026-07-20|c4bd9fcb
+carranca/templates/includes/_action_forms_and_btns.html.j2|2026-07-20|6f09a5a1
+carranca/templates/layouts/prompt.html.j2|2026-07-20|161521be
+carranca/templates/layouts/form.html.j2|2026-07-20|7343b1f4
+carranca/private/sep_grid.py|2026-07-20|a70ab986
+carranca/__init__.py|2026-07-20|8f9ec15d
+carranca/public/access_control/login.py|2026-07-20|0737a035
+carranca/private/sep_new_edit.py|2026-07-20|8b9e9c1a
+carranca/private/scm_new_edit.py|2026-07-20|f44c5e96
+carranca/private/spd_new_edit.py|2026-07-20|019936b8
+carranca/private/spd_grid.py|2026-07-20|40802978
+carranca/private/scm_grid.py|2026-07-20|63bb417a
+carranca/private/scm_export_ui_show.py|2026-07-20|0b91af01
+carranca/private/scm_create.py|2026-07-20|09981de5
+carranca/private/sep_mgmt/sep_mgmt.py|2026-07-20|2cc380c0
+carranca/private/received_files/download_record.py|2026-07-20|794be908
+carranca/private/routes.py|2026-07-20|761db342
+carranca/private/SepIconMaker.py|2026-07-20|b478d5f4
+carranca/helpers/py_helper.py|2026-07-20|24a83882
+carranca/templates/private/sep_grid.html.j2|2026-07-20|9e2085a3

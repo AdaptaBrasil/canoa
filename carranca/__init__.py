@@ -110,7 +110,7 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
     from .helpers.types_helper import DB_Texts
     from .helpers.uiact_helper import UiActResponseProxy
     from .helpers.route_helper import private_route, public_route, static_route
-    from .helpers.js_consts_helper import js_form_sec_key, js_form_cargo_id, js_form_sec_value
+    from .helpers.js_consts_helper import JS_FORM_SEC_KEY, JS_FORM_CARGO_ID, js_form_sec_value
     from .config.FormIcons import FormIcons as _fi
 
     def __get_app_menu(sub_menu_name: str) -> DB_Texts:
@@ -180,7 +180,7 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
         scm_menu=__get_scm_menu_list,
         ui_act_add=UiActResponseProxy.add,
         ui_act_shw=UiActResponseProxy.show,
-        safe_token={"key": js_form_sec_key, "value": js_form_sec_value(), "cargo": js_form_cargo_id},
+        safe_token={"key": JS_FORM_SEC_KEY, "value": js_form_sec_value, "cargo": JS_FORM_CARGO_ID},
         fi=_fi,
     )
 

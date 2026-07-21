@@ -12,17 +12,17 @@ from typing import List
 from .sep_icon import do_icon_get_url
 from ..helpers.py_helper import class_to_dict
 from ..public.ups_handler import get_ups_jHtml
-from ..helpers.uiact_helper import UiActResponseKeys
+from ..helpers.uiact_helper import UiActResponseKeys, UiActResponseProxy
 from ..helpers.jinja_helper import Jinja_Rendered, process_template
 from ..helpers.route_helper import MTD_POST, get_private_response_data, init_response_vars
-from ..helpers.js_consts_helper import js_grid_col_meta_info, js_ui_dictionary
+from ..helpers.js_consts_helper import JS_GRID_COL_META_INFO, js_ui_dictionary, js_form_get_sec_msg
 from ..helpers.ui_db_texts_manager import UITextsKeys
 from ..common.app_error_assistant import ModuleErrorCode, AppStumbled, HTTP_StatusCode
 from ..helpers.db_records.DBRecords import DBRecords
 from ..models.private.mgmt_seps_user import MgmtSepsUser
 
 
-def get_sep_grid(allow_post: bool = False) -> Jinja_Rendered:
+def get_sep_grid() -> Jinja_Rendered:
 
     def _sep_data_fetch(col_names: List[str]) -> DBRecords:
         sep_usr_rows = MgmtSepsUser.get_seps_usr(col_names)
@@ -39,14 +39,14 @@ def get_sep_grid(allow_post: bool = False) -> Jinja_Rendered:
         tmpl_ffn, is_get, ui_db_texts = get_private_response_data("sepGrid")
 
         task_code += 1  # 2
-        if not is_get:
+        if not is_get and js_form_get_sec_msg() != UiActResponseProxy.show:
             _, msg_fatal = ui_db_texts.set_msg_fatal(HTTP_StatusCode.CODE_405.value)
             msg = f"{msg_fatal} (Requested: ${MTD_POST}.)"
             raise AppStumbled(msg, task_code, False, True)
 
         task_code += 1  # 3
         col_names = ["id", "icon_file_name", "scm_name", "name", "user_curr", "visible"]
-        js_ui_dict = js_ui_dictionary(ui_db_texts[js_grid_col_meta_info], col_names, task_code)
+        js_ui_dict = js_ui_dictionary(ui_db_texts[JS_GRID_COL_META_INFO], col_names, task_code)
 
         task_code += 1  # 4
         sep_data = _sep_data_fetch(col_names)

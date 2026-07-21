@@ -34,9 +34,6 @@ Sidekick
           see:
           app_context_vars.py
 
-  Claude checked this file and found no errors at 2026-07-15
-  (added the missing FATAL/unknown-kind cases in _echo's match)
-
 """
 
 # cSpell:ignore sqlalchemy mgd appcontext

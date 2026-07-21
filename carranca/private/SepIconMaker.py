@@ -15,6 +15,9 @@ from ..helpers.html_helper import url_join
 from ..helpers.route_helper import static_route
 from ..helpers.types_helper import Svg_Content
 
+SEP_NO_ICON: str = "%%"  # no SEP *selected* yet (darkgrey "?" placeholder)
+SEP_EMPTY_ICON: str = ""  # SEP *exists*, but no icon was ever uploaded (near-invisible box)
+
 
 class SepIconMaker:
 
@@ -29,9 +32,10 @@ class SepIconMaker:
 
     @staticmethod
     def get_file_name(icon_file_name: str) -> str:
-        if icon_file_name == SEP_NO_ICON:
+        ifn = to_str(icon_file_name)
+        if ifn == SEP_NO_ICON:
             return SepIconMaker.none_file
-        elif to_str(icon_file_name) == SEP_EMPTY_ICON:
+        elif ifn == SEP_EMPTY_ICON:
             return SepIconMaker.empty_file
         else:
             return icon_file_name
@@ -76,24 +80,5 @@ class SepIconMaker:
 
 
 SYSTEM_ICONS = [SepIconMaker.none_file, SepIconMaker.empty_file, SepIconMaker.error_file]
-
-# do_icon_get_url() input sentinels — see SepIconMaker.none_content()/empty_content()
-SEP_NO_ICON: str = "\t\t"  # no SEP *selected* yet (darkgrey "?" placeholder)
-SEP_EMPTY_ICON: str = ""  # SEP *exists*, but no icon was ever uploaded (near-invisible box)
-
-# TODO new Python
-# class MetaSepIconConfig(type):
-#     @property
-#     def none_content(cls):
-#         return cls.content_for("darkgrey", "Falta", stroke_opacity="0.45")
-
-# class SepIconConfig(metaclass=MetaSepIconConfig):
-#     ext = "svg"
-#     folder = "sep_icons"
-
-#     @staticmethod
-#     def content_for(color, text, stroke_opacity=None):
-#         return f"<svg color='{color}' text='{text}' opacity='{stroke_opacity}'></svg>"
-
 
 # eof

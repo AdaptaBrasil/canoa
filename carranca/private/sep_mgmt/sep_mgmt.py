@@ -28,8 +28,8 @@ from ...helpers.route_helper import get_private_response_data, init_response_var
 from ...helpers.js_consts_helper import (
     js_form_sec_check,
     js_ui_dictionary,
-    js_form_cargo_id,
-    js_grid_col_meta_info,
+    JS_FORM_CARGO_ID,
+    JS_GRID_COL_META_INFO,
 )
 from ...helpers.ui_db_texts_manager import UITextsKeys
 from ...helpers.db_records.DBRecords import DBRecords, ListOfDBRecords
@@ -55,7 +55,7 @@ def sep_mgmt() -> str:
 
         task_code += 1  # 3
         col_names: List[str] = list(class_to_dict(SepMgmtGridCols).values())
-        js_ui_dict = js_ui_dictionary(ui_db_texts[js_grid_col_meta_info], col_names, task_code)
+        js_ui_dict = js_ui_dictionary(ui_db_texts[JS_GRID_COL_META_INFO], col_names, task_code)
 
         sep_data: ListOfDBRecords = []
         item_none = ui_db_texts["itemNone"]
@@ -69,7 +69,7 @@ def sep_mgmt() -> str:
             raise AppStumbled(msg, task_code, True, True)
         else:
             task_code += 3  # 6
-            txt_response = cast(str, request.form.get(js_form_cargo_id))
+            txt_response = cast(str, request.form.get(JS_FORM_CARGO_ID))
             json_response: Dict[str, str] = json.loads(txt_response)
             msg_success, msg_error_save_and_email, task_code = _save_and_email(json_response, ui_db_texts, task_code)
             sep_data, user_list = _sep_data_fetch(item_none, col_names)

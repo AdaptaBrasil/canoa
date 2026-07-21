@@ -12,10 +12,13 @@ mgd 2025-01-19 -- 10-08
 
 import json
 from flask import request
-from typing import Optional, List, Final
-
-from ..common.app_error_assistant import AppStumbled
+from typing import List, Final, Dict
+from flask_login import current_user
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from .types_helper import JS_Constants
+
+from ..helpers.py_helper import to_str
+from ..common.app_error_assistant import AppStumbled
 
 # === Global js constants Keys for JsConstants Jinja Dictionary for j2 grid/form/security ====
 #
@@ -31,35 +34,68 @@ from .types_helper import JS_Constants
 #  ----------------
 #  Uses PascalCase style names (see ui_items Database View)
 
-# ------------------------
-# see carranca\__init__.py
-# safe_token= {"key": js_form_sec_key, "value": js_form_sec_value(), "cargo": js_form_cargo_id }
-js_form_sec_key = "form_sec_key"
-js_form_cargo_id = "form_cargo_id"  # don't use  "form-cargo-id" (raise errors & errors)
+
+JS_FORM_SEC_KEY: Final[str] = "form_sec_key"
+JS_FORM_CARGO_ID: Final[str] = "form_cargo_id"  # don't use  "form-cargo-id" (raise errors & errors)
 
 
-def js_form_sec_value() -> str:
-    # TODO: create a real key with user_id and datetime
-    return "7298kaj0fk9dl-sd=)0ya16"
+# Signed, time-limited form token: proves a POST's hidden `form_sec_key` field came from
+# a page Canoa itself rendered for this same user, recently -- not a real secret hidden
+# from the browser (it round-trips through a hidden input), just tamper-evidence, so
+# signing (itsdangerous) is enough; no need for actual encryption.
+_SEC_TOKEN_SALT: Final[str] = "canoa-form-sec-token"
+_SEC_TOKEN_MAX_AGE_SECONDS: Final[int] = 4 * 3600  # generous: don't punish a user who left a grid open
+
+_ANONYMOUS_ID: Final[int] = -5612
+
+_SEC_TOKEN_KEY_USER: Final[str] = "u"
+_SEC_TOKEN_KEY_MSG: Final[str] = "m"
+
+
+def _sec_token_serializer() -> URLSafeTimedSerializer:
+    from ..common.app_context_vars import sidekick
+
+    return URLSafeTimedSerializer(sidekick.config.SECRET_KEY, salt=_SEC_TOKEN_SALT)
+
+
+def _sec_token_user_id() -> int:
+    return current_user.id if current_user and current_user.is_authenticated else _ANONYMOUS_ID
+
+
+def js_form_sec_value(msg: str = "") -> str:
+    return _sec_token_serializer().dumps({_SEC_TOKEN_KEY_USER: _sec_token_user_id(), _SEC_TOKEN_KEY_MSG: msg})
 
 
 # }
 
 # Grid
-js_grid_col_meta_info: Final[str] = "colMetaInfo"
+JS_GRID_COL_META_INFO: Final[str] = "colMetaInfo"
 
 # ui_texts security key msg error key (in DB ui_items)
-ui_texts_sec_error_key = "secKeyViolation"
+UI_TEXTS_SEC_ERROR_KEY: Final[str] = "secKeyViolation"
 
 
-def js_form_sec_check(value: Optional[str] = None) -> str:
-    # TODO "secKey"
-    check = value if value else request.form.get(js_form_sec_key, "")
+def _js_form_sec_load(expect_authenticated: bool) -> Dict:
+    value = request.form.get(JS_FORM_SEC_KEY, "")
 
-    msg_error = "" if check == js_form_sec_value() else ui_texts_sec_error_key
-    # "secKeyExpired"
-    # ...'TODO
-    return msg_error
+    try:
+        data = _sec_token_serializer().loads(value, max_age=_SEC_TOKEN_MAX_AGE_SECONDS)
+    except (BadSignature, SignatureExpired):
+        return {}
+
+    is_valid = data.get(_SEC_TOKEN_KEY_USER) == (_sec_token_user_id() if expect_authenticated else _ANONYMOUS_ID)
+    return data if is_valid else {}
+
+
+def js_form_sec_check(expect_authenticated: bool = True) -> str:
+
+    data = _js_form_sec_load(expect_authenticated)
+    return "" if data else UI_TEXTS_SEC_ERROR_KEY
+
+
+def js_form_get_sec_msg() -> str:
+    data = _js_form_sec_load(True)
+    return to_str(data.get(_SEC_TOKEN_KEY_MSG)) if data else ""
 
 
 def js_ui_dictionary(col_meta_info_txt: str = "", col_names: List[str] = [], task_code: int = 1) -> JS_Constants:
@@ -73,11 +109,7 @@ def js_ui_dictionary(col_meta_info_txt: str = "", col_names: List[str] = [], tas
     js_ui_dict: JS_Constants = {}
 
     js_ui_dict["grid_id"] = "ag-grid-id"
-    js_ui_dict[js_form_cargo_id] = js_form_cargo_id
-
-    # # TODO see _ini_py:_register_jinja
-    # js_ui_dict[js_form_sec_key] = js_form_sec_key  # security token key
-    # js_ui_dict["form_sec_value"] = js_form_sec_value()  # security token value
+    js_ui_dict[JS_FORM_CARGO_ID] = JS_FORM_CARGO_ID
 
     """ little bit of 'recursive':
         can be used as `js_ui_dict.form_sec_key` or, in macros, `just `form_sec_key`

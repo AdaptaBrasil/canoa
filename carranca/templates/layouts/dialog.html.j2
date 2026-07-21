@@ -49,6 +49,7 @@ mgd
 {# see canoa.js: #}
 {% set dlg_data_wait_process = 'data-wait-process'%}
 {# this form is the only one that `posts` cargo => submit inputs #}
+{% set dlg_post_sec_msg = dlgFormSecMsg | default('') %}
 {% set dlg_post_btn_id= 'dlg-post-btn-id' %}
 {% set dlg_post_form_id= 'dlg-post-form-id' %}
 {% set dlg_btns_container_id = 'dlg-btns-container-id' %}
@@ -60,6 +61,7 @@ mgd
 
 {% set dlg_close_btn_visible= dlg_close_btn_visible | default(True) %}
 {% set dlg_close_action_url= dlgFormCloseAction | default('/login') %}
+{% set dlg_goto_action_url= dlgFormGotoAction | default('') %}
 
 {% set dlg_icon_size= dlg_icon_size | default('32px') %}
 {% set dlg_fa_size= dlg_fa_size | default('24px') %} # Font Awesome form icon size

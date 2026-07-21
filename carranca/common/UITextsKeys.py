@@ -30,23 +30,32 @@ class UITextsKeys:
         post_route = "formSubmitRoute"
         size = "dlg_cls_size"
 
+    class Section:
+        """
+        See table ui_sections.name
+        This two sections keys are special (id=1 & id=2):
+        as they group all — common —  message
+        error and success
+        """
+
+        error = "secError"
+        success = "secSuccess"
+        # only search on the current section
+        current = ""  # only search on the current section
+        # this is a special key, that has the name of the section
+        # loaded in db_Texts, see  get_section
+        name = "__section_name__"
+
     class Fatal:
         no_db_conn = "NoDBConnection"
         code = "UpsErrorCode"
         where = "UpsOffendingDef"
         http_code = "UpsHttpCode"
 
-    class Section:
-        """See table ui_sections.name
-        This two sections are special (id=1 & id=2):
-        as they group all msg error and msgs success"""
-
-        error = "secError"
-        success = "secSuccess"
-        current = ""  # only search on the current section
-        # this is a special key that has the name of the section loaded in db_Texts,
-        # see  get_section
-        name = "__section_name__"
+    class Action:
+        dlg_close = "dlgFormCloseAction"
+        dlg_goto = "dlgFormGotoAction"
+        dlg_sec_msg = "dlgFormSecMsg"
 
 
 # eof

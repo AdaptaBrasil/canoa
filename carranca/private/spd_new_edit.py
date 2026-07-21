@@ -259,7 +259,7 @@ def spd_new_or_edit(data: str) -> Route_Response:
         # TODO use: window.history.back() in JavaScript.
         # TODO selected Row, ix=row_index)
         process_on_end = private_route("spd_grid", code=UiActResponseProxy.show)
-        form_on_close = {"dlgFormCloseAction": process_on_end}
+        form_on_close = {UITextsKeys.Action.dlg_close: process_on_end}
     else:  # standard routine
         code = data
         action = None

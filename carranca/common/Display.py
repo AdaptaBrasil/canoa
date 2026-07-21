@@ -54,9 +54,9 @@ class Display:
     # https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters
     @staticmethod
     def code(color_code: int | None) -> str:
-        #       reset                 return ESC only        valid Set foreground color code
-        if not (color_code in (None, 0) or (color_code in range(30, 37))):
-            ValueError("Invalid color code, valid values are in [30, 37] | 0 | None.")
+        #       reset                 return ESC only        valid Set foreground color code (standard + bright)
+        if not (color_code in (None, 0) or (color_code in range(30, 38)) or (color_code in range(90, 98))):
+            raise ValueError("Invalid color code, valid values are in [30-37] | [90-97] | 0 | None.")
 
         return "\033[" + ("" if color_code is None else f"{color_code}m")
 

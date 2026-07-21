@@ -18,7 +18,7 @@ from ..public.ups_handler import get_ups_jHtml
 from ..helpers.uiact_helper import UiActResponseKeys
 from ..helpers.jinja_helper import Jinja_Rendered, process_template
 from ..helpers.route_helper import get_private_response_data, init_response_vars
-from ..helpers.js_consts_helper import js_grid_col_meta_info, js_ui_dictionary
+from ..helpers.js_consts_helper import JS_GRID_COL_META_INFO, js_ui_dictionary
 from ..common.app_error_assistant import ModuleErrorCode
 from ..helpers.db_records.DBRecords import DBRecords
 from ..models.private.spatial_data_file import SpatialDataFile
@@ -51,7 +51,7 @@ def get_spd_grid() -> Jinja_Rendered:
         attributes_names = [f.name for f in SpdEdit().field_list]
         table_col_names = base_col_names + attributes_names
 
-        js_ui_dict = js_ui_dictionary(ui_db_texts[js_grid_col_meta_info], grid_col_names, task_code)
+        js_ui_dict = js_ui_dictionary(ui_db_texts[JS_GRID_COL_META_INFO], grid_col_names, task_code)
 
         task_code += 1  # 4
         spd_rows = _spd_data_fetch(table_col_names).to_list()

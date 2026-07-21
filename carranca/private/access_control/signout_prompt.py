@@ -46,6 +46,10 @@ def cache_flushed_prompt(n: int) -> Jinja_Rendered:
         task_code += 1
         ui_db_texts.set_msg_prompt("cacheFlushed", n)
         ui_db_texts.set_value(UITextsKeys.Form.size, "frm-size")
+        # This dialog is informational only (no yes/no question), so suppress the
+        # section's "Sim" submit button -- unlike signout_prompt(), there's no
+        # formSubmitRoute to send it to (that gap was rendering a literal "/False").
+        ui_db_texts.set_value(UITextsKeys.Form.btn_submit, "")
         ui_db_texts.display_msg_only = True
         task_code += 1
         jHtml = process_template(tmpl_ffn, fi=fi.with_icon("cache_clear"), **ui_db_texts.data())

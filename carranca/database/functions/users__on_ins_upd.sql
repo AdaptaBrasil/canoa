@@ -10,6 +10,9 @@ declare
 	new_token text;
 begin
 
+	-- -----------------------------------------------------------------------------------------
+	-- /!\ Keep a copy of this file updated in carranca\database\functions\users__on_ins_upd.sql
+    -- ------------------------------------------------------------------------------------------
 
 	-- mgd 2024-04-18
 	-- keep email lowercase
@@ -43,7 +46,7 @@ begin
 		reset_recover_pw_token := true;
 	end if;
 
-	-- keep datetime when the usew was diabled
+	-- keep datetime when the user was disabled
 	if new.disabled and not old.disabled then
 		new.disabled_at := now();
 	elsif old.disabled and not new.disabled then
@@ -81,10 +84,10 @@ begin
 		-- sync recover_email_token_at with recover_email_token
 		reset_recover_pw_token := true;
 	elsif new_recover_pw_token_is_empty and new.recover_email_token is not null then
-		-- clean grabage from recover_email_token
+		-- clean garbage from recover_email_token
 		reset_recover_pw_token := true;
 	end if;
-	-- TODO check min lenght of recover_email_token
+	-- TODO check min length of recover_email_token
 
 	-- not needed any more
 	if reset_recover_pw_token then
@@ -96,3 +99,8 @@ begin
 end;
 $function$
 ;
+
+-- Permissions
+
+ALTER FUNCTION canoa.users__on_ins_upd() OWNER TO canoa_power;
+GRANT ALL ON FUNCTION canoa.users__on_ins_upd() TO canoa_power;

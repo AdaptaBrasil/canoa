@@ -37,7 +37,7 @@ what should be shown#}
 {# ╒═══════════════ Display UI ═══════════════╕ #}
 {# FORM: only submit/Post data entry (% frm_blc_inputs %) of the app #}
 <form id="{{frm_data_entry_form_id}}" method="post" action="" {{dlg_data_wait_process}} {{formAttribute | default('')}}>
-    <input type="hidden" name="{{safe_token.key}}" value="{{safe_token.value}}">
+    <input type="hidden" name="{{safe_token.key}}" value="{{safe_token.value(dlg_post_sec_msg)}}">
     {# ╒═══════════════ Form's input ═══════════════╕ #}
     {% block frm_blc_inputs %}{% endblock %}
     {# ╘══════════════ Form's input ════════════════╛ #}

@@ -23,7 +23,7 @@ from ...helpers.file_helper import change_file_ext
 from ...helpers.types_helper import Usual_Dict
 from ...helpers.route_helper import MTD_GET, get_private_response_data, init_response_vars
 from ...common.app_error_assistant import HTTP_StatusCode, ModuleErrorCode, AppStumbled
-from ...helpers.js_consts_helper import js_form_sec_check, js_form_cargo_id, js_grid_col_meta_info
+from ...helpers.js_consts_helper import js_form_sec_check, JS_FORM_CARGO_ID, JS_GRID_COL_META_INFO
 
 
 def download_rec() -> Response:
@@ -42,7 +42,7 @@ def download_rec() -> Response:
             raise AppStumbled(msg, task_code, log_out, True)
 
         def _get_receipt(db_record: Usual_Dict):
-            col_meta = ui_db_texts[js_grid_col_meta_info]
+            col_meta = ui_db_texts[JS_GRID_COL_META_INFO]
             caption = json.loads(col_meta)[USER_RECEIPT]
             return f"{caption}: [{db_record[USER_RECEIPT]}]."
 
@@ -52,7 +52,7 @@ def download_rec() -> Response:
             _raise(msg, HTTPStatus.METHOD_NOT_ALLOWED)
 
         task_code += 1  # 2
-        rqst = request.form.get(js_form_cargo_id)
+        rqst = request.form.get(JS_FORM_CARGO_ID)
         rec_id, rec_type = to_int(rqst[:-1]), rqst[-1]
 
         if not is_str_none_or_empty(msg_key := js_form_sec_check()):

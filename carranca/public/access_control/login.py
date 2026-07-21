@@ -33,7 +33,6 @@ from ...helpers.route_helper import (
 
 
 def do_login():
-
     jHtml, is_get, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.ACCESS_CONTROL_LOGIN)
 
     try:
@@ -48,7 +47,7 @@ def do_login():
         elif is_get:
             task_code += 2  # 4
             pass
-        elif not is_str_none_or_empty(msg_error_key := js_form_sec_check()):
+        elif not is_str_none_or_empty(msg_error_key := js_form_sec_check(expect_authenticated=False)):
             task_code += 3  # 5
             _, msg_error = ui_db_texts.set_msg_error(msg_error_key)
             raise AppStumbled(msg_error, task_code, True, True)

@@ -37,12 +37,12 @@ def init_grid(for_user: int) -> Jinja_Template:
             task_code += 1  # 3
             users = fetch_user_s()
             task_code += 1  # 4
-            request_user = next((user for user in users if user.user_id == for_user), None)
+            request_user = next((user for user in users if user.id == for_user), None)
             # TODO: if request_user is none Ups!
             task_code += 1  # 5
             users_list = [  # TODO: use user.code
                 (  # id, name (files-count), enabled
-                    str(user.user_id),
+                    str(user.id),
                     f"{user.user_name} ({user.files_count})",
                     user.user_name != request_user.user_name,
                 )
@@ -51,7 +51,7 @@ def init_grid(for_user: int) -> Jinja_Template:
             users_list.insert(0, ("", ui_db_texts[("noneUser" if len(users_list) == 0 else "selectUser")], True))
             task_code += 1  # 6
             ui_db_texts[UITextsKeys.Form.title] = ui_db_texts[UITextsKeys.Form.title + "Power"].format(request_user.user_name)
-            user_id = request_user.user_id
+            user_id = request_user.id
         else:  # ignore `for_user`
             task_code += 4  # 6
             users_list = []

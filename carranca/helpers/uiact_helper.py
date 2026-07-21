@@ -33,6 +33,7 @@ class UiActResponseKeys:
     save = "S"
     export = "X"
     download = "W"
+    log = "L"
 
 
 class UiActResponse:

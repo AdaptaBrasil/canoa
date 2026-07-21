@@ -1,16 +1,13 @@
 {# ------------------------------------
 
-sep_grid.html.j2
------------------
-CRUD for seps
+sep_log_grid.html.j2
+--------------------
+Read-only audit-log grid for one SEP (see sep_log_grid.py)
+Reached from sep_grid's [Ver log] button; only one button here: back to sep_grid.
 
-Extends
-"./layouts/grid.html.j2"
-
-2025.05.23
+2026.07.16
 mgd
 --------------------------------------- #}
-{# cSpell:ignore onclick tojson onsubmit #}
 
 {% set dlg_cls_size= 'modal-lg' %}
 
@@ -19,15 +16,10 @@ mgd
 
 {# ╒════════════════ Grid Footer ════════════════╕ #}
 {% block grid_blc_footer %}
-{% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
+
+{% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
 <div class="col-auto">
-    {{ btn_action(dlg_post_form_id, grdBtnEdit, cargo_keys.edit) }}
-</div>
-<div class="col-auto">
-    {{ btn_action(dlg_post_form_id, grdBtnDelete, cargo_keys.delete) }}
-</div>
-<div class="col-auto">
-    {{ btn_action(dlg_post_form_id, grdBtnLog, cargo_keys.log) }}
+    {{ btn_close_dlg(dlg_post_form_id, dlg_close_btn_id, grdBtnBack) }}
 </div>
 {% endblock grid_blc_footer %}
 {# ╘═══════════════ Grid Footer ═════════════════╛ #}
@@ -36,32 +28,22 @@ mgd
 {% block grid_blc_forms %}
 
 {% from "includes/_action_forms_and_btns.html.j2" import action_form__post_cargo %}
-{{ action_form__post_cargo(dlg_post_form_id, private_route('sep_grid', code=form_cargo_id), dlg_data_wait_process) }}
+{{ action_form__post_cargo(dlg_post_form_id, dlg_goto_action_url, dlg_data_wait_process, sec_msg=dlg_post_sec_msg) }}
 
 {% endblock grid_blc_forms %}
 {# ╘════════════════ Grid Forms ═════════════════╛ #}
-
 
 {# ╒══════════════ Grid JavaScript ══════════════╕ #}
 {% block grid_blc_javascript %}
 
 <script>
     const colMeta = {{ grid_col_meta | tojson | safe }};
-    const colCode = colMeta[0].n;
-    const colIconUrl = colMeta[1].n;
-
-    const gridRows = {{ sep_data | tojson | safe }};
-    const cargoKeys = {{ cargo_keys | tojson }};
+    const gridRows = {{ log_data | tojson | safe }};
     const gridID = '{{ grid_id }}';
-    const initRow = {{ grid_init_row | default (0) }};
-    const cargo = { [cargoKeys.action]: '', [cargoKeys.row_index]: initRow, [cargoKeys.code]: '' };
-    const icon = /** @type {HTMLImageElement} */(document.getElementById('{{ dlg_icon_id }}'));
-
-    {% from "includes/_action_forms_and_btns.js.j2" import form_link_action %}
-    {{ form_link_action(dlg_post_form_id, form_cargo_id) }}
+    const userLocale = '{{ userLocale }}';
 
 </script>
-<script src="{{static_route('js/sep_grid.js')}}"></script>
+<script src="{{static_route('js/sep_log_grid.js')}}"></script>
 
 {% endblock grid_blc_javascript %}
 {# ╘══════════════ Grid JavaScript ══════════════╛ #}

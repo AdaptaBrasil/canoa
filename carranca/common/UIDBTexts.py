@@ -122,10 +122,6 @@ class UIDBTexts:
 
         return value
 
-    def _get_ui_datetime(self) -> str:
-        ui_dt_str = self._retrieve_value("ui_datetime", UITextsKeys.Section.success, self.ui_dt_format, True)
-        return ui_dt_str
-
     def __init__(self, data: Dict[str, Any], debugging: bool, ui_dt_format: str = "", db_lookup: DB_Lookup | None = None):
         # collect msg keys names
         items = UITextsKeys.Msg.__dict__.items()
@@ -247,7 +243,7 @@ class UIDBTexts:
         value = self._get_value_or_default(key, default, str)
         return cast(str, value)
 
-    def get_bool(self, key: str, default: bool | None = None) -> bool:
+    def get_bool(self, key: str, default: bool = False) -> bool:
         """
         Retrieves a value from self._data guaranteed to be a boolean.
         If the key is missing returns the provided default value as str

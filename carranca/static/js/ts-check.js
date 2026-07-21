@@ -56,10 +56,6 @@ var btnSave;
 /** @type {HTMLButtonElement} */
 var btnExport;
 
-/** @type {Object} */
-var gridContainer;
-
-
 /**
  * @typedef {Object} gridColParams
  * @property {Object} api

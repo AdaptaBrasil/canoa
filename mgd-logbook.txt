@@ -84,7 +84,8 @@
 
     » git commands
         last commit msg:  git log -1 --pretty=%B
-
+    » Claude commands
+        /status /usage
 
 
 ------- 2025 - July --------------

@@ -74,7 +74,7 @@ cSpell:ignore
 {% block dlg_blc_forms %}
 
 {% from "includes/_action_forms_and_btns.html.j2" import action_form__post_cargo %}
-{{ action_form__post_cargo(dlg_post_form_id, form_post_action, dlg_data_wait_process) }}
+{{ action_form__post_cargo(dlg_post_form_id, form_post_action, dlg_data_wait_process, sec_msg=dlg_post_sec_msg) }}
 
 {% endblock dlg_blc_forms %}
 {# ╘═════════════════ Dialog Forms ════════════════╛ #}

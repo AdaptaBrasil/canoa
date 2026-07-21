@@ -30,7 +30,7 @@ from ..helpers.types_helper import (
     Json_Text,
     Route_Response,
 )
-from ..helpers.js_consts_helper import js_form_cargo_id, js_form_sec_check
+from ..helpers.js_consts_helper import JS_FORM_CARGO_ID, js_form_sec_check
 from ..helpers.route_helper import (
     get_private_response_data,
     base_route_private,
@@ -136,7 +136,7 @@ def uiact_response(code: str) -> Tuple[Jinja_Rendered, UiActResponse | None]:
         def _get_result() -> Tuple[Jinja_Rendered, UiActResponse | None]:
             uiact_rsp = None
             jHtmlError: Jinja_Rendered = ""
-            cmd_text: Json_Text = request.args.get(js_form_cargo_id, "") if rqs_method == MTD_GET else request.form.get(js_form_cargo_id, "")
+            cmd_text: Json_Text = request.args.get(JS_FORM_CARGO_ID, "") if rqs_method == MTD_GET else request.form.get(JS_FORM_CARGO_ID, "")
             if is_str_none_or_empty(cmd_text):
                 jHtmlError = create_ups_jHtml(_get_error("empty"))
             elif not (uiact_rsp := UiActResponse(cmd_text)):
@@ -148,7 +148,7 @@ def uiact_response(code: str) -> Tuple[Jinja_Rendered, UiActResponse | None]:
 
         if rqs_method == MTD_POST and not is_str_none_or_empty(msg_error_key := js_form_sec_check()):
             jHtml = create_ups_jHtml(msg_error_key)
-        elif code == js_form_cargo_id:
+        elif code == JS_FORM_CARGO_ID:
             # the code is send via a html form's input or on the parameter
             jHtml, uiact_rsp = _get_result()
         elif not is_str_none_or_empty(code):
@@ -196,6 +196,10 @@ def grid_route(code: str, editor_name: str, download: Call_Args, show_grid: Call
                 jHtmlOrResp = download(uiact_rsp.code)
             case UiActResponseKeys.delete:
                 jHtmlOrResp = create_ups_jHtml("The `delete` procedure is under development.")
+            case UiActResponseKeys.log:
+                # SEP-specific for now (only sep_grid has a [Ver log] button) -- revisit if
+                # other grids get one too, see the JS/grid-unification idea in project_next_tasks.md
+                jHtmlOrResp = redirect_to(private_route("sep_log_grid", code=uiact_rsp.code))
             case _:
                 jHtmlOrResp = create_ups_jHtml(f"Unknown route action '{uiact_rsp.action}'.")
 
@@ -213,6 +217,19 @@ def sep_grid(code: str = "?"):
         from .sep_grid import get_sep_grid
 
         return grid_route(code, "sep_edit", "", get_sep_grid)
+
+
+@bp_private.route("/sep_log_grid/<code>", methods=MTD_BOTH)
+def sep_log_grid(code: str = "?"):
+    """
+    Through this route, the admin user sees the audit-log history of one SEP
+    """
+    if nobody_is_logged():
+        return redirect_to(login_route())
+    else:
+        from .sep_log_grid import get_sep_log_grid
+
+        return get_sep_log_grid(code)
 
 
 @bp_private.route("/sep_edit/<code>", methods=MTD_BOTH)
@@ -374,6 +391,7 @@ def received_file_download():
 
         rsp = download_rec()
         return rsp
+
 
 # Dyslexia-proof
 @bp_private.route("/end_session", methods=MTD_BOTH)

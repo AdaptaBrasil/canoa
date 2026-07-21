@@ -74,7 +74,12 @@ def ups_handler(
         error_msg = ""  # no error, just a message for the user
     elif isinstance(e, AppStumbled):
         error_code = e.error_code
-        error_msg = e.msg
+        # Avoid double-showing the same failure: when a proper user_msg already exists
+        # (e.g. via get_ups_jHtml's set_msg_fatal), e.msg is usually just an internal
+        # step-tag (see db_helper.py's "Evaluating the SQL request." etc) -- skip it for
+        # regular users. Power users (admin + support-while-debugging) still see it.
+        show_internal_msg = is_str_none_or_empty(user_msg) or (app_user and app_user.is_power)
+        error_msg = e.msg if show_internal_msg else ""
         logout = e.logout
         tech_msg = _get_tech_msg()
     elif app_user.is_power if app_user else False:

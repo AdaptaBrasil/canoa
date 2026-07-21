@@ -21,11 +21,13 @@ The default caption buttons are in English:
     the button is awaiting a value from the developer.
 -- #}
 
-{# -- Post form: includes security token & cargo -- #}
-{% macro action_form__post_cargo(form_id, action_route, dlg_wait_process, extra='')%}
+{# -- Post form: includes security token & cargo --
+   `extra`: raw HTML attributes appended to the <form ...> tag (eg onsubmit=...)
+   `sec_msg`: security-token context-binding message  value, passed to safe_token.value( #}
+{% macro action_form__post_cargo(form_id, action_route, dlg_wait_process, extra='', sec_msg='')%}
 <form id="{{form_id}}" method="post" action="{{action_route}}" {{dlg_wait_process}} {{extra}}>
     <input type="hidden" name="{{safe_token.cargo}}" id="{{safe_token.cargo}}">
-    <input type="hidden" name="{{safe_token.key}}" value="{{safe_token.value}}">
+    <input type="hidden" name="{{safe_token.key}}" value="{{safe_token.value(sec_msg)}}">
 </form>
 {% endmacro %}
 

@@ -145,6 +145,7 @@ class Sep(CanoaBaseTable):
         def _log(operation: str):
             log_row = LogUserSep()
             log_row.id_sep = sep_row.id
+            log_row.id_users = sep_row.users_id  # the SEP's manager at the time of this operation
             log_row.done_by = app_user.id
             log_row.operation = operation
             log_row.batch_code = batch_code

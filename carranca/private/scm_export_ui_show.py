@@ -16,7 +16,7 @@ from ..helpers.types_helper import Jinja_Template
 from ..helpers.jinja_helper import process_template
 from ..helpers.uiact_helper import UiActResponse, UiActResponseKeys
 from ..helpers.route_helper import get_private_response_data, init_response_vars
-from ..helpers.js_consts_helper import js_grid_col_meta_info, js_ui_dictionary
+from ..helpers.js_consts_helper import JS_GRID_COL_META_INFO, js_ui_dictionary
 from ..models.private.ExportGrid import ExportGrid
 from ..config.ExportProcessConfig import ExportProcessConfig
 from ..common.app_error_assistant import ModuleErrorCode
@@ -45,7 +45,7 @@ def scm_export_ui_show(uiact_rsp: UiActResponse) -> Jinja_Template:
         # TODO get names from table
         # col_names = [ExportGrid.id.name,...]
         col_names = ["id", "sep_id", "scm_id", "file_name", "sep_fullname", "uploaded", "report_errors"]
-        js_ui_dict = js_ui_dictionary(ui_db_texts[js_grid_col_meta_info], col_names, task_code)
+        js_ui_dict = js_ui_dictionary(ui_db_texts[JS_GRID_COL_META_INFO], col_names, task_code)
 
         task_code += 1
         jHtml = process_template(

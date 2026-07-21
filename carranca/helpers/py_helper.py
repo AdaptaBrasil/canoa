@@ -33,7 +33,11 @@ CODE_UTF_8 = "utf-8"
 
 
 class class_property(property):
-    """A read-only property accessible on the class itself, not just instances (cls.prop, no parens)."""
+    """Canoa:
+    Substitutes for chained @classmethod + @property (`@classmethod` wrapping
+    `@property`), which Python allowed starting 3.9, deprecated in 3.11, and
+    removed entirely in 3.13 -- no official stdlib replacement exists.
+    Read-only, accessible on the class itself (cls.prop, no parens)."""
 
     def __get__(self, instance, owner):
         return self.fget(owner)

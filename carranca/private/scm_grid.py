@@ -15,7 +15,7 @@ from ..public.ups_handler import get_ups_jHtml
 from ..helpers.uiact_helper import UiActResponseKeys
 from ..helpers.jinja_helper import Jinja_Rendered, process_template
 from ..helpers.route_helper import MTD_POST, get_private_response_data, init_response_vars
-from ..helpers.js_consts_helper import js_grid_col_meta_info, js_ui_dictionary
+from ..helpers.js_consts_helper import JS_GRID_COL_META_INFO, js_ui_dictionary
 from ..common.app_error_assistant import ModuleErrorCode, AppStumbled, HTTP_StatusCode
 from ..models.private.schema_grid import SchemaGrid
 
@@ -43,7 +43,7 @@ def get_scm_grid() -> Jinja_Rendered:
 
         task_code += 1  # 3
         col_names = ["id", "name", "color", "visible", "sep_v2t"]
-        js_ui_dict = js_ui_dictionary(ui_db_texts[js_grid_col_meta_info], col_names, task_code)
+        js_ui_dict = js_ui_dictionary(ui_db_texts[JS_GRID_COL_META_INFO], col_names, task_code)
 
         task_code += 1  # 4
         scm_data = _scm_data_fetch(col_names)

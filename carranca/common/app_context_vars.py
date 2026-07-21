@@ -26,7 +26,6 @@ Contains a shortcut to the global sidekick object.
 Equipe da Canoa -- 2025
 mgd
 
-
 """
 
 # cSpell:ignore mgmt sepsusr usrlist
@@ -131,7 +130,7 @@ def __prepare_user_seps() -> "UserSepsRtn":
 
 def __get_user_seps() -> "UserSepList":
     result = []
-    if app_user is None:
+    if not app_user:
         local_sidekick().display.error("No current user to retrieve SEP data.")
     else:
         seps = __get_scoped_var("_user_seps", __prepare_user_seps)

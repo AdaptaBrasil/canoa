@@ -37,7 +37,8 @@ def proper_user_exception(e: Exception, task_code: int) -> str:
     code = crc16(error_str)
     info_str = f"e-code: {code}, task: {task_code}, date: {now_as_iso()}"
 
-    sidekick.display.error(f"user: {app_user.id}, {info_str}, error: {error_str}")
+    user_id = app_user.id if app_user else "anonymous"
+    sidekick.display.error(f"user: {user_id}, {info_str}, error: {error_str}")
     if app_user and app_user.ready and (app_user.is_support or app_user.is_adm):
         return error_str
     else:
@@ -119,6 +120,7 @@ class ModuleErrorCode(IntEnum):
     SEP_MGMT = 550
     DB_FETCH_ROWS = 590  # only one
     SEP_GRID = 600
+    SEP_LOG_GRID = 610
     SCM_GRID = 700
     SCM_EDIT = 750
 

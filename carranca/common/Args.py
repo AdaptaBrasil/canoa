@@ -4,6 +4,7 @@
  Base shared objects
 
  mgd 2024-10-01
+
  """
 
 import json
@@ -22,10 +23,13 @@ class Args:
     def __repr__(self):
         return json.dumps(self.__dict__, indent=None, separators=(",", ":"), sort_keys=True)
 
-    @classmethod
-    def ignite(cls, json_str):
-        data = json.loads(json_str)
-        return cls(**data)
+    # 2026-07-20 dead code, no callers
+    # @classmethod
+    # def ignite(cls, json_str):
+    #     data = json.loads(json_str)
+    #     obj = cls(data.get("app_debug", False))
+    #     obj.__dict__.update(data)
+    #     return obj
 
     def from_arguments(self):
         set_flags_from_argv(self)

@@ -70,11 +70,11 @@ def _get_debug_2() -> bool:
     #    the 'app_mode' argument (: 'D', 'P', etc, see config.py).
     #    Taking this inb consideration, we skip 3. Config
     #
-    from ..helpers.py_helper import get_envvar
+    from ..helpers.py_helper import get_envvar, as_bool
 
     debug_4 = False
     debug_3 = debug_4  # Read above 'Considerations'
-    debug_2 = bool(get_envvar("debug", str(debug_3)))
+    debug_2 = as_bool(get_envvar("debug", str(debug_3)))
     return debug_2
 
 

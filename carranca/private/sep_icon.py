@@ -68,9 +68,10 @@ def do_icon_get_url(icon_file_name: str | None, sep_id: Optional[int] = None) ->
     returns the file's url
     """
 
-    if icon_file_name == SEP_NO_ICON:
+    ifn = to_str(icon_file_name)
+    if ifn == SEP_NO_ICON:
         icon_file_name = SepIconMaker.none_file
-    elif to_str(icon_file_name) == SEP_EMPTY_ICON:
+    elif ifn == SEP_EMPTY_ICON:
         # param `icon_file_name`
         #    comes from table
         #   sep.icon_file_name that can be Null

@@ -16,7 +16,7 @@ from ..helpers.uiact_helper import UiActResponseKeys
 from ..helpers.jinja_helper import process_template
 from ..helpers.types_helper import Jinja_Template
 from ..helpers.route_helper import get_private_response_data, init_response_vars
-from ..helpers.js_consts_helper import js_grid_col_meta_info, js_ui_dictionary
+from ..helpers.js_consts_helper import JS_GRID_COL_META_INFO, js_ui_dictionary
 from ..helpers.db_records.DBRecords import ListOfDBRecords
 
 
@@ -31,7 +31,7 @@ def do_scm_create() -> Jinja_Template:
 
         task_code += 1  # 3
         col_names = ["id", "name", "color", "visible", "sep_v2t"]
-        js_ui_dict = js_ui_dictionary(ui_db_texts[js_grid_col_meta_info], col_names, task_code)
+        js_ui_dict = js_ui_dictionary(ui_db_texts[JS_GRID_COL_META_INFO], col_names, task_code)
 
         scm_data = []
         if is_get:

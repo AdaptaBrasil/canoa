@@ -11,7 +11,10 @@ declare
 	usr_new_id int;
     operation char(1); -- mgd 2025-06-28 (S)et, (R)emoved | (E)dited, Marked as (D)eleted. For insert, see sep.ins_at.
 begin
-    -- spell:ignore mgmt plpgsql
+
+    -- -------------------------------------------------------------------------------------------------
+	-- /!\ Keep a copy of this file updated in carranca\database\functions\vw_mgmt_seps_user__on_upd.sql
+    -- -------------------------------------------------------------------------------------------------
 
     -- TODO:
     -- Get message string from vw_ui_texts
@@ -63,3 +66,10 @@ begin
 end;
 $function$
 ;
+
+-- Permissions
+
+ALTER FUNCTION canoa.vw_mgmt_seps_user__on_upd() OWNER TO canoa_power;
+GRANT ALL ON FUNCTION canoa.vw_mgmt_seps_user__on_upd() TO canoa_power;
+
+-- eof

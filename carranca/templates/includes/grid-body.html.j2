@@ -7,13 +7,9 @@ Common body for ag-grid
 mgd
 --------------------------------------- #}
 
-{#
-Jinja does not process {% block %} definitions inside an included file.
-To ensure blocks are properly expanded, define them in the main template
-and place {% include %} inside the block."
-#}
-{% include "./includes/backend-msg.html.j2" %}
-<div id='{{ grid_id }}' class="ag-theme-quartz" style="height: 400px"></div>
+{# backend-msg.html.j2 is included by grid.html.j2's dlg_blc_body block instead,
+   unconditionally -- it must render even when dlg_bke_display_ui is False (msgOnly). #}
+<div id='{{ grid_id | default("ag-grid-id") }}' class="ag-theme-quartz" style="height: 400px"></div>
 
 {# const gridOptions = {
     // ✅ New API for single row selection

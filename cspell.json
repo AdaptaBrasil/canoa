@@ -11,6 +11,7 @@
         "plpgsql",
         "dunder",
         "tojson",
+        "claude",
         "params",
         "fform",
         "gmail",

@@ -5,16 +5,20 @@ Module for analyzing spatial data from GeoPackage (.gpkg) files using GeoPandas 
 mgd 2026.05.07
 """
 
-import pyogrio
-import pandas as pd
-import geopandas as gpd
-
 from io import BytesIO
-from typing import Tuple, List
+from typing import TYPE_CHECKING, Tuple, List
 from datetime import datetime
 
 from ..helpers.py_helper import now_as_iso, same_entry
 from ..helpers.types_helper import Usual_Dict, Primitive
+
+if TYPE_CHECKING:
+    # kept import-time-only: geopandas/pyogrio are slow to import (GDAL driver
+    # registration, PROJ database load) and are only actually needed once a file
+    # is analyzed, not just to open the insert/edit form. See callers below for
+    # the real (function-scoped) imports.
+    import geopandas as gpd
+    import pandas as pd
 
 # cspell:words ffname pyogrio gpkg sjoin geospatial
 
@@ -66,7 +70,7 @@ def spd_file_format(file_ext: str):
     return None
 
 
-def _health_score(gdf: gpd.GeoDataFrame) -> Usual_Dict:
+def _health_score(gdf: "gpd.GeoDataFrame") -> Usual_Dict:
     # With the assistance of Claude:
     # see: ./docs/gpkg health.md
     """
@@ -121,7 +125,7 @@ def _health_score(gdf: gpd.GeoDataFrame) -> Usual_Dict:
 
 
 def _get_spd_info(
-    started_at: datetime, gdf: gpd.GeoDataFrame, layers: pd.DataFrame, layer_index: int = 0, values_from_fields: List[str] = []
+    started_at: datetime, gdf: "gpd.GeoDataFrame", layers: "pd.DataFrame", layer_index: int = 0, values_from_fields: List[str] = []
 ) -> Usual_Dict:
     """
     Reads a GeoDataFrame, extracts metadata including engine versions, bounding box,
@@ -135,6 +139,9 @@ def _get_spd_info(
 
     Returns a structured dict for further processing.
     """
+    import pandas as pd
+    import pyogrio
+    import geopandas as gpd
 
     def __build_values(hashable_fields: List[str]) -> Tuple[List[str], Usual_Dict]:
         def ___get_values_of(field: str) -> List[Primitive]:
@@ -266,6 +273,9 @@ def spd_info_from_bytes(bytes_data: bytes, format: str, layer_index: int = 0, va
 
     Returns a structured dict for further processing.
     """
+    import geopandas as gpd
+    import pandas as pd
+    import pyogrio
 
     started = datetime.now()
     gpd.options.io_engine = "pyogrio"

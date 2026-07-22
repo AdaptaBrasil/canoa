@@ -11,15 +11,6 @@
 
 ------------- TODOs -------------
 ----------------------------------
-    sidekick:
-        » log to file
-
-    security:
-        » real secKeyViolation for forms
-
-    leftovers:
-        » def __get_scm_menu_list() -> List[Dict]: in __init__.py
-
     db:
         » user_data_files
             - set elapsed time, no datetime

@@ -148,10 +148,6 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
 
         return sep_list
 
-    def __get_scm_menu_list() -> List[Dict]:
-        scm_list: List[Dict] = []
-        return scm_list
-
     def __do_btn_id(action: str, data: str) -> str:
         if not isinstance(data, str):
             raise ValueError("Invalid argument: string expected in __do_btn_id(action: str, data: str)")
@@ -177,7 +173,6 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
         is_anyone_logged=__is_anyone_logged,
         app_menu=__get_app_menu,
         sep_menu=__get_user_sep_menu_list,
-        scm_menu=__get_scm_menu_list,
         ui_act_add=UiActResponseProxy.add,
         ui_act_shw=UiActResponseProxy.show,
         safe_token={"key": JS_FORM_SEC_KEY, "value": js_form_sec_value, "cargo": JS_FORM_CARGO_ID},

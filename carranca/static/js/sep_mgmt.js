@@ -31,8 +31,6 @@ const gridOptions = {
     // not compatible with designed ui rowSelection: { mode: 'singleRow', checkboxes: false },
     rowSelection: 'single',
     onGridReady: (params) => {
-        params.api.sizeColumnsToFit();
-        setTimeout(() => params.api.sizeColumnsToFit(), 100);
         const row = cargo[cargoKeys.row_index] ?? 0
         const firstRow = params.api.getDisplayedRowAtIndex(row);
         if (firstRow) {
@@ -53,11 +51,11 @@ const gridOptions = {
         { field: colMeta[0].n, hide: true },
         { field: colIconUrl, hide: true },
         { field: colUserCurr, hide: true },
-        { field: colMeta[3].n, headerName: colMeta[3].h, hide: false, flex: 3 },
+        { field: colMeta[3].n, headerName: colMeta[3].h, flex: 6 },
         {
             field: colUserNew,
             headerName: colMeta[4].h,
-            flex: 2,
+            flex: 4,
             editable: true,
             cellClass: 'grd-col-sep_new',
             cellClassRules: {
@@ -102,9 +100,9 @@ const gridOptions = {
         {
             field: colMeta[6].n
             , headerName: colMeta[6].h
-            , headerClass: 'text-center'
-            , flex: 1
+            , headerClass: 'ag-center-aligned-header'
             , cellStyle: { display: 'flex', justifyContent: 'center' }
+            , flex: 2
         },
 
     ]

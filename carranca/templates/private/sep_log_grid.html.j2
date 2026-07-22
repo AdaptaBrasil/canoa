@@ -37,9 +37,9 @@ mgd
 {% block grid_blc_javascript %}
 
 <script>
-    const colMeta = {{ grid_col_meta | tojson | safe }};
-    const gridRows = {{ log_data | tojson | safe }};
-    const gridID = '{{ grid_id }}';
+    const colMeta = {{ grid_col_meta | default([]) | tojson | safe }};
+    const gridRows = {{ log_data | default([]) | tojson | safe }};
+    const gridID = '{{ grid_id | default("ag-grid-id") }}';
     const userLocale = '{{ userLocale }}';
 
 </script>

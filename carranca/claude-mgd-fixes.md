@@ -9,6 +9,97 @@ ledger stays the tamper-evidence mechanism; this file is the human-readable "wha
 
 ---
 
+## 2026-07-21 — `grid.html.j2`'s `msgOnly` gating never actually worked, for any grid page
+
+While wiring `sep_log_grid.py`'s `JumpOut` path (a graceful "not found"/"not allowed"
+message instead of a crash — see the entry below), the message showed correctly, but a
+leftover empty ag-grid ("No Rows To Show") also rendered below it, and the dialog title
+showed the raw unformatted `"Log de {0}"` DB text instead of the SEP's name.
+
+**Root cause, verified with a minimal Jinja reproduction (not guessed):** `grid.html.j2`
+wrapped its block *declarations* — `dlg_blc_body`, `grid_blc_footer`, `grid_blc_javascript`,
+`grid_blc_forms`, `base_blc_head_js` — inside one shared `{% if dlg_bke_display_ui %}`, so
+that they'd only render when the page wasn't in `msgOnly` mode. Confirmed this is a genuine
+Jinja limitation, not specific to this file: wrapping a `{% block %}` override in `{% if %}`
+inside a child/middle template has **zero effect**, whether one block or several are
+grouped, and whether or not the block calls `{{ super() }}` — Jinja registers a block
+override unconditionally based on its presence in the child's source; the ancestor template
+that actually *calls* `{% block x %}{% endblock %}` has no visibility into any conditional
+that wrapped the override's *declaration*. Verified this precisely with `jinja2.Environment`
+reproductions matching the real 3-level chain (`dialog.html.j2` → `grid.html.j2` →
+`sep_log_grid.html.j2`) before touching the real file. This means `grid.html.j2`'s `msgOnly`
+support has likely never worked correctly for *any* grid page (`sep_grid`, `scm_grid`,
+`spd_grid` too) — just never previously exercised, since `sep_log_grid`'s `JumpOut` path was
+the first early-exit case any of them hit.
+
+**Fix:** moved the `{% if dlg_bke_display_ui %}` to live *inside* each block's own body
+(between its `{% block %}`/`{% endblock %}` tags) instead of wrapping the declarations from
+outside. Verified this pattern actually gates correctly, including at the real 3-level
+nesting depth, and that a grandchild's undefined-variable reference inside a gated block
+never even gets evaluated when the condition is false.
+
+**Also fixed in the same pass, `sep_log_grid.py`:** the `Form.title` DB text
+(`"Log de {0}"`) was only being formatted with the SEP's name *after* the
+not-found/not-allowed check — so on the `JumpOut` path, it stayed raw and unformatted.
+Moved the formatting up next to where `sep_fullname` is computed, before the check.
+Confirmed `set_msg_fatal()`'s internal `reset_messages()` only clears `Msg`-namespaced
+keys, not `Form.title`, so this reordering is safe.
+
+---
+
+## 2026-07-21 — `grid.html.j2` `msgOnly` gap, part 2: message text and close button were also missing
+
+Follow-up to the entry above. After moving `{% if dlg_bke_display_ui %}` inside each
+block's body, `sep_log_grid`'s `JumpOut` path correctly suppressed the empty ag-grid —
+but the dialog body was then completely blank (no error text at all), and the footer had
+no button whatsoever. Two more instances of the same root shape:
+
+1. **Message text never rendered for any grid page.** `form.html.j2`'s `dlg_blc_body`
+   block includes `includes/backend-msg.html.j2` directly and unconditionally (line 33) —
+   that's the only place the `msgError`/`msgWarn`/etc. alerts actually get emitted.
+   `grid.html.j2`'s own `dlg_blc_body` override never included it at all; the include had
+   been placed instead inside `includes/grid-body.html.j2` (line 15), which is itself only
+   reached when `dlg_bke_display_ui` is `True` — i.e. exactly the one case where a message
+   isn't the point. So no page extending `grid.html.j2` (`sep_grid`, `scm_grid`, `spd_grid`,
+   `sep_log_grid`) has ever shown its backend message text.
+   **Fix:** moved the `{% include "includes/backend-msg.html.j2" %}` out of
+   `grid-body.html.j2` and into `grid.html.j2`'s `dlg_blc_body` block, unconditionally,
+   ahead of the `{% if dlg_bke_display_ui %}` grid include — matching `form.html.j2`'s shape.
+
+2. **No footer button in `msgOnly` mode.** `grid.html.j2`'s `dlg_blc_footer_buttons` block
+   only ever rendered `grid_blc_footer` (gated by `dlg_bke_display_ui`) — the page-specific
+   footer (e.g. `sep_log_grid.html.j2`'s only button, "Voltar") lives entirely inside that
+   gated block, so in `msgOnly` mode there was no way to close the dialog at all.
+   **Fix:** added an `{% else %}` branch to `dlg_blc_footer_buttons`, rendering a generic
+   close button via `btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, ...)` against the
+   base close-form already defined unconditionally in `dialog.html.j2`'s `base_blc_forms` —
+   same pattern `form.html.j2` uses for its own message-only footer.
+
+Both verified live by Miguel against `sep_log_grid`'s not-allowed message (screenshot: alert
+text + OK button both render correctly now).
+
+**Still open, not yet applied (continue next session):**
+- The dialog title still shows the raw `"Log de {0}"` placeholder on this same screen, even
+  though the message body's own `sep_fullname` substitution works fine — so `sep_fullname`
+  itself is a valid non-empty string, but `ui_db_texts.format(UITextsKeys.Form.title, ...)`
+  isn't landing. Not yet traced further.
+- The "Voltar" button posts straight to `/sep_grid/!@@` — functionally correct (`grid_route`
+  in `routes.py` decodes the `!@@` "show" sentinel fine, same pattern used by
+  `sep_new_edit.py`/`scm_new_edit.py`/`spd_new_edit.py`), but the raw sentinel is visible in
+  the browser's address bar after the POST, since `action_form__post_cargo`'s `action`
+  attribute is the URL directly. Proposed scoped fix (agreed in shape, not yet applied):
+  route the POST through the existing `JS_FORM_CARGO_ID` cargo mechanism instead — target
+  the form at `private_route("sep_grid", code=JS_FORM_CARGO_ID)`, add an optional
+  `cargo=''` param to `action_form__post_cargo` (`_action_forms_and_btns.html.j2`) that sets
+  the hidden cargo input's `value`, and pass `dlg_post_sec_msg` as that cargo value from
+  `sep_log_grid.html.j2` (it already equals `UiActResponseProxy.show`). This makes the
+  visible POST target `/sep_grid/form_cargo_id` instead of `/sep_grid/!@@`, same security
+  check on the way back in. Deliberately scoped to this file + the one shared macro, not the
+  broader `dlg_goto_action_url`/`prompt_back_route` standardization already on the
+  next-tasks list.
+
+---
+
 ## 2026-07-18 — crossed `extra` param in `action_form__post_cargo`, plus `UITextsKeys.Action` adoption
 
 While building the security-token `extra` context-binding, `prompt.html.j2:77` ended up passing

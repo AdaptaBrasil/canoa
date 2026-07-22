@@ -15,9 +15,10 @@ from ..public.ups_handler import get_ups_jHtml
 from ..helpers.uiact_helper import UiActResponseKeys, UiActResponseProxy
 from ..helpers.jinja_helper import Jinja_Rendered, process_template
 from ..helpers.route_helper import MTD_POST, get_private_response_data, init_response_vars
+from ..common.app_context_vars import app_user
 from ..helpers.js_consts_helper import JS_GRID_COL_META_INFO, js_ui_dictionary, js_form_get_sec_msg
-from ..helpers.ui_db_texts_manager import UITextsKeys
 from ..common.app_error_assistant import ModuleErrorCode, AppStumbled, HTTP_StatusCode
+from ..helpers.ui_db_texts_manager import UITextsKeys
 from ..helpers.db_records.DBRecords import DBRecords
 from ..models.private.mgmt_seps_user import MgmtSepsUser
 
@@ -25,7 +26,7 @@ from ..models.private.mgmt_seps_user import MgmtSepsUser
 def get_sep_grid() -> Jinja_Rendered:
 
     def _sep_data_fetch(col_names: List[str]) -> DBRecords:
-        sep_usr_rows = MgmtSepsUser.get_seps_usr(col_names)
+        sep_usr_rows = MgmtSepsUser.get_seps_usr(col_names, None if app_user.is_power else app_user.id)
         for sep in sep_usr_rows:
             sep_id = sep.id
             sep.id = MgmtSepsUser.to_code(sep_id)

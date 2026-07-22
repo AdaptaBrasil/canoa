@@ -186,7 +186,7 @@ CREATE SEQUENCE canoa.users__id_seq
 
 ALTER SEQUENCE canoa.users__id_seq OWNER TO canoa_power;
 GRANT ALL ON SEQUENCE canoa.users__id_seq TO canoa_power;
-GRANT SELECT, USAGE ON SEQUENCE canoa.users__id_seq TO canoa_connstr;
+GRANT USAGE, SELECT ON SEQUENCE canoa.users__id_seq TO canoa_connstr;
 -- canoa.db_version definition
 
 -- Drop table
@@ -213,7 +213,7 @@ COMMENT ON COLUMN canoa.db_version.applied_at IS 'Readonly column that stores th
 -- Permissions
 
 ALTER TABLE canoa.db_version OWNER TO canoa_power;
-GRANT TRIGGER, INSERT, SELECT, DELETE, REFERENCES, UPDATE, TRUNCATE ON TABLE canoa.db_version TO canoa_power;
+GRANT REFERENCES, UPDATE, SELECT, INSERT, DELETE, TRIGGER, TRUNCATE ON TABLE canoa.db_version TO canoa_power;
 GRANT SELECT ON TABLE canoa.db_version TO canoa_connstr;
 
 
@@ -242,7 +242,7 @@ COMMENT ON COLUMN canoa.roles.abbr IS 'DO NOT ALTER, Is 3-letter identifier of t
 -- Permissions
 
 ALTER TABLE canoa.roles OWNER TO canoa_power;
-GRANT TRIGGER, INSERT, SELECT, DELETE, REFERENCES, UPDATE, TRUNCATE ON TABLE canoa.roles TO canoa_power;
+GRANT REFERENCES, UPDATE, SELECT, INSERT, DELETE, TRIGGER, TRUNCATE ON TABLE canoa.roles TO canoa_power;
 GRANT SELECT ON TABLE canoa.roles TO canoa_connstr;
 
 
@@ -282,7 +282,7 @@ CREATE UNIQUE INDEX ui_locales__locale_uix ON canoa.ui_locales USING btree (loca
 -- Permissions
 
 ALTER TABLE canoa.ui_locales OWNER TO canoa_power;
-GRANT TRIGGER, INSERT, SELECT, DELETE, REFERENCES, UPDATE, TRUNCATE ON TABLE canoa.ui_locales TO canoa_power;
+GRANT REFERENCES, UPDATE, SELECT, INSERT, DELETE, TRIGGER, TRUNCATE ON TABLE canoa.ui_locales TO canoa_power;
 GRANT SELECT ON TABLE canoa.ui_locales TO canoa_connstr;
 
 
@@ -310,7 +310,7 @@ CREATE UNIQUE INDEX ui_sections__locale_name_uix ON canoa.ui_sections USING btre
 -- Permissions
 
 ALTER TABLE canoa.ui_sections OWNER TO canoa_power;
-GRANT TRIGGER, INSERT, SELECT, DELETE, REFERENCES, UPDATE, TRUNCATE ON TABLE canoa.ui_sections TO canoa_power;
+GRANT REFERENCES, UPDATE, SELECT, INSERT, DELETE, TRIGGER, TRUNCATE ON TABLE canoa.ui_sections TO canoa_power;
 GRANT SELECT ON TABLE canoa.ui_sections TO canoa_connstr;
 
 
@@ -336,7 +336,7 @@ CREATE TABLE canoa.ui_items (
 -- Permissions
 
 ALTER TABLE canoa.ui_items OWNER TO canoa_power;
-GRANT TRIGGER, INSERT, SELECT, DELETE, REFERENCES, UPDATE, TRUNCATE ON TABLE canoa.ui_items TO canoa_power;
+GRANT REFERENCES, UPDATE, SELECT, INSERT, DELETE, TRIGGER, TRUNCATE ON TABLE canoa.ui_items TO canoa_power;
 GRANT SELECT ON TABLE canoa.ui_items TO canoa_connstr;
 
 
@@ -375,8 +375,8 @@ COMMENT ON COLUMN canoa.log_user_sep.operation IS '(S)et, (R)emoved | (I)nserted
 -- Permissions
 
 ALTER TABLE canoa.log_user_sep OWNER TO canoa_power;
-GRANT TRIGGER, INSERT, SELECT, DELETE, REFERENCES, UPDATE, TRUNCATE ON TABLE canoa.log_user_sep TO canoa_power;
-GRANT INSERT, SELECT, UPDATE ON TABLE canoa.log_user_sep TO canoa_connstr;
+GRANT REFERENCES, UPDATE, SELECT, INSERT, DELETE, TRIGGER, TRUNCATE ON TABLE canoa.log_user_sep TO canoa_power;
+GRANT UPDATE, SELECT, INSERT ON TABLE canoa.log_user_sep TO canoa_connstr;
 
 
 -- canoa."schema" definition
@@ -415,8 +415,8 @@ COMMENT ON COLUMN canoa."schema".ui_order IS 'Defines the display order of the e
 -- Permissions
 
 ALTER TABLE canoa."schema" OWNER TO canoa_power;
-GRANT TRIGGER, INSERT, SELECT, DELETE, REFERENCES, UPDATE, TRUNCATE ON TABLE canoa."schema" TO canoa_power;
-GRANT INSERT, SELECT, UPDATE ON TABLE canoa."schema" TO canoa_connstr;
+GRANT REFERENCES, UPDATE, SELECT, INSERT, DELETE, TRIGGER, TRUNCATE ON TABLE canoa."schema" TO canoa_power;
+GRANT UPDATE, SELECT, INSERT ON TABLE canoa."schema" TO canoa_connstr;
 
 
 -- canoa.sep definition
@@ -483,8 +483,8 @@ COMMENT ON COLUMN canoa.sep.id_spd IS 'Reference for the SPatial Data File for t
 -- Permissions
 
 ALTER TABLE canoa.sep OWNER TO canoa_power;
-GRANT TRIGGER, INSERT, SELECT, DELETE, REFERENCES, UPDATE, TRUNCATE ON TABLE canoa.sep TO canoa_power;
-GRANT INSERT, SELECT, UPDATE ON TABLE canoa.sep TO canoa_connstr;
+GRANT REFERENCES, UPDATE, SELECT, INSERT, DELETE, TRIGGER, TRUNCATE ON TABLE canoa.sep TO canoa_power;
+GRANT UPDATE, SELECT, INSERT ON TABLE canoa.sep TO canoa_connstr;
 
 
 -- canoa.spatial_data_files definition
@@ -530,8 +530,8 @@ COMMENT ON COLUMN canoa.spatial_data_files.field_alt_name IS 'Secondary Name fie
 -- Permissions
 
 ALTER TABLE canoa.spatial_data_files OWNER TO canoa_power;
-GRANT TRIGGER, INSERT, SELECT, DELETE, REFERENCES, UPDATE, TRUNCATE ON TABLE canoa.spatial_data_files TO canoa_power;
-GRANT INSERT, SELECT, UPDATE ON TABLE canoa.spatial_data_files TO canoa_connstr;
+GRANT REFERENCES, UPDATE, SELECT, INSERT, DELETE, TRIGGER, TRUNCATE ON TABLE canoa.spatial_data_files TO canoa_power;
+GRANT UPDATE, SELECT, INSERT ON TABLE canoa.spatial_data_files TO canoa_connstr;
 
 
 -- canoa.user_data_files definition
@@ -639,8 +639,8 @@ update
 -- Permissions
 
 ALTER TABLE canoa.user_data_files OWNER TO canoa_power;
-GRANT TRIGGER, INSERT, SELECT, DELETE, REFERENCES, UPDATE, TRUNCATE ON TABLE canoa.user_data_files TO canoa_power;
-GRANT INSERT, SELECT, UPDATE ON TABLE canoa.user_data_files TO canoa_connstr;
+GRANT REFERENCES, UPDATE, SELECT, INSERT, DELETE, TRIGGER, TRUNCATE ON TABLE canoa.user_data_files TO canoa_power;
+GRANT UPDATE, SELECT, INSERT ON TABLE canoa.user_data_files TO canoa_connstr;
 
 
 -- canoa.users definition
@@ -709,8 +709,8 @@ update
 -- Permissions
 
 ALTER TABLE canoa.users OWNER TO canoa_power;
-GRANT TRIGGER, INSERT, SELECT, DELETE, REFERENCES, UPDATE, TRUNCATE ON TABLE canoa.users TO canoa_power;
-GRANT INSERT, SELECT, UPDATE ON TABLE canoa.users TO canoa_connstr;
+GRANT REFERENCES, UPDATE, SELECT, INSERT, DELETE, TRIGGER, TRUNCATE ON TABLE canoa.users TO canoa_power;
+GRANT UPDATE, SELECT, INSERT ON TABLE canoa.users TO canoa_connstr;
 
 
 -- canoa.log_user_sep foreign keys
@@ -801,10 +801,10 @@ CREATE OR REPLACE VIEW canoa.vw_log_user_sep
 AS SELECT log.id,
     log.id_sep,
     sep.sep_fullname,
-    log.id_users,
-    u.username AS user_name,
-    log.id_users_prior,
-    up.username AS user_prior_name,
+    log.id_users AS curr_user_id,
+    u.username AS curr_user_name,
+    log.id_users_prior AS prior_user_id,
+    up.username AS prior_user_name,
     log.done_at,
     log.done_by,
     ub.username AS done_by_name,
@@ -858,7 +858,7 @@ COMMENT ON VIEW canoa.vw_mgmt_email_sep IS '*Updatable View* that exposes column
 
 ALTER TABLE canoa.vw_mgmt_email_sep OWNER TO canoa_power;
 GRANT ALL ON TABLE canoa.vw_mgmt_email_sep TO canoa_power;
-GRANT INSERT, SELECT, UPDATE ON TABLE canoa.vw_mgmt_email_sep TO canoa_connstr;
+GRANT UPDATE, SELECT, INSERT ON TABLE canoa.vw_mgmt_email_sep TO canoa_connstr;
 
 
 -- canoa.vw_mgmt_seps_user source
@@ -899,7 +899,7 @@ update
 
 ALTER TABLE canoa.vw_mgmt_seps_user OWNER TO canoa_power;
 GRANT ALL ON TABLE canoa.vw_mgmt_seps_user TO canoa_power;
-GRANT INSERT, SELECT, UPDATE ON TABLE canoa.vw_mgmt_seps_user TO canoa_connstr;
+GRANT UPDATE, SELECT, INSERT ON TABLE canoa.vw_mgmt_seps_user TO canoa_connstr;
 
 
 -- canoa.vw_mgmt_user_sep source
@@ -933,7 +933,7 @@ update
 
 ALTER TABLE canoa.vw_mgmt_user_sep OWNER TO canoa_power;
 GRANT ALL ON TABLE canoa.vw_mgmt_user_sep TO canoa_power;
-GRANT SELECT, UPDATE ON TABLE canoa.vw_mgmt_user_sep TO canoa_connstr;
+GRANT UPDATE, SELECT ON TABLE canoa.vw_mgmt_user_sep TO canoa_connstr;
 
 
 -- canoa.vw_schema source
@@ -1045,7 +1045,7 @@ COMMENT ON VIEW canoa.vw_ui_for_edit IS 'Todo: Trigger for Update';
 
 ALTER TABLE canoa.vw_ui_for_edit OWNER TO canoa_power;
 GRANT ALL ON TABLE canoa.vw_ui_for_edit TO canoa_power;
-GRANT SELECT, UPDATE ON TABLE canoa.vw_ui_for_edit TO canoa_connstr;
+GRANT UPDATE, SELECT ON TABLE canoa.vw_ui_for_edit TO canoa_connstr;
 
 
 -- canoa.vw_ui_texts source
@@ -1150,7 +1150,7 @@ begin
 
 	-- mgd 2025-03-18
     NEW.locale := lower(NEW.locale);
-
+  
 	return new;
 end;
 $function$
@@ -1168,9 +1168,9 @@ CREATE OR REPLACE FUNCTION canoa.user_data_files__on_ins_upd()
  RETURNS trigger
  LANGUAGE plpgsql
 AS $function$
-declare
+declare 
 	reset_pw_token bool;
-	db_version varchar(8);
+	db_version varchar(8); 
 begin
 
 	-- ---------------------------------------------------------------------------------------------------
@@ -1182,11 +1182,11 @@ begin
 		new.registered_at := now();
 		select number into db_version from canoa.db_version order by id desc limit 1;
 		new.db_version := db_version;
-	elsif (TG_OP <> 'UPDATE') then
+	elsif (TG_OP <> 'UPDATE') then 
 		return new;
 	end if;
 
-	if (NEW.email_sent AND not OLD.email_sent) then
+	if (NEW.email_sent AND not OLD.email_sent) then 
 		new.email_sent_at := now();
 	end if;
 
@@ -1194,7 +1194,7 @@ begin
 		new.error_at := now();
 	end if;
 
-
+  
 	return new;
 end;
 $function$
@@ -1393,7 +1393,7 @@ CREATE OR REPLACE FUNCTION canoa.vw_mgmt_user_sep__on_upd()
  RETURNS trigger
  LANGUAGE plpgsql
 AS $function$
-declare
+declare 
 	dt_sec timestamp;
 	id_sep_new int;
 	id_sep_old int;
@@ -1412,12 +1412,12 @@ begin
 
 	-- mgd 2024-10-25, 11-08
 	sep_new = Null;
-	dt_sec = now();
+	dt_sec = now(); 
 	if NEW.scm_sep_new is Null or trim(NEW.scm_sep_new) = '' then
 		-- remove SEP from user
 		id_sep_new := Null;
 	else
-		-- find sep's id for the new schem_name/sep_name
+		-- find sep's id for the new schem_name/sep_name 
 		fullname := trim(NEW.scm_sep_new);
 		select sep_id into id_sep_new from canoa.vw_scm_sep as vw where (vw.sep_fullname_lower = lower(fullname));
 
@@ -1438,10 +1438,10 @@ begin
 			end if;
 
 			-- set user name into new SEP´s description (just to inform)
-			dsc := substring(('ins para ' || NEW.user_name) from 1 for 140);
+			dsc := substring(('ins para ' || NEW.user_name) from 1 for 140); 
 
 			-- insert the new SEP name = part[2] and get it's id (id_sep_new)
-			insert into canoa.sep
+			insert into canoa.sep 
 				   	   (id_schema, name,    description, visible, ins_at, ins_by)
 	    		values (id_schema, sep_new, dsc,         False,   dt_sec, NEW.assigned_by)
 	    		returning id into id_sep_new;
@@ -1452,9 +1452,9 @@ begin
 
 
 	-- get the user's SEP up to this point (can be null --doesn't have one) to keep track (log it)
-	select mgmt_sep_id into id_sep_old from canoa.users where id = NEW.user_id;
+	select mgmt_sep_id into id_sep_old from canoa.users where id = NEW.user_id;  
 
-
+	
 
 	-- Update canoa.users table
 	update canoa.users
@@ -1464,7 +1464,7 @@ begin
 	where id = NEW.user_id;
 
 	-- register operation on the log table
-	insert into canoa.log_user_sep
+	insert into canoa.log_user_sep 
 		   		(id_users,    id_sep,     id_sep_old, sep_new, done_at, done_by,         batch_code)
 		 values (NEW.user_id, id_sep_new, id_sep_old, sep_new, dt_sec,  NEW.assigned_by, NEW.batch_code);
 
@@ -1485,6 +1485,4 @@ GRANT ALL ON FUNCTION canoa.vw_mgmt_user_sep__on_upd() TO canoa_power;
 GRANT ALL ON SCHEMA canoa TO canoa_power;
 GRANT USAGE ON SCHEMA canoa TO mauro;
 GRANT USAGE ON SCHEMA canoa TO canoa_users;
-ALTER DEFAULT PRIVILEGES FOR ROLE canoa_users IN SCHEMA canoa GRANT INSERT, SELECT, DELETE, UPDATE ON TABLES TO canoa_users;
-
--- eof
+ALTER DEFAULT PRIVILEGES FOR ROLE canoa_users IN SCHEMA canoa GRANT UPDATE, SELECT, INSERT, DELETE ON TABLES TO canoa_users;

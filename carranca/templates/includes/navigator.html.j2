@@ -16,13 +16,12 @@ cSpell:ignore &ç gico endere spatialdata
 --------------------------------------- #}
 <nav id="navbar-main" class="navbar fixed-top navbar-expand-sm shadow-sm px-2">
     {% set menu_header= app_menu('menuHeaders') %}
-    {% set sep_list= sep_menu() %}
-    {% set sep_menu_class= '' %}
+    {% set menu= app_menu('menuItems') %}
     {% set j_user= jinja_user() %}
+    {% set sep_list= [] if j_user.power else sep_menu() %}
+    {% set sep_menu_class= '' %}
 
-    {% if j_user.power %}
-    {# -- #}{% set scm_list= scm_menu() %}
-    {% elif not sep_list %}
+    {% if not j_user.power and not sep_list %}
     {# -- #}{% set sep_menu_class= 'disabled' %}
     {% endif %}
 
@@ -52,7 +51,7 @@ cSpell:ignore &ç gico endere spatialdata
                         </li>
                         <li><a class="dropdown-item" href="{{private_route('received_files_mgmt')}}"
                                 title="Abre grid dos arquivos enviados ao processo de valida&ccedil;&atilde;o e resultados">
-                                Arquivos Enviados e Resultados
+                                Ver Envios e Resultados
                             </a>
                         </li>
                     </ul>
@@ -80,7 +79,7 @@ cSpell:ignore &ç gico endere spatialdata
                         <li>
                             <a class="dropdown-item" href="{{private_route('sep_grid', code=ui_act_shw) }}"
                                 title="Abre grid para editar ou remover setores estrat&eacute;gicos">
-                                Edi&ccedil;&atilde;o e Remo&ccedil;&atilde;o
+                                Edi&ccedil;&atilde;o
                             </a>
                         </li>
                         <li>
@@ -92,11 +91,19 @@ cSpell:ignore &ç gico endere spatialdata
                         {# ╘════════ admin sep menu ═══════╛ #}
                         {% else %}
                         {# ╒═════ user with seps menu ═════╕ #}
-                        {% for sep in sep_list %}
                         <li>
-                            <a class="dropdown-item" href="{{private_route('sep_edit', code=sep.code) }}">{{sep.name}}</a>
+                            <table class="table table-sm table-borderless mb-0 dropdown-item-text">
+                                {% for sep in sep_list %}
+                                <tr>
+                                    <td class="align-middle text-nowrap">{{sep.name}}</td>
+                                    <td class="text-end text-nowrap">
+                                        <a class="btn btn-sm menu-item-btn" href="{{private_route('sep_edit', code=sep.code) }}">Editar</a>
+                                        <a class="btn btn-sm menu-item-btn" href="{{private_route('sep_log_grid', code=sep.code) }}">Ver log</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </table>
                         </li>
-                        {% endfor %}
                         {# ╘════════ user sep menu ════════╛ #}
                         {% endif %}
                     </ul>
@@ -124,7 +131,7 @@ cSpell:ignore &ç gico endere spatialdata
                         <li>
                             <a class="dropdown-item" href="{{private_route('scm_grid', code=ui_act_shw) }}"
                                 title="Abre grid para editar ou remover esquemas">
-                                Edi&ccedil;&atilde;o e Remo&ccedil;&atilde;o
+                                Edi&ccedil;&atilde;o
                             </a>
                         </li>
                         <li>

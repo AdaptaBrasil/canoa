@@ -321,6 +321,17 @@ body {
     background-color: var(--canoa-form-button-bg);
 }
 
+/* Same color scheme as .frm-foot-btn, but sized for compact inline use (eg. menu rows) */
+.menu-item-btn {
+    color: var(--canoa-form-button-color);
+    background-color: var(--canoa-form-button-bg);
+    border-color: var(--canoa-form-button-bg);
+}
+
+.menu-item-btn:hover {
+    filter: brightness(130%);
+}
+
 .frm-pw-eye-btn {
     /* similar to frm-foot-btn:hover */
     transition: filter 0.3s ease;

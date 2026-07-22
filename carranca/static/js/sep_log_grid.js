@@ -23,7 +23,7 @@ const decodeHtmlEntities = (text) => {
 // https://www.ag-grid.com/javascript-data-grid/column-definitions/
 // == Ag Grid (read-only log: no cargo, no row actions)
 /** @type {Record<string, number>} */
-const flexByField = { done_at: 1, operation: 1, curr_user_name: 2, prior_user_name: 2, done_by_name: 2 };
+const flexByField = { done_at: 2, operation: 1, curr_user_name: 1, prior_user_name: 1, done_by_name: 1 };
 
 /** @type {Record<string, (params: any) => string>} */
 const formatterByField = {

@@ -14,25 +14,56 @@ mgd 2025-05-23
 {% extends "./layouts/dialog.html.j2" %}
 
 
-{% block dlg_blc_body_cls_tweak %}grid-body{% endblock %}
+{% if dlg_bke_display_ui %}
+    {% block dlg_blc_body_cls_tweak %}grid-body{% endblock %}
+{% endif %}
+{# ╒════════════════════ Base Head ═══════════════════════╕ #}
+    {% block base_blc_head_js %}
+    {% include "./includes/grid-header.html.j2" %}
+    {% endblock %}
+{# ╘════════════════════ Base Head ═══════════════════════╛ #}
 
+
+{# ╒════════════════════ Dialog Body ══════════════════════╕ #}
+{% block dlg_blc_body %}
+
+{# ╒═════════ Display Message If Any ═══════════╕ #}
+{# always is included, internal filter knows what should be shown#}
+{% include "includes/backend-msg.html.j2" %}
+{# ╘═════════ Display Message If Any ═══════════╛ #}
 
 {% if dlg_bke_display_ui %}
-{# ╒════════════ Display UI ══════════════╕ #}
+{# ╒══════════════ Display UI ═════════════════╕ #}
+    {% include "./includes/grid-body.html.j2" %}
+{# ╘══════════════ Display UI ═════════════════╛ #}
+{% endif %}
 
-{% block base_blc_head_js %}
-{% include "./includes/grid-header.html.j2" %}
-{% endblock %}
+{% endblock dlg_blc_body %}
+{# ╘════════════════════ Dialog Body ══════════════════════╛ #}
 
-{% block dlg_blc_body %}
-{% include "./includes/grid-body.html.j2" %}
-{% endblock %}
+{# ╒════════════════ Footer ════════════════════╕ #}
 
-  {# ╒══════════ Footer Buttons ══════════╕ #}
-  {% block dlg_blc_footer_buttons %}
-    {% block grid_blc_footer %}{% endblock %}
-  {% endblock %}
+{# ╒══════════ Footer Buttons ══════════╕ #}
+{% block dlg_blc_footer_buttons %}
+
+    {% if dlg_bke_display_ui %}
+        {% block grid_blc_footer %}{% endblock %}
+    {% else %}
+        <div class="col-auto">
+            {% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
+            {{ btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, ui_defaults.okButton) }}
+        </div>
+    {% endif %}
+
+{% endblock dlg_blc_footer_buttons  %}
   {# ╘══════════ Footer Buttons ══════════╛ #}
+
+{# ╒═══════════ Footer Options ═══════════╕ #}
+{% block dlg_blc_footer_options %}
+{% endblock dlg_blc_footer_options %}
+{# ╘═══════════ Footer Options ═══════════╛ #}
+
+{% if dlg_bke_display_ui %}
 
   {# ╒════════════ JavaScript ═════════════╕ #}
   {% block dlg_blc_javascript %}
@@ -48,5 +79,4 @@ mgd 2025-05-23
   {% endblock %}
   {# ╘══════════════ Forms ════════════════╛ #}
 
-{# ╘════════════ Display UI ══════════════╛ #}
 {% endif %}

@@ -23,9 +23,11 @@ carranca/common/igniter.py|2026-07-16|7f36b3bf
 carranca/common/app_constants.py|2026-07-16|fe9eb5db
 carranca/private/received_files/init_grid.py|2026-07-18|32de0c97
 carranca/models/private/sep.py|2026-07-20|92b82554
-carranca/private/sep_log_grid.py|2026-07-20|710e5383
+carranca/private/sep_log_grid.py|2026-07-21|3e86c82f
 carranca/static/js/sep_log_grid.js|2026-07-20|e81540f7
-carranca/templates/private/sep_log_grid.html.j2|2026-07-20|3096fe4a
+carranca/templates/private/sep_log_grid.html.j2|2026-07-21|4a5f84a4
+carranca/templates/layouts/grid.html.j2|2026-07-21|a512a890
+carranca/templates/includes/grid-body.html.j2|2026-07-21|fa061c9e
 carranca/helpers/js_consts_helper.py|2026-07-20|ae98a15c
 carranca/templates/layouts/dialog.html.j2|2026-07-20|c4bd9fcb
 carranca/templates/includes/_action_forms_and_btns.html.j2|2026-07-20|6f09a5a1

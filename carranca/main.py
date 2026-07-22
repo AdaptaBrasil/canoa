@@ -9,7 +9,7 @@ main.py
 
 # cSpell:ignore sqlalchemy cssless keepalives UNMINIFIED
 from __future__ import annotations
-from typing import cast, Tuple, TYPE_CHECKING
+from typing import Tuple, TYPE_CHECKING
 from flask_minify import Minify
 
 if TYPE_CHECKING:
@@ -84,7 +84,7 @@ try:
     sidekick.display.set_elapsed_output(False)
     info = ""  # _k.USER,
     for k in [_k.INFO, _k.WARN, _k.ERROR, _k.DEBUG, _k.FATAL]:
-        info += cast(str, sidekick.display.print(k, str(sidekick.occurrences(k)), "", True, True)) + ", "
+        info += (sidekick.display.print(k, str(sidekick.occurrences(k)), "", True, True) or "") + ", "
 
     sidekick.display.set_elapsed_output(True)
     sidekick.display.info("Messages printed:  " + info.strip(", "))

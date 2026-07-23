@@ -166,6 +166,7 @@ def receive_file() -> Jinja_Template:
                 return False
 
             # maybe a 'stale lock left by a crashed process' — remove before recreating
+            # TODO 2026-07-23 ver se existe processo travado e fecha-o (psutil), Refs #94
             try:
                 remove(lock_file)
             except OSError:

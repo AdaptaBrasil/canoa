@@ -1,5 +1,5 @@
 -- DROP SCHEMA canoa;
--- mgd 2027.07.23
+-- mgd 2026-07-23 20:31
 
 CREATE SCHEMA canoa AUTHORIZATION canoa_power;
 
@@ -772,24 +772,26 @@ AS SELECT id,
     sep_fullname,
     uploaded,
     report_errors
-   FROM ( SELECT udf.id,
-            udf.id_users AS user_id,
+   FROM ( SELECT b.id,
+            b.id_users AS user_id,
             sep.sep_id,
             sep.scm_id,
             sep.is_visible,
             sep.sep_fullname,
-            udf.file_origin,
-            udf.stored_file_name AS file_name,
-            udf.registered_at AS uploaded,
-            udf.report_warns,
-            udf.report_errors,
-            row_number() OVER (PARTITION BY udf.id_sep ORDER BY udf.registered_at DESC) AS rn_recent,
-            row_number() OVER (PARTITION BY udf.id_sep ORDER BY udf.report_errors) AS rn_lowest_errors
-           FROM vw_user_data_files udf
-             JOIN vw_scm_sep sep ON udf.id_sep = sep.sep_id
-          WHERE udf.id_sep IS NOT NULL AND sep.is_visible) udf_last_file
+            b.file_origin,
+            b.stored_file_name AS file_name,
+            b.registered_at AS uploaded,
+            b.report_warns,
+            b.report_errors,
+            row_number() OVER (PARTITION BY b.id_sep ORDER BY b.registered_at DESC) AS rn_recent,
+            row_number() OVER (PARTITION BY b.id_sep ORDER BY b.report_errors) AS rn_lowest_errors
+           FROM vw_base_data_files b
+             JOIN vw_scm_sep sep ON b.id_sep = sep.sep_id
+          WHERE b.id_sep IS NOT NULL AND sep.is_visible) udf_last_file
   WHERE rn_recent = 1
   ORDER BY (COALESCE(report_errors, '-1'::integer)) DESC;
+
+COMMENT ON VIEW canoa.vw_export_data_files IS 'For scm_export_ui_show.py and scm_export_db.py.';
 
 -- Permissions
 
@@ -1079,29 +1081,26 @@ GRANT SELECT ON TABLE canoa.vw_ui_texts TO canoa_connstr;
 -- canoa.vw_user_data_files source
 
 CREATE OR REPLACE VIEW canoa.vw_user_data_files
-AS SELECT udf.id,
-    udf.id_sep,
-    udf.id_users,
+AS SELECT b.id,
+    b.id_sep,
+    b.id_users,
     usr.username,
     usr.email,
     sep.sep_id,
     sep.sep_fullname,
-    concat(TRIM(BOTH FROM udf.ticket), '_', TRIM(BOTH FROM udf.file_name))::character varying(180) AS stored_file_name,
-        CASE
-            WHEN udf.original_name IS NULL OR udf.original_name::text = ''::text THEN udf.file_name
-            ELSE udf.original_name
-        END AS original_name,
-    udf.file_size,
-    udf.file_crc32,
-    udf.file_origin,
-    udf.user_receipt,
-    udf.report_errors,
-    udf.report_warns,
-    udf.registered_at
-   FROM user_data_files udf
-     JOIN users usr ON usr.id = udf.id_users
-     LEFT JOIN vw_scm_sep sep ON udf.id_sep = sep.sep_id
-  ORDER BY udf.id_users, udf.registered_at DESC;
+    b.stored_file_name,
+    b.original_name,
+    b.file_size,
+    b.file_crc32,
+    b.file_origin,
+    b.user_receipt,
+    b.report_errors,
+    b.report_warns,
+    b.registered_at
+   FROM vw_base_data_files b
+     JOIN users usr ON usr.id = b.id_users
+     LEFT JOIN vw_scm_sep sep ON b.id_sep = sep.sep_id
+  ORDER BY b.id_users, b.registered_at DESC;
 
 COMMENT ON VIEW canoa.vw_user_data_files IS 'For received_files_mgmt.py';
 

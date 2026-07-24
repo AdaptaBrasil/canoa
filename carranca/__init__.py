@@ -113,14 +113,15 @@ def _register_error_handlers(app: Flask):
     apply to bp_private routes too, not just bp_public (a Flask blueprint's own
     @errorhandler only fires for exceptions raised inside that same blueprint).
 
-    Routes that set `g.raw_http_error = True` before calling abort() (see
+    Routes that set `g.raw_http_error_raised = True` before calling abort() (see
     received_files/download_record.py, spd_download.py: file-download responses,
     where a styled HTML page would confuse the client) get Werkzeug's plain
     default page instead of our styled one.
     """
+    from .common.app_constants import APP_RAW_HTTP_ERROR_RAISED
 
     def _page_or_raw(error, code: HTTPStatus):
-        if getattr(g, "raw_http_error", False):
+        if getattr(g, APP_RAW_HTTP_ERROR_RAISED, False):
             return error
         return render_template(f"home/page-{code}.html"), code
 
@@ -354,7 +355,7 @@ def _create_app_and_log_file(app_name: str):
 def create_app():
     from .common.igniter import ignite_app
     from .helpers.email_helper import EmailProvider
-    from .common.app_constants import APP_NAME, APP_VERSION
+    from .common.app_constants import APP_VERSION, APP_NAME
 
     # ⚠️ =================================================
     # Global variables should be assigned before any other module

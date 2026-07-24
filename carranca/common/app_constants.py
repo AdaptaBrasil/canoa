@@ -28,4 +28,6 @@ APP_UPS_HTML_PAGE_FILE_NAME = "ups_page.html.j2"
 APP_JINJA_TEMPLATE_BUG_FOUND = "🚨 A Jinja runtime error was detected"
 APP_JINJA_TEMPLATE_BUG_MSG_TECH = "Disable config.DEBUG_RENDERED_TEMPLATES to hide this error."
 
+
+APP_RAW_HTTP_ERROR_RAISED = "raw_http_error_raised"
 # eof

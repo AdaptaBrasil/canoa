@@ -22,6 +22,7 @@ from ...public.ups_handler import ups_handler
 from ...helpers.file_helper import change_file_ext
 from ...helpers.types_helper import Usual_Dict
 from ...helpers.route_helper import MTD_GET, get_private_response_data, init_response_vars
+from ...common.app_constants import APP_RAW_HTTP_ERROR_RAISED
 from ...common.app_error_assistant import HTTP_StatusCode, ModuleErrorCode, AppStumbled
 from ...helpers.js_consts_helper import js_form_sec_check, JS_FORM_CARGO_ID, JS_GRID_COL_META_INFO
 
@@ -89,13 +90,13 @@ def download_rec() -> Response:
         # ⚠️ Use default ups/error handler to log errors
         ups_handler(task_code, str(e), e)
 
-        # g.raw_http_error
+        # g.<APP_RAW_HTTP_ERROR_RAISED>
         # ----------------
         # tells the app-wide error handlers (see carranca/__init__.py) to skip
         # their styled page and let Werkzeug render its plain default instead, since this
         # response is a file-download attempt, not a page navigation.
         # Note 2026-07-24
-        g.raw_http_error = True
+        setattr(g, APP_RAW_HTTP_ERROR_RAISED, True)
 
         # ⚠️ Direct abort is required here
         # ---------------------------------

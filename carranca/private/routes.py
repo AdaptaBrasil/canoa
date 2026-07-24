@@ -12,7 +12,8 @@ mgd
 
 from __future__ import annotations
 
-from flask import Blueprint, request, make_response
+from http import HTTPStatus
+from flask import Blueprint, request, make_response, abort
 from typing import TypeAlias, Callable, Tuple, cast
 from datetime import datetime
 from sqlalchemy import func
@@ -255,15 +256,20 @@ def scm_export(code: str = "?"):
     if nobody_is_logged():
         return redirect_to(login_route())
 
+    from ..common.app_context_vars import app_user
+
+    if not app_user.is_power:
+        abort(HTTPStatus.FORBIDDEN)
+
     jHtmlError, uiact_rsp = uiact_response(code)
     if not is_str_none_or_empty(jHtmlError) or uiact_rsp is None:
         # `uiact_rsp is None`` is for typing hints
         return jHtmlError
 
     elif uiact_rsp.code == UiActResponseProxy.show:
-        from .scm_export_ui_show import scm_export_ui_show
+        from .scm_export_ui_display import scm_export_ui_display
 
-        return scm_export_ui_show(uiact_rsp)
+        return scm_export_ui_display(uiact_rsp)
     elif uiact_rsp.action == UiActResponseKeys.export:
         from .scm_export_db import scm_export_db
 
@@ -279,28 +285,38 @@ def scm_export(code: str = "?"):
 @bp_private.route("/scm_grid/<code>", methods=MTD_BOTH)
 def scm_grid(code: str = "?"):
     """
-    Through this route, the user can edit and insert a Schema
+    Through this route, the admin user can edit and insert a Schema
     """
     if nobody_is_logged():
         return redirect_to(login_route())
-    else:
-        from .scm_grid import get_scm_grid
 
-        return grid_route(code, "scm_edit", "", get_scm_grid)
+    from ..common.app_context_vars import app_user
+
+    if not app_user.is_power:
+        abort(HTTPStatus.FORBIDDEN)
+
+    from .scm_grid import get_scm_grid
+
+    return grid_route(code, "scm_edit", "", get_scm_grid)
 
 
 @bp_private.route("/scm_edit/<code>", methods=MTD_BOTH)
 def scm_edit(code: str = "?"):
     """
-    Through this route, the user can edit a Schema
+    Through this route, the admin user can edit a Schema
     """
 
     if nobody_is_logged():
         return redirect_to(login_route())
-    else:
-        from .scm_new_edit import do_scm_edit
 
-        return do_scm_edit(code)
+    from ..common.app_context_vars import app_user
+
+    if not app_user.is_power:
+        abort(HTTPStatus.FORBIDDEN)
+
+    from .scm_new_edit import do_scm_edit
+
+    return do_scm_edit(code)
 
 
 @bp_private.route("/spd_grid/<code>", methods=MTD_BOTH)

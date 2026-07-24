@@ -13,7 +13,7 @@ mgd 2026-06-01
 import json
 from os import path
 from http import HTTPStatus
-from flask import send_file, request, Response, abort
+from flask import send_file, request, Response, abort, g
 
 from ..helpers.py_helper import is_str_none_or_empty
 from ..public.ups_handler import ups_handler
@@ -73,6 +73,14 @@ def download_rec(code: str) -> Response:
     except Exception as e:
         # ⚠️ Use default ups/error handler to log errors
         ups_handler(task_code, str(e), e)
+
+        # g.raw_http_error
+        # ----------------
+        # tells the app-wide error handlers (see carranca/__init__.py) to skip
+        # their styled page and let Werkzeug render its plain default instead, since this
+        # response is a file-download attempt, not a page navigation.
+        # Note 2026-07-24
+        g.raw_http_error = True
 
         # ⚠️ Direct abort is required here
         # ---------------------------------

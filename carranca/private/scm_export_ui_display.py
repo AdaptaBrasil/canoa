@@ -22,12 +22,12 @@ from ..config.ExportProcessConfig import ExportProcessConfig
 from ..common.app_error_assistant import ModuleErrorCode
 
 
-def scm_export_ui_show(uiact_rsp: UiActResponse) -> Jinja_Template:
+def scm_export_ui_display(uiact_rsp: UiActResponse) -> Jinja_Template:
 
-    jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SCM_EXPORT_UI_SHOW)
+    jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SCM_EXPORT_UI_DISPLAY)
     try:
         task_code += 1
-        tmpl_ffn, _, ui_db_texts = get_private_response_data("scmExportUiShow")
+        tmpl_ffn, _, ui_db_texts = get_private_response_data("scmExportUiShow", "scm_export_ui_display")
 
         task_code += 1
         scm_cols = ["name", "color"]

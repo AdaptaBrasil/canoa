@@ -9,6 +9,18 @@ ledger stays the tamper-evidence mechanism; this file is the human-readable "wha
 
 ---
 
+## 2026-07-24 — `ExportProcessConfig.header`'s `"decoding"` claim didn't match reality
+
+Flagged during Refs #57 export-format review (2026-07-23): `header.json` always claimed
+`"decoding": "Base64 -> UTF-8"`, but `scm_export_db.py` constructs `ExportProcessConfig()`
+with `encode_data` defaulting to `False`, so the export never actually Base64-encodes —
+text fields ship as plain UTF-8. The literal in the `header` property ignored
+`self.encode_data` entirely. Fixed by conditioning the value on the flag itself:
+`"decoding": "Base64 -> UTF-8" if self.encode_data else "plain UTF-8, nothing to do"` —
+single source of truth, no change needed anywhere else that reads `config.header`.
+
+---
+
 ## 2026-07-21 — `grid.html.j2`'s `msgOnly` gating never actually worked, for any grid page
 
 While wiring `sep_log_grid.py`'s `JumpOut` path (a graceful "not found"/"not allowed"

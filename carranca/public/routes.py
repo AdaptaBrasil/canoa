@@ -139,22 +139,12 @@ def docs(publicDocName: str):
 
 
 # Common Errors -------------------------------------------
-# 403 Forbidden
-@bp_public.errorhandler(HTTPStatus.FORBIDDEN)
-def access_forbidden(error):
-    return render_template(f"home/page-{HTTPStatus.FORBIDDEN}.html"), HTTPStatus.FORBIDDEN
-
-
-# 404 Not Found
-@bp_public.errorhandler(HTTPStatus.NOT_FOUND)
-def not_found_error(error):
-    return render_template(f"home/page-{HTTPStatus.NOT_FOUND}.html"), HTTPStatus.NOT_FOUND
-
-
-# 500 Internal Server Error
-@bp_public.errorhandler(HTTPStatus.INTERNAL_SERVER_ERROR)
-def internal_error(error):
-    return render_template(f"home/page-{HTTPStatus.INTERNAL_SERVER_ERROR}.html"), HTTPStatus.INTERNAL_SERVER_ERROR
+# 403 Forbidden, 404 Not Found, 500 Internal Server Error:
+# moved 2026-07-24 to app-wide handlers, see _register_error_handlers() in
+# carranca/__init__.py -- a Blueprint's own @errorhandler only fires for exceptions
+# raised inside that same blueprint (bp_public), never for bp_private routes, so
+# scm_export/scm_grid/scm_edit's abort(FORBIDDEN) was falling through to Werkzeug's
+# default page instead of home/page-403.html.
 
 
 # 401 Unauthorized Access  ---------------------------------

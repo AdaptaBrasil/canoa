@@ -38,7 +38,7 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_Rendered | Response:
         task_code += 1
         tmpl_ffn, _, ui_db_texts = get_private_response_data("scmExportDB")
         task_code += 1
-        config = ExportProcessConfig()
+        config = ExportProcessConfig(True)
         task_code += 1
         schema_data, task_code = get_scm_data(task_code, config, True)
 
@@ -57,7 +57,6 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_Rendered | Response:
             file_origin: str
             file_name: str
 
-        # TRrc grid_data = ExportGrid.get_data(["user_id", "sep_id", "scm_id", "file_origin", "file_name"])
         grid_data = ExportGrid.get_rows(GridFields)
 
         task_code += 1
@@ -87,20 +86,13 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_Rendered | Response:
             task_code += 2
             schema_dict = class_to_dict(schema_data)
             with zipfile.ZipFile(config.output_full_file_name, "w", zipfile.ZIP_DEFLATED) as zipf:
-                zipf.writestr("header.json", json.dumps(config.header, **config.json_cfg))
+                # zipf.writestr("header.json", json.dumps(config.header, **config.json_cfg))
                 zipf.writestr("metadata.json", json.dumps(schema_dict, **config.json_cfg))
                 # Add files from the folder
                 for row in file_info:
                     zipf.write(row.ffn, arcname=row.name)
 
             ui_db_texts.set_msg_success()
-            # TODO:
-            # <!-- JavaScript to trigger download -->
-            # <script>
-            #     window.onload = function() {
-            #         window.location.href = "{{ download_file_url }}";
-            #     };
-            # </script>
             file_response = send_file(config.output_full_file_name, as_attachment=True)
             return file_response
 

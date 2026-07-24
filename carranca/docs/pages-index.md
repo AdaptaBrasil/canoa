@@ -29,13 +29,13 @@ Handles the creation, display, and organization of Schemas and their relationshi
     -   `carranca/templates/private/scm_new_edit.j2`: Jinja2 template that renders the schema creation/edition form.
 
 -   **Schema Export UI**
-    -   `carranca/private/scm_export_ui_show.py`: Renders the user interface that allows admins to visually arrange SEPs within Schemas for database export.
+    -   `carranca/private/scm_export_ui_display.py`: Renders the user interface that allows admins to visually arrange SEPs within Schemas for database export.
     -   `carranca/private/scm_export_ui_save.py`: Saves the new visual order of SEPs within a Schema as defined by the user in the export UI.
     -   `carranca/private/scm_export_db.py`: Handles the final step of exporting the structured Schema and SEP data to the database.
     -   `carranca/private/scm_data.py`: A helper module to collect and structure all data related to Schemas and their associated SEPs.
     -   `carranca/private/scm_import.py`: The counterpart to export; defines logic to import schema data from a JSON structure.
 -   **`scm_export`**: A user interface for admins to visually arrange SEPs within Schemas and export the final structure.
-    -   `carranca/private/scm_export_ui_show.py`: Renders the initial UI with all schemas and their associated SEPs.
+    -   `carranca/private/scm_export_ui_display.py`: Renders the initial UI with all schemas and their associated SEPs.
     -   `carranca/private/scm_export_ui_save.py`: Saves the new visual order of SEPs within a schema.
     -   `carranca/private/scm_export_db.py`: Handles the final database export of the schema structure.
     -   `carranca/templates/private/scm_export.j2`: Jinja2 template for the visual arrangement page.

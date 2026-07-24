@@ -13,7 +13,7 @@ mgd 2025-01-14 03-18
 import json
 from os import path
 from http import HTTPStatus
-from flask import send_file, request, Response, abort
+from flask import send_file, request, Response, abort, g
 
 from .constants import DOWNLOAD_REPORT, DOWNLOAD_ZIPFILE
 from .fetch_records import fetch_record_s, IGNORE_USER, USER_RECEIPT
@@ -89,9 +89,18 @@ def download_rec() -> Response:
         # ⚠️ Use default ups/error handler to log errors
         ups_handler(task_code, str(e), e)
 
+        # g.raw_http_error
+        # ----------------
+        # tells the app-wide error handlers (see carranca/__init__.py) to skip
+        # their styled page and let Werkzeug render its plain default instead, since this
+        # response is a file-download attempt, not a page navigation.
+        # Note 2026-07-24
+        g.raw_http_error = True
+
         # ⚠️ Direct abort is required here
         # ---------------------------------
         abort(http_status_code, description=str(e))
+
         # ---------------------------------
         # This page runs during file download responses.
         #

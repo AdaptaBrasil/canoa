@@ -29,7 +29,7 @@ AS SELECT id,
   WHERE rn_recent = 1
   ORDER BY (COALESCE(report_errors, '-1'::integer)) DESC;
 
-COMMENT ON VIEW canoa.vw_export_data_files IS 'For scm_export_ui_show.py and scm_export_db.py.';
+COMMENT ON VIEW canoa.vw_export_data_files IS 'For scm_export_ui_display.py and scm_export_db.py.';
 
 -- Permissions
 

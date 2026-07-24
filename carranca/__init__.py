@@ -46,7 +46,8 @@ import json
 import jinja2
 import socket
 
-from flask import Flask
+from http import HTTPStatus
+from flask import Flask, g, render_template
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask_sqlalchemy import SQLAlchemy
@@ -101,6 +102,43 @@ def _register_blueprint_routes(app: Flask):
 
     app.register_blueprint(bp_private)
     app.register_blueprint(bp_public)
+
+    return
+
+
+# ---------------------------------------------------------------------------- #
+def _register_error_handlers(app: Flask):
+    """
+    App-wide (not blueprint-scoped) handlers for common HTTPStatus errors, so they
+    apply to bp_private routes too, not just bp_public (a Flask blueprint's own
+    @errorhandler only fires for exceptions raised inside that same blueprint).
+
+    Routes that set `g.raw_http_error = True` before calling abort() (see
+    received_files/download_record.py, spd_download.py: file-download responses,
+    where a styled HTML page would confuse the client) get Werkzeug's plain
+    default page instead of our styled one.
+    """
+
+    def _page_or_raw(error, code: HTTPStatus):
+        if getattr(g, "raw_http_error", False):
+            return error
+        return render_template(f"home/page-{code}.html"), code
+
+    @app.errorhandler(HTTPStatus.UNAUTHORIZED)
+    def unauthorized(error):
+        return _page_or_raw(error, HTTPStatus.UNAUTHORIZED)
+
+    @app.errorhandler(HTTPStatus.FORBIDDEN)
+    def forbidden(error):
+        return _page_or_raw(error, HTTPStatus.FORBIDDEN)
+
+    @app.errorhandler(HTTPStatus.NOT_FOUND)
+    def not_found(error):
+        return _page_or_raw(error, HTTPStatus.NOT_FOUND)
+
+    @app.errorhandler(HTTPStatus.INTERNAL_SERVER_ERROR)
+    def internal_error(error):
+        return _page_or_raw(error, HTTPStatus.INTERNAL_SERVER_ERROR)
 
     return
 
@@ -364,6 +402,9 @@ def create_app():
     _info("Added 'after_request' event for all blueprints.")
     _register_blueprint_routes(app)
     _info("The blueprint routes were collected and registered within the app.")
+
+    _register_error_handlers(app)
+    _info("App-wide HTTPStatus error handlers were registered.")
 
     # -- Start  Database User Interface Text Max Module:
     jinja_ui_defaults = _init_ui_db_texts()

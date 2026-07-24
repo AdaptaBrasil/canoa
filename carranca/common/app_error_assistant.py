@@ -124,7 +124,7 @@ class ModuleErrorCode(IntEnum):
     SCM_GRID = 700
     SCM_EDIT = 750
 
-    SCM_EXPORT_UI_SHOW = 800
+    SCM_EXPORT_UI_DISPLAY = 800
     SCM_EXPORT_UI_SAVE = 820
     SCM_EXPORT_DB = 840
 

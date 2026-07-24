@@ -176,10 +176,6 @@ class CanoaBase(DeclarativeBase):
             raise TypeError(f"get_row() for `col_names` expects  None, List[str], or a dataclass type, " f"got {type(col_names).__name__}")
 
         error_code += 1
-        # Keep the requested order
-        # selected_columns: List[ColumnElement] = [
-        #     col for col in cls.__table__.columns if all_cols or col.name in selected_cols_names
-        # ]
         col_map = {col.name: col for col in cls.__table__.columns}
         selected_columns: List[ColumnElement] = (
             list(cls.__table__.columns) if all_cols else [col_map[name] for name in requested_col_names if name in col_map]
@@ -238,7 +234,7 @@ class CanoaBaseTable(CanoaBase):
 class CanoaBaseView(CanoaBase):
     __abstract__ = True
     __read_only__ = True
-    # Override id to disable autoincrement for views (y es como se hace):es-PE
+    # Override id to disable autoincrement for views (y es así como se hace):es-PE
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=False)
 
 

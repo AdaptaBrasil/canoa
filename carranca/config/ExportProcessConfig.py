@@ -66,7 +66,7 @@ class ExportProcessConfig:
                 "version": self.version,
                 "when": self._started.isoformat() if self._started else now(),
                 "user": app_user.name,
-                "decoding": "Base64 -> UTF-8",
+                "decoding": "Base64 -> UTF-8" if self.encode_data else "plain UTF-8, nothing to do",
             }
 
         return self._header

@@ -1,4 +1,5 @@
 -- DROP SCHEMA canoa;
+-- DB_version 5.12.1
 -- mgd 2026-07-24 22:26
 
 CREATE SCHEMA canoa AUTHORIZATION canoa_power;

@@ -8,6 +8,8 @@ mgd 2025.09
 
 # cSpell: ignore samp sepsusr usrlist
 
+from typing import List
+
 from ..public.ups_handler import get_ups_jHtml
 from ..common.app_error_assistant import ModuleErrorCode, AppStumbled
 
@@ -18,6 +20,7 @@ from ..helpers.types_helper import Jinja_Template
 from ..helpers.route_helper import get_private_response_data, init_response_vars
 from ..helpers.js_consts_helper import JS_GRID_COL_META_INFO, js_ui_dictionary
 from ..helpers.db_records.DBRecords import ListOfDBRecords
+from ..models.private.schema_grid import SchemaGrid
 
 
 def do_scm_create() -> Jinja_Template:
@@ -26,6 +29,14 @@ def do_scm_create() -> Jinja_Template:
     scm_data: ListOfDBRecords = []
 
     try:
+
+        def _scm_data_fetch(col_names: List[str]) -> List[SchemaGrid]:
+            scm_rows = SchemaGrid.get_schemas(col_names)
+            for record in scm_rows:
+                scm_id = record.id
+                record.id = SchemaGrid.to_code(scm_id)
+            return scm_rows
+
         task_code += 1  # 1
         tmpl_ffn, is_get, ui_db_texts = get_private_response_data("scmGrid")
 

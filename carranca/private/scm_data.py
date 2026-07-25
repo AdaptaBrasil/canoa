@@ -33,7 +33,6 @@ class SchemaData:
         meta_sep: Usual_Dict,
         schemas: List[Usual_Dict],
     ):
-        self.coder = None  # coder
         self.header = header
         self.meta_scm = meta_scm
         self.meta_sep = meta_sep

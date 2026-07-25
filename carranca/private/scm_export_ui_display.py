@@ -8,6 +8,7 @@ mgd 2025.08
 """
 
 from .scm_data import get_scm_data
+from .received_files.constants import DOWNLOAD_REPORT
 from .sep_icon import do_icon_get_url, SEP_EMPTY_ICON
 from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import class_to_dict
@@ -55,6 +56,7 @@ def scm_export_ui_display(uiact_rsp: UiActResponse) -> Jinja_Template:
             empty_icon=empty_icon,
             cargo_keys=class_to_dict(UiActResponseKeys),
             cargo=uiact_rsp.initial(),
+            dnld_R=DOWNLOAD_REPORT,
             fi=fi.with_icon("scm_export"),
             **ui_db_texts.data(),
             **js_ui_dict,

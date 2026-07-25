@@ -50,3 +50,4 @@ carranca/private/SepIconMaker.py|2026-07-20|b478d5f4
 carranca/helpers/py_helper.py|2026-07-20|24a83882
 carranca/templates/private/sep_grid.html.j2|2026-07-20|9e2085a3
 carranca/config/ExportProcessConfig.py|2026-07-24|f19d7ad1
+carranca/private/scm_data.py|2026-07-24|cd0feb1f

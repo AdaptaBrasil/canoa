@@ -125,6 +125,10 @@ def _register_error_handlers(app: Flask):
             return error
         return render_template(f"home/page-{code}.html"), code
 
+    @app.errorhandler(HTTPStatus.BAD_REQUEST)
+    def bad_request(error):
+        return _page_or_raw(error, HTTPStatus.BAD_REQUEST)
+
     @app.errorhandler(HTTPStatus.UNAUTHORIZED)
     def unauthorized(error):
         return _page_or_raw(error, HTTPStatus.UNAUTHORIZED)
@@ -136,6 +140,14 @@ def _register_error_handlers(app: Flask):
     @app.errorhandler(HTTPStatus.NOT_FOUND)
     def not_found(error):
         return _page_or_raw(error, HTTPStatus.NOT_FOUND)
+
+    @app.errorhandler(HTTPStatus.METHOD_NOT_ALLOWED)
+    def method_not_allowed(error):
+        return _page_or_raw(error, HTTPStatus.METHOD_NOT_ALLOWED)
+
+    @app.errorhandler(HTTPStatus.GONE)
+    def gone(error):
+        return _page_or_raw(error, HTTPStatus.GONE)
 
     @app.errorhandler(HTTPStatus.INTERNAL_SERVER_ERROR)
     def internal_error(error):

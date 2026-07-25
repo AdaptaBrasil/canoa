@@ -56,4 +56,13 @@ The default caption buttons are in English:
 {% endmacro %}
 {# -- Button #}
 
+
+{# -- Button that calls a JS function directly on click, not tied to a form submission
+   (eg. a grid-row action gated on selection: download, etc.) -- #}
+{% macro btn_click(btn_id, caption, onclick, extra='') %}
+<button type="button" onclick="{{onclick}}" id="{{btn_id}}" class="frm-foot-btn" {{extra}}>
+    {{caption}}
+</button>
+{% endmacro %}
+
 {# eof #}

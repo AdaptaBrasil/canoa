@@ -9,6 +9,18 @@ ledger stays the tamper-evidence mechanism; this file is the human-readable "wha
 
 ---
 
+## 2026-07-24 — `SchemaData.coder` was dead weight, always `null` in every export
+
+Last open item from the Refs #57 export-format review: `scm_data.py:36`'s
+`self.coder = None  # coder` was never read or assigned anywhere else in the codebase
+(confirmed via grep), always emitting `"coder": null` in every export's `metadata.json`.
+Distinct from — and confusable with — `ExportProcessConfig.coder` (the real `IdToCode`
+instance used to obfuscate PKs for the UI, actively used elsewhere). Neither Miguel nor
+the code itself could account for its purpose, and `scm_import.py` (the export's
+counterpart) doesn't reference it either. Removed. This closes #57.
+
+---
+
 ## 2026-07-24 — `ExportProcessConfig.header`'s `"decoding"` claim didn't match reality
 
 Flagged during Refs #57 export-format review (2026-07-23): `header.json` always claimed

@@ -209,7 +209,9 @@ def do_sep_edit(data: str) -> str:
         else:
             task_code += 1  # 511
             sep_row.name = sep_name
-            sep_row.visible = bool(fform.visible.data)
+            frm_visible = cast(bool, fform.visible.data)
+            visible_changed = (editMode != SepEditMode.INSERT) and (frm_visible != sep_row.visible)
+            sep_row.visible = frm_visible
             sep_row.description = get_form_input_value(fform.description.name)
             sep_row.id_spd = id_spd
             batch_code = get_batch_code()
@@ -250,7 +252,7 @@ def do_sep_edit(data: str) -> str:
                 icon_new_file_name = sep_row.icon_file_name
 
             icon_crc = sep_row.icon_crc
-            if (sep_id := Sep.save(sep_row, schema_changed, batch_code)) >= 0:  # :——
+            if (sep_id := Sep.save(sep_row, schema_changed, visible_changed, batch_code)) >= 0:  # :——
                 task_code += 5  # 517
                 msg_key = "sepSuccessNew" if editMode == SepEditMode.INSERT else "sepSuccessEdit"
                 ui_db_texts.set_msg_success(msg_key, sep_fullname)

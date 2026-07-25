@@ -11,7 +11,7 @@ const cargo = {[cargoKeys.action]: '', [cargoKeys.row_index]: initRow, [cargoKey
 mgd
 
 --------------------------------------- #}
-{# cSpell:ignore stylesheet urlname tojson endfor ufiles #}
+{# cSpell:ignore stylesheet urlname tojson endfor ufiles Dwn Rprt #}
 {% set dlg_cls_size= dlg_cls_size | default('modal-lg') %}
 {% set grid_cell_id = grid_cell_id | default('grid_cell_id') %}
 {% set reticle_cell_id = reticle_cell_id | default('reticle_cell_id') %}
@@ -85,12 +85,15 @@ mgd
 
 {# ╒════════════════ Dialog Footer ═══════════════╛ #}
 {% block dlg_blc_footer_buttons %}
-{% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
+{% from "includes/_action_forms_and_btns.html.j2" import btn_action, btn_click %}
 <div class="col-auto">
     {{ btn_action(dlg_post_form_id, dlgBtnSaveArrange, cargo_keys.save, "disabled") }}
 </div>
 <div class="col-auto">
     {{ btn_action(dlg_post_form_id, dlgBtnExport, cargo_keys.export) }}
+</div>
+<div class="col-auto">
+    {{ btn_click('btnDwnRprt', dlgBtnDownloadReport, 'downloadReport()', 'disabled') }}
 </div>
 {% endblock dlg_blc_footer_buttons %}
 {# ╘════════════════ Dialog Footer ═══════════════╛ #}
@@ -101,6 +104,15 @@ mgd
 
 {% from "includes/_action_forms_and_btns.html.j2" import action_form__post_cargo %}
 {{ action_form__post_cargo(dlg_post_form_id, private_route('scm_export', code=form_cargo_id), dlg_data_wait_process) }}
+
+{# Separate form for report downloads (target: /received_file_download) -- can't reuse the
+   form above, different action_route/cargo semantics. Cargo input needs its own `id` since
+   `action_form__post_cargo`'s cargo input id (safe_token.cargo) is already used by the form
+   above -- same `name`, different `id`, so the backend still reads it correctly. #}
+<form id="dlgDownloadForm" method="post" action="{{private_route('received_file_download')}}" target="_blank">
+    <input type="hidden" name="{{safe_token.cargo}}" id="downloadCargoInput">
+    <input type="hidden" name="{{safe_token.key}}" value="{{safe_token.value()}}">
+</form>
 
 {% endblock dlg_blc_forms %}
 {# ╘═════════════════ Dialog Forms ════════════════╛ #}
@@ -135,10 +147,24 @@ mgd
     const cargoKeys = {{ cargo_keys | tojson }};
     const cargo = {{ cargo | tojson }};
 
+    const btnDwnRprt = document.getElementById('btnDwnRprt');
+    const downloadCargoInput = document.getElementById('downloadCargoInput');
+    const dlgDownloadForm = document.getElementById('dlgDownloadForm');
+    const dnldR = '{{ dnld_R }}';
+    let activeRowId = null;
+
     const setActiveRow = (row, rowIndex) => {
         if (!row) { return; }
         cargo[cargoKeys.row_index] = rowIndex;
         cargo[cargoKeys.code] = row.data[colCode]
+        activeRowId = row.data.id;
+        btnDwnRprt.disabled = !row.data.is_exportable;
+    }
+
+    const downloadReport = () => {
+        if (activeRowId == null) { return; }
+        downloadCargoInput.value = `${activeRowId}${dnldR}`;
+        dlgDownloadForm.submit();
     }
 
     {% from "includes/_action_forms_and_btns.js.j2" import form_link_action %}

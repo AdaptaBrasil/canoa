@@ -135,7 +135,7 @@ class Sep(CanoaBaseTable):
         return True
 
     @staticmethod
-    def save(sep_row: "Sep", schema_changed: bool, batch_code: str) -> int:
+    def save(sep_row: "Sep", schema_changed: bool, visible_changed: bool, batch_code: str) -> int:
         """
         Saves a Sep record
             if OK -> returns the row id
@@ -163,6 +163,8 @@ class Sep(CanoaBaseTable):
                     db_session.add(_log("E"))
                     if schema_changed:
                         db_session.add(_log("C"))
+                    if visible_changed:
+                        db_session.add(_log("X" if sep_row.visible else "F"))
 
                 sep_id = sep_row.id
                 db_session.commit()

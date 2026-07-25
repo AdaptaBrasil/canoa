@@ -107,15 +107,9 @@ const gridOptions = {
         {
             field: colMeta[6].n
             , headerName: colMeta[6].h
+            , valueFormatter: params => (params.data.is_exportable ? params.value : '?')
             , flex: 1
             , type: 'rightAligned',
-        },
-        {
-            // 2026-07-23: column only, no link yet (Refs #92) -- wired up next session
-            headerName: colMeta[7].h
-            , flex: 1
-            , cellStyle: { display: 'flex', justifyContent: 'center' }
-            , cellRenderer: () => '<i class="fas fa-file-pdf"></i>'
         }
     ]
 }; // gridOptions

@@ -1,5 +1,5 @@
 -- DROP SCHEMA canoa;
--- mgd 2026-07-23 20:31
+-- mgd 2026-07-24 22:26
 
 CREATE SCHEMA canoa AUTHORIZATION canoa_power;
 
@@ -214,7 +214,7 @@ COMMENT ON COLUMN canoa.db_version.applied_at IS 'Readonly column that stores th
 -- Permissions
 
 ALTER TABLE canoa.db_version OWNER TO canoa_power;
-GRANT UPDATE, SELECT, TRIGGER, INSERT, TRUNCATE, REFERENCES, DELETE ON TABLE canoa.db_version TO canoa_power;
+GRANT UPDATE, INSERT, DELETE, TRIGGER, TRUNCATE, SELECT, REFERENCES ON TABLE canoa.db_version TO canoa_power;
 GRANT SELECT ON TABLE canoa.db_version TO canoa_connstr;
 
 
@@ -243,7 +243,7 @@ COMMENT ON COLUMN canoa.roles.abbr IS 'DO NOT ALTER, Is 3-letter identifier of t
 -- Permissions
 
 ALTER TABLE canoa.roles OWNER TO canoa_power;
-GRANT UPDATE, SELECT, TRIGGER, INSERT, TRUNCATE, REFERENCES, DELETE ON TABLE canoa.roles TO canoa_power;
+GRANT UPDATE, INSERT, DELETE, TRIGGER, TRUNCATE, SELECT, REFERENCES ON TABLE canoa.roles TO canoa_power;
 GRANT SELECT ON TABLE canoa.roles TO canoa_connstr;
 
 
@@ -283,7 +283,7 @@ CREATE UNIQUE INDEX ui_locales__locale_uix ON canoa.ui_locales USING btree (loca
 -- Permissions
 
 ALTER TABLE canoa.ui_locales OWNER TO canoa_power;
-GRANT UPDATE, SELECT, TRIGGER, INSERT, TRUNCATE, REFERENCES, DELETE ON TABLE canoa.ui_locales TO canoa_power;
+GRANT UPDATE, INSERT, DELETE, TRIGGER, TRUNCATE, SELECT, REFERENCES ON TABLE canoa.ui_locales TO canoa_power;
 GRANT SELECT ON TABLE canoa.ui_locales TO canoa_connstr;
 
 
@@ -311,7 +311,7 @@ CREATE UNIQUE INDEX ui_sections__locale_name_uix ON canoa.ui_sections USING btre
 -- Permissions
 
 ALTER TABLE canoa.ui_sections OWNER TO canoa_power;
-GRANT UPDATE, SELECT, TRIGGER, INSERT, TRUNCATE, REFERENCES, DELETE ON TABLE canoa.ui_sections TO canoa_power;
+GRANT UPDATE, INSERT, DELETE, TRIGGER, TRUNCATE, SELECT, REFERENCES ON TABLE canoa.ui_sections TO canoa_power;
 GRANT SELECT ON TABLE canoa.ui_sections TO canoa_connstr;
 
 
@@ -337,7 +337,7 @@ CREATE TABLE canoa.ui_items (
 -- Permissions
 
 ALTER TABLE canoa.ui_items OWNER TO canoa_power;
-GRANT UPDATE, SELECT, TRIGGER, INSERT, TRUNCATE, REFERENCES, DELETE ON TABLE canoa.ui_items TO canoa_power;
+GRANT UPDATE, INSERT, DELETE, TRIGGER, TRUNCATE, SELECT, REFERENCES ON TABLE canoa.ui_items TO canoa_power;
 GRANT SELECT ON TABLE canoa.ui_items TO canoa_connstr;
 
 
@@ -357,7 +357,7 @@ CREATE TABLE canoa.log_user_sep (
 	batch_code varchar(10) NOT NULL, -- (days since 2024.11.01).(ms) both in base duovigesimal (22)
 	email_at timestamp NULL,
 	email_error varchar(800) NULL,
-	operation bpchar(1) NULL, -- (S)et, (R)emoved | (I)nserted (E)dited, marked as (D)eleted | schema (C)hanged,
+	operation bpchar(1) NULL, -- (S)et/(R)emoved manager | (I)nserted, (E)dited, schema (C)hanged, e(X)portable, (F)orbidden export | (V)alidated data | (D) retired, unused
 	id_user_data_files int4 NULL,
 	CONSTRAINT log_user_sep__pk PRIMARY KEY (id)
 );
@@ -372,13 +372,13 @@ COMMENT ON COLUMN canoa.log_user_sep.id_users IS 'Set NULL when remove sep from 
 COMMENT ON COLUMN canoa.log_user_sep.id_users_prior IS 'The user ID of the previous owner of the SEP, or None if none was assigned';
 COMMENT ON COLUMN canoa.log_user_sep.done_by IS 'The new  SEP owner user id';
 COMMENT ON COLUMN canoa.log_user_sep.batch_code IS '(days since 2024.11.01).(ms) both in base duovigesimal (22)';
-COMMENT ON COLUMN canoa.log_user_sep.operation IS '(S)et, (R)emoved | (I)nserted (E)dited, marked as (D)eleted | schema (C)hanged,';
+COMMENT ON COLUMN canoa.log_user_sep.operation IS '(S)et/(R)emoved manager | (I)nserted, (E)dited, schema (C)hanged, e(X)portable, (F)orbidden export | (V)alidated data | (D) retired, unused';
 
 -- Permissions
 
 ALTER TABLE canoa.log_user_sep OWNER TO canoa_power;
-GRANT UPDATE, SELECT, TRIGGER, INSERT, TRUNCATE, REFERENCES, DELETE ON TABLE canoa.log_user_sep TO canoa_power;
-GRANT UPDATE, SELECT, INSERT ON TABLE canoa.log_user_sep TO canoa_connstr;
+GRANT UPDATE, INSERT, DELETE, TRIGGER, TRUNCATE, SELECT, REFERENCES ON TABLE canoa.log_user_sep TO canoa_power;
+GRANT UPDATE, INSERT, SELECT ON TABLE canoa.log_user_sep TO canoa_connstr;
 
 
 -- canoa."schema" definition
@@ -417,8 +417,8 @@ COMMENT ON COLUMN canoa."schema".ui_order IS 'Defines the display order of the e
 -- Permissions
 
 ALTER TABLE canoa."schema" OWNER TO canoa_power;
-GRANT UPDATE, SELECT, TRIGGER, INSERT, TRUNCATE, REFERENCES, DELETE ON TABLE canoa."schema" TO canoa_power;
-GRANT UPDATE, SELECT, INSERT ON TABLE canoa."schema" TO canoa_connstr;
+GRANT UPDATE, INSERT, DELETE, TRIGGER, TRUNCATE, SELECT, REFERENCES ON TABLE canoa."schema" TO canoa_power;
+GRANT UPDATE, INSERT, SELECT ON TABLE canoa."schema" TO canoa_connstr;
 
 
 -- canoa.sep definition
@@ -431,7 +431,7 @@ CREATE TABLE canoa.sep (
 	id int4 DEFAULT nextval('sep_id__seq'::regclass) NOT NULL,
 	"name" varchar(100) NOT NULL, -- ins by vw_mgmt_user_sep
 	description varchar(140) NOT NULL, -- set by do_sep_edit
-	visible bool DEFAULT false NULL,
+	visible bool DEFAULT false NULL, -- When True the SEP will be exported (unrelated to UI display)
 	ins_at timestamp DEFAULT now() NULL, -- set by do_sep_edit |  vw_mgmt_user_sep
 	name_lower varchar(100) GENERATED ALWAYS AS (lower(name::text)) STORED NULL,
 	ins_by int4 NOT NULL, -- set by do_sep_edit | vw_mgmt_user_sep, see log
@@ -465,6 +465,7 @@ CREATE INDEX sep__mgmt_users_id__idx ON canoa.sep USING btree (mgmt_users_id);
 
 COMMENT ON COLUMN canoa.sep."name" IS 'ins by vw_mgmt_user_sep';
 COMMENT ON COLUMN canoa.sep.description IS 'set by do_sep_edit';
+COMMENT ON COLUMN canoa.sep.visible IS 'When True the SEP will be exported (unrelated to UI display)';
 COMMENT ON COLUMN canoa.sep.ins_at IS 'set by do_sep_edit |  vw_mgmt_user_sep';
 COMMENT ON COLUMN canoa.sep.ins_by IS 'set by do_sep_edit | vw_mgmt_user_sep, see log';
 COMMENT ON COLUMN canoa.sep.icon_file_name IS 'set by do_sep_edit';
@@ -485,8 +486,8 @@ COMMENT ON COLUMN canoa.sep.id_spd IS 'Reference for the SPatial Data File for t
 -- Permissions
 
 ALTER TABLE canoa.sep OWNER TO canoa_power;
-GRANT UPDATE, SELECT, TRIGGER, INSERT, TRUNCATE, REFERENCES, DELETE ON TABLE canoa.sep TO canoa_power;
-GRANT UPDATE, SELECT, INSERT ON TABLE canoa.sep TO canoa_connstr;
+GRANT UPDATE, INSERT, DELETE, TRIGGER, TRUNCATE, SELECT, REFERENCES ON TABLE canoa.sep TO canoa_power;
+GRANT UPDATE, INSERT, SELECT ON TABLE canoa.sep TO canoa_connstr;
 
 
 -- canoa.spatial_data_files definition
@@ -532,8 +533,8 @@ COMMENT ON COLUMN canoa.spatial_data_files.field_alt_name IS 'Secondary Name fie
 -- Permissions
 
 ALTER TABLE canoa.spatial_data_files OWNER TO canoa_power;
-GRANT UPDATE, SELECT, TRIGGER, INSERT, TRUNCATE, REFERENCES, DELETE ON TABLE canoa.spatial_data_files TO canoa_power;
-GRANT UPDATE, SELECT, INSERT ON TABLE canoa.spatial_data_files TO canoa_connstr;
+GRANT UPDATE, INSERT, DELETE, TRIGGER, TRUNCATE, SELECT, REFERENCES ON TABLE canoa.spatial_data_files TO canoa_power;
+GRANT UPDATE, INSERT, SELECT ON TABLE canoa.spatial_data_files TO canoa_connstr;
 
 
 -- canoa.user_data_files definition
@@ -641,8 +642,8 @@ update
 -- Permissions
 
 ALTER TABLE canoa.user_data_files OWNER TO canoa_power;
-GRANT UPDATE, SELECT, TRIGGER, INSERT, TRUNCATE, REFERENCES, DELETE ON TABLE canoa.user_data_files TO canoa_power;
-GRANT UPDATE, SELECT, INSERT ON TABLE canoa.user_data_files TO canoa_connstr;
+GRANT UPDATE, INSERT, DELETE, TRIGGER, TRUNCATE, SELECT, REFERENCES ON TABLE canoa.user_data_files TO canoa_power;
+GRANT UPDATE, INSERT, SELECT ON TABLE canoa.user_data_files TO canoa_connstr;
 
 
 -- canoa.users definition
@@ -711,8 +712,8 @@ update
 -- Permissions
 
 ALTER TABLE canoa.users OWNER TO canoa_power;
-GRANT UPDATE, SELECT, TRIGGER, INSERT, TRUNCATE, REFERENCES, DELETE ON TABLE canoa.users TO canoa_power;
-GRANT UPDATE, SELECT, INSERT ON TABLE canoa.users TO canoa_connstr;
+GRANT UPDATE, INSERT, DELETE, TRIGGER, TRUNCATE, SELECT, REFERENCES ON TABLE canoa.users TO canoa_power;
+GRANT UPDATE, INSERT, SELECT ON TABLE canoa.users TO canoa_connstr;
 
 
 -- canoa.log_user_sep foreign keys
@@ -760,6 +761,35 @@ ALTER TABLE canoa.users ADD CONSTRAINT users__role_id_fk FOREIGN KEY (id_role) R
 ALTER TABLE canoa.users ADD CONSTRAINT users__sep_id_fk FOREIGN KEY (mgmt_sep_id) REFERENCES canoa.sep(id);
 
 
+-- canoa.vw_base_data_files source
+
+CREATE OR REPLACE VIEW canoa.vw_base_data_files
+AS SELECT id,
+    id_sep,
+    id_users,
+    concat(TRIM(BOTH FROM ticket), '_', TRIM(BOTH FROM file_name))::character varying(180) AS stored_file_name,
+        CASE
+            WHEN original_name IS NULL OR original_name::text = ''::text THEN file_name
+            ELSE original_name
+        END AS original_name,
+    file_size,
+    file_crc32,
+    file_origin,
+    user_receipt,
+    report_errors,
+    report_warns,
+    registered_at
+   FROM user_data_files udf;
+
+COMMENT ON VIEW canoa.vw_base_data_files IS 'Shared core columns/logic for vw_user_data_files and vw_export_data_files -- Refs #93. Neither specialized view depends on the other anymore, both depend on this instead.';
+
+-- Permissions
+
+ALTER TABLE canoa.vw_base_data_files OWNER TO canoa_power;
+GRANT ALL ON TABLE canoa.vw_base_data_files TO canoa_power;
+GRANT SELECT ON TABLE canoa.vw_base_data_files TO canoa_connstr;
+
+
 -- canoa.vw_export_data_files source
 
 CREATE OR REPLACE VIEW canoa.vw_export_data_files
@@ -771,7 +801,8 @@ AS SELECT id,
     file_name,
     sep_fullname,
     uploaded,
-    report_errors
+    report_errors,
+    is_visible AND file_name IS NOT NULL AS is_exportable
    FROM ( SELECT b.id,
             b.id_users AS user_id,
             sep.sep_id,
@@ -783,15 +814,15 @@ AS SELECT id,
             b.registered_at AS uploaded,
             b.report_warns,
             b.report_errors,
-            row_number() OVER (PARTITION BY b.id_sep ORDER BY b.registered_at DESC) AS rn_recent,
-            row_number() OVER (PARTITION BY b.id_sep ORDER BY b.report_errors) AS rn_lowest_errors
-           FROM vw_base_data_files b
-             JOIN vw_scm_sep sep ON b.id_sep = sep.sep_id
-          WHERE b.id_sep IS NOT NULL AND sep.is_visible) udf_last_file
+            row_number() OVER (PARTITION BY sep.sep_id ORDER BY b.registered_at DESC) AS rn_recent,
+            row_number() OVER (PARTITION BY sep.sep_id ORDER BY b.report_errors) AS rn_lowest_errors
+           FROM vw_scm_sep sep
+             LEFT JOIN vw_base_data_files b ON b.id_sep = sep.sep_id
+          WHERE sep.is_visible OR b.id IS NOT NULL) udf_last_file
   WHERE rn_recent = 1
-  ORDER BY (COALESCE(report_errors, '-1'::integer)) DESC;
+  ORDER BY (NOT (is_visible AND file_name IS NOT NULL)) DESC, (COALESCE(report_errors, '-1'::integer)) DESC;
 
-COMMENT ON VIEW canoa.vw_export_data_files IS 'For scm_export_ui_display.py and scm_export_db.py.';
+COMMENT ON VIEW canoa.vw_export_data_files IS 'For scm_export_ui_display.py and scm_export_db.py. Shows a SEP if it is currently exportable (sep.is_visible) OR has real submission history, even if later marked non-exportable -- Refs #88.';
 
 -- Permissions
 
@@ -863,7 +894,7 @@ COMMENT ON VIEW canoa.vw_mgmt_email_sep IS '*Updatable View* that exposes column
 
 ALTER TABLE canoa.vw_mgmt_email_sep OWNER TO canoa_power;
 GRANT ALL ON TABLE canoa.vw_mgmt_email_sep TO canoa_power;
-GRANT UPDATE, SELECT, INSERT ON TABLE canoa.vw_mgmt_email_sep TO canoa_connstr;
+GRANT UPDATE, INSERT, SELECT ON TABLE canoa.vw_mgmt_email_sep TO canoa_connstr;
 
 
 -- canoa.vw_mgmt_seps_user source
@@ -904,7 +935,7 @@ update
 
 ALTER TABLE canoa.vw_mgmt_seps_user OWNER TO canoa_power;
 GRANT ALL ON TABLE canoa.vw_mgmt_seps_user TO canoa_power;
-GRANT UPDATE, SELECT, INSERT ON TABLE canoa.vw_mgmt_seps_user TO canoa_connstr;
+GRANT UPDATE, INSERT, SELECT ON TABLE canoa.vw_mgmt_seps_user TO canoa_connstr;
 
 
 -- canoa.vw_mgmt_user_sep source
@@ -1133,7 +1164,7 @@ COMMENT ON VIEW canoa.vw_user_data_files_count IS 'Used is carranca\private\rece
 -- Permissions
 
 ALTER TABLE canoa.vw_user_data_files_count OWNER TO canoa_power;
-GRANT SELECT, DELETE ON TABLE canoa.vw_user_data_files_count TO canoa_power;
+GRANT DELETE, SELECT ON TABLE canoa.vw_user_data_files_count TO canoa_power;
 GRANT SELECT ON TABLE canoa.vw_user_data_files_count TO canoa_connstr;
 
 
@@ -1494,4 +1525,6 @@ GRANT ALL ON FUNCTION canoa.vw_mgmt_user_sep__on_upd() TO canoa_power;
 GRANT ALL ON SCHEMA canoa TO canoa_power;
 GRANT USAGE ON SCHEMA canoa TO mauro;
 GRANT USAGE ON SCHEMA canoa TO canoa_users;
-ALTER DEFAULT PRIVILEGES FOR ROLE canoa_users IN SCHEMA canoa GRANT UPDATE, SELECT, INSERT, DELETE ON TABLES TO canoa_users;
+ALTER DEFAULT PRIVILEGES FOR ROLE canoa_users IN SCHEMA canoa GRANT UPDATE, INSERT, DELETE, SELECT ON TABLES TO canoa_users;
+
+-- eof

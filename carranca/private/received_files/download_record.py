@@ -23,6 +23,7 @@ from ...helpers.file_helper import change_file_ext
 from ...helpers.types_helper import Usual_Dict
 from ...helpers.route_helper import MTD_GET, get_private_response_data, init_response_vars
 from ...common.app_constants import APP_RAW_HTTP_ERROR_RAISED
+from ...common.app_context_vars import app_user
 from ...common.app_error_assistant import HTTP_StatusCode, ModuleErrorCode, AppStumbled
 from ...helpers.js_consts_helper import js_form_sec_check, JS_FORM_CARGO_ID, JS_GRID_COL_META_INFO
 
@@ -67,8 +68,9 @@ def download_rec() -> Response:
         else:
             task_code += 3  # 5
             no_sep = ui_db_texts["itemNone"]
-            db_records, download_file_name, uploaded_name, report_ext = fetch_record_s(no_sep, rec_id, IGNORE_USER)
-            if len(db_records) != 1:
+            db_records, download_file_name, uploaded_name, report_ext, owner_user_id = fetch_record_s(no_sep, rec_id, IGNORE_USER)
+            is_owner = len(db_records) == 1 and ((owner_user_id == app_user.id) or app_user.is_power)
+            if not is_owner:
                 _, msg = ui_db_texts.set_msg_error("noRecord")
                 _raise(msg, HTTPStatus.NOT_FOUND)
 

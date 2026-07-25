@@ -59,7 +59,7 @@ def init_grid(for_user: int) -> Jinja_Template:
 
         # TODO check empty received_files
         task_code += 1  # 7
-        file_recs, _, _, _ = fetch_record_s(ui_db_texts["itemNone"], ALL_USER_RECS, user_id)
+        file_recs, _, _, _, _ = fetch_record_s(ui_db_texts["itemNone"], ALL_USER_RECS, user_id)
         col_names = file_recs[0].keys() if file_recs else []
         task_code += 1  # 8
         js_ui_dict = js_ui_dictionary(ui_db_texts["colMetaInfo"], col_names, task_code)

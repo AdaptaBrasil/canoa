@@ -26,7 +26,7 @@ USER_RECEIPT = "receipt"
 
 def fetch_record_s(
     no_sep: str, rec_id: Optional[int] = ALL_USER_RECS, user_id: Optional[int] = IGNORE_USER
-) -> Tuple[DBRecords, str, str, str]:
+) -> Tuple[DBRecords, str, str, str, Optional[int]]:
     """Fetch received files records from the view vw_user_data_files
 
     no_sep: str: text to show when the record has an empty SEP
@@ -36,15 +36,19 @@ def fetch_record_s(
                 - has value, ignore user_id and fetch the record with the given id & return file full_name too
     user_id: int  user id to fetch records for
 
-    return: DBRecords: records fetched and the last record's file full_name and uploaded_name
+    return: DBRecords: records fetched, the last record's file full_name and uploaded_name,
+            the report extension, and (only when rec_id is given) that record's owning user_id
+            -- kept out of the row dict itself since that shape is also used as the grid's
+            column list (see init_grid.py), which must match the DB's colMetaInfo mapping.
 
     """
 
     if rec_id is ALL_USER_RECS and user_id is IGNORE_USER:
-        return DBRecords(), "", "", ""
+        return DBRecords(), "", "", "", None
 
     file_full_name = ""
     uploaded_file_name = ""
+    owner_user_id: Optional[int] = None
     received_recs = ReceivedFiles.get_records(rec_id, user_id)
     report_ext = ValidateProcessConfig(False).output_file.ext
     grid_rows: List[Usual_Dict] = []
@@ -64,6 +68,7 @@ def fetch_record_s(
             file_full_name = uf.file_full_name(record.file_origin, record.stored_file_name)
             _, ext = path.splitext(file_full_name)
             uploaded_file_name = change_file_ext(record.file_name, ext)
+            owner_user_id = record.user_id
             # Copy specific fields to a new object 'row'
             row = {
                 "id": record.id,
@@ -84,6 +89,7 @@ def fetch_record_s(
         file_full_name,
         uploaded_file_name,
         report_ext,
+        owner_user_id,
     )
 
 

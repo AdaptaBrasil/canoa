@@ -109,10 +109,15 @@ def sep_mgmt():
     """
     if nobody_is_logged():
         return redirect_to(login_route())
-    else:
-        from .sep_mgmt.sep_mgmt import sep_mgmt
 
-        return sep_mgmt()
+    from ..common.app_context_vars import app_user
+
+    if not app_user.is_power:
+        abort(HTTPStatus.FORBIDDEN)
+
+    from .sep_mgmt.sep_mgmt import sep_mgmt
+
+    return sep_mgmt()
 
 
 def create_ups_jHtml(error: str, code: int = 0) -> Jinja_Rendered:
@@ -326,11 +331,16 @@ def spd_grid(code: str = "?"):
     """
     if nobody_is_logged():
         return redirect_to(login_route())
-    else:
-        from .spd_grid import get_spd_grid
-        from .spd_download import download_rec
 
-        return grid_route(code, "spd_edit", download_rec, get_spd_grid)
+    from ..common.app_context_vars import app_user
+
+    if not app_user.is_power:
+        abort(HTTPStatus.FORBIDDEN)
+
+    from .spd_grid import get_spd_grid
+    from .spd_download import download_rec
+
+    return grid_route(code, "spd_edit", download_rec, get_spd_grid)
 
 
 @bp_private.route("/spd_edit/<code>", methods=MTD_BOTH)
@@ -341,10 +351,15 @@ def spd_edit(code: str = "?"):
 
     if nobody_is_logged():
         return redirect_to(login_route())
-    else:
-        from .spd_new_edit import spd_new_or_edit
 
-        return spd_new_or_edit(code)
+    from ..common.app_context_vars import app_user
+
+    if not app_user.is_power:
+        abort(HTTPStatus.FORBIDDEN)
+
+    from .spd_new_edit import spd_new_or_edit
+
+    return spd_new_or_edit(code)
 
 
 @bp_private.route("/receive_file", methods=MTD_BOTH)

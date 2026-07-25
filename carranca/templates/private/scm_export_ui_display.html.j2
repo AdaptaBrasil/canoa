@@ -90,7 +90,7 @@ mgd
     {{ btn_action(dlg_post_form_id, dlgBtnSaveArrange, cargo_keys.save, "disabled") }}
 </div>
 <div class="col-auto">
-    {{ btn_action(dlg_post_form_id, dlgBtnExport, cargo_keys.export) }}
+    {{ btn_action(dlg_post_form_id, dlgBtnExport, cargo_keys.export, 'formtarget="_blank" onclick="setSleepVeil()"') }}
 </div>
 <div class="col-auto">
     {{ btn_click('btnDwnRprt', dlgBtnDownloadReport, 'downloadReport()', 'disabled') }}

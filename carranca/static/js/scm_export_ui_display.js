@@ -66,7 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const gridIsOriginal = (newOrder == gridInitialOrder)
                     cargo[cargoKeys.data] = gridIsOriginal ? '' : newOrder
                     btnSave.disabled = gridIsOriginal;
-                    btnExport.disabled = !gridIsOriginal
+                    btnExport.disabled = !gridIsOriginal;
+                    Canoa.dataModified = !gridIsOriginal;
                 }
             });
         });

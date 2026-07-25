@@ -9,6 +9,8 @@ const setSleepVeil = () => {
     const sv = document.querySelector('[data-sleep-veil]');
     if (sv) {
         sv.className = 'dlg-sleep-veil';
+        // a la chamba: safety net in case the page never navigates away (eg. a same-tab file download)
+        setTimeout(() => { sv.className = 'd-none'; }, 6000);
     }
 }
 
@@ -30,8 +32,10 @@ document.addEventListener('submit', (e) => {
         if (!['login', 'logout', 'goto'].includes(route)) {
             setSleepVeil();
         }
-    } else if (frm.hasAttribute('data-form-close') && frm.action && Canoa.dataModified ) {
-        if (!confirm("Perder as alterações?")) {
+    } else if (frm.hasAttribute('data-form-close') && frm.action && Canoa.dataModified) {
+        if (confirm("Perder as alterações?")) {
+            Canoa.dataModified = false;
+        } else {
             e.preventDefault();
         }
     }

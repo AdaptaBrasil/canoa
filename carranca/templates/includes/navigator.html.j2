@@ -54,6 +54,13 @@ cSpell:ignore &ç gico endere spatialdata
                                 Ver Envios e Resultados
                             </a>
                         </li>
+                        {% if j_user.power %}
+                        <li><a class="dropdown-item" href="{{private_route('sep_validate')}}"
+                                title="Abre grid dos setores estrat&eacute;gicos vis&iacute;veis, para validar as suas submiss&otilde;es">
+                                Validar Vis&iacute;veis
+                            </a>
+                        </li>
+                        {% endif %}
                     </ul>
                     {% endif %}
                 </li>

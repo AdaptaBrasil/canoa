@@ -1,0 +1,59 @@
+{# ------------------------------------
+
+sep_validate.html.j2
+--------------------
+Read-only grid: every currently-exportable SEP, its manager, last
+submission date, validator version and last result (see sep_validate.py).
+First layer of the "Validar Visiveis" feature (Refs #61) -- display
+only, no retest/email action yet.
+
+Extends
+"./layouts/grid.html.j2"
+
+2026.07.28
+mgd
+--------------------------------------- #}
+
+{% extends "./layouts/grid.html.j2" %}
+
+{% set dlg_cls_size= 'modal-xl' %}
+
+{# ╒════════════════ Grid Footer ════════════════╕ #}
+{% block grid_blc_footer %}
+{% from "includes/_action_forms_and_btns.html.j2" import btn_submit %}
+<div class="col-auto">
+    {{ btn_submit(dlg_post_form_id, "btn-validate-one-id", grdBtnValidateOne, 'name="cmd" value="one" disabled') }}
+</div>
+<div class="col-auto">
+    {{ btn_submit(dlg_post_form_id, "btn-validate-all-id", grdBtnValidateAll, 'name="cmd" value="all"') }}
+</div>
+{% endblock grid_blc_footer %}
+{# ╘═══════════════ Grid Footer ═════════════════╛ #}
+
+{# ╒════════════════ Grid Forms ═════════════════╕ #}
+{% block grid_blc_forms %}
+{# Not using action_form__post_cargo directly -- needs one extra hidden field (the selected
+   row's sep_id) the macro has no parameter for, so its two fields are reproduced here by hand. #}
+<form id="{{dlg_post_form_id}}" method="post" action="{{private_route('sep_validate')}}" {{dlg_data_wait_process}}>
+    <input type="hidden" name="{{safe_token.cargo}}" id="{{safe_token.cargo}}">
+    <input type="hidden" name="{{safe_token.key}}" value="{{safe_token.value()}}">
+    <input type="hidden" name="sep_id" id="selected-sep-id" value="">
+</form>
+{% endblock grid_blc_forms %}
+{# ╘════════════════ Grid Forms ═════════════════╛ #}
+
+{# ╒══════════════ Grid JavaScript ══════════════╕ #}
+{% block grid_blc_javascript %}
+
+<script>
+    const colMeta = {{ grid_col_meta | default([]) | tojson | safe }};
+    const gridRows = {{ grid_data | default([]) | tojson | safe }};
+    const gridID = '{{ grid_id | default("ag-grid-id") }}';
+    const userLocale = '{{ userLocale }}';
+</script>
+<script src="{{static_route('js/sep_validate.js')}}"></script>
+
+{% endblock grid_blc_javascript %}
+{# ╘══════════════ Grid JavaScript ══════════════╛ #}
+
+{# eof #}

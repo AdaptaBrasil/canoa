@@ -238,6 +238,26 @@ def sep_log_grid(code: str = "?"):
         return get_sep_log_grid(code)
 
 
+@bp_private.route("/sep_validate", methods=MTD_BOTH)
+def sep_validate():
+    """
+    Through this route, a power user sees every currently-exportable SEP,
+    its manager, last submission and validator result -- first layer of
+    the "Validar Visíveis" feature (Refs #61), display only.
+    """
+    if nobody_is_logged():
+        return redirect_to(login_route())
+
+    from ..common.app_context_vars import app_user
+
+    if not app_user.is_power:
+        abort(HTTPStatus.FORBIDDEN)
+
+    from .sep_validate import get_sep_validate_grid
+
+    return get_sep_validate_grid()
+
+
 @bp_private.route("/sep_edit/<code>", methods=MTD_BOTH)
 def sep_edit(code: str = "?"):
     """

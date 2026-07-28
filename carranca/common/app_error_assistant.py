@@ -135,6 +135,8 @@ class ModuleErrorCode(IntEnum):
     SPD_GRID = 940
     SPD_DOWNLOAD = 980
 
+    SEP_VALIDATE = 1000
+
 
 class HTTP_StatusCode(StrEnum):
     # this are key for table ui_items.name = <key>, section= 2 (secError)

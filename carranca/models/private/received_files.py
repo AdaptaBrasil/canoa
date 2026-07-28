@@ -37,7 +37,7 @@ class ReceivedFiles(CanoaBaseView):
     sep_id: Mapped[int] = mapped_column(Integer)
     sep_fullname: Mapped[str] = mapped_column(String(256))
 
-    submitted_at: Mapped[datetime] = mapped_column("registered_at", DateTime)  # index (user_id, registered_at)
+    submitted_at: Mapped[datetime] = mapped_column("uploaded_at", DateTime)  # index (user_id, registered_at)
     stored_file_name: Mapped[str] = mapped_column(String(180))
     file_name: Mapped[str] = mapped_column("original_name", String(80))
     file_origin: Mapped[str] = mapped_column(String(1))

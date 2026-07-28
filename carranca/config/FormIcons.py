@@ -58,6 +58,7 @@ FormIcons: FormIconsDict = FormIconsDict(
         "download_file": "fa-file-arrow-down",
         "local_upload": "fa-upload",
         "cloud_upload": "fa-cloud-upload",
+        "sep_validate": "fa-check-double",
         # setor estratégico
         "sep": "fa-puzzle-piece",
         "manager": "fa-circle-user",

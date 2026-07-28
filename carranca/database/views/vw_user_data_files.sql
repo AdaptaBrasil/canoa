@@ -16,11 +16,12 @@ AS SELECT b.id,
     b.user_receipt,
     b.report_errors,
     b.report_warns,
-    b.registered_at
+    b.uploaded_at,
+    b.validated_at
    FROM vw_base_data_files b
      JOIN users usr ON usr.id = b.id_users
      LEFT JOIN vw_scm_sep sep ON b.id_sep = sep.sep_id
-  ORDER BY b.id_users, b.registered_at DESC;
+  ORDER BY b.id_users, b.uploaded_at DESC;
 
 COMMENT ON VIEW canoa.vw_user_data_files IS 'For received_files_mgmt.py';
 

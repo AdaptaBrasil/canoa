@@ -37,6 +37,7 @@ class CanoaBase(DeclarativeBase):
 
     __code_seed__ = 7  # default, subclasses may override
     __read_only__ = False  # default, subclasses may override
+    __is_view__ = False  # default, subclasses may override
 
     @classmethod
     def __init_subclass__(cls, **kwargs):
@@ -194,8 +195,9 @@ class CanoaBase(DeclarativeBase):
             table_col_names = {col.name for col in cls.__table__.columns}
             unknown_cols: List[str] = [col_name for col_name in requested_col_names if col_name not in table_col_names]
             if unknown_cols:
+                obj_kind = "view" if cls.__is_view__ else "table"
                 raise AppStumbled(
-                    f"Unknown cols [{', '.join(unknown_cols)}] requested for table {cls.__tablename__}",
+                    f"Unknown cols [{', '.join(unknown_cols)}] requested for {obj_kind} [{cls.__tablename__}].",
                     error_code,
                     False,
                     True,
@@ -234,6 +236,8 @@ class CanoaBaseTable(CanoaBase):
 class CanoaBaseView(CanoaBase):
     __abstract__ = True
     __read_only__ = True
+    __is_view__ = True
+
     # Override id to disable autoincrement for views (y es así como se hace):es-PE
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=False)
 

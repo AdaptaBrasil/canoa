@@ -28,9 +28,13 @@ class ExportGrid(CanoaBaseView):
     file_name: Mapped[str | None] = mapped_column(String(180))
     sep_fullname: Mapped[str] = mapped_column(String(180))
 
-    uploaded: Mapped[datetime | None] = mapped_column(DateTime)
     report_errors: Mapped[int | None] = mapped_column(Integer)
+    report_warns: Mapped[int | None] = mapped_column(Integer)
+    manager_name: Mapped[str | None] = mapped_column(String(100))
+    validator_version: Mapped[str | None] = mapped_column(String(16))
     is_exportable: Mapped[bool] = mapped_column(Boolean)
+    uploaded_at: Mapped[datetime | None] = mapped_column(DateTime)
+    validated_at: Mapped[datetime | None] = mapped_column(DateTime)
 
 
 # eof

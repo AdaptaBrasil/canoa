@@ -45,7 +45,7 @@ def scm_export_ui_display(uiact_rsp: UiActResponse) -> Jinja_Template:
         task_code += 1
         # TODO get names from table
         # col_names = [ExportGrid.id.name,...]
-        col_names = ["id", "sep_id", "scm_id", "file_name", "sep_fullname", "uploaded", "report_errors"]
+        col_names = ["id", "sep_id", "scm_id", "file_name", "sep_fullname", "uploaded_at", "report_errors"]
         js_ui_dict = js_ui_dictionary(ui_db_texts[JS_GRID_COL_META_INFO], col_names, task_code)
 
         task_code += 1

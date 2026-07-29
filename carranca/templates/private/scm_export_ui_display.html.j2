@@ -135,7 +135,7 @@ mgd
     }
     const gridInitialOrder = getReticuleOrder();
     const gridRows = ({{ grid_data | tojson | safe }}).map(item => {
-        item.uploaded = item.uploaded ? new Date(item.uploaded) : null;
+        item.uploaded_at = item.uploaded_at ? new Date(item.uploaded_at) : null;
         return item;
     });
     const colMeta = {{ grid_col_meta | tojson | safe }};

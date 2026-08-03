@@ -1,7 +1,8 @@
 """
 SEP Log Grid
 Read-only audit-log grid: shows a single SEP's history from `log_user_sep`
-(see vw_log_user_sep / LogUserSepGrid). Reached from sep_grid's [Ver log] button.
+(see vw_log_user_sep / LogUserSepGrid). Reached from sep_grid's and sep_mgmt's
+[Ver log] buttons -- ?from= tells [Voltar] which one to return to.
 
 Equipe da Canoa -- 2026
 mgd 2026-07-16
@@ -24,7 +25,7 @@ from ..models.private.mgmt_seps_user import MgmtSepsUser
 from ..models.private.log_user_sep_grid import LogUserSepGrid
 
 
-def get_sep_log_grid(sep_code: str) -> Jinja_Rendered:
+def get_sep_log_grid(sep_code: str, from_page: str = "sep_grid") -> Jinja_Rendered:
 
     jHtml, _, ui_db_texts, task_code = init_response_vars(ModuleErrorCode.SEP_LOG_GRID)
     tmpl_ffn = ""
@@ -58,7 +59,9 @@ def get_sep_log_grid(sep_code: str) -> Jinja_Rendered:
         task_code += 1  # 6
         log_data = LogUserSepGrid.get_rows(col_names, LogUserSepGrid.id_sep == sep_id)
         operation_labels = json.loads(ui_db_texts.get_str("jsonOperation", "{}"))
-        ui_db_texts[UITextsKeys.Action.dlg_goto] = private_route("sep_grid", code=UiActResponseProxy.show)
+        # from_page is user-supplied (?from=), whitelist it -- sep_mgmt's route takes no `code`, unlike sep_grid's
+        goto_url = private_route("sep_mgmt") if from_page == "sep_mgmt" else private_route("sep_grid", code=UiActResponseProxy.show)
+        ui_db_texts[UITextsKeys.Action.dlg_goto] = goto_url
         ui_db_texts[UITextsKeys.Action.dlg_sec_msg] = UiActResponseProxy.show
 
         for row in log_data:

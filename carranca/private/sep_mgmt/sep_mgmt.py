@@ -67,6 +67,10 @@ def sep_mgmt() -> str:
             task_code += 2  # 5
             _, msg = ui_db_texts.set_msg_error(msg)
             raise AppStumbled(msg, task_code, True, True)
+        elif is_str_none_or_empty(cast(str, request.form.get(JS_FORM_CARGO_ID))):
+            # POST with no cargo -- eg. the [Voltar] button on sep_log_grid coming back here: just redisplay the grid
+            task_code += 1  # 6
+            sep_data, user_list = _sep_data_fetch(item_none, col_names)
         else:
             task_code += 3  # 6
             txt_response = cast(str, request.form.get(JS_FORM_CARGO_ID))
@@ -106,6 +110,7 @@ def _sep_data_fetch(_item_none: str, col_names: List[str]) -> Tuple[DBRecords, L
         record.user_curr = _item_none if record.user_curr is None else record.user_curr
         record.user_new = record.user_curr
         record.icon_file_name = do_icon_get_url(record.icon_file_name)  # this is file_name
+        record.sep_code = MgmtSepsUser.to_code(record.id)  # for the [Ver Log] button, see sep_mgmt.js
 
     user_rows = User.get_all_users(User.disabled == False)
     users_list = [user.username for user in user_rows]

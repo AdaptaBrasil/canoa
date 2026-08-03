@@ -25,6 +25,10 @@ mgd
     {% from "includes/_action_forms_and_btns.html.j2" import btn_close_dlg %}
     {{ btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, grdBtnCancel) }}
 </div>
+<div class="col-auto">
+    {% from "includes/_action_forms_and_btns.html.j2" import btn_click %}
+    {{ btn_click("btn-view-log-id", grdBtnLog, "gotoSepLog()") }}
+</div>
 {% endblock grid_blc_footer %}
 
 {% block grid_blc_forms %}
@@ -70,6 +74,7 @@ Create a copy of user_list(or empty array), then add (itemNone)
     const userLocale = '{{ userLocale  }}';
     const initRow = {{ grid_init_row | default (0) }};
     const cargo = { [cargoKeys.action]: '', [cargoKeys.row_index]: initRow, [cargoKeys.code]: '' };
+    const logRoutePrefix = '{{ private_route("sep_log_grid", code="~") }}'.replace('~', '');
 
 </script>
 <script src="{{static_route('js/sep_mgmt.js')}}"></script>

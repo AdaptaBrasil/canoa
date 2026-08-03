@@ -115,6 +115,7 @@ def sep_mgmt():
     if not app_user.is_power:
         abort(HTTPStatus.FORBIDDEN)
 
+    # TODO: should use grid_route
     from .sep_mgmt.sep_mgmt import sep_mgmt
 
     return sep_mgmt()
@@ -235,7 +236,7 @@ def sep_log_grid(code: str = "?"):
     else:
         from .sep_log_grid import get_sep_log_grid
 
-        return get_sep_log_grid(code)
+        return get_sep_log_grid(code, request.args.get("from", "sep_grid"))
 
 
 @bp_private.route("/sep_validate", methods=MTD_BOTH)

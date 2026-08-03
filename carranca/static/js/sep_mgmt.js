@@ -117,6 +117,11 @@ const api = /** type {Object} */(agGrid.createGrid(gridContainer, gridOptions));
 
 //-------------
 // == Actions
+const gotoSepLog = () => {
+    if (!activeRow) { return; }
+    window.location.href = logRoutePrefix + activeRow.data.sep_code + '?from=sep_mgmt';
+}
+//-------------
 const doGridCargo = () => {
     api.stopEditing();
     const elResponse = /** @type {HTMLInputElement} */(document.getElementById(respID));

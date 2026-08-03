@@ -69,6 +69,17 @@ body {
     background-color: #ffffff7a;
 }
 
+/* ============================================
+ *  MS Edge workaround to avoid revealing password
+ *
+ *  Disable Edge’s automatic “reveal password”
+ *  eye‑icon by hiding its injected UI elements
+ *  because Canoa has it own.
+ * ============================================ */
+
+input[type="password"]::-ms-reveal {
+    display: none;
+}
 
 /* ============================================
  *  carranca\templates\layouts\dialog.tmpl

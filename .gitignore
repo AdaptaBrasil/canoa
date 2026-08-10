@@ -36,6 +36,7 @@ instance/*
 
 ## Canoa per git's user
 carranca/static/sep_icons/
+/static/
 carranca/internal_tests/data
 carranca/shape2geojsn/data
 downloaded_files/

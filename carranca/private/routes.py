@@ -216,7 +216,8 @@ def grid_route(code: str, editor_name: str, download: Call_Args, show_grid: Call
 @bp_private.route("/sep_grid/<code>", methods=MTD_BOTH)
 def sep_grid(code: str = "?"):
     """
-    Through this route, the admin user can CRUD seps and display a grid
+    Through this route, the admin user can CRUD seps and display a grid;
+    non-power users see the same grid scoped to the seps they manage (Refs #21)
     """
     if nobody_is_logged():
         return redirect_to(login_route())

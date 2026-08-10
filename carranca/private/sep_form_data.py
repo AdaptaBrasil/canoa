@@ -15,7 +15,6 @@ from .SepIconMaker import SepIconMaker
 from ..models.public.user import User
 from ..models.private.sep import Sep
 from ..models.private.schema import Schema
-from ..private.UserSep import UserSep
 from ..common.UIDBTexts import UIDBTexts
 from ..helpers.py_helper import to_int, clean_text
 from ..helpers.types_helper import Usual_Dict
@@ -48,9 +47,7 @@ MANAGER_LIST_VALUE = "managerListValue"
 
 def _get_managers(no_manager: NoManager) -> List[Usual_Dict]:
     user_rows = User.get_all_users(User.disabled == False)
-    mng_list = [{"id": no_manager.id, "name": no_manager.name}] + [
-        {"id": user.id, "name": user.username} for user in user_rows
-    ]
+    mng_list = [{"id": no_manager.id, "name": no_manager.name}] + [{"id": user.id, "name": user.username} for user in user_rows]
     return mng_list
 
 
@@ -110,15 +107,7 @@ def get_sep_data(
     # else is_simple_edit or is_full_edit
     # ------------
     task_code += 6
-    # Now, find the sep's manager
-    sep_manager: str = ""
-    sep_usr_row: MgmtSepsUser | None = None
-
-    # does current user owns the sep?
-    usr_sep = next((sep for sep in app_user.seps if sep.id == sep_id), None)
-
-    # Get fresh dada from db
-    if usr_sep is not None:
+    if sep_row.users_id == app_user.id:
         # current user owns the sep, so it can be edited, get the record
         sep_usr_row = MgmtSepsUser.get_sep_row(sep_id)
         sep_manager = "" if (edit_mode == SepEditMode.SIMPLE_EDIT) else app_user.name
@@ -131,17 +120,14 @@ def get_sep_data(
         _, msg_fatal = ui_db_texts.set_msg_fatal("sepEditNotFound")
         raise JumpOut(msg_fatal, task_code + 2)
     else:
-        # create a `usr_sep` and get the sep's manager (user_curr)
-        usr_sep_dict = dict(sep_usr_row)
-        # Remove 'user_curr' from edit_dict, because is not needed in UserSep(..)
-        sep_manager = sep_user if (sep_user := usr_sep_dict.pop("user_curr", None)) else ui_db_texts["managerNone"]
-        usr_sep = UserSep(**usr_sep_dict)
-        usr_sep.icon_url = SepIconMaker.get_url(usr_sep.icon_file_name)
+        # current user is power but doesn't manage this sep -- get its manager's name for display
+        sep_manager = sep_usr_row.user_curr if sep_usr_row.user_curr else ui_db_texts["managerNone"]
 
+    task_code += 3
     # fill the form for edition
     if is_get:
         # set the form's data row for edition, just in case (someone messed with the db) clean up the text
-        form.schema_name.data = usr_sep.scm_name
+        form.schema_name.data = sep_usr_row.scm_name
         form.sep_name.data = clean_text(sep_row.name)
         form.visible.data = bool(sep_row.visible)
         form.description.data = clean_text(sep_row.description)
@@ -157,7 +143,7 @@ def get_sep_data(
         task_code += 3  # 512
 
     task_code += 1
-    ui_db_texts[UITextsKeys.Form.icon_url] = usr_sep.icon_url
+    ui_db_texts[UITextsKeys.Form.icon_url] = SepIconMaker.get_url(sep_usr_row.icon_file_name)
     return sep_row, ui_select_lists, sep_usr_row.fullname
 
 

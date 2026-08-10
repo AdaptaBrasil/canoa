@@ -28,21 +28,36 @@ const gridOptions = {
         setActiveRow(row, event.rowIndex)
     }
     , rowData: gridRows
-    , columnDefs: [
+    , columnDefs: buildColumnDefs()
+}; // gridOptions
+
+// colMeta entries are keyed by field name, not position -- 'user_curr' (Gestor)
+// is absent entirely for non-power users (see sep_grid.py), and 'spd_name' is a
+// later addition, so don't assume a fixed column order/count.
+function buildColumnDefs() {
+    const colByName = Object.fromEntries(colMeta.map((c) => [c.n, c]));
+    const col = (name, extra) => ({ field: name, headerName: colByName[name].h, flex: 3, ...extra });
+
+    const defs = [
         { field: colCode, hide: true },
         { field: colIconUrl, hide: true },
-        { field: colMeta[2].n, headerName: colMeta[2].h, flex: 3 },
-        { field: colMeta[3].n, headerName: colMeta[3].h, flex: 3 },
-        { field: colMeta[4].n, headerName: colMeta[4].h, flex: 3 },
-        {
-            field: colMeta[5].n,
-            headerName: colMeta[5].h,
-            headerClass: 'text-center',
-            cellStyle: { display: 'flex', justifyContent: 'center' },
-            flex: 1
-        },
-    ]
-}; // gridOptions
+        col('scm_name'),
+        col('name'),
+    ];
+
+    if (userIsPower) {
+        defs.push(col('user_curr'));
+    }
+
+    defs.push(col('spd_name'));
+    defs.push(col('visible', {
+        headerClass: 'text-center',
+        cellStyle: { display: 'flex', justifyContent: 'center' },
+        flex: 1,
+    }));
+
+    return defs;
+}
 
 const setActiveRow = (row, rowIx) => {
     if (!row) { return; }

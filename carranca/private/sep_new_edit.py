@@ -103,7 +103,11 @@ def do_sep_edit(data: str) -> str:
             if is_get:
                 return (False, False, "", -1, -1, None)
 
-            id_manager, frm_id_schema, frm_sep_name, frm_id_spd = (None, 0, "", None)
+            id_manager, frm_id_schema, frm_sep_name = (None, 0, "")
+            # spd_name is editable in both SepNew and SepEdit (see wtforms.py) -- every
+            # user may assign a spd to `their` sep (Refs #50), so read it unconditionally
+            id_spd = to_int(form.spd_name.data)
+            frm_id_spd = id_spd if id_spd > 0 else None
 
             if edit_full_or_ins:
                 frm_id_manager = cast(int, form.manager_list.data)
@@ -111,8 +115,6 @@ def do_sep_edit(data: str) -> str:
                 frm_id_schema = cast(int, form.schema_list.data)
                 frm_visible = cast(bool, form.visible.data)
                 frm_sep_name = get_form_input_value(form.sep_name.name, [Sep.scm_sep])
-                id_spd = to_int(form.spd_name.data)
-                frm_id_spd = id_spd if id_spd > 0 else None
                 frm_description = get_form_input_value(form.description.name)
             else:
                 frm_visible = cast(bool, form.visible.data)
@@ -124,7 +126,11 @@ def do_sep_edit(data: str) -> str:
                     form_modified = True
                     sep_modified = True
                 case SepEditMode.SIMPLE_EDIT:
-                    form_modified = (frm_visible != sep_row.visible) or (frm_description != sep_row.description)
+                    form_modified = (
+                        (frm_visible != sep_row.visible)
+                        or (frm_description != sep_row.description)
+                        or (frm_id_spd != sep_row.id_spd)
+                    )
                     sep_modified = False
                 case SepEditMode.FULL_EDIT:
                     form_modified = (

@@ -50,6 +50,7 @@ mgd
     const gridRows = {{ sep_data | tojson | safe }};
     const cargoKeys = {{ cargo_keys | tojson }};
     const gridID = '{{ grid_id }}';
+    const userIsPower = {{ jinja_user().power | tojson }};
     const initRow = {{ grid_init_row | default (0) }};
     const cargo = { [cargoKeys.action]: '', [cargoKeys.row_index]: initRow, [cargoKeys.code]: '' };
     const icon = /** @type {HTMLImageElement} */(document.getElementById('{{ dlg_icon_id }}'));

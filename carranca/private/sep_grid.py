@@ -46,7 +46,11 @@ def get_sep_grid() -> Jinja_Rendered:
             raise AppStumbled(msg, task_code, False, True)
 
         task_code += 1  # 3
-        col_names = ["id", "icon_file_name", "scm_name", "name", "user_curr", "visible"]
+        col_names = ["id", "icon_file_name", "scm_name", "name", "user_curr", "spd_name", "visible"]
+        if not app_user.is_power:
+            # non-power users only see their own seps (see _sep_data_fetch below) -- don't
+            # also ship every other manager's name to their browser, see project plan for #21
+            col_names.remove("user_curr")
         js_ui_dict = js_ui_dictionary(ui_db_texts[JS_GRID_COL_META_INFO], col_names, task_code)
 
         task_code += 1  # 4

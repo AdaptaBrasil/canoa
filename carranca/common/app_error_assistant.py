@@ -121,6 +121,7 @@ class ModuleErrorCode(IntEnum):
     DB_FETCH_ROWS = 590  # only one
     SEP_GRID = 600
     SEP_LOG_GRID = 610
+    SEP_IDS_DOWNLOAD = 620
     SCM_GRID = 700
     SCM_EDIT = 750
 

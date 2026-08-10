@@ -26,6 +26,9 @@ mgd
 <div class="col-auto">
     {{ btn_action(dlg_post_form_id, grdBtnLog, cargo_keys.log) }}
 </div>
+<div class="col-auto">
+    {{ btn_action(dlg_post_form_id, grdBtnDownload, cargo_keys.download, 'formTarget="_blank" disabled onclick="setSleepVeil()"') }}
+</div>
 {% endblock grid_blc_footer %}
 {# ╘═══════════════ Grid Footer ═════════════════╛ #}
 
@@ -51,6 +54,7 @@ mgd
     const cargoKeys = {{ cargo_keys | tojson }};
     const gridID = '{{ grid_id }}';
     const userIsPower = {{ jinja_user().power | tojson }};
+    const btnDownloadId = '{{ do_btn_id(cargo_keys.download, grdBtnDownload) }}';
     const initRow = {{ grid_init_row | default (0) }};
     const cargo = { [cargoKeys.action]: '', [cargoKeys.row_index]: initRow, [cargoKeys.code]: '' };
     const icon = /** @type {HTMLImageElement} */(document.getElementById('{{ dlg_icon_id }}'));

@@ -66,10 +66,12 @@ const setActiveRow = (row, rowIx) => {
     if (icon.src != row.data[colIconUrl]) {
         icon.src = row.data[colIconUrl];
     }
+    btnDownload.disabled = !row.data['spd_name'];
 }
 
 //-------------
 //== Init
 const gridContainer = document.getElementById(gridID);
 const api = /** type {Object} */(agGrid.createGrid(gridContainer, gridOptions));
+const btnDownload = /** @type {HTMLButtonElement} */(document.getElementById(btnDownloadId));
 //== eof

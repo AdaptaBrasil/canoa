@@ -223,8 +223,9 @@ def sep_grid(code: str = "?"):
         return redirect_to(login_route())
     else:
         from .sep_grid import get_sep_grid
+        from .sep_ids_download import download_ids
 
-        return grid_route(code, "sep_edit", "", get_sep_grid)
+        return grid_route(code, "sep_edit", download_ids, get_sep_grid)
 
 
 @bp_private.route("/sep_log_grid/<code>", methods=MTD_BOTH)

@@ -57,6 +57,26 @@ def _get_choices(file_data: FileData) -> List[Tuple[str, str]]:
     return choices
 
 
+def _apply_spd_analysis(spd_row: SpatialDataFile, ui_db_texts: UIDBTexts, spd_data: FileData, file_display_name: str) -> None:
+    """
+    Applies a `_get_spd_info`-shaped analysis result (see spd_analysis.py) onto `spd_row`,
+    used both right after upload (`_do_spd_insert`) and after an edit that changes which
+    fields are captured (`spd_new_or_edit`). Raises on an analysis error.
+    """
+    if error_info := spd_data["error"]:
+        _, error_msg = ui_db_texts.set_msg_error("errorMetadataRead", (file_display_name, error_info))
+        raise Exception(error_msg)
+
+    layer_data = spd_data["layer"]
+    spd_row.layer_name = layer_data["name"]
+    spd_row.layer_crs = layer_data["crs"]
+    spd_row.layer_health = spd_data["health_score"]["score_pct"]
+    spd_row.features_count = spd_data["features"]["count"]
+    spd_row.file_data = json.dumps(spd_data)
+
+    return
+
+
 def _do_spd_insert(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, file_obj: Any, layer: int = 0, analyze_bytes: bool = False) -> bool:
     def __get_extension(fn: str) -> str:
         _, fnx = path.splitext(fn)
@@ -127,24 +147,18 @@ def _do_spd_insert(ui_db_texts: UIDBTexts, spd_row: SpatialDataFile, file_obj: A
                 error_code += 2
                 spd_data = spd_info_from_file(ffn, layer, values_from_fields)
 
-            if error_info := spd_data["error"]:
-                _, error_msg = ui_db_texts.set_msg_error("errorMetadataRead", (ofn, error_info))
-                raise Exception(error_msg)
-
-            layer_data = spd_data["layer"]
-            spd_row.layer_name = layer_data["name"]
-            spd_row.layer_crs = layer_data["crs"]
-            spd_row.layer_health = spd_data["health_score"]["score_pct"]
-            spd_row.features_count = spd_data["features"]["count"]
-            spd_row.file_data = json.dumps(spd_data)
+            _apply_spd_analysis(spd_row, ui_db_texts, spd_data, ofn)
 
             # Now, we have the real fields list: sanitize attributes
             fields_removed: List[str] = []
             candidates = [k for k, _ in _get_choices(spd_data)]
             for f in form_field_list:
-                if getattr(spd_row, f.name) not in candidates:
+                value = getattr(spd_row, str(f.name))
+                # only flag it if the user actually typed something that isn't a real column --
+                # an optional field left blank (e.g. field_alt_name) isn't a removal, nothing to report
+                if value and value not in candidates:
                     setattr(spd_row, f.name, None)
-                    fields_removed.append(f.name)
+                    fields_removed.append(value)
 
             error_code = 0
             if fields_removed:
@@ -346,10 +360,24 @@ def spd_new_or_edit(data: str) -> Route_Response:
 
             elif form_modified:
                 task_code += 2  # 11
-                # CHECK fields_id,  fields_id
+                fields_changed = any(
+                    getattr(spd_row, str(f.name)) != f.data  # pyright: ignore[reportAttributeAccessIssue]
+                    for f in cast(SpdEdit, fform).field_list
+                )
                 fform.populate_obj(spd_row)
                 spd_row.edited_by = app_user.id
                 spd_row.edited_at = func.now()
+
+                if fields_changed:
+                    # field_id/name/alt_name changed -- file_data['values'] may not have captured
+                    # the newly selected field(s) (see spd_analysis.py's values_from_fields), so
+                    # the file needs re-analysis with the updated field list.
+                    task_code += 1
+                    values_from_fields = [f for f in [spd_row.field_id, spd_row.field_name, spd_row.field_alt_name] if f]
+                    ffn = path.join(sidekick.config.LOCAL_SPATIAL_DATA_PATH, spd_row.file_name)
+                    spd_data = spd_info_from_file(ffn, 0, values_from_fields)
+                    _apply_spd_analysis(spd_row, ui_db_texts, spd_data, spd_row.original_file_name)
+
                 return __save_and_go()
             else:
                 task_code += 3  # 12

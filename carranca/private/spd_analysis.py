@@ -5,12 +5,14 @@ Module for analyzing spatial data from GeoPackage (.gpkg) files using GeoPandas 
 mgd 2026.05.07
 """
 
+import json
 from io import BytesIO
 from typing import TYPE_CHECKING, Tuple, List
 from datetime import datetime
 
 from ..helpers.py_helper import now_as_iso, same_entry
-from ..helpers.types_helper import Usual_Dict, Primitive
+from ..helpers.types_helper import Usual_Dict
+from ..models.private.spatial_data_file import SpatialDataFile
 
 if TYPE_CHECKING:
     # kept import-time-only: geopandas/pyogrio are slow to import (GDAL driver
@@ -22,7 +24,7 @@ if TYPE_CHECKING:
 
 # cspell:words ffname pyogrio gpkg sjoin geospatial
 
-SPD_MODULE_VERSION = "1.0"
+SPD_MODULE_VERSION = "1.1"
 
 SPD_FORMAT_GPKG = "GPKG"  # GeoPackage
 SPD_EXT_GPKG = ["gpkg"]
@@ -143,23 +145,23 @@ def _get_spd_info(
     import pyogrio
     import geopandas as gpd
 
-    def __build_values(hashable_fields: List[str]) -> Tuple[List[str], Usual_Dict]:
-        def ___get_values_of(field: str) -> List[Primitive]:
-            def ____to_native(value):
-                return value.item() if hasattr(value, "item") else value
+    def __build_values(hashable_fields: List[str]) -> Tuple[List[str], List[Usual_Dict]]:
+        def ____to_native(value):
+            # NaN -> None (json.dumps(nan) is not standard JSON); numpy scalar -> native Python
+            return None if pd.isna(value) else (value.item() if hasattr(value, "item") else value)
 
-            return [____to_native(v) for v in gdf[field].dropna().unique()] if all_columns or field in values_from_fields else []
-
-        fields: List[str] = []
-        values: Usual_Dict = {}
         all_columns = values_from_fields == SPD_VALUES_FROM_ALL_FIELDS
-        for column in gdf.columns:
-            col_values = ___get_values_of(column) if column in hashable_fields and (all_columns or column in values_from_fields) else []
-            if col_values:
-                fields.append(column)
-                values[column] = col_values
+        requested = [c for c in gdf.columns if c in hashable_fields and (all_columns or c in values_from_fields)]
+        if not requested:
+            return [], []
 
-        return fields, values
+        # the first requested field is the row's id (see spd_new_edit.py: DEFAULT_ID_ATTRIBUTE_NAME
+        # is always requested first) -- a row with no id can't be referenced/validated later, drop it
+        rows_df = gdf.filter(items=requested).dropna(subset=[requested[0]])
+
+        values = [{str(col): ____to_native(v) for col, v in row.items()} for row in rows_df.to_dict(orient="records")]
+
+        return requested, values
 
     def __hashable_fields() -> List[str]:
         hashable_fields = []
@@ -306,6 +308,23 @@ def spd_info_from_bytes(bytes_data: bytes, format: str, layer_index: int = 0, va
     spd_data = _get_spd_info(started, gdf, layers, layer_index, values_from_fields)
 
     return spd_data
+
+
+def get_id_values(spd_row: SpatialDataFile) -> List[int | str]:
+    """
+    Returns the list of id values cached in `spd_row.file_data['values']`
+    (see `_get_spd_info`'s row-paired 'values' shape: list[dict[field_name, value]]).
+
+    Empty when the file was never analyzed, or `spd_row.field_id` has no captured
+    values (eg. it wasn't a real column found in the file, see `spd_new_edit.py`'s
+    insert-time field sanitization).
+    """
+    if not spd_row.file_data:
+        return []
+
+    data = json.loads(spd_row.file_data)
+    rows = data.get(SPD_DATA_KEY_VALUES, [])
+    return [row[spd_row.field_id] for row in rows if spd_row.field_id in row]
 
 
 # eof

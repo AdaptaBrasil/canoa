@@ -20,7 +20,7 @@ from ...models.private.spatial_data_file import SpatialDataFile
 from ...common.app_context_vars import sidekick
 from ...common.app_error_assistant import ModuleErrorCode
 
-Dict_Field_Values: TypeAlias = dict[str, list[int | str]]
+Row_Values: TypeAlias = dict[str, int | str | None]
 
 
 def spddata(cargo: Cargo) -> Next_Cargo:
@@ -40,20 +40,24 @@ def spddata(cargo: Cargo) -> Next_Cargo:
 
     try:
 
-        def _get_fields_dic(data_dic: dict[str, Any], fields: List[str]) -> dict[str, Dict_Field_Values]:
+        def _get_fields_dic(data_dic: dict[str, Any], fields: List[str]) -> dict[str, List[Row_Values]]:
             fields_req = [
                 field_name for field_name in fields if data_dic.get(SPD_DATA_KEY_FIELDS, {}).get(field_name, {}).get("has_values", False)
             ]
-            field_values = {
-                field_name: values for field_name, values in data_dic.get(SPD_DATA_KEY_VALUES, {}).items() if field_name in fields_req
-            }
-            return {SPD_DATA_KEY_VALUES: field_values} if field_values else {}
+            if not fields_req:
+                return {}
+            # 'values' is now a list of row dicts (one per feature), not {field: [unique values]} -- see spd_analysis.py
+            rows = [
+                {field_name: row[field_name] for field_name in fields_req if field_name in row}
+                for row in data_dic.get(SPD_DATA_KEY_VALUES, [])
+            ]
+            return {SPD_DATA_KEY_VALUES: rows} if rows else {}
 
         export_type = cargo.receive_file_cfg.spd_data_export
         export_types = cargo.receive_file_cfg.SpdDataExport
 
         spd_id = -1 if export_type == export_types.NONE else (cargo.sep_data.spd_id or -1)
-        data_dic: Dict_Field_Values = {}
+        data_dic: dict[str, Any] = {}
 
         if spd_id > 0 and (spd_data := SpatialDataFile.get_row(spd_id)) and (data_dic := json.loads(spd_data.file_data)):
             msg_error = "spd_extract_error"

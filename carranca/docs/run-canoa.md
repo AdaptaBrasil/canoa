@@ -11,14 +11,26 @@ It allows you to:
 GNU Screen is not a windowing system nor physical terminal. It is a software tool that creates “virtual terminals” inside your real terminal.
 
 ## Start Canoa (in a screen session)
-``` Start canoa
-screen -S canoa
-```
 
-Then, inside screen, start your app normally
-```
-/home/desenv/canoa/carranca$ ../rema.sh
-```
+1. Check no Canoa session is already running:
+   ```
+   screen -ls
+   ```
+2. If one is active, kill it (replace `12345` with the actual session id):
+   ```
+   screen -X -S 12345 quit
+   ```
+3. Start a new screen session:
+   ```
+   screen -S canoa
+   ```
+4. Inside the screen session, go to the app dir and launch it -- no need to activate
+   the venv yourself, `rema.sh` does it (`source ../.venv/bin/activate`):
+   ```
+   cd /home/desenv/canoa/carranca
+   ../rema.sh
+   ```
+5. Detach, leaving it running: `Ctrl + A` then `D`
 
 ## Detach from screen (leave it running: stay detached)
 Press: Ctrl + A then D

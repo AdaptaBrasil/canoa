@@ -20,7 +20,7 @@ carranca/common/UIDBTexts.py|2026-07-16|b538e4f2
 carranca/common/UITextsKeys.py|2026-07-20|1196c410
 carranca/common/app_error_assistant.py|2026-08-10|431a5a1c
 carranca/common/igniter.py|2026-07-16|7f36b3bf
-carranca/common/app_constants.py|2026-08-10|af9eea02
+carranca/common/app_constants.py|2026-08-11|be1f3781
 carranca/private/received_files/init_grid.py|2026-07-18|32de0c97
 carranca/models/private/sep.py|2026-07-20|92b82554
 carranca/private/sep_log_grid.py|2026-07-21|3e86c82f
@@ -52,3 +52,5 @@ carranca/templates/private/sep_grid.html.j2|2026-07-20|9e2085a3
 carranca/config/ExportProcessConfig.py|2026-07-24|f19d7ad1
 carranca/private/scm_data.py|2026-07-24|cd0feb1f
 carranca/private/sep_ids_download.py|2026-08-10|d8ad68ce
+carranca/private/spd_analysis.py|2026-08-11|673257b5
+carranca/config/ValidateProcessConfig.py|2026-08-11|005a25cb

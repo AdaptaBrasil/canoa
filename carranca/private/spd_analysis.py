@@ -155,9 +155,12 @@ def _get_spd_info(
         if not requested:
             return [], []
 
-        # the first requested field is the row's id (see spd_new_edit.py: DEFAULT_ID_ATTRIBUTE_NAME
-        # is always requested first) -- a row with no id can't be referenced/validated later, drop it
-        rows_df = gdf.filter(items=requested).dropna(subset=[requested[0]])
+        # values_from_fields[0] is the row's id (see spd_new_edit.py: DEFAULT_ID_ATTRIBUTE_NAME is
+        # always requested first) -- a row with no id can't be referenced/validated later, drop it.
+        # NB: `requested`'s order follows gdf.columns, not values_from_fields, so the id field can't
+        # be assumed to be requested[0].
+        id_field = "" if all_columns else values_from_fields[0]
+        rows_df = gdf.filter(items=requested).dropna(subset=[id_field]) if id_field in requested else gdf.filter(items=requested)
 
         values = [{str(col): ____to_native(v) for col, v in row.items()} for row in rows_df.to_dict(orient="records")]
 

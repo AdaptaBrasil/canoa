@@ -55,7 +55,7 @@ class ValidateProcessConfig:
         self.output_file = OutputFile(name="data_report", ext=".pdf")
         self.spd_data_file = OutputFile(name="spd_data", ext=".json")
         # send noto data_validate full
-        # export Spatial data to data_validate full content of spatial_data_files.file_data:json | only values.id:[]
+        # export Spatial data to data_validate full content of spatial_data_files.file_data:json | only values:[{field: value}]
         self.spd_data_export = self.SpdDataExport.ATTRIBUTES
         self.dv_app = DataValidateApp(
             batch="run_validate." + ("bat" if OS_IS_WINDOWS else "sh"),  # TODO: OS_IS_LINUX

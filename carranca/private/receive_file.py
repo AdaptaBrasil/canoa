@@ -143,7 +143,7 @@ def receive_file() -> Jinja_Template:
             _w = _rm(pd.path.data_tunnel_user_write)
             _r = _rm(pd.path.data_tunnel_user_read)
 
-        return _w and _r and _l  # don't concatenate function ;—)
+        return _w and _r and _l  # don't concatenate functions ;—)
 
     def _try_lock_process(ui_db_texts: UIDBTexts, pd: ProcessData, task_code: int) -> bool:
         """

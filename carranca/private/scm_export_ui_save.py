@@ -9,7 +9,7 @@ mgd 2025.08
 from typing import TypeAlias, Tuple, List
 
 from ..helpers.py_helper import class_to_dict
-from ..public.ups_handler import get_ups_jHtml
+from ..common.ups_handler import get_ups_jHtml
 from ..helpers.uiact_helper import UiActResponseKeys, UiActResponse
 from ..helpers.types_helper import Jinja_Template
 from ..helpers.jinja_helper import process_template

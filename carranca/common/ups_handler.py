@@ -8,7 +8,7 @@ relevant information about the error.
 
     Ups Files
     ---------
-    /public/ups_handler.py
+    /common/ups_handler.py
     /static/icons/ups_handler.svg
     /templates/home/ups_page.html.j2
 
@@ -28,7 +28,7 @@ from typing import Tuple, Any
 
 from flask import current_app
 
-from ..common.UIDBTexts import UIDBTexts
+from .UIDBTexts import UIDBTexts
 from ..helpers.py_helper import is_str_none_or_empty
 from ..helpers.pw_helper import internal_logout, is_anyone_logged
 from ..helpers.html_helper import icon_url, icon_svg_inline
@@ -37,7 +37,7 @@ from ..helpers.types_helper import Template_File_Full_Name, Jinja_Rendered, DB_T
 from ..helpers.route_helper import get_tmpl_full_file_name
 from ..config.local_ui_texts import AuxTexts, local_ui_texts, local_form_texts
 from ..helpers.ui_db_texts_manager import get_section
-from ..common.app_error_assistant import AppStumbled
+from .app_error_assistant import AppStumbled
 from ..helpers.ui_db_texts_manager import DB_Texts, UITextsKeys
 
 
@@ -57,7 +57,7 @@ def get_ups_jHtml(
 def ups_handler(
     error_code: int, user_msg: str, e: Exception | None = None, logout: bool = False
 ) -> Tuple[dict, Template_File_Full_Name, DB_Texts]:
-    from ..common.app_context_vars import app_user, sidekick
+    from .app_context_vars import app_user, sidekick
 
     try:
         ui_texts = get_section(f"Ups-{error_code}")

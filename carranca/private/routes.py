@@ -21,7 +21,7 @@ from flask_login import current_user
 
 from ..helpers.py_helper import is_str_none_or_empty, to_str
 from ..helpers.pw_helper import internal_logout, nobody_is_logged
-from ..public.ups_handler import ups_handler
+from ..common.ups_handler import ups_handler
 from ..helpers.uiact_helper import UiActResponse, UiActResponseProxy, UiActResponseKeys
 from ..helpers.jinja_helper import process_template
 from ..helpers.types_helper import (

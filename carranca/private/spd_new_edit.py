@@ -24,7 +24,7 @@ from .spd_analysis import spd_file_format, spd_info_from_file, spd_info_from_byt
 from ..common.UIDBTexts import UIDBTexts
 from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import is_str_none_or_empty, is_empty
-from ..public.ups_handler import get_ups_jHtml
+from ..common.ups_handler import get_ups_jHtml
 from ..helpers.file_helper import ensure_folder_exists, get_unique_filename
 from ..helpers.types_helper import Route_Response, Choice, Choices
 from ..helpers.jinja_helper import process_template

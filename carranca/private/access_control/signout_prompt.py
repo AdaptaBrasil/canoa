@@ -8,7 +8,7 @@ mgd 2025.10.29 -- 2026.03.20
 # cSpell: ignore formdata FlaskForm timestamping
 
 from ...config.FormIcons import FormIcons as fi
-from ...public.ups_handler import get_ups_jHtml
+from ...common.ups_handler import get_ups_jHtml
 from ...helpers.jinja_helper import Jinja_Rendered, process_template
 from ...helpers.route_helper import get_account_response_data, init_response_vars, private_route, is_method_post
 from ...common.app_context_vars import app_user

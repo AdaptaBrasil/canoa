@@ -21,7 +21,7 @@ from ...helpers.db_records.DBRecords import DBRecords
 from ...helpers.py_helper import is_str_none_or_empty
 from ...private.scm_export_ui_save import Sep_UI_Order
 from ...private.SepIconMaker import SepIconMaker, Svg_Content
-from ...public.ups_handler import AppStumbled
+from ...common.ups_handler import AppStumbled
 
 
 class Sep(CanoaBaseTable):

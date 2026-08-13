@@ -212,7 +212,7 @@ def process_template(tmpl_ffn: Jinja_Template, **context: Any) -> Jinja_Rendered
                 _save_and_raise(jHtml_to_display, errors, bugged_ffname, j2_fname)
 
     except Exception as e:
-        from ..public.ups_handler import ups_handler
+        from ..common.ups_handler import ups_handler
 
         if isinstance(e, TemplateSyntaxError):
             e = cast(TemplateSyntaxError, e)

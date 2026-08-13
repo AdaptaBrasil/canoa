@@ -12,7 +12,7 @@ import json
 
 from .UserSep import UserSep
 from .sep_icon import do_icon_get_url
-from ..public.ups_handler import get_ups_jHtml
+from ..common.ups_handler import get_ups_jHtml
 from ..helpers.jinja_helper import Jinja_Rendered, process_template
 from ..helpers.uiact_helper import UiActResponseProxy
 from ..helpers.route_helper import get_private_response_data, init_response_vars, private_route

@@ -12,7 +12,7 @@ from .received_files.constants import DOWNLOAD_REPORT
 from .sep_icon import do_icon_get_url, SEP_EMPTY_ICON
 from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import class_to_dict
-from ..public.ups_handler import get_ups_jHtml
+from ..common.ups_handler import get_ups_jHtml
 from ..helpers.types_helper import Jinja_Template
 from ..helpers.jinja_helper import process_template
 from ..helpers.uiact_helper import UiActResponse, UiActResponseKeys

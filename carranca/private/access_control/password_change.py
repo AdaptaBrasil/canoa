@@ -15,7 +15,7 @@ from ...models.public.user import User
 from ...config.FormIcons import FormIcons as fi
 from ...helpers.py_helper import is_str_none_or_empty
 from ...helpers.pw_helper import internal_logout, hash_password, verify_password
-from ...public.ups_handler import get_ups_jHtml
+from ...common.ups_handler import get_ups_jHtml
 from ...helpers.jinja_helper import process_template
 from ...helpers.types_helper import Jinja_Rendered, Flask_Response
 from ...common.app_context_vars import sidekick

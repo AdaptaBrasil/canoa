@@ -43,6 +43,7 @@ FormIcons: FormIconsDict = FormIconsDict(
         "icon": "",  # this is a place holder: fi.icon = fi.sep
         # msg_only
         "error": "fa-circle-exclamation",
+        "http_error": "fa-file-circle-exclamation",
         "fatal": "fa-bomb",
         "info": "fa-circle-info",
         "success": "fa-square-check",

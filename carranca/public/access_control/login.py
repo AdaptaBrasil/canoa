@@ -18,7 +18,7 @@ from ...config.FormIcons import FormIcons as fi
 from ...helpers.py_helper import is_str_none_or_empty, now_as_iso
 from ...helpers.pw_helper import internal_logout, is_anyone_logged, verify_password
 from ...private.RolesAbbr import RolesAbbr
-from ...public.ups_handler import get_ups_jHtml
+from ...common.ups_handler import get_ups_jHtml
 from ...helpers.jinja_helper import process_template
 from ...common.app_context_vars import sidekick
 from ...helpers.js_consts_helper import js_form_sec_check

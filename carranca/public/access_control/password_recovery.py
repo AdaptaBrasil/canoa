@@ -17,7 +17,7 @@ from ...models.public.user import User
 from ...config.FormIcons import FormIcons as fi
 from ...helpers.py_helper import elapsed_hours
 from ...common.UITextsKeys import UITextsKeys
-from ...public.ups_handler import get_ups_jHtml
+from ...common.ups_handler import get_ups_jHtml
 from ...helpers.email_helper import RecipientsList, RecipientsDic, send_email
 from ...helpers.jinja_helper import process_template
 from ...common.app_error_assistant import ModuleErrorCode

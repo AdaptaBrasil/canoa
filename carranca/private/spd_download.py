@@ -12,12 +12,11 @@ mgd 2026-06-01
 
 from os import path
 from http import HTTPStatus
-from flask import send_file, Response, abort, g
+from flask import send_file, Response
 
 from ..helpers.py_helper import is_str_none_or_empty
-from ..public.ups_handler import ups_handler
 from ..helpers.route_helper import MTD_GET, get_private_response_data, init_response_vars
-from ..common.app_constants import APP_RAW_HTTP_ERROR_RAISED
+from ..common.abort_handler import abort_handler
 from ..common.app_context_vars import sidekick
 from ..helpers.js_consts_helper import js_form_sec_check
 from ..common.app_error_assistant import HTTP_StatusCode, ModuleErrorCode, AppStumbled
@@ -71,31 +70,8 @@ def download_rec(code: str) -> Response:
             http_status_code = file_response.status_code
 
     except Exception as e:
-        # ⚠️ Use default ups/error handler to log errors
-        ups_handler(task_code, str(e), e)
-
-        # g.<APP_RAW_HTTP_ERROR_RAISED>
-        # ----------------
-        # tells the app-wide error handlers (see carranca/__init__.py) to skip
-        # their styled page and let Werkzeug render its plain default instead, since this
-        # response is a file-download attempt, not a page navigation.
-        # Note 2026-07-24
-        setattr(g, APP_RAW_HTTP_ERROR_RAISED, True)
-
-        # ⚠️ Direct abort is required here
-        # ---------------------------------
-        abort(http_status_code, description=str(e))
-        # ---------------------------------
-        # This page runs during file download responses.
-        #
-        # Returning the project’s standard (`get_ups_jHtml` | 'ups_handler')
-        # HTML error page would corrupt the binary stream and confuse the client.
-        #
-        # Future refactors/technical reviews: preserve this abort() call
-        # unless the download mechanism itself is redesigned.
-        # Do not use:
-        # jHTML = get_ups_jHtml(http_status_code, ui_db_texts, task_code, e)
-        # return jHTML
+        # see common.abort_handler for why this doesn't use the project's usual ups_handler page
+        abort_handler(task_code, e, http_status_code)
 
     return file_response
 

@@ -13,7 +13,7 @@ mgd 2026-08-04
 
 from io import BytesIO
 from http import HTTPStatus
-from flask import send_file, Response, abort, g
+from flask import send_file, Response
 from openpyxl import Workbook
 from werkzeug.utils import secure_filename
 
@@ -21,10 +21,9 @@ from .UserSep import UserSep
 from .spd_analysis import get_id_values
 from ..helpers.py_helper import is_str_none_or_empty
 from ..models.private.sep import Sep
-from ..public.ups_handler import ups_handler
 from ..common.app_constants import APP_NAME
 from ..helpers.route_helper import MTD_GET, get_private_response_data, init_response_vars
-from ..common.app_constants import APP_RAW_HTTP_ERROR_RAISED
+from ..common.abort_handler import abort_handler
 from ..common.app_context_vars import app_user
 from ..helpers.js_consts_helper import js_form_sec_check
 from ..common.app_error_assistant import HTTP_StatusCode, ModuleErrorCode, AppStumbled
@@ -105,19 +104,8 @@ def download_ids(code: str) -> Response:
             http_status_code = file_response.status_code
 
     except Exception as e:
-        # ⚠️ Use default ups/error handler to log errors
-        ups_handler(task_code, str(e), e)
-
-        # g.<APP_RAW_HTTP_ERROR_RAISED>
-        # ----------------
-        # tells the app-wide error handlers (see carranca/__init__.py) to skip
-        # their styled page and let Werkzeug render its plain default instead, since this
-        # response is a file-download attempt, not a page navigation.
-        setattr(g, APP_RAW_HTTP_ERROR_RAISED, True)
-
-        # ⚠️ Direct abort is required here -- see spd_download.py for the full rationale
-        # (an HTML error page here would corrupt the binary download stream)
-        abort(http_status_code, description=str(e))
+        # see common.abort_handler for why this doesn't use the project's usual ups_handler page
+        abort_handler(task_code, e, http_status_code)
 
     return file_response
 

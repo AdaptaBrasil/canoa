@@ -21,7 +21,7 @@ from .wtforms import ReceiveFileForm
 from ..common.Display import Display
 from ..common.UIDBTexts import UIDBTexts
 
-from ..public.ups_handler import ups_handler
+from ..common.ups_handler import ups_handler
 from ..common.app_context_vars import sidekick, app_user
 from ..common.app_error_assistant import ModuleErrorCode
 from ..config.ValidateProcessConfig import ValidateProcessConfig

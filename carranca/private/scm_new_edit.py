@@ -13,7 +13,7 @@ from sqlalchemy import func  # func.now() == db-server time
 from .wtforms import ScmEdit
 from ..models.private.schema import Schema
 from ..config.FormIcons import FormIcons as fi
-from ..public.ups_handler import get_ups_jHtml
+from ..common.ups_handler import get_ups_jHtml
 from ..helpers.jinja_helper import process_template
 from ..helpers.uiact_helper import UiActResponseProxy
 from ..helpers.ui_db_texts_manager import UITextsKeys

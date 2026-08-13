@@ -12,8 +12,6 @@ mgd
 from http import HTTPStatus
 from flask import Blueprint, render_template
 
-# from flask_login import LoginManager
-from carranca import global_login_manager
 from ..helpers.pw_helper import internal_logout, is_anyone_logged
 from ..helpers.route_helper import (
     MTD_BOTH,
@@ -103,8 +101,23 @@ def password_reset(token=None):
     mgd 2024.03.21
     """
     if is_anyone_logged():
+        from ..common.UITextsKeys import UITextsKeys
+        from ..config.FormIcons import FormIcons as fi
+        from ..helpers.ui_db_texts_manager import init_ui_db_texts
+
         internal_logout()
-        return unauthorized_handler()
+        code = HTTPStatus.UNAUTHORIZED
+        ui_db_texts = init_ui_db_texts(UITextsKeys.Section.error)
+        _, message = ui_db_texts.set_msg_fatal(f"HTTP-{code.value}")
+        # one shared word (DB item "httpErrorTitle", eg. "Erro") reused as the title for every code
+        title = f"{ui_db_texts.get_str('httpErrorTitle', 'Error')} {code}"
+        ui_texts = {
+            **ui_db_texts.data(),  # includes msgOnly=True, set by set_msg_fatal above
+            UITextsKeys.Page.title: title,
+            UITextsKeys.Form.title: title,
+            UITextsKeys.Msg.error: message,
+        }
+        return render_template("home/html_error_page.html", code=code, fi=fi.with_icon("http_error"), **ui_texts), code
     else:
         from .access_control.password_reset import password_reset
 
@@ -136,21 +149,6 @@ def docs(publicDocName: str):
 
     # TODO privateDocs for About
     return display_html(publicDocName)
-
-
-# Common Errors -------------------------------------------
-# 403 Forbidden, 404 Not Found, 500 Internal Server Error:
-# moved 2026-07-24 to app-wide handlers, see _register_error_handlers() in
-# carranca/__init__.py -- a Blueprint's own @errorhandler only fires for exceptions
-# raised inside that same blueprint (bp_public), never for bp_private routes, so
-# scm_export/scm_grid/scm_edit's abort(FORBIDDEN) was falling through to Werkzeug's
-# default page instead of home/page-403.html.
-
-
-# 401 Unauthorized Access  ---------------------------------
-@global_login_manager.unauthorized_handler
-def unauthorized_handler():
-    return render_template(f"home/page-{HTTPStatus.UNAUTHORIZED}.html"), HTTPStatus.UNAUTHORIZED
 
 
 # eof

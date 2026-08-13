@@ -14,7 +14,7 @@ from .fetch_users import fetch_user_s
 from .fetch_records import fetch_record_s, ALL_USER_RECS
 
 from ...config.FormIcons import FormIcons as fi
-from ...public.ups_handler import get_ups_jHtml, AppStumbled
+from ...common.ups_handler import get_ups_jHtml, AppStumbled
 from ...helpers.types_helper import Jinja_Template
 from ...helpers.jinja_helper import process_template
 from ...helpers.route_helper import get_private_response_data, init_response_vars, MTD_UNEXPECTED_ERROR

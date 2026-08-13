@@ -7,7 +7,7 @@ mgd
 
 """
 
-# cSpell:ignore app_name sqlalchemy sessionmaker autoflush gethostname connstr juser scms gcfg uidbtexts fromjson
+# cSpell:ignore app_name sqlalchemy sessionmaker autoflush gethostname connstr juser scms gcfg uidbtexts fromjson errorhandler
 
 # ============================================================================ #
 from flask_mail import Mail
@@ -118,12 +118,26 @@ def _register_error_handlers(app: Flask):
     where a styled HTML page would confuse the client) get Werkzeug's plain
     default page instead of our styled one.
     """
+    from .config.FormIcons import FormIcons as fi
+    from .common.UITextsKeys import UITextsKeys
     from .common.app_constants import APP_RAW_HTTP_ERROR_RAISED
+    from .helpers.ui_db_texts_manager import init_ui_db_texts
 
     def _page_or_raw(error, code: HTTPStatus):
         if getattr(g, APP_RAW_HTTP_ERROR_RAISED, False):
             return error
-        return render_template(f"home/page-{code}.html"), code
+        ui_db_texts = init_ui_db_texts(UITextsKeys.Section.error)
+        _, message = ui_db_texts.set_msg_fatal(f"HTTP-{code.value}")
+        # one shared word (DB item "httpErrorTitle", eg. "Erro") reused as the title for every code
+        title = f"{ui_db_texts.get_str('httpErrorTitle', 'Error')} &ndash; {code}"
+        ui_texts = {
+            **ui_db_texts.data(),  # includes msgOnly=True, set by set_msg_fatal above
+            UITextsKeys.Page.title: title,
+            UITextsKeys.Form.title: title,
+            UITextsKeys.Msg.error: message,
+            UITextsKeys.Action.dlg_close: "/",
+        }
+        return render_template("home/html_error_page.html", code=code, fi=fi.with_icon("http_error"), **ui_texts), code
 
     @app.errorhandler(HTTPStatus.BAD_REQUEST)
     def bad_request(error):
@@ -152,6 +166,14 @@ def _register_error_handlers(app: Flask):
     @app.errorhandler(HTTPStatus.INTERNAL_SERVER_ERROR)
     def internal_error(error):
         return _page_or_raw(error, HTTPStatus.INTERNAL_SERVER_ERROR)
+
+    # Flask-Login's own callback for @login_required routes -- fires *instead of* (never
+    # alongside) the UNAUTHORIZED errorhandler above, since defining this callback tells
+    # Flask-Login to skip its default abort(401) entirely. Kept here, not in public/routes.py,
+    # so every home/html_error_page.html caller lives in one place.
+    @global_login_manager.unauthorized_handler
+    def unauthorized_handler():
+        return _page_or_raw(None, HTTPStatus.UNAUTHORIZED)
 
     return
 

@@ -14,7 +14,7 @@ mgd 2026-07-28
 """
 
 from ..config.FormIcons import FormIcons as fi
-from ..public.ups_handler import get_ups_jHtml, ups_handler
+from ..common.ups_handler import get_ups_jHtml, ups_handler
 from ..helpers.jinja_helper import Jinja_Rendered, process_template
 from ..helpers.route_helper import get_private_response_data, init_response_vars
 from ..helpers.js_consts_helper import JS_GRID_COL_META_INFO, js_ui_dictionary

@@ -14,7 +14,7 @@ from ..wtforms import RegisterForm
 from ...models.public.user import User
 from ...config.FormIcons import FormIcons as fi
 from ...helpers.pw_helper import internal_logout, is_anyone_logged
-from ...public.ups_handler import get_ups_jHtml
+from ...common.ups_handler import get_ups_jHtml
 from ...helpers.jinja_helper import process_template
 from ...common.app_context_vars import sidekick
 from ...common.app_error_assistant import ModuleErrorCode

@@ -10,7 +10,7 @@ mgd 2025.09
 
 from typing import List
 
-from ..public.ups_handler import get_ups_jHtml
+from ..common.ups_handler import get_ups_jHtml
 from ..common.app_error_assistant import ModuleErrorCode, AppStumbled
 
 from ..helpers.py_helper import class_to_dict

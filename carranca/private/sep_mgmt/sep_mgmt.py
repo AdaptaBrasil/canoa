@@ -17,10 +17,10 @@ from ..sep_icon import do_icon_get_url
 from ..SepIconMaker import SepIconMaker
 
 from ...common.UIDBTexts import UIDBTexts
-from ...public.ups_handler import ups_handler
+from ...common.ups_handler import ups_handler
 from ...common.app_error_assistant import ModuleErrorCode, AppStumbled
 from ...helpers.py_helper import is_str_none_or_empty, class_to_dict
-from ...public.ups_handler import get_ups_jHtml
+from ...common.ups_handler import get_ups_jHtml
 from ...helpers.user_helper import get_batch_code
 from ...helpers.jinja_helper import process_template
 from ...helpers.types_helper import Sep_Mgmt_Return, Cargo_List

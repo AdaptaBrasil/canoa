@@ -15,7 +15,7 @@ from flask_wtf import FlaskForm
 from ..wtforms import EmailTokenForm
 from ...config.FormIcons import FormIcons as fi
 from ...models.public.user import User
-from ...public.ups_handler import get_ups_jHtml
+from ...common.ups_handler import get_ups_jHtml
 from ...helpers.py_helper import is_str_none_or_empty, generate_random, crc16
 from ...helpers.types_helper import Usual_Dict
 from ...helpers.jinja_helper import Jinja_Rendered, process_template

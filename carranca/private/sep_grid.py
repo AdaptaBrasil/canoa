@@ -11,7 +11,7 @@ from typing import List
 
 from .sep_icon import do_icon_get_url
 from ..helpers.py_helper import class_to_dict
-from ..public.ups_handler import get_ups_jHtml
+from ..common.ups_handler import get_ups_jHtml
 from ..helpers.uiact_helper import UiActResponseKeys, UiActResponseProxy
 from ..helpers.jinja_helper import Jinja_Rendered, process_template
 from ..helpers.route_helper import MTD_POST, get_private_response_data, init_response_vars

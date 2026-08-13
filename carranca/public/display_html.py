@@ -22,7 +22,7 @@ from typing import List
 from ..common.UIDBTexts import UITextsKeys
 from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import is_str_none_or_empty
-from ..public.ups_handler import get_ups_jHtml
+from ..common.ups_handler import get_ups_jHtml
 from ..helpers.file_helper import ensure_folder_exists, path_get_last_folder
 from ..helpers.route_helper import init_response_vars
 from ..helpers.html_helper import img_filenames, img_change_src_path, url_join, URL_PATH_SEP, icon_svg_inline

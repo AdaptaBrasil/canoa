@@ -66,7 +66,7 @@ unchanged, because icon keys are just more DB items — no special-casing per do
 | `config/FormIcons.py` | Font Awesome icon registry + `with_icon()` clone helper |
 | `helpers/html_helper.py` | `icon_url()`, `icon_svg_inline()`, `img_filenames()` |
 | `public/display_html.py` | Renders document dialogs (About, Privacy, Terms…) |
-| `public/ups_handler.py` | Renders the fatal-error / "Ups!" dialog |
+| `common/ups_handler.py` | Renders the fatal-error / "Ups!" dialog |
 | `templates/layouts/dialog.html.j2` | Universal modal layout (all dialogs inherit this) |
 
 ---

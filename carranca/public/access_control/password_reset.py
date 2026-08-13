@@ -11,7 +11,7 @@ from datetime import datetime
 from ...models.public.user import User
 from ...config.FormIcons import FormIcons as fi
 from ...private.wtforms import ChangePassword
-from ...public.ups_handler import get_ups_jHtml
+from ...common.ups_handler import get_ups_jHtml
 from ...helpers.pw_helper import hash_password
 from ...helpers.py_helper import elapsed_hours, to_str
 from ...helpers.jinja_helper import process_template

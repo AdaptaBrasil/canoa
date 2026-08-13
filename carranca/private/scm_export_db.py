@@ -15,7 +15,7 @@ from dataclasses import dataclass
 
 from .scm_data import get_scm_data
 from ..helpers.py_helper import class_to_dict
-from ..public.ups_handler import get_ups_jHtml
+from ..common.ups_handler import get_ups_jHtml
 from ..helpers.user_helper import UserFolders
 from ..helpers.uiact_helper import UiActResponse
 from ..helpers.jinja_helper import process_template

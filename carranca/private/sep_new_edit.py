@@ -25,7 +25,7 @@ from .sep_form_data import get_sep_data, SepEditMode, NoManager, SCHEMA_LIST_KEY
 from ..private.UserSep import UserSep
 from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import is_str_none_or_empty, to_int
-from ..public.ups_handler import get_ups_jHtml
+from ..common.ups_handler import get_ups_jHtml
 from ..helpers.user_helper import get_batch_code
 from ..helpers.types_helper import Choices
 from ..helpers.uiact_helper import UiActResponseProxy

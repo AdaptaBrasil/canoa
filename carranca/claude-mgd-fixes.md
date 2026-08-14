@@ -9,6 +9,18 @@ ledger stays the tamper-evidence mechanism; this file is the human-readable "wha
 
 ---
 
+## 2026-08-14 — `dialog.html.j2` footer row missing `align-items-center`
+
+`<select>` in a dialog footer (`sep_validate`'s user-list dropdown) rendered visibly
+misaligned against the neighboring buttons. `align-items-center` was on the outer
+`dlg-modal-content-footer-id` div, but the actual flex row grouping the controls
+(`dlg-btns-container-id`) only had `justify-content-center g-2` — missing its own
+`align-items-center`. Moved the class down to the row that needs it; removed it from the
+outer div since Bootstrap's `.modal-footer` already sets `align-items: center` by default,
+so it was redundant there.
+
+---
+
 ## 2026-07-24 — `SchemaData.coder` was dead weight, always `null` in every export
 
 Last open item from the Refs #57 export-format review: `scm_data.py:36`'s

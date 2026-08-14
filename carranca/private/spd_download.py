@@ -17,6 +17,7 @@ from flask import send_file, Response
 from ..helpers.py_helper import is_str_none_or_empty
 from ..helpers.route_helper import MTD_GET, get_private_response_data, init_response_vars
 from ..common.abort_handler import abort_handler
+from ..common.app_constants import APP_DOWNLOAD_READY_COOKIE
 from ..common.app_context_vars import sidekick
 from ..helpers.js_consts_helper import js_form_sec_check
 from ..common.app_error_assistant import HTTP_StatusCode, ModuleErrorCode, AppStumbled
@@ -68,6 +69,10 @@ def download_rec(code: str) -> Response:
             task_code += 7
             file_response = send_file(ffn, as_attachment=True, download_name=original_name)
             http_status_code = file_response.status_code
+            # see canoa.js's setSleepVeil() -- Set-Cookie arrives with the response headers,
+            # well before the body finishes streaming, so the client can poll for it instead
+            # of guessing a fixed delay before hiding the sleep veil
+            file_response.set_cookie(APP_DOWNLOAD_READY_COOKIE, "1", max_age=30, path="/")
 
     except Exception as e:
         # see common.abort_handler for why this doesn't use the project's usual ups_handler page

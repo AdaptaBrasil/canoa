@@ -21,7 +21,7 @@ from .UserSep import UserSep
 from .spd_analysis import get_id_values
 from ..helpers.py_helper import is_str_none_or_empty
 from ..models.private.sep import Sep
-from ..common.app_constants import APP_NAME
+from ..common.app_constants import APP_NAME, APP_DOWNLOAD_READY_COOKIE
 from ..helpers.route_helper import MTD_GET, get_private_response_data, init_response_vars
 from ..common.abort_handler import abort_handler
 from ..common.app_context_vars import app_user
@@ -102,6 +102,10 @@ def download_ids(code: str) -> Response:
                 mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             )
             http_status_code = file_response.status_code
+            # see canoa.js's setSleepVeil() -- Set-Cookie arrives with the response headers,
+            # well before the body finishes streaming, so the client can poll for it instead
+            # of guessing a fixed delay before hiding the sleep veil
+            file_response.set_cookie(APP_DOWNLOAD_READY_COOKIE, "1", max_age=30, path="/")
 
     except Exception as e:
         # see common.abort_handler for why this doesn't use the project's usual ups_handler page

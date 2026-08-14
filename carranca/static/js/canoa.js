@@ -9,8 +9,30 @@ const setSleepVeil = () => {
     const sv = document.querySelector('[data-sleep-veil]');
     if (sv) {
         sv.className = 'dlg-sleep-veil';
-        // a la chamba: safety net in case the page never navigates away (eg. a same-tab file download)
-        setTimeout(() => { sv.className = 'd-none'; }, 6000);
+
+        // download_ready cookie trick: the server Set-Cookie's this on the file response,
+        // which arrives with the response headers -- well before the body finishes streaming
+        // -- so polling for it hides the veil as soon as the download actually starts,
+        // instead of guessing a fixed delay.
+        // keep in sync with carranca/common/app_constants.py's APP_DOWNLOAD_READY_COOKIE --
+        // this file is static (not Jinja-rendered), so it can't import that constant directly
+        const cookieName = 'download_ready';
+        const clearCookie = () => { document.cookie = `${cookieName}=; Max-Age=0; path=/`; };
+        const hide = () => { sv.className = 'd-none'; };
+
+        clearCookie(); // drop any stale cookie from a previous download before polling
+        const poll = setInterval(() => {
+            if (document.cookie.includes(`${cookieName}=1`)) {
+                clearInterval(poll);
+                clearTimeout(timeout);
+                clearCookie();
+                hide();
+            }
+        }, 300);
+
+        // safety net in case the cookie never arrives (eg. cookies blocked,
+        // a same-tab navigation, or a route that doesn't set it)
+        const timeout = setTimeout(() => { clearInterval(poll); hide(); }, 6000);
     }
 }
 

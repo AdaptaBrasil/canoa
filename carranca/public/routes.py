@@ -117,7 +117,7 @@ def password_reset(token=None):
             UITextsKeys.Form.title: title,
             UITextsKeys.Msg.error: message,
         }
-        return render_template("home/html_error_page.html", code=code, fi=fi.with_icon("http_error"), **ui_texts), code
+        return render_template("home/html_error_page.html.j2", code=code, fi=fi.with_icon("http_error"), **ui_texts), code
     else:
         from .access_control.password_reset import password_reset
 

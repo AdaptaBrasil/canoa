@@ -1,12 +1,12 @@
 {#
 ----------------------------------
-./home/html_error_page.html
+./home/html_error_page.html.j2
 ----------------------------------
 Generic HTTP-error display page (400/401/403/404/405/410/500). No custom body/footer
-needed -- UIDBTexts.set_msg_fatal() (see carranca/common/http_error_messages.py's
-callers) already sets msgOnly=True, which is exactly form.html.j2's own
-"display-only, no <form>/CSRF, just the message + a Close button" path, used by
-every other message-only dialog in Canoa.
+needed -- UIDBTexts.set_msg_fatal() (see carranca/__init__.py's _page_or_raw and
+public/routes.py's password_reset) already sets msgOnly=True, which is exactly
+form.html.j2's own "display-only, no <form>/CSRF, just the message + a Close
+button" path, used by every other message-only dialog in Canoa.
 
 Extends:
 ./layouts/form.html.j2

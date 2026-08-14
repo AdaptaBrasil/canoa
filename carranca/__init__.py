@@ -137,7 +137,7 @@ def _register_error_handlers(app: Flask):
             UITextsKeys.Msg.error: message,
             UITextsKeys.Action.dlg_close: "/",
         }
-        return render_template("home/html_error_page.html", code=code, fi=fi.with_icon("http_error"), **ui_texts), code
+        return render_template("home/html_error_page.html.j2", code=code, fi=fi.with_icon("http_error"), **ui_texts), code
 
     @app.errorhandler(HTTPStatus.BAD_REQUEST)
     def bad_request(error):
@@ -170,7 +170,7 @@ def _register_error_handlers(app: Flask):
     # Flask-Login's own callback for @login_required routes -- fires *instead of* (never
     # alongside) the UNAUTHORIZED errorhandler above, since defining this callback tells
     # Flask-Login to skip its default abort(401) entirely. Kept here, not in public/routes.py,
-    # so every home/html_error_page.html caller lives in one place.
+    # so every home/html_error_page.html.j2 caller lives in one place.
     @global_login_manager.unauthorized_handler
     def unauthorized_handler():
         return _page_or_raw(None, HTTPStatus.UNAUTHORIZED)

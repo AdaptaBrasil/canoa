@@ -16,7 +16,7 @@ app_constants.py
 APP_NAME = "Canoa"
 
 # &beta; major.minor
-APP_VERSION = "β 5.99"  # 2026-08-13
+APP_VERSION = "β 6.00"  # 2026-08-14
 
 # default user HTML/DB lang/locale (see table users.lang)
 APP_LANG = "pt-br"
@@ -30,4 +30,11 @@ APP_JINJA_TEMPLATE_BUG_MSG_TECH = "Disable config.DEBUG_RENDERED_TEMPLATES to hi
 
 
 APP_RAW_HTTP_ERROR_RAISED = "raw_http_error_raised"
+
+# Cookie name set on every file-download response (spd_download.py, sep_ids_download.py,
+# scm_export_db.py, received_files/download_record.py) so canoa.js's setSleepVeil() can poll
+# for it instead of guessing a fixed delay. Keep in sync with canoa.js's own copy of this
+# string -- it's a static JS file, not Jinja-rendered, so it can't import this constant.
+APP_DOWNLOAD_READY_COOKIE = "download_ready"
+
 # eof

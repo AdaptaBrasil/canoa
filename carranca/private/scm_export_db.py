@@ -23,6 +23,7 @@ from ..helpers.types_helper import Jinja_Rendered
 from ..helpers.route_helper import get_private_response_data, init_response_vars
 from ..models.private.ExportGrid import ExportGrid
 from ..config.ExportProcessConfig import ExportProcessConfig
+from ..common.app_constants import APP_DOWNLOAD_READY_COOKIE
 from ..common.app_error_assistant import ModuleErrorCode
 
 
@@ -94,6 +95,10 @@ def scm_export_db(uiact_rsp: UiActResponse) -> Jinja_Rendered | Response:
 
             ui_db_texts.set_msg_success()
             file_response = send_file(config.output_full_file_name, as_attachment=True)
+            # see canoa.js's setSleepVeil() -- Set-Cookie arrives with the response headers,
+            # well before the body finishes streaming, so the client can poll for it instead
+            # of guessing a fixed delay before hiding the sleep veil
+            file_response.set_cookie(APP_DOWNLOAD_READY_COOKIE, "1", max_age=30, path="/")
             return file_response
 
         task_code += 1

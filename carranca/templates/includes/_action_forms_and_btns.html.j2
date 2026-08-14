@@ -7,6 +7,7 @@ Macros for Action Forms and Buttons:
 Buttons:
 - `btn_close`: [Close] | [X]
 - `btn_submit`: [Submit]
+- `btn_download`: like `btn_action`, but new-tab + sleep-veil wiring baked in
 
 v2 2025.04.01
 mgd
@@ -55,6 +56,16 @@ The default caption buttons are in English:
 </button>
 {% endmacro %}
 {# -- Button #}
+
+
+{# -- Download button: same as btn_action, but with the new-tab + sleep-veil wiring
+   (formtarget="_blank" onclick="setSleepVeil()", see canoa.js's download_ready cookie
+   trick) baked in, so callers don't repeat that attribute string per grid -- #}
+{% macro btn_download(form_id, caption, cmd= '', extra= '')%}
+<button type="submit" form="{{form_id}}" id="{{do_btn_id(cmd, caption)}}" class="frm-foot-btn" formtarget="_blank" onclick="setSleepVeil()" {{extra}}>
+    {{caption}}
+</button>
+{% endmacro %}
 
 
 {# -- Button that calls a JS function directly on click, not tied to a form submission

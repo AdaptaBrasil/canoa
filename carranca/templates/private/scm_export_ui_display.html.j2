@@ -85,12 +85,12 @@ mgd
 
 {# ╒════════════════ Dialog Footer ═══════════════╛ #}
 {% block dlg_blc_footer_buttons %}
-{% from "includes/_action_forms_and_btns.html.j2" import btn_action, btn_click %}
+{% from "includes/_action_forms_and_btns.html.j2" import btn_action, btn_click, btn_download %}
 <div class="col-auto">
     {{ btn_action(dlg_post_form_id, dlgBtnSaveArrange, cargo_keys.save, "disabled") }}
 </div>
 <div class="col-auto">
-    {{ btn_action(dlg_post_form_id, dlgBtnExport, cargo_keys.export, 'formtarget="_blank" onclick="setSleepVeil()"') }}
+    {{ btn_download(dlg_post_form_id, dlgBtnExport, cargo_keys.export) }}
 </div>
 <div class="col-auto">
     {{ btn_click('btnDwnRprt', dlgBtnDownloadReport, 'downloadReport()', 'disabled') }}

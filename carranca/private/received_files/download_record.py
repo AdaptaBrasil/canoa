@@ -22,6 +22,7 @@ from ...helpers.file_helper import change_file_ext
 from ...helpers.types_helper import Usual_Dict
 from ...helpers.route_helper import MTD_GET, get_private_response_data, init_response_vars
 from ...common.abort_handler import abort_handler
+from ...common.app_constants import APP_DOWNLOAD_READY_COOKIE
 from ...common.app_context_vars import app_user
 from ...common.app_error_assistant import HTTP_StatusCode, ModuleErrorCode, AppStumbled
 from ...helpers.js_consts_helper import js_form_sec_check, JS_FORM_CARGO_ID, JS_GRID_COL_META_INFO
@@ -82,6 +83,10 @@ def download_rec() -> Response:
                 # TODO mimetype
                 file_response = send_file(download_file_name, as_attachment=True, download_name=uploaded_name)
                 http_status_code = HTTPStatus.OK
+                # see canoa.js's setSleepVeil() -- Set-Cookie arrives with the response headers,
+                # well before the body finishes streaming, so the client can poll for it instead
+                # of guessing a fixed delay before hiding the sleep veil
+                file_response.set_cookie(APP_DOWNLOAD_READY_COOKIE, "1", max_age=30, path="/")
             else:  # deleted just now :-(
                 _, msg_error = ui_db_texts.set_msg_error("fileNotFound")
                 msg = f"{msg_error} {_get_receipt(db_records[0])}"

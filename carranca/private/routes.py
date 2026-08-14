@@ -350,15 +350,11 @@ def scm_edit(code: str = "?"):
 @bp_private.route("/spd_grid/<code>", methods=MTD_BOTH)
 def spd_grid(code: str = "?"):
     """
-    Through this route, the user can edit and insert a Schema
+    Through this route, any logged-in user can view/download spatial data files;
+    insert/edit is further gated by /spd_edit's own is_power check.
     """
     if nobody_is_logged():
         return redirect_to(login_route())
-
-    from ..common.app_context_vars import app_user
-
-    if not app_user.is_power:
-        abort(HTTPStatus.FORBIDDEN)
 
     from .spd_grid import get_spd_grid
     from .spd_download import download_rec

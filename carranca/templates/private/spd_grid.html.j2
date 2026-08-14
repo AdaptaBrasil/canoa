@@ -19,7 +19,7 @@ mgd
 
 {# ╒════════════════ Grid Footer ════════════════╕ #}
 {% block grid_blc_footer %}
-{% from "includes/_action_forms_and_btns.html.j2" import btn_action %}
+{% from "includes/_action_forms_and_btns.html.j2" import btn_action, btn_download %}
 {% if jinja_user().power %}
     <div class="col-auto">
         {{ btn_action(dlg_post_form_id, grdBtnEdit, cargo_keys.edit) }}
@@ -29,7 +29,7 @@ mgd
     </div>
 {% endif %}
 <div class="col-auto">
-    {{ btn_action(dlg_post_form_id, grdBtnDownload, cargo_keys.download, 'formTarget="_blank"') }}
+    {{ btn_download(dlg_post_form_id, grdBtnDownload, cargo_keys.download) }}
 </div>
 {% endblock grid_blc_footer %}
 {# ╘═══════════════ Grid Footer ═════════════════╛ #}

@@ -13,6 +13,7 @@ from http import HTTPStatus
 from flask import Blueprint, render_template
 
 from ..helpers.pw_helper import internal_logout, is_anyone_logged
+from ..common.app_constants import PUBLIC_DOC_NAMES
 from ..helpers.route_helper import (
     MTD_BOTH,
     bp_name,
@@ -142,12 +143,20 @@ def password_recovery():
         return password_recovery()
 
 
-# new comers: <name> is a dynamic name
 @bp_public.route("/docs/<publicDocName>")
 def docs(publicDocName: str):
+    """
+    Displays a document (eg. `aboutApp`, `privacyPolicy`, `termsOfUse`).
+    Despite living in `bp_public`, this route is only *partially* public:
+    names in `PUBLIC_DOC_NAMES` are open to everyone (linked from login/
+    register, before the user is authenticated); any other name requires
+    an active session.
+    """
     from .display_html import display_html
 
-    # TODO privateDocs for About
+    if publicDocName.lower() not in PUBLIC_DOC_NAMES and not is_anyone_logged():
+        return redirect_to(login_route())
+
     return display_html(publicDocName)
 
 

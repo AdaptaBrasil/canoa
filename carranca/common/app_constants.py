@@ -37,4 +37,7 @@ APP_RAW_HTTP_ERROR_RAISED = "raw_http_error_raised"
 # string -- it's a static JS file, not Jinja-rendered, so it can't import this constant.
 APP_DOWNLOAD_READY_COOKIE = "download_ready"
 
+# /docs/<publicDocName> names reachable without login (public/routes.py's docs() route)
+PUBLIC_DOC_NAMES = ("privacyPolicy", "termsOfUse")
+
 # eof

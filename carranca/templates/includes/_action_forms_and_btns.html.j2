@@ -58,9 +58,7 @@ The default caption buttons are in English:
 {# -- Button #}
 
 
-{# -- Download button: same as btn_action, but with the new-tab + sleep-veil wiring
-   (formtarget="_blank" onclick="setSleepVeil()", see canoa.js's download_ready cookie
-   trick) baked in, so callers don't repeat that attribute string per grid -- #}
+{# --extension of btn_action, (onclick="setSleepVeil()", see canoa.js's download_ready cookie trick) #}
 {% macro btn_download(form_id, caption, cmd= '', extra= '')%}
 <button type="submit" form="{{form_id}}" id="{{do_btn_id(cmd, caption)}}" class="frm-foot-btn" formtarget="_blank" onclick="setSleepVeil()" {{extra}}>
     {{caption}}

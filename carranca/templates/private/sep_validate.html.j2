@@ -22,10 +22,10 @@ mgd
 {% block grid_blc_footer %}
 {% from "includes/_action_forms_and_btns.html.j2" import btn_submit %}
 <div class="col-auto">
-    {{ btn_submit(dlg_post_form_id, "btn-validate-one-id", grdBtnValidateOne, 'name="cmd" value="one" disabled') }}
+    {{ btn_submit(dlg_post_form_id, "btn-validate-all-id", grdBtnValidateAll, 'name="cmd" value="all"') }}
 </div>
 <div class="col-auto">
-    {{ btn_submit(dlg_post_form_id, "btn-validate-all-id", grdBtnValidateAll, 'name="cmd" value="all"') }}
+    {{ btn_submit(dlg_post_form_id, "btn-validate-one-id", grdBtnValidateOne, 'name="cmd" value="one" disabled') }}
 </div>
 {% endblock grid_blc_footer %}
 {# ╘═══════════════ Grid Footer ═════════════════╛ #}

@@ -169,9 +169,9 @@ def do_sep_edit(data: str) -> str:
             fform.sep_name.render_kw["lang"] = app_user.lang
             fform.description.render_kw["lang"] = app_user.lang
             # 2026.05
-            _choices: Choices = SpatialDataFile.get_rows(["id", "spd_name"], None, "spd_name_lower")
+            _choices: Choices = SpatialDataFile.get_rows(["id", "spd_name", "features_count"], None, "spd_name_lower")
             first_item = [("", "(nenhum)")]  # TODO
-            fform.spd_name.choices: Choices = first_item + [(r.id, r.spd_name) for r in _choices]
+            fform.spd_name.choices: Choices = first_item + [(r.id, f"{r.spd_name} ({r.features_count} objetos)") for r in _choices]
 
         task_code += 1  # 3
         sep_row, ui_select_lists, sep_fullname = get_sep_data(task_code, editMode, no_manager, ui_db_texts, fform, sep_id, sep_fullname)

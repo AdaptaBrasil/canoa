@@ -9,7 +9,7 @@ Equipe da Canoa --  06.2026
 mgd
 """
 
-# cSpell:ignore spddata
+# cSpell:ignore spdata
 
 import json
 from os import path
@@ -23,7 +23,7 @@ from ...common.app_error_assistant import ModuleErrorCode
 Row_Values: TypeAlias = dict[str, int | str | None]
 
 
-def spddata(cargo: Cargo) -> Next_Cargo:
+def spdata(cargo: Cargo) -> Next_Cargo:
     """
     Writes a JSON file with the spatial data IDs and/or attributes
     to the data_tunnel write folder so `data_validate` can use them.
@@ -36,7 +36,7 @@ def spddata(cargo: Cargo) -> Next_Cargo:
     msg_exception = ""
     task_code = 1
     spd_id = 0
-    proc = "[spddata]: "
+    proc = "[spdata]: "
 
     try:
 

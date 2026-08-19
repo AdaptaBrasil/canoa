@@ -9,6 +9,30 @@ ledger stays the tamper-evidence mechanism; this file is the human-readable "wha
 
 ---
 
+## 2026-08-18 — `request_loader` silently authenticated from any POST's `username` field
+
+Found while testing the GH #1 welcome-email flow (`register.py`): right after registering,
+the response page rendered as if logged in as the brand-new user. Traced to Flask-Login's
+`request_loader` (`models/public/user.py:160-166`) — a fallback callback that fires whenever
+session-based lookup finds no user, reading `request.form.get("username")` and returning
+`User.get_where(username_lower=...)` for it, with **no password check at all**. Register's
+POST form has a `username` field, and by the time the response template's `is_anyone_logged()`
+call first touches `current_user` (in `base.html.j2`'s nav block), the just-created row already
+exists — so the fallback matched it. Didn't persist (no `login_user()`/session cookie set), but
+the mechanism itself is a real hole: any route with a `username`-named form field would trigger
+the same silent, passwordless authentication for that one request.
+
+Traced to its origin: the exact same suspicious comment (`# TODO, seems that this make a user
+name before log process has finished`) was already attached in the very first commit that added
+it (`7780a62`, 2025-05-14) — looks like Flask-Login tutorial boilerplate, flagged as suspicious
+immediately by Miguel, never revisited. Confirmed via grep: nothing else in the codebase relies
+on `request_loader` for any real token/API-auth flow.
+
+**Fix:** commented out (not yet deleted — Miguel's call, `TODO: remove in next version`, tracked
+in `project_next_tasks.md` memory), dated 2026-08-18 with the explanation above.
+
+---
+
 ## 2026-08-14 — `dialog.html.j2` footer row missing `align-items-center`
 
 `<select>` in a dialog footer (`sep_validate`'s user-list dropdown) rendered visibly

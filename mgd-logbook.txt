@@ -1,7 +1,7 @@
 #spell:ignore onclick jinja apikey bingint vw_sepcombined andrade inpe nginx getusermail passwordrecovery changepassword resetpassword
 #spell:ignore desloga sepcombined especificacaosetor suporteusuariogrupo suporteusuarioelemento tmpl wtforms getuseremail getusermail requestemail
 #spell:ignore venv ccedil atilde receivefile datetime saude uix unsync healthcheck
-#spell:ignore Setorista sendgrid linux cnpq ajax mgmt SQLA sqla gmail varchar onsubmit dedup pycache spddata tkinter
+#spell:ignore Setorista sendgrid linux cnpq ajax mgmt SQLA sqla gmail varchar onsubmit dedup pycache spdata tkinter
 
 
 ------------- Use of / in schema/SEP -------------
@@ -79,7 +79,7 @@
         /status /usage
 
 
-------- 2025 - July --------------
+------- 2026- July --------------
 
     » 2026-07-06 Full tests, fix this log's June dates
 
@@ -177,7 +177,7 @@
             .  new icon_svg_inline() to work tests on SVG back color (not fully implemented)
             .
         - validate process:
-            create module [spddata]
+            create module [spdata]
         - other minor fixes
         - new var dlg_fa_size, for Font Awesome icon size
 

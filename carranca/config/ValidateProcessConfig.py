@@ -72,7 +72,7 @@ class ValidateProcessConfig:
         )
         # remove data_validate temporary files from (...data_tunnel/<user_code>/
         # ⚠️ set to False ONLY for debugging process
-        self.remove_user_folders = True
+        self.remove_user_folders = False
         _debug = ValidateProcessConfig._debug_process  # hard coded debug flag
         self.debug_process = debug if _debug is None else bool(_debug)
         self.stdout_result_pattern = r"<\{\"data_validate\":.*?}>"

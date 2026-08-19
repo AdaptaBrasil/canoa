@@ -10,6 +10,7 @@
         "formtarget",
         "UIDBTexts",
         "plpgsql",
+        "spdata",
         "dunder",
         "tojson",
         "claude",

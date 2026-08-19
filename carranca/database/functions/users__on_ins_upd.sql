@@ -5,14 +5,16 @@ CREATE OR REPLACE FUNCTION canoa.users__on_ins_upd()
  LANGUAGE plpgsql
 AS $function$
 declare
+	new_token text;
+    is_setting_new_token bool;
 	reset_recover_pw_token bool;
 	new_recover_pw_token_is_empty bool;
-	new_token text;
 begin
 
 	-- -----------------------------------------------------------------------------------------
 	-- /!\ Keep a copy of this file updated in carranca\database\functions\users__on_ins_upd.sql
     -- ------------------------------------------------------------------------------------------
+    -- mgd version 2026.08.19
 
 	-- mgd 2024-04-18
 	-- keep email lowercase
@@ -57,9 +59,15 @@ begin
 
 
 	-- keep verify email token date updated
+	-- NOTE: this trigger fires on ANY update to the users row, not just ones about e-mail
+	-- verification -- every branch below must check "distinct from old" before acting, or
+	-- it'll misfire on an untouched-but-still-pending token from an unrelated column change.
 	new_token := trim(coalesce(new.verify_email_token, ''));
-	-- todo check only 6 digits &
-	if (new_token ~ '^[0-9]{6}$') and new.verify_email_token is distinct from old.verify_email_token then
+    is_setting_new_token = new.verify_email_token is distinct from old.verify_email_token;
+
+	if is_setting_new_token and (new_token ~ '^[0-9]{6}$') then
+        -- new_token is a valid 6-digit token
+        -- verification process has started, stamp when the email was sent.
 	    new.verify_email_sent_at := now();
 	    new.email_verified_at    := null;
 	elsif old.verify_email_token is not null and (old.verify_email_token || '*' = new_token) then
@@ -67,14 +75,23 @@ begin
 	    new.email_verified_at    := now();
 	    new.verify_email_sent_at := null;
 	    new.verify_email_token   := null;
-	elsif new_token != '' then
-		-- delete junk from verify_mail token
+	elsif is_setting_new_token and new_token != '' then
+		-- Invalid token, keep table row safe:
 		new.verify_email_sent_at := null;
 	    new.verify_email_token := null;
 	elsif new_token = '' and old.verify_email_token is not null then
+		-- token explicitly cleared to null/empty in this same statement
+        -- and one used to exist
+        -- -> sync sent_at to null too, so nothing pending is left dangling.
   		new.verify_email_sent_at := null;
 	end if;
 
+
+	-- a real login just happened -> clear any pending "forgot password" request
+	if new.last_login_at is not null and new.last_login_at is distinct from old.last_login_at then
+		reset_recover_pw_token := true;
+		new.password_failures := 0;
+	end if;
 
 	-- keep datetime when the recover pw token was generated
 	new_recover_pw_token_is_empty = (trim(coalesce(new.recover_email_token, '')) = '');
@@ -89,8 +106,8 @@ begin
 	end if;
 	-- TODO check min length of recover_email_token
 
-	-- not needed any more
 	if reset_recover_pw_token then
+		-- not needed any more
 		new.recover_email_token := null;
 		new.recover_email_token_at := null;
 	end if;
@@ -104,3 +121,5 @@ $function$
 
 ALTER FUNCTION canoa.users__on_ins_upd() OWNER TO canoa_power;
 GRANT ALL ON FUNCTION canoa.users__on_ins_upd() TO canoa_power;
+
+-- eof

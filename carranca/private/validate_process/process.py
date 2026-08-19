@@ -23,7 +23,6 @@ Equipe da Canoa -- 2024 —— 06.2026
 mgd
 """
 
-# cSpell:ignore ext spddata
 # pyright: reportAttributeAccessIssue=false
 
 from typing import List, Tuple
@@ -42,7 +41,7 @@ from .ProcessData import ProcessData
 
 from .check import check
 from .unzip import unzip
-from .spdata import spddata
+from .spdata import spdata
 from .email import email
 from .submit import submit
 from .register import register
@@ -113,7 +112,7 @@ def process(
         # mgd test
         D:/Projects/AdaptaBrasil/Canoa/user_files/uploaded/00212/00212_2026-06-11_ei9358_se_saude_07_08.zip
     """
-    for current_module in [check, register, unzip, spddata, submit, email]:
+    for current_module in [check, register, unzip, spdata, submit, email]:
         current_module_name = current_module.__name__
         try:
             cargo, next_module_params = _get_next_params(cargo)

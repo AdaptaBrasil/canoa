@@ -64,6 +64,8 @@ mgd
 
 {% block dlg_blc_javascript %}
 <script id="sep_select">
+    Canoa.wake_up_in_ms = 300000; // process() can run long (data_validate); give the sleep-veil more time before the safety-net hides it
+
     const seps = {{ seps | tojson | safe }};
     const select = document.getElementById('{{ form.schema_sep.id }}');
     const icon = document.getElementById('{{ dlg_icon_id }}');

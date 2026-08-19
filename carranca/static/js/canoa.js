@@ -3,7 +3,7 @@
 */
 
 /** @type {CanoaGlobal} */
-window.Canoa = { dataModified: false, }
+window.Canoa = { dataModified: false, wake_up_in_ms: 6000 }
 
 const setSleepVeil = () => {
     const sv = document.querySelector('[data-sleep-veil]');
@@ -32,7 +32,7 @@ const setSleepVeil = () => {
 
         // safety net in case the cookie never arrives (eg. cookies blocked,
         // a same-tab navigation, or a route that doesn't set it)
-        const timeout = setTimeout(() => { clearInterval(poll); hide(); }, 6000);
+        const timeout = setTimeout(() => { clearInterval(poll); hide(); }, Canoa.wake_up_in_ms);
     }
 }
 

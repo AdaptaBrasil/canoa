@@ -507,7 +507,7 @@ def email_addr_hub(uid: str = "") -> Route_Response:
     if nobody_is_logged():
         return redirect_to(login_route())
 
-    elif not (user_rec := User.get_where(email=current_user.email)) or user_rec.disabled:
+    elif not (user_rec := User.get_where_email_is(current_user.email)) or user_rec.disabled:
         # Maybe just deleted | disable?  | ?
         return redirect_to(login_route())
 

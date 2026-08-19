@@ -14,6 +14,7 @@ from flask_login import login_user, logout_user
 
 from ..wtforms import LoginForm
 from ...models.public.user import User
+from ...common.UITextsKeys import UITextsKeys
 from ...config.FormIcons import FormIcons as fi
 from ...helpers.py_helper import is_str_none_or_empty, now_as_iso
 from ...helpers.pw_helper import internal_logout, is_anyone_logged, verify_password
@@ -25,6 +26,7 @@ from ...helpers.js_consts_helper import js_form_sec_check
 from ...common.app_error_assistant import ModuleErrorCode, AppStumbled
 from ...helpers.route_helper import (
     home_route,
+    private_route,
     redirect_to,
     init_response_vars,
     get_form_input_value,
@@ -46,14 +48,13 @@ def do_login():
             internal_logout()
         elif is_get:
             task_code += 2  # 4
-            pass
         elif not is_str_none_or_empty(msg_error_key := js_form_sec_check(expect_authenticated=False)):
             task_code += 3  # 5
             _, msg_error = ui_db_texts.set_msg_error(msg_error_key)
             raise AppStumbled(msg_error, task_code, True, True)
         else:
             task_code += 4  # 6
-            # user can inform name OR email => id
+            # /!\ user can inform name OR email => id
             id = get_form_input_value("username")
             task_code += 1  # 7
             password = get_form_input_value("password")
@@ -66,7 +67,6 @@ def do_login():
                 task_code += 1  # 12
                 ui_db_texts.set_msg_error("userOrPwdIsWrong")
             elif not verify_password(password, user.password):
-                # TODO: new  user.login_failed = True
                 user.password_failed_at = func.now()
                 task_code += 2  # 13
                 user.password_failures = user.password_failures + 1
@@ -81,17 +81,14 @@ def do_login():
             else:
                 task_code += 6  # 17
                 user_email_verified = user.email_verified
+                pending_verify_token = user.verify_email_token
                 task_code += 1  # 18
-                # start
-                # reset the 'user state'
-                user.recover_email_token = None
                 user.last_login_at = func.now()
-                user.password_failures = 0
-                # end
                 task_code += 1  # 19
                 remember_me = not is_str_none_or_empty(request.form.get("remember_me"))
                 task_code += 1  # 20
-                login_user(user, remember_me)
+                # no persistent cookie while unverified -- nudges them to finish verifying
+                login_user(user, remember_me and user_email_verified)
                 task_code += 1  # 21
                 msg = f"{user.username} [id: {user.id}, role: '{user.role.name}'] just logged in [{now_as_iso()}]."
                 sidekick.display.info(msg)
@@ -102,9 +99,17 @@ def do_login():
                 if user_email_verified:
                     return redirect_to(home_route())
 
-                task_code += 1  # 24
-                ui_db_texts.set_msg_warn("msgVerifyEmail")
+                from ...private.routes import ROUTE_EMAIL_ADDR_HUB
+
+                if pending_verify_token:
+                    task_code += 1  # 24
+                    ui_db_texts.set_msg_info("msgTokenPending")
+                else:
+                    task_code += 2  # 25
+                    ui_db_texts.set_msg_info("msgVerifyEmail")
+
                 ui_db_texts.set_value("display_footer", "False")
+                ui_db_texts.set_value(UITextsKeys.Action.dlg_close, private_route(ROUTE_EMAIL_ADDR_HUB))
                 ui_db_texts.display_msg_only = True
 
         jHtml = process_template(tmpl_ffn, form=fform, fi=fi.with_icon("login"), **ui_db_texts.data())

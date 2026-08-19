@@ -157,12 +157,14 @@ def user_loader(id: str) -> UserMixin | None:
     return user
 
 
-# TODO, seems that this make a user name before log process has finished
-@global_login_manager.request_loader
-def request_loader(request: Request) -> UserMixin | None:
-    username = "" if len(request.form) == 0 else request.form.get("username", "")
-    user = None if is_str_none_or_empty(username) else User.get_where(username_lower=username.lower())
-    return user
+# 2026-08-18 dead code: silently authenticated `current_user` from any POST's `username`
+# field, no password check (confirmed via register.py testing -- traced in claude-mgd-fixes.md).
+# Not used by any real token/API flow (grepped the repo). TODO: remove in next version.
+# @global_login_manager.request_loader
+# def request_loader(request: Request) -> UserMixin | None:
+#     username = "" if len(request.form) == 0 else request.form.get("username", "")
+#     user = None if is_str_none_or_empty(username) else User.get_where(username_lower=username.lower())
+#     return user
 
 
 # eof

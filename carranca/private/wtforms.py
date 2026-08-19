@@ -90,7 +90,7 @@ class EmailTokenForm(FlaskForm):
     token = IntegerField(
         "",
         validators=[DataRequired(), NumberRange(min=min, max=max)],
-        render_kw=cls_render_kw,
+        render_kw={**cls_render_kw, "autocomplete": "off"},
     )
 
 

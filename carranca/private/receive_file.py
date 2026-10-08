@@ -145,7 +145,7 @@ def receive_file() -> Jinja_Template:
 
         return _w and _r and _l  # don't concatenate functions ;—)
 
-    def _try_lock_process(ui_db_texts: UIDBTexts, pd: ProcessData, task_code: int) -> bool:
+    def _lock_process(ui_db_texts: UIDBTexts, pd: ProcessData, task_code: int) -> bool:
         """
         Checks/acquires the processing lock for a user folder.
         Returns True if lock acquired (caller may proceed), False if not
@@ -157,7 +157,7 @@ def receive_file() -> Jinja_Template:
             ui_db_texts.display_msg_only = True
             return
 
-        result = True
+        result = False
         lock_file = path.join(pd.path.data_tunnel_user_lock, pd.lock.file_name)
         if path.isfile(lock_file):
             age_minutes = (time.time() - path.getmtime(lock_file)) / 60
@@ -186,6 +186,7 @@ def receive_file() -> Jinja_Template:
         return result
 
     remove_user_folders = True
+    process_locked = False
     pd: ProcessData | None = None
     try:
         tmpl_ffn, is_get, ui_db_texts = get_private_response_data("receiveFile")
@@ -247,11 +248,12 @@ def receive_file() -> Jinja_Template:
         debug_process, remove_user_folders, pd = doProcessData()
 
         task_code += 1  # 15
+
         if not ensure_folder_exists(pd.path.data_tunnel_user_lock):
             task_code += 1  # 16
             error_code = _log_issue(ui_db_texts, Display.Kind.ERROR, 0, RECEIVE_FILE_DEFAULT_ERROR, task_code)
             return _get_template(ui_db_texts, error_code)
-        elif not _try_lock_process(ui_db_texts, pd, task_code + 2):  # 17
+        elif not (process_locked := _lock_process(ui_db_texts, pd, task_code + 2)):  # 17
             return _get_template(ui_db_texts, 0)
         elif not _cleanup_user_folders("init", pd, True, False):
             task_code += 4  # 18
@@ -304,7 +306,8 @@ def receive_file() -> Jinja_Template:
         _, tmpl_ffn, ui_db_texts = ups_handler(task_code, msg, e)
         jHtml = process_template(tmpl_ffn, **ui_db_texts)
     finally:
-        _cleanup_user_folders("exit", pd, remove_user_folders, True)
+        if process_locked:
+            _cleanup_user_folders("exit", pd, remove_user_folders, True)
 
     return jHtml
 

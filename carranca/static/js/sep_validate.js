@@ -21,16 +21,17 @@ const decodeHtmlEntities = (text) => {
 };
 
 // https://www.ag-grid.com/javascript-data-grid/column-definitions/
-// == Ag Grid (single-row selection feeds [Validar Um]; [Validar Todos] needs no selection --
-// both still just POST to the same under-development stub in sep_validate.py, see #61)
+// == Ag Grid (single-row selection feeds [Validar Um], posting the row's `id` -- the
+// user_data_files.id of the SEP's last file -- as `udf_id`; [Validar Todos] needs no
+// selection and still POSTs to the under-development stub in sep_validate.py, see #61)
 
-const selectedSepIdInput = /** @type {HTMLInputElement} */ (document.getElementById('selected-sep-id'));
+const selectedUdfIdInput = /** @type {HTMLInputElement} */ (document.getElementById('selected-code'));
 const btnValidateOne = /** @type {HTMLButtonElement} */ (document.getElementById('btn-validate-one-id'));
 
 /** @param {any} event */
 const onSelectionChanged = event => {
     const row = event.api.getSelectedRows()[0];
-    selectedSepIdInput.value = row ? row.sep_id : '';
+    selectedUdfIdInput.value = row ? row.id : '';
     btnValidateOne.disabled = !row;
 };
 

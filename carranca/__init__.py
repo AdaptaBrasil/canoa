@@ -179,7 +179,16 @@ def _register_error_handlers(app: Flask):
 
 
 # ---------------------------------------------------------------------------- #
-def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version: str, db_version: str, ui_defaults: str):
+def _register_jinja(
+    app: Flask,
+    debugUndefined: bool,
+    app_name: str,
+    app_version: str,
+    db_version: str,
+    app_brand: str,
+    app_brand_alert: bool,
+    ui_defaults: str,
+):
     from .helpers.types_helper import DB_Texts
     from .helpers.uiact_helper import UiActResponseProxy
     from .helpers.route_helper import private_route, public_route, static_route
@@ -237,6 +246,8 @@ def _register_jinja(app: Flask, debugUndefined: bool, app_name: str, app_version
         app_name=app_name,
         app_version=app_version,
         db_version=db_version,
+        app_brand=app_brand,
+        app_brand_alert=app_brand_alert,
         ui_defaults=json.loads(ui_defaults),
         static_route=static_route,
         private_route=private_route,
@@ -389,7 +400,7 @@ def _create_app_and_log_file(app_name: str):
 def create_app():
     from .common.igniter import ignite_app
     from .helpers.email_helper import EmailProvider
-    from .common.app_constants import APP_VERSION, APP_NAME
+    from .common.app_constants import APP_VERSION, APP_NAME, APP_SCHEMA
 
     # ⚠️ =================================================
     # Global variables should be assigned before any other module
@@ -403,7 +414,7 @@ def create_app():
     FLASK_APP_NAME = "main.py"
 
     # === Check if all mandatory information is ready === #
-    global_sidekick, db_version, display_mute_after_init = ignite_app(APP_NAME, FLASK_APP_NAME, started)
+    global_sidekick, db_version, db_schema, display_mute_after_init = ignite_app(APP_NAME, FLASK_APP_NAME, started)
     _info(f"[{global_sidekick}] instance is now ready to assist you.")
     gcfg = global_sidekick.config  # shortcut
 
@@ -445,7 +456,14 @@ def create_app():
     jinja_ui_defaults = _init_ui_db_texts()
 
     # -- Jinja2
-    _register_jinja(app, bool(gcfg.DEBUG_TEMPLATES), APP_NAME, APP_VERSION, db_version, jinja_ui_defaults)
+    db_is_production = db_schema == APP_SCHEMA
+    # Brand: the app name on the production schema, otherwise the schema itself (e.g. canoa_dev)
+    app_brand = APP_NAME if db_is_production else db_schema
+    # Alert on a mismatch: debugging on live data, or production running on a copy (see navigator.html.j2)
+    app_brand_alert = bool(gcfg.APP_DEBUGGING) == db_is_production
+    _register_jinja(
+        app, bool(gcfg.DEBUG_TEMPLATES), APP_NAME, APP_VERSION, db_version, app_brand, app_brand_alert, jinja_ui_defaults
+    )
 
     # config sidekick.display
     if display_mute_after_init:

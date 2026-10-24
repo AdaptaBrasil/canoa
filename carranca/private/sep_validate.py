@@ -35,12 +35,10 @@ def get_sep_validate_grid() -> Jinja_Rendered:
         task_code += 1  # 1
         tmpl_ffn, is_get, ui_db_texts = get_private_response_data("sepValidate")
 
-        if not is_get:
-            # 2026-10-08: both [Validar Todos] and [O Selecionado] show the "under development"
-            # stub for now -- the single-row path below is wired and works, but known gaps
-            # (rv_check's size/CRC32 bypass, the export-view error_code bug, missing DB text
-            # keys) mean it shouldn't be reachable from the UI yet. Restore the
-            # `get_form_input_value("cmd") != "one"` condition here to re-enable it.
+        if not is_get and get_form_input_value("cmd") != "one":
+            # [Validar Todos] (bulk, needs a background job) is still under development.
+            # 2026-10-24 [O Selecionado] re-enabled for testing on canoa_dev; still open before
+            # production: rv_check's size/CRC32 bypass, missing DB text keys.
             _, tmpl_ffn2, ui_texts = ups_handler(0, "A validação de todos os setores ainda está em desenvolvimento.")
             return process_template(tmpl_ffn2, **ui_texts)
 

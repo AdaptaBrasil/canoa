@@ -9,6 +9,17 @@ ledger stays the tamper-evidence mechanism; this file is the human-readable "wha
 
 ---
 
+## 2026-10-24 — "key not found" message dropped the current section name
+
+Found while testing [O Selecionado] revalidation (Refs #61): the message for a missing
+`receiveFileSubmit_error` read "não foi encontrada na; § , secError", with no current
+section. `UIDBTexts._key_not_found_ui_msg` (line 352) built it as
+`self.section + "" if ... else f", {alternative_section}"` -- the conditional expression
+binds looser than `+`, so with an alternative section the whole value became just
+`", secError"`. **Fix:** parenthesized the conditional, now reads "sepValidate, secError".
+
+---
+
 ## 2026-08-18 — `request_loader` silently authenticated from any POST's `username` field
 
 Found while testing the GH #1 welcome-email flow (`register.py`): right after registering,

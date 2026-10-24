@@ -69,6 +69,26 @@ body {
     background-color: #ffffff7a;
 }
 
+/* debug on live data, or production on a copy (also dialog.html.j2 title) */
+.brand-alert,
+.brand-alert:hover {
+    /* :hover beats bootstrap's .navbar-brand:hover */
+    color: var(--bs-danger);
+    font-weight: bold;
+}
+
+/* not production schema, just info (dialog.html.j2 title, same color as .dlg-fa-icon) */
+.brand-info {
+    color: var(--canoa-form-label-color);
+}
+
+/* alert on the brown dialog header: a cream chip, so the red stands out */
+.dlg-title .brand-alert {
+    background-color: var(--canoa-dlg-body-bg);
+    border-radius: 0.6rem;
+    padding: 0.1rem 0.5rem;
+}
+
 /* ============================================
  *  MS Edge workaround to avoid revealing password
  *

@@ -182,38 +182,41 @@ def _check_mandatory_keys(config, fDisplay) -> str:
 
 
 # ---------------------------------------------------------------------------- #
-def _ignite_sql_connection(fuse: Fuse, uri: str) -> Tuple[str, str]:
+def _ignite_sql_connection(fuse: Fuse, uri: str) -> Tuple[str, str, str]:
     """
-    Establish a connection to the database and retrieve the database version.
+    Establish a connection to the database and retrieve the database version and schema.
 
     Args:
         uri (str): The database connection URI.
 
     Returns:
-        Tuple[str, str]: A tuple containing an error message (if any) and the database version.
+        Tuple[str, str, str]: error message (if any), database version and
+        the schema the server resolved (search_path), e.g. canoa or canoa_dev.
     """
     from sqlalchemy import create_engine, text
     from sqlalchemy.exc import OperationalError
 
     error = ""
     db_version: str = "?"
+    db_schema: str = "?"
     fuse.display.debug("Connecting to the database.")  # this may take a while
     error_msg = "{} error: Unable to connect to the database.{}\nError details:\n[{}]."
     try:
         engine = create_engine(uri)
         start_time = time.time()
         with engine.connect() as connection:
-            result = connection.execute(text("select number from db_version order by id desc limit 1"))
-            _version: str | None = result.scalar()
-            db_version = _version if isinstance(_version, str) else "!"
+            result = connection.execute(text("select number, current_schema() from db_version order by id desc limit 1"))
+            row = result.first()
+            db_version = row[0] if row and isinstance(row[0], str) else "!"
+            db_schema = row[1] if row and isinstance(row[1], str) else "!"
             elap = f"{(time.time() - start_time) * 1000:,.2f}"
-            fuse.display.info(f"Connected to database version {db_version} successfully in {elap} ms.")
+            fuse.display.info(f"Connected to database version {db_version} (schema {db_schema}) successfully in {elap} ms.")
     except OperationalError as e:
         error = error_msg.format("Operational", f"\nuri: [{uri}]", e)
     except Exception as e:
         error = error_msg.format("Unexpected", "", e)
 
-    return error, db_version
+    return error, db_version, db_schema
 
 
 # ---------------------------------------------------------------------------- #
@@ -229,7 +232,7 @@ def _check_roles_abbr(fuse: Fuse, uri: str) -> str:
     try:
         engine = create_engine(uri)
         with engine.connect() as connection:
-            result = connection.execute(text("select abbr from canoa.roles"))
+            result = connection.execute(text("select abbr from roles"))  # avoid schema: from canoa.roles"))
             db_abbrs = {row[0].strip() for row in result}
 
         known_abbrs = {r.value for r in RolesAbbr}
@@ -255,7 +258,7 @@ def _check_roles_abbr(fuse: Fuse, uri: str) -> str:
 from .Sidekick import Sidekick
 
 
-def ignite_app(app_name: str, flask_app_name: str, start_at: float) -> Tuple[Sidekick, str, bool]:
+def ignite_app(app_name: str, flask_app_name: str, start_at: float) -> Tuple[Sidekick, str, str, bool]:
     from .Display import Display
 
     global fuse
@@ -287,8 +290,11 @@ def ignite_app(app_name: str, flask_app_name: str, start_at: float) -> Tuple[Sid
         _log_and_exit(error)
     fuse.display.debug("All mandatory configuration keys were informed.")
 
+    # 2026-10-24 TEST alert case: drop canoa_dev, back to live canoa (remove after test)
+    # config.SQLALCHEMY_DATABASE_URI = config.SQLALCHEMY_DATABASE_URI.replace("?options=-csearch_path%3Dcanoa_dev", "")
+
     # Check DB connection, stop if not debugging
-    error, db_version = _ignite_sql_connection(fuse, config.SQLALCHEMY_DATABASE_URI)
+    error, db_version, db_schema = _ignite_sql_connection(fuse, config.SQLALCHEMY_DATABASE_URI)
     if not error:
         fuse.display.info(f"SQLAlchemy engine was created and the db (version {db_version}) connection was successfully tested.")
     elif RaiseIf.ignite_no_sql_conn:
@@ -338,7 +344,7 @@ def ignite_app(app_name: str, flask_app_name: str, start_at: float) -> Tuple[Sid
 
     del fuse  # clean up fuse to prevent memory leaks
 
-    return sidekick, db_version, mute_display_after_init
+    return sidekick, db_version, db_schema, mute_display_after_init
 
 
 # eof

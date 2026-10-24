@@ -17,10 +17,12 @@ AS SELECT id,
     report_warns,
     validator_version,
     registered_at AS uploaded_at,
-    g_report_ready_at AS validated_at
+    g_report_ready_at AS validated_at,
+    COALESCE(report_tests > 0, false) AS validated
    FROM user_data_files udf;
 
 COMMENT ON VIEW canoa.vw_base_data_files IS 'Shared core columns/logic for vw_user_data_files and vw_export_data_files -- Refs #93. Neither specialized view depends on the other anymore, both depend on this instead.';
+COMMENT ON COLUMN canoa.vw_base_data_files.validated IS 'Validation finished: report_tests > 0 (validator ran its tests). Not error_code (last failing step) nor validated_at (stamped before the report is checked) -- Refs #61.';
 
 -- Permissions
 

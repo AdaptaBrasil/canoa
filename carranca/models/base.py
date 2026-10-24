@@ -229,7 +229,7 @@ class CanoaBase(DeclarativeBase):
 
 
 class CanoaBaseTable(CanoaBase):
-    __table_args__ = {"schema": "canoa"}
+    # avoid schema: __table_args__ = {"schema": "canoa"}
     __abstract__ = True
 
 

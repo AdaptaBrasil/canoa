@@ -1,8 +1,9 @@
 -- update_canoa.sql
 -- Pending DB changes, to apply first on canoa_dev, then on canoa (production).
 --
--- Schema-independent: no `canoa.` prefixes. Set the target schema ONCE below;
--- unqualified names in the views are bound to it at creation time.
+-- Schema-independent: no `canoa.` prefixes. Set the target schema below, in the
+-- `set search_path` line and in the guard's `expected`; a mismatch stops the script.
+-- Unqualified names in the views are bound to it at creation time.
 -- Run the whole script (DBeaver: Alt+X), not statement by statement.
 -- Idempotent: it can run again on a DB that already has (part of) it.
 --
@@ -11,9 +12,21 @@
 -- cSpell:ignore secsuccess secerror receivefile receivefilesubmit_error uploadfilesuccess revalidatefilesuccess revalidatedfile
 -- cSpell:ignore uploadedfile revalidatefile uploadfileerror uploadfilezip uploadfileemail receivefileexception receivefileadmit
 
-set search_path to canoa_dev;  -- ⚠️ canoa_dev for testing, canoa for production
+set search_path to canoa_dev;  -- ⚠️ canoa_dev for testing, canoa for production; same name in `expected` below
 
 begin;
+
+-- guard: stops (rollback) when the schema in effect is not the expected one
+do $$
+declare
+  expected constant text := 'canoa_dev';  -- ⚠️ same name as the set search_path line
+begin
+  if current_schema() is distinct from expected then
+    raise exception 'update_canoa.sql: wrong schema [%], expected [%]', current_schema(), expected;
+  end if;
+  raise notice 'START db [%] schema [%] version [%]', current_database(), current_schema(),
+               (select number from db_version order by id desc limit 1);
+end $$;
 
 -- ============================================================================
 -- 2026-11-05 `validated` column -- Refs #61
@@ -288,6 +301,8 @@ select '5.14.0', '6.03',
        'user_data_files.validated (set by submit.py), views rank/filter by it; file_origin S; '
        || 'ui sections revalidateFile & revalidatedFile_email, 2 missing receiveFile keys (Refs #61)'
  where not exists (select 1 from db_version where number = '5.14.0');
+
+do $$ begin raise notice 'END schema [%] version [%]', current_schema(), (select number from db_version order by id desc limit 1); end $$;
 
 commit;
 

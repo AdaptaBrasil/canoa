@@ -20,13 +20,11 @@ from ...common.app_error_assistant import ModuleErrorCode
 from ...helpers.py_helper import is_str_none_or_empty, now_as_text, now
 from ...helpers.email_helper import RecipientsDic, RecipientsList, send_email
 
-# TODO 2026-09-16 create DB texts section "revalidatedFile_email" ("the validator was updated, check the new results")
-RV_EMAIL_TEXTS = "uploadedFile_email"
 
-
-def rv_email(cargo: Cargo, user_report_full_name: str, report_recipient: object | None) -> Next_Cargo:
-    """`report_recipient`: the SEP's current manager (name, email) or None"""
+def rv_email(cargo: Cargo, user_report_full_name: str) -> Next_Cargo:
+    """`cargo.report_recipient`: the SEP's current manager (name, email) or None; `cargo.email_texts`: the DB texts section"""
     proc = "[rv_email]: "
+    report_recipient = cargo.report_recipient
     msg_exception = ""
     task_code = 0
     try:
@@ -51,7 +49,7 @@ def rv_email(cargo: Cargo, user_report_full_name: str, report_recipient: object 
         }
 
         task_code += 1  # 2
-        send_email(recipients, RV_EMAIL_TEXTS, email_body_params, user_report_full_name)
+        send_email(recipients, cargo.email_texts, email_body_params, user_report_full_name)
         sidekick.display.info(f"{proc}An email was sent to [{recipients.to}] with the result of the revalidation.")
 
         task_code += 2  # 4

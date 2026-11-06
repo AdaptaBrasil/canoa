@@ -8,14 +8,14 @@ validator version processed it, and the last result (errors/warnings).
 
 First layer of the "Validar Visíveis" feature (Refs #61) -- display.
 [Validar Um] wires the second layer: revalidates the selected row's stored
-file (see `revalidate_sep.py`) and redisplays the grid with the result.
+file (see `revalidate_file.py`) and redisplays the grid with the result.
 [Validar Todos] (bulk, needs a background job) is still under development.
 
 Equipe da Canoa -- 2026
 mgd 2026-07-28
 """
 
-from .revalidate_sep import revalidate_sep
+from .revalidate_file import revalidate_file, RV_MSG_NOT_VALIDATED
 from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import is_str_none_or_empty
 from ..common.ups_handler import get_ups_jHtml, ups_handler
@@ -35,12 +35,10 @@ def get_sep_validate_grid() -> Jinja_Rendered:
         task_code += 1  # 1
         tmpl_ffn, is_get, ui_db_texts = get_private_response_data("sepValidate")
 
-        if not is_get:
-            # 2026-10-08: both [Validar Todos] and [O Selecionado] show the "under development"
-            # stub for now -- the single-row path below is wired and works, but known gaps
-            # (rv_check's size/CRC32 bypass, the export-view error_code bug, missing DB text
-            # keys) mean it shouldn't be reachable from the UI yet. Restore the
-            # `get_form_input_value("cmd") != "one"` condition here to re-enable it.
+        if not is_get and get_form_input_value("cmd") != "one":
+            # [Validar Todos] (bulk, needs a background job) is still under development.
+            # 2026-10-24 [O Selecionado] re-enabled for testing on canoa_dev; still open before
+            # production: rv_check's size/CRC32 bypass, missing DB text keys.
             _, tmpl_ffn2, ui_texts = ups_handler(0, "A validação de todos os setores ainda está em desenvolvimento.")
             return process_template(tmpl_ffn2, **ui_texts)
 
@@ -53,8 +51,11 @@ def get_sep_validate_grid() -> Jinja_Rendered:
         else:
             task_code += 2  # 4
             code = ExportGrid.to_id(get_form_input_value("code"))
-            error_code, msg_id, msg_arg = revalidate_sep(code)
-            if error_code == 0:
+            error_code, msg_id, msg_arg = revalidate_file(code)
+            if error_code == 0 and msg_id == RV_MSG_NOT_VALIDATED:
+                # processed, but the validation did not finish: the previous file is still the current one
+                ui_db_texts.set_msg_warn(msg_id, (msg_arg,))
+            elif error_code == 0:
                 # uploadFileSuccess expects (receipt, email) -- same shape receive_file.py feeds it.
                 ui_db_texts.set_msg_success(msg_id, (msg_arg, app_user.email))
             else:

@@ -61,8 +61,13 @@ class Cargo:
         self.check_started_at: datetime | None = None
         self.unzip_started_at: datetime | None = None
         self.report_ready_at: datetime | None = None
+        """ set by submit.py, same value saved in user_data_files.validated """
+        self.validated: bool = False
         self.submit_started_at: datetime | None = None
         self.email_started_at: datetime | None = None
+        """ email.py/rv_email.py: DB texts section of the report email, and its recipient """
+        self.email_texts: str = "uploadedFile_email"
+        self.report_recipient: object | None = None  # rv: the SEP's current manager (name, email), None → adm
         """ same as file ticket, a unique key in table UserDataFiles """
         self.table_udf_key: str = ""
 

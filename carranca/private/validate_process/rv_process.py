@@ -52,9 +52,12 @@ def rv_process(
     src_full_name: str,
     src_file_size: int,
     src_file_crc32: int,
-) -> Tuple[int, str, str]:
+) -> Tuple[int, str, str, bool]:
     """
     `report_recipient`: the SEP's current manager (name, email) or None
+    returns (error_code, msg_error, msg_exception, is_validated)
+        `is_validated`: the validation finished (cargo.validated, set by submit.py),
+        only then the file becomes the SEP's current one (see vw_export_data_files)
     """
     from ...common.app_context_vars import sidekick
 
@@ -87,6 +90,9 @@ def rv_process(
         None,  # received_at: nothing is received
         {"src_full_name": src_full_name, "src_file_size": src_file_size, "src_file_crc32": src_file_crc32},
     )
+    # TODO 2026-11-05 Miguel creates DB texts section "revalidatedFile_email", then use it here
+    cargo.email_texts = "uploadedFile_email"
+    cargo.report_recipient = report_recipient
     error_code = 0
     msg_error = ""
     msg_exception = ""
@@ -98,8 +104,6 @@ def rv_process(
         current_module_name = current_module.__name__
         try:
             cargo, next_module_params = _get_next_params(cargo)
-            if current_module is rv_email:
-                next_module_params["report_recipient"] = report_recipient
             error_code, msg_error, msg_exception, cargo = current_module(cargo, **next_module_params)
             if error_code > 0:
                 break
@@ -160,7 +164,7 @@ def rv_process(
         sidekick.display.info(_log(f"The revalidation process end with error code [{error_code}]"))
         sidekick.display.set_elapsed_output(elapsed_output)
 
-    return error_code, msg_error, msg_exception
+    return error_code, msg_error, msg_exception, cargo.validated
 
 
 # eof

@@ -349,7 +349,8 @@ class UIDBTexts:
         default = KEY_NOT_FOUND_MSG
         nice_key = camel_to_snake(key).replace("_", " ").capitalize()
         key_not_found_msg = self._retrieve_value("keyNotFound", UITextsKeys.Section.error, default, True)
-        section = self.section + "" if alternative_section == UITextsKeys.Section.current else f", {alternative_section}"
+        # current section, plus the alternative one when it was also searched (eg "sepValidate, secError")
+        section = self.section + ("" if alternative_section == UITextsKeys.Section.current else f", {alternative_section}")
         return key_not_found_msg.format(nice_key, key, section)
 
     def _set_or_add_msg(self, key: str, alternative_section: str, msg_kind: str, args: DB_Texts_Args = None) -> Tuple[str, str]:

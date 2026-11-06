@@ -34,8 +34,9 @@ from ..helpers.types_helper import Jinja_Template, Usual_Dict, Jinja_Rendered
 from ..helpers.route_helper import get_private_response_data, get_form_input_value, init_response_vars
 from ..helpers.dwnLd_goo_helper import is_gd_url_valid, download_public_google_file
 from ..helpers.js_consts_helper import js_ui_dictionary
-from .validate_process.ProcessData import ProcessData
 from ..helpers.ui_db_texts_manager import UITextsKeys
+from .validate_process.ProcessData import ProcessData
+from .received_files.constants import FILE_ORIGIN_CLOUD, FILE_ORIGIN_LOCAL
 
 if TYPE_CHECKING:
     from .UserSep import UserSep, UserSepList
@@ -240,7 +241,7 @@ def receive_file() -> Jinja_Template:
                 common_folder,
                 receive_file_cfg.dv_app.folder,
                 receive_file_cfg.dv_app.batch,
-                has_url,
+                FILE_ORIGIN_CLOUD if has_url else FILE_ORIGIN_LOCAL,
             )
             return receive_file_cfg.debug_process, receive_file_cfg.remove_user_folders, pd
 

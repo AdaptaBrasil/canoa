@@ -7,7 +7,7 @@ Refs #61, second layer of "Validar Visíveis" (`sep_validate.py`). 2026-09-16.
 
 | Module | Role |
 |---|---|
-| `private/revalidate_sep.py` | Entry point `revalidate_sep(udf_id)` → `(error_code, msg_id, msg_arg)`. Loads record, SEP & manager, builds `ProcessData`, lock, cleanup. No request/template. |
+| `private/revalidate_file.py` | Entry point `revalidate_file(udf_id)` → `(error_code, msg_id, msg_arg)`. Loads record, SEP & manager, builds `ProcessData`, lock, cleanup. No request/template. |
 | `validate_process/rv_process.py` | Loop `rv_check → rv_register → unzip → spdata → submit → rv_email` + final DB update (mirrors `process.py`). |
 | `validate_process/rv_check.py` | Infra checks (as `check.py`) + stored file exists, same size, same CRC32 (1 MiB chunks). |
 | `validate_process/rv_register.py` | Hard link (copy fallback) of the stored zip under the new ticket, then **insert** a new record. |
@@ -33,13 +33,13 @@ Refs #61, second layer of "Validar Visíveis" (`sep_validate.py`). 2026-09-16.
 
 | Where | Base | Task codes |
 |---|---|---|
-| `revalidate_sep` | `SEP_VALIDATE` (1000) | 11 not power · 12 no record · 13 no SEP · 14 manager lookup · 15 process data · 16 lock folder · 17 locked/bad lock · 18 cleanup · 19 exception during process |
+| `revalidate_file` | `REVALIDATE_FILE` (1100) | 11 not power · 12 no record · 13 no SEP · 14 manager lookup · 15 process data · 16 lock folder · 17 locked/bad lock · 18 cleanup · 19 exception during process |
 | `rv_check` | `RECEIVE_FILE_CHECK` (210) | as `check.py` + 14 missing file · 15 size · 16 crc32 · 18 exception |
 | `rv_register` | `RECEIVE_FILE_REGISTER` (230) | 3 source = working file · 4 link/copy · 6 insert |
 
 ## Pending
 
-1. **Wire it**: `sep_validate.py` POST → read selected `ExportGrid.id`, `js_form_sec_check()`, call `revalidate_sep`, show `msg_id`.
+1. **Wire it**: `sep_validate.py` POST → read selected `ExportGrid.id`, `js_form_sec_check()`, call `revalidate_file`, show `msg_id`.
 2. **Email text**: `rv_email.RV_EMAIL_TEXTS` still `uploadedFile_email`; needs DB section `revalidatedFile_email`.
 3. **DB columns**: `id_source_udf`, `spd_crc32`, `spd_edited_at` (+ `db_version`).
 4. **"All" SEPs**: needs a background job (request timeout).

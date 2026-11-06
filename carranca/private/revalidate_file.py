@@ -22,26 +22,31 @@ mgd
 
 import time
 import shutil
+
 from os import path, remove
 from math import ceil
 from typing import Tuple
 
 from .UserSep import UserSep
 from .validate_process.ProcessData import ProcessData
-from .received_files.constants import FILE_ORIGIN_CLOUD
+from .received_files.constants import FILE_ORIGIN_STORAGE
 from .receive_file import RECEIVE_FILE_DEFAULT_ERROR
 from ..models.public.user import User
 from ..models.private.mgmt_seps_user import MgmtSepsUser
 from ..models.private.user_data_files import UserDataFiles
+from ..helpers.py_helper import is_str_none_or_empty
 from ..helpers.user_helper import UserFolders
 from ..helpers.file_helper import ensure_folder_exists
-from ..helpers.py_helper import is_str_none_or_empty
 from ..common.app_context_vars import sidekick, app_user
 from ..common.app_error_assistant import ModuleErrorCode
 from ..config.ValidateProcessConfig import ValidateProcessConfig
 
 # (error_code, msg_id, msg_arg): msg_id is a UI text key, msg_arg its argument
 Revalidate_Result = Tuple[int, str, str]
+
+# success msg keys (error_code == 0): the file is now the SEP's current one, or not (validation not finished)
+RV_MSG_VALIDATED = "uploadFileSuccess"
+RV_MSG_NOT_VALIDATED = "revalidateFileNotValidated"
 
 
 class _Recipient:
@@ -74,7 +79,7 @@ def _try_lock_process(pd: ProcessData) -> int:
     except FileExistsError:
         return pd.lock.ttl_min
     except Exception as e:
-        sidekick.display.error(f"[revalidate_sep]: Lock process on folder [{lock_file}] failed: {e}.")
+        sidekick.display.error(f"[revalidate_file]: Lock process on folder [{lock_file}] failed: {e}.")
         return -1
 
 
@@ -98,7 +103,7 @@ def _cleanup_folders(proc: str, pd: ProcessData, rm_user_folders: bool, rm_lock_
     return ok
 
 
-def revalidate_sep(udf_id: int) -> Revalidate_Result:
+def revalidate_file(udf_id: int) -> Revalidate_Result:
     """
     Revalidates the stored file of the user_data_files record `udf_id`.
     Runs synchronously (~1.5 min): one SEP per request.
@@ -106,8 +111,8 @@ def revalidate_sep(udf_id: int) -> Revalidate_Result:
     # same as receive_file.py: Cargo imports receive_file
     from .validate_process.rv_process import rv_process
 
-    proc = "revalidate_sep"
-    error_code_base = ModuleErrorCode.SEP_VALIDATE.value
+    proc = "revalidate_file"
+    error_code_base = ModuleErrorCode.REVALIDATE_FILE.value
     task_code = 10
     pd: ProcessData | None = None
     lock_acquired = False
@@ -155,7 +160,7 @@ def revalidate_sep(udf_id: int) -> Revalidate_Result:
             sidekick.config.COMMON_PATH,
             cfg.dv_app.folder,
             cfg.dv_app.batch,
-            udf.file_origin == FILE_ORIGIN_CLOUD,
+            FILE_ORIGIN_STORAGE,  # the working file goes to the uploaded folder
         )
         pd.received_file_name = udf.file_name.strip()
         pd.received_original_name = pd.received_file_name if is_str_none_or_empty(udf.original_name) else udf.original_name
@@ -182,11 +187,11 @@ def revalidate_sep(udf_id: int) -> Revalidate_Result:
             f"[{proc}]: {app_user.name} revalidates [{udf.ticket}] of SEP [{sep_data.fullname}]"
             + f", report to {'adm' if report_recipient is None else report_recipient.name}."
         )
-        error_code, msg_id, _ = rv_process(
+        error_code, msg_id, _, is_validated = rv_process(
             app_user, report_recipient, sep_data, pd, src_full_name, udf.file_size, udf.file_crc32
         )
         if error_code == 0:
-            return 0, "uploadFileSuccess", pd.user_receipt
+            return 0, RV_MSG_VALIDATED if is_validated else RV_MSG_NOT_VALIDATED, pd.user_receipt
         return error_code, msg_id, ""
 
     except Exception as e:

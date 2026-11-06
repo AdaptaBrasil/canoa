@@ -229,7 +229,8 @@ class CanoaBase(DeclarativeBase):
 
 
 class CanoaBaseTable(CanoaBase):
-    __table_args__ = {"schema": "canoa"}
+    # 2026-10-22 schema-independent: search_path selects canoa or canoa_dev
+    # __table_args__ = {"schema": "canoa"}
     __abstract__ = True
 
 

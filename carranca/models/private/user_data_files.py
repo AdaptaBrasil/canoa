@@ -70,6 +70,7 @@ class UserDataFiles(CanoaBaseTable):
     report_errors: Mapped[int | None] = mapped_column(Integer)
     report_warns: Mapped[int | None] = mapped_column(Integer)
     report_tests: Mapped[int | None] = mapped_column(Integer)
+    validated: Mapped[bool] = mapped_column(Boolean, default=False)  # True when the validation process successfully finished (set by submit.py)
 
     ## submit & email
     h_email_started_at: Mapped[datetime | None] = mapped_column(DateTime)

@@ -17,7 +17,7 @@
             - no column in_debug
         » db_error_mgmt
     ui:
-        » wait... background in 5s
+        » Menu to DB
 
     cache:
         » \carranca\helpers\ui_db_texts_cache.py
@@ -77,6 +77,15 @@
         last commit msg:  git log -1 --pretty=%B
     » Claude commands
         /status /usage
+
+
+------- 2026- October -----------\
+    »  2026-10-22
+        - remove schema mention on the code.
+            __table_args__ = {"schema": "canoa"}
+            id_role: Mapped[int] = mapped_column(Integer, ForeignKey("canoa.roles.id"))
+            result = connection.execute(text("select abbr from canoa.roles"))
+
 
 
 ------- 2026- July --------------

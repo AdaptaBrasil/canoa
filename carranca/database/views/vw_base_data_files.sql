@@ -17,10 +17,12 @@ AS SELECT id,
     report_warns,
     validator_version,
     registered_at AS uploaded_at,
-    g_report_ready_at AS validated_at
+    g_report_ready_at AS validated_at,
+    validated
    FROM user_data_files udf;
 
 COMMENT ON VIEW canoa.vw_base_data_files IS 'Shared core columns/logic for vw_user_data_files and vw_export_data_files -- Refs #93. Neither specialized view depends on the other anymore, both depend on this instead.';
+COMMENT ON COLUMN canoa.vw_base_data_files.validated IS 'True when the validation process successfully finished (set by submit.py)';
 
 -- Permissions
 

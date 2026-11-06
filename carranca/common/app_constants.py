@@ -18,6 +18,9 @@ APP_NAME = "Canoa"
 # &beta; major.minor
 APP_VERSION = "β 6.02"  # 2026-10-08
 
+# production DB schema; on any other (e.g. canoa_dev) the navbar brand shows the schema name
+APP_SCHEMA = "canoa"
+
 # default user HTML/DB lang/locale (see table users.lang)
 APP_LANG = "pt-br"
 

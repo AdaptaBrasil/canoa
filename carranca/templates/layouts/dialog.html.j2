@@ -109,9 +109,13 @@ Ensure this matches the expected dimensions for dialog icons.
                     <i class="fas fa-fw dlg-fa-icon {{fi.icon}}" style="font-size: {{ dlg_fa_size }};"></i>
                     {% endif %}
                     <span inert>{{formTitle|default(app_name)}}</span>
+                    {# Brand marker: same rule as the navbar brand, cases table in includes/navigator.html.j2 #}
+                    {% if app_brand_alert or app_brand != app_name %}
+                    <small class="ms-2 {{'brand-alert' if app_brand_alert else 'brand-info'}}" title="Active Database">[{{app_brand}}]</small>
+                    {% endif %}
                 </h5>
                 {% if dlg_close_btn_visible %}
-                <button type="submit" title="Fechar" id="{{dlg_close_x_id}}" form="{{dlg_close_form_id}}" class="btn-close"></button>
+                <button type="submit" title="{{ui_defaults.closeButton}}" id="{{dlg_close_x_id}}" form="{{dlg_close_form_id}}" class="btn-close"></button>
                 {% endif %}
             </div>
             {# ╘════════════════════ Header ════════════════════════════╛ #}

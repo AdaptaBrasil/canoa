@@ -25,9 +25,10 @@ from ...common.app_error_assistant import ModuleErrorCode
 from ...helpers.py_helper import is_str_none_or_empty, now, OS_IS_LINUX
 
 
-def _store_report_result(ui_name: str, stdout_result_pattern: str, cargo: Cargo, std_out_str: str):
+def _store_report_result(ui_name: str, stdout_result_pattern: str, cargo: Cargo, std_out_str: str, is_report_ok: bool):
     # -------------------------------------
     # Expected <{"data_validate": {"version": "0.5.02", "report": {"errors": 676, "warnings": 609, "tests": 31}}}>
+    # `is_report_ok`: submit ended without error (report found & moved), required for `validated`
 
     def _local_result(error: str) -> str:
         return json.dumps({ui_name: {"local_error": f"{error}."}})
@@ -88,6 +89,8 @@ def _store_report_result(ui_name: str, stdout_result_pattern: str, cargo: Cargo,
 
     finally:
         # --- DB update ---
+        cargo.validated = is_report_ok and (report_tests or 0) > 0
+        cargo.validator_version = dv_version
         try:
             UserDataFiles.update(
                 cargo.table_udf_key,
@@ -99,6 +102,7 @@ def _store_report_result(ui_name: str, stdout_result_pattern: str, cargo: Cargo,
                 report_errors=report_errors,
                 report_warns=report_warns,
                 report_tests=report_tests,
+                validated=cargo.validated,
             )
         except Exception as e:
             sidekick.display.error(f"Error saving data_validate result: {result_json_str} [{e}]")
@@ -201,9 +205,9 @@ def submit(cargo: Cargo) -> Next_Cargo:
                 + f"\nExitCode {exit_code}"
                 + "\nEnd."
             )
-        elif stat(final_report_full_name).st_size < 200:
+        elif (report_size := stat(final_report_full_name).st_size) < 200:
             task_code += 2  # 9
-            raise Exception(f"\n{sidekick.app_name}: The report has an invalid size of = {stat(final_report_full_name).st_size}b.")
+            raise Exception(f"\n{sidekick.app_name}: The report has an invalid size of = {report_size} bytes.")
         else:
             # ⚠️ PDF is moved to /canoa/user_files/uploaded/<user_id>
             # copy the final_report file to the same folder and
@@ -220,7 +224,7 @@ def submit(cargo: Cargo) -> Next_Cargo:
         msg_exception = str(e)
         sidekick.display.fatal(f"{proc}{msg_exception}")
     finally:
-        _store_report_result(_cfg.dv_app.ui_name, _cfg.stdout_result_pattern, cargo, std_out_str)
+        _store_report_result(_cfg.dv_app.ui_name, _cfg.stdout_result_pattern, cargo, std_out_str, error_code == 0)
 
     # goto email.py
     if error_code == 0:

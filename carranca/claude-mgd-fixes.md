@@ -9,6 +9,62 @@ ledger stays the tamper-evidence mechanism; this file is the human-readable "wha
 
 ---
 
+## 2026-11-06 — test revalidations emailed the real SEP manager
+
+Found in test A of [O Selecionado] on `canoa_dev` (Refs #61): the log showed
+`[rv_email]: An email was sent to [pedro.andrade.inpe@gmail.com,pedro.andrade]` -- a report made by
+the fake validator (`run_validate.bat`) went to a real manager. `rv_email` always picks the SEP's
+current manager, cc adm, also in a debug run. **Fix:** in debug mode (`cargo.in_debug_mode`) the report
+goes only to the user who started the revalidation, with a `warn` in the log.
+
+---
+
+## 2026-11-06 — two receiveFile message keys missing, also for uploads
+
+Found while listing the keys the revalidation returns (Refs #61): `receiveFileAdmit_bad_lock`
+(`receive_file.py` lock failure) and `spd_extract_error` (`spdata.py`) existed in no DB section, so
+an upload that hit either one showed "key not found" instead of the message. **Fix:** both added to
+`receiveFile` (and copied to `revalidateFile`) in `update_canoa.sql`.
+
+---
+
+## 2026-11-06 — grid dates shown 3h early (Flask `tojson` labels naive datetimes as GMT)
+
+Found in the revalidation grid: `validated_at` showed 10:26 for a DB value of 13:26. The DB stores
+naive local times (BRT); Flask's JSON provider turns any `datetime` into an HTTP date labeled GMT
+(`"Fri, 06 Nov 2026 13:26:28 GMT"`), and JS `new Date()` converts it to UTC-3. Same in
+`received_files_mgmt` (upload time 3h early, seen by every user), and dates off by one day for
+times between 00:00 and 02:59 in `scm_export_ui_display` and `sep_mgmt`. **Fix:** new
+`Sidekick.to_iso_dt()` (ISO without a time zone, read by JS as local time), called explicitly by each
+grid route (`sep_validate`, `fetch_records`, `scm_export_ui_display`, `sep_mgmt`, `sep_log_grid`).
+A global Flask JSON provider was tried and dropped, Miguel's call: don't change a global behavior
+the next developer won't expect.
+
+---
+
+## 2026-11-05 — a failed submit could still count as `validated`
+
+Found while reviewing the revalidation (Refs #61): `submit.py`'s `finally` called
+`_store_report_result`, which saved the validator's `report_tests` even when submit had failed
+afterwards (report missing, under 200 bytes, or not moved). With `validated` calculated as
+`report_tests > 0`, that broken record ranked first in `vw_export_data_files` and replaced the SEP's
+last good file. **Fix:** real column `user_data_files.validated`, set by `submit.py` only when the
+report is ready and `report_tests > 0`; `vw_base_data_files` just exposes it. Verified on `canoa_dev`
+(test C: no PDF, `tests: 1` → `validated = false`, error 268, the previous file stays current).
+
+---
+
+## 2026-10-24 — "key not found" message dropped the current section name
+
+Found while testing [O Selecionado] revalidation (Refs #61): the message for a missing
+`receiveFileSubmit_error` read "não foi encontrada na; § , secError", with no current
+section. `UIDBTexts._key_not_found_ui_msg` (line 352) built it as
+`self.section + "" if ... else f", {alternative_section}"` -- the conditional expression
+binds looser than `+`, so with an alternative section the whole value became just
+`", secError"`. **Fix:** parenthesized the conditional, now reads "sepValidate, secError".
+
+---
+
 ## 2026-08-18 — `request_loader` silently authenticated from any POST's `username` field
 
 Found while testing the GH #1 welcome-email flow (`register.py`): right after registering,

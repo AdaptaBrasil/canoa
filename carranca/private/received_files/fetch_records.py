@@ -10,7 +10,7 @@ mgd 2025-01-14 & 03-18
 from os import path
 from typing import List, Tuple, Optional
 from ...models.private.received_files import ReceivedFiles
-from ...common.app_context_vars import app_user
+from ...common.app_context_vars import app_user, sidekick
 from ...config.ValidateProcessConfig import ValidateProcessConfig
 
 from ...helpers.user_helper import UserFolders
@@ -78,7 +78,7 @@ def fetch_record_s(
                 "file_name": change_file_ext(record.file_name),
                 "user_name": record.user_name,
                 USER_RECEIPT: record.user_receipt,
-                "when": record.submitted_at,
+                "when": sidekick.to_iso_dt(record.submitted_at),
                 "errors": record.report_errors,
                 "warns": record.report_warns,
             }

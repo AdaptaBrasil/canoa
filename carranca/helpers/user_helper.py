@@ -8,7 +8,7 @@ Equipe da Canoa -- 2024
 from os import path
 
 from .py_helper import ms_since_midnight, to_base, to_code, now, crc16
-from ..private.received_files.constants import FILE_ORIGIN_LOCAL
+from ..private.received_files.constants import FILE_ORIGIN_LOCAL, FILE_ORIGIN_STORAGE
 
 _user_code_shift_id = 903
 _ticket_receipt_sep = "_"
@@ -46,7 +46,7 @@ class UserFolders:
     spatial_files = "spatial_files"
 
     def file_full_name(self, file_origin: str, stored_file_name: str) -> str:
-        folder = self.uploaded if file_origin == FILE_ORIGIN_LOCAL else self.downloaded
+        folder = self.uploaded if file_origin in (FILE_ORIGIN_LOCAL, FILE_ORIGIN_STORAGE) else self.downloaded
         user_folder = get_user_folder(self.user_id)
         file_full_name = path.join(folder, user_folder, stored_file_name)
         return file_full_name

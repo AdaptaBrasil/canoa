@@ -15,6 +15,7 @@ from os import path
 from ...helpers.py_helper import is_str_none_or_empty
 from ...helpers.user_helper import get_file_ticket, get_user_receipt
 from ...helpers.file_helper import path_remove_last_folder
+from ..received_files.constants import FILE_ORIGIN_CLOUD
 
 
 class ProcessData:
@@ -107,7 +108,7 @@ class ProcessData:
             self.data_validate = path.join(self.apps_parent_path, data_validate_folder)
 
     def __init__(
-        self, user_code: str, user_folder: str, common_folder: str, data_validate_folder: str, batch_name: str, file_was_downloaded: bool
+        self, user_code: str, user_folder: str, common_folder: str, data_validate_folder: str, batch_name: str, file_origin: str
     ):
         self._user_folder = user_folder
         # This is a unique key for the file name and a unique key in the data base
@@ -115,8 +116,9 @@ class ProcessData:
         # This is an (expected) unique code used as a 'receipt' number for the user (eg see email)
         self.user_receipt = get_user_receipt(self.file_ticket)
         self.folder = self._Folder()  # not really needed, but conventions.
-        self.file_was_downloaded = file_was_downloaded
-        self.file_was_uploaded = not file_was_downloaded
+        self.file_origin = file_origin  # FILE_ORIGIN_* (L, C or S), saved in user_data_files.file_origin
+        self.file_was_downloaded = file_origin == FILE_ORIGIN_CLOUD
+        self.file_was_uploaded = not self.file_was_downloaded  # L & S: the uploaded folder
         self.path = self._Path(self, user_folder, common_folder, data_validate_folder, batch_name)
         # values are given in receive_file.py
         self.received_file_name = ""

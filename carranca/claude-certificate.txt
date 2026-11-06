@@ -7,23 +7,31 @@
 # can be treated as stale.
 #
 # Format (pipe-delimited, one entry per file):
-#   relative/path/from/repo/root.py|YYYY-MM-DD|crc32_hex
+#   relative/path/from/repo/root.py|YYYY-MM-DD|crc32_hex|model_id
 #
 # crc32_hex is zlib.crc32() of the full file content at the time of the
 # review, formatted as 8 lowercase hex digits.
+# model_id is the Claude model that did the review (e.g. claude-opus-5-5);
+# entries before 2026-10-24 have no model_id (unknown).
 
-carranca/common/Sidekick.py|2026-07-15|0c8fd8d7
+carranca/private/validate_process/submit.py|2026-11-06|aa451e10|claude-opus-5-5
+carranca/common/Sidekick.py|2026-11-06|4432bc26|claude-opus-5-5
+carranca/private/sep_validate.py|2026-11-06|d0772c77|claude-opus-5-5
+carranca/private/received_files/fetch_records.py|2026-11-06|04c75d33|claude-opus-5-5
+carranca/private/scm_export_ui_display.py|2026-11-06|998aa81c|claude-opus-5-5
+carranca/private/sep_mgmt/sep_mgmt.py|2026-11-06|57ef617a|claude-opus-5-5
+carranca/private/sep_log_grid.py|2026-11-06|c417fd62|claude-opus-5-5
+carranca/private/validate_process/rv_email.py|2026-11-06|10c06bee|claude-opus-5-5
+carranca/common/UIDBTexts.py|2026-11-06|9d8d346b|claude-opus-5-5
 carranca/common/Args.py|2026-07-20|ec35e25b
 carranca/common/Display.py|2026-07-16|a95c7475
 carranca/common/app_context_vars.py|2026-07-16|01fdfb83
-carranca/common/UIDBTexts.py|2026-07-16|b538e4f2
 carranca/common/UITextsKeys.py|2026-07-20|1196c410
 carranca/common/app_error_assistant.py|2026-08-10|431a5a1c
 carranca/common/igniter.py|2026-07-16|7f36b3bf
 carranca/common/app_constants.py|2026-08-14|941ea460
 carranca/private/received_files/init_grid.py|2026-08-13|c11a0505
 carranca/models/private/sep.py|2026-08-13|9a39c0cb
-carranca/private/sep_log_grid.py|2026-08-13|2f0a9c42
 carranca/static/js/sep_log_grid.js|2026-07-20|e81540f7
 carranca/templates/private/sep_log_grid.html.j2|2026-07-21|4a5f84a4
 carranca/templates/layouts/grid.html.j2|2026-07-21|a512a890
@@ -43,9 +51,7 @@ carranca/private/scm_new_edit.py|2026-08-13|a418f86d
 carranca/private/spd_new_edit.py|2026-08-13|751b99fa
 carranca/private/spd_grid.py|2026-08-13|6814cb61
 carranca/private/scm_grid.py|2026-08-13|3753cc59
-carranca/private/scm_export_ui_display.py|2026-08-13|044caa0b
 carranca/private/scm_create.py|2026-08-13|4ab332c2
-carranca/private/sep_mgmt/sep_mgmt.py|2026-08-13|126fa887
 carranca/private/received_files/download_record.py|2026-08-14|30b33968
 carranca/private/routes.py|2026-08-14|8f1dac16
 carranca/private/SepIconMaker.py|2026-07-20|b478d5f4

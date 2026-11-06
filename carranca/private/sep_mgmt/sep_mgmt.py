@@ -21,6 +21,7 @@ from ...common.ups_handler import ups_handler
 from ...common.app_error_assistant import ModuleErrorCode, AppStumbled
 from ...helpers.py_helper import is_str_none_or_empty, class_to_dict
 from ...common.ups_handler import get_ups_jHtml
+from ...common.app_context_vars import sidekick
 from ...helpers.user_helper import get_batch_code
 from ...helpers.jinja_helper import process_template
 from ...helpers.types_helper import Sep_Mgmt_Return, Cargo_List
@@ -111,6 +112,7 @@ def _sep_data_fetch(_item_none: str, col_names: List[str]) -> Tuple[DBRecords, L
         record.user_new = record.user_curr
         record.icon_file_name = do_icon_get_url(record.icon_file_name)  # this is file_name
         record.sep_code = MgmtSepsUser.to_code(record.id)  # for the [Ver Log] button, see sep_mgmt.js
+        record.assigned_at = sidekick.to_iso_dt(record.assigned_at)
 
     user_rows = User.get_all_users(User.disabled == False)
     users_list = [user.username for user in user_rows]

@@ -40,7 +40,7 @@ class User(CanoaBaseTable, UserMixin):
 
     # id: in CanoaBase
     # registered_at, disabled_at, password_changed_at, email_changed_at: DB-trigger managed, not mapped here
-    id_role: Mapped[int] = mapped_column(Integer, ForeignKey("canoa.roles.id"))
+    id_role: Mapped[int] = mapped_column(Integer, ForeignKey("roles.id"))  # avoid schema: ForeignKey("canoa.roles.id"))
     lang: Mapped[str | None] = mapped_column(String(8), default=APP_LANG)
     username: Mapped[str] = mapped_column(String(100), unique=True)
     username_lower: Mapped[str] = mapped_column(String(100), Computed(""))

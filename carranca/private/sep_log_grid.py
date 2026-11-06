@@ -16,7 +16,7 @@ from ..common.ups_handler import get_ups_jHtml
 from ..helpers.jinja_helper import Jinja_Rendered, process_template
 from ..helpers.uiact_helper import UiActResponseProxy
 from ..helpers.route_helper import get_private_response_data, init_response_vars, private_route
-from ..common.app_context_vars import app_user
+from ..common.app_context_vars import app_user, sidekick
 from ..helpers.js_consts_helper import JS_GRID_COL_META_INFO, js_ui_dictionary
 from ..helpers.ui_db_texts_manager import UITextsKeys
 from ..common.app_error_assistant import ModuleErrorCode, JumpOut
@@ -66,7 +66,7 @@ def get_sep_log_grid(sep_code: str, from_page: str = "sep_grid") -> Jinja_Render
 
         for row in log_data:
             row.operation = operation_labels.get(row.operation, row.operation)
-            row.done_at = row.done_at.isoformat()  # sortable string; sep_log_grid.js formats it for display
+            row.done_at = sidekick.to_iso_dt(row.done_at)  # sortable local ISO; sep_log_grid.js formats it for display
 
         task_code += 1  # 7
         jHtml = process_template(

@@ -15,8 +15,10 @@ DOWNLOAD_ZIPFILE = "F"  # File
 #  » Indicates the source of the uploaded file, with
 #       'L' for local uploads and
 #       'C' for cloud downloads.
+#       'S' for a stored file, revalidated (kept in the uploaded folder).
 FILE_ORIGIN_LOCAL = "L"
 FILE_ORIGIN_CLOUD = "C"
+FILE_ORIGIN_STORAGE = "S"
 
 
 # eof

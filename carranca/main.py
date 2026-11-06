@@ -68,10 +68,10 @@ sidekick.display.info("The app is ready to run!")
 
 
 if sidekick.config.APP_DISPLAY_DEBUG_MSG:
-    # print(repr(sidekick))
     from .public.debug_info import get_debug_info
 
-    di = get_debug_info(app, sidekick.config)  # TODO, print
+    di = get_debug_info(app, sidekick.config)
+    sidekick.display.debug("\n".join(f"{name}: {value}" for name, value in di))
 
 # Tell everybody how quick we are
 elapsed = (time.perf_counter() - started) * 1000

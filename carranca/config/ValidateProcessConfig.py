@@ -42,6 +42,8 @@ class DataValidateApp(NamedTuple):
 
 class ValidateProcessConfig:
     _debug_process = None  # None -> set by param debug (see flag_debug)
+    # ⚠️ True ONLY while testing/merging process.py & rv_process.py: modules may skip checks (eg rv_check size & crc32)
+    VALIDATE_PROCESS_DEBUGGING = False
 
     class SpdDataExport(IntEnum):
         NONE = 0
@@ -75,6 +77,7 @@ class ValidateProcessConfig:
         self.remove_user_folders = True
         _debug = ValidateProcessConfig._debug_process  # hard coded debug flag
         self.debug_process = debug if _debug is None else bool(_debug)
+        self.validate_process_debugging = debug and ValidateProcessConfig.VALIDATE_PROCESS_DEBUGGING  # never in production
         self.stdout_result_pattern = r"<\{\"data_validate\":.*?}>"
         # reports's email cc recipients
         if cc := get_envvar("EMAIL_REPORT_CC"):

@@ -137,6 +137,7 @@ class ModuleErrorCode(IntEnum):
     SPD_DOWNLOAD = 980
 
     SEP_VALIDATE = 1000
+    REVALIDATE_FILE = 1100  # revalidate_file.py, task codes 11..19
 
 
 class HTTP_StatusCode(StrEnum):

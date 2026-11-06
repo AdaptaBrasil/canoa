@@ -30,7 +30,7 @@ from ...helpers.py_helper import is_str_none_or_empty, now
 from ...common.app_error_assistant import ModuleErrorCode
 from ...config.ValidateProcessConfig import ValidateProcessConfig
 
-from .Cargo import Cargo
+from .Cargo import Cargo, Next_Cargo
 from .ProcessData import ProcessData
 
 from .rv_check import rv_check
@@ -41,7 +41,7 @@ from .submit import submit
 from .rv_email import rv_email
 
 # process_version String(12): the `rv` prefix marks a revalidation record
-RV_PROCESS_VERSION = "rv2026.09.16"
+RV_PROCESS_VERSION = "rv2026.11.06"
 
 
 def rv_process(
@@ -52,9 +52,13 @@ def rv_process(
     src_full_name: str,
     src_file_size: int,
     src_file_crc32: int,
-) -> Tuple[int, str, str]:
+) -> Next_Cargo:
     """
     `report_recipient`: the SEP's current manager (name, email) or None
+    returns (error_code, msg_error, msg_exception, cargo), as each module does, eg:
+        cargo.validated: the validation finished (set by submit.py), only then
+                         the file becomes the SEP's current one (see vw_export_data_files)
+        cargo.report_sent_to: the report's "to" addresses (set by rv_email.py)
     """
     from ...common.app_context_vars import sidekick
 
@@ -87,6 +91,8 @@ def rv_process(
         None,  # received_at: nothing is received
         {"src_full_name": src_full_name, "src_file_size": src_file_size, "src_file_crc32": src_file_crc32},
     )
+    cargo.email_texts = "revalidatedFile_email"
+    cargo.report_recipient = report_recipient
     error_code = 0
     msg_error = ""
     msg_exception = ""
@@ -98,8 +104,6 @@ def rv_process(
         current_module_name = current_module.__name__
         try:
             cargo, next_module_params = _get_next_params(cargo)
-            if current_module is rv_email:
-                next_module_params["report_recipient"] = report_recipient
             error_code, msg_error, msg_exception, cargo = current_module(cargo, **next_module_params)
             if error_code > 0:
                 break
@@ -160,7 +164,7 @@ def rv_process(
         sidekick.display.info(_log(f"The revalidation process end with error code [{error_code}]"))
         sidekick.display.set_elapsed_output(elapsed_output)
 
-    return error_code, msg_error, msg_exception
+    return error_code, msg_error, msg_exception, cargo
 
 
 # eof

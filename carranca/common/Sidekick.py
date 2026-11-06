@@ -36,12 +36,12 @@ Sidekick
 
 """
 
-# cSpell:ignore sqlalchemy mgd appcontext
+# cSpell:ignore sqlalchemy mgd appcontext timespec
 
 from flask import Flask, current_app
 from typing import TYPE_CHECKING, cast
 from logging import Logger
-from datetime import datetime
+from datetime import date, datetime
 from .Display import Display
 from flask_login import current_user
 from ..common.app_constants import APP_NAME
@@ -77,6 +77,20 @@ class Sidekick:
 
     def now(self) -> datetime:
         return datetime.now()
+
+    @staticmethod
+    def to_iso_dt(value: date | datetime | None) -> str | None:
+        """
+        ISO date-time without a time zone (eg "2026-11-06T13:26:28.558"), so JS `new Date()` reads it as local time.
+        Use it for dates sent to JS with `tojson`: Flask labels naive datetimes as GMT, and JS shifts them (eg -3h).
+        The DB's naive datetimes are local time; a `date` gets the local midnight (JS reads a date-only ISO as UTC).
+        Milliseconds: the ECMAScript date-time format has 3 fraction digits, Python's default is 6.
+        `None` stays `None`.
+        """
+        if value is None:
+            return None
+        dt = value if isinstance(value, datetime) else datetime.combine(value, datetime.min.time())
+        return dt.isoformat(timespec="milliseconds")
 
     # TODO remove almost unused
     @property

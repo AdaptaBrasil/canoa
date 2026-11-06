@@ -187,6 +187,7 @@ class UIDBTexts:
         """
         Allows dictionary-like assignment (ui_texts["key"] = value).
         Restricts insertion types strictly to str or bool.
+        A success/fatal msg also sets display_msg_only, as set_msg_success/fatal do.
         """
         # This check runs always to enforce the class's contract.
         if not isinstance(value, (str, bool)):
@@ -195,6 +196,8 @@ class UIDBTexts:
             )
 
         self._data[key] = value
+        if value and key in (UITextsKeys.Msg.success, UITextsKeys.Msg.fatal):
+            self.display_msg_only = True
 
     def __len__(self) -> int:
         return len(self._data)
@@ -349,7 +352,8 @@ class UIDBTexts:
         default = KEY_NOT_FOUND_MSG
         nice_key = camel_to_snake(key).replace("_", " ").capitalize()
         key_not_found_msg = self._retrieve_value("keyNotFound", UITextsKeys.Section.error, default, True)
-        section = self.section + "" if alternative_section == UITextsKeys.Section.current else f", {alternative_section}"
+        # current section, plus the alternative one when it was also searched (eg "sepValidate, secError")
+        section = self.section + ("" if alternative_section == UITextsKeys.Section.current else f", {alternative_section}")
         return key_not_found_msg.format(nice_key, key, section)
 
     def _set_or_add_msg(self, key: str, alternative_section: str, msg_kind: str, args: DB_Texts_Args = None) -> Tuple[str, str]:

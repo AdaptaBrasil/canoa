@@ -21,6 +21,7 @@ from ..helpers.js_consts_helper import JS_GRID_COL_META_INFO, js_ui_dictionary
 from ..models.private.ExportGrid import ExportGrid
 from ..config.ExportProcessConfig import ExportProcessConfig
 from ..common.app_error_assistant import ModuleErrorCode
+from ..common.app_context_vars import sidekick
 
 
 def scm_export_ui_display(uiact_rsp: UiActResponse) -> Jinja_Template:
@@ -39,6 +40,9 @@ def scm_export_ui_display(uiact_rsp: UiActResponse) -> Jinja_Template:
         schema_data, task_code = get_scm_data(task_code, config, False)
         task_code += 1  # 813
         grid_data = ExportGrid.get_rows()
+        for row in grid_data:
+            # dates as local ISO for JS (Flask's tojson labels naive datetimes as GMT)
+            row.uploaded_at = sidekick.to_iso_dt(row.uploaded_at)
         task_code += 1
         empty_icon = do_icon_get_url(SEP_EMPTY_ICON)
 

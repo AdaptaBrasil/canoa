@@ -1,6 +1,7 @@
 """
 Revalidation, sixth and final step:
     Send an email with the validation report attached:
+        - debug mode: to the user who started the revalidation only (never to real managers)
         - SEP has a manager: to manager, cc adm (`report_email_cc`, as email.py)
         - SEP has no manager: to adm, no cc
         - no manager & no adm: to the user who started the revalidation
@@ -20,20 +21,22 @@ from ...common.app_error_assistant import ModuleErrorCode
 from ...helpers.py_helper import is_str_none_or_empty, now_as_text, now
 from ...helpers.email_helper import RecipientsDic, RecipientsList, send_email
 
-# TODO 2026-09-16 create DB texts section "revalidatedFile_email" ("the validator was updated, check the new results")
-RV_EMAIL_TEXTS = "uploadedFile_email"
 
-
-def rv_email(cargo: Cargo, user_report_full_name: str, report_recipient: object | None) -> Next_Cargo:
-    """`report_recipient`: the SEP's current manager (name, email) or None"""
+def rv_email(cargo: Cargo, user_report_full_name: str) -> Next_Cargo:
+    """`cargo.report_recipient`: the SEP's current manager (name, email) or None; `cargo.email_texts`: the DB texts section"""
     proc = "[rv_email]: "
+    report_recipient = cargo.report_recipient
     msg_exception = ""
     task_code = 0
     try:
         cargo.email_started_at = now()
         task_code += 1  # 1
         adm_cc = cargo.receive_file_cfg.report_email_cc
-        if report_recipient is not None:
+        if cargo.in_debug_mode:  # never email real managers from a test run
+            greet_name = cargo.user.name
+            recipients = RecipientsDic(to=RecipientsList(cargo.user.email, cargo.user.name))
+            sidekick.display.warn(f"{proc}Debug mode: the report goes to {cargo.user.name}, not to the SEP's manager.")
+        elif report_recipient is not None:
             greet_name = report_recipient.name
             recipients = RecipientsDic(to=RecipientsList(report_recipient.email, report_recipient.name), cc=adm_cc)
         elif not is_str_none_or_empty(adm_cc):
@@ -48,10 +51,14 @@ def rv_email(cargo: Cargo, user_report_full_name: str, report_recipient: object 
             "user": greet_name,
             "receipt": cargo.pd.user_receipt,
             "when": now_as_text(),
+            "version": cargo.validator_version,
+            "sep": cargo.sep_data.fullname,  # a manager can have several SEPs
         }
 
         task_code += 1  # 2
-        send_email(recipients, RV_EMAIL_TEXTS, email_body_params, user_report_full_name)
+        send_email(recipients, cargo.email_texts, email_body_params, user_report_full_name)
+        # only the addresses ("email,name" items, ";" separated)
+        cargo.report_sent_to = ", ".join(item.split(",")[0].strip() for item in recipients.to.list())
         sidekick.display.info(f"{proc}An email was sent to [{recipients.to}] with the result of the revalidation.")
 
         task_code += 2  # 4

@@ -10,6 +10,14 @@ mgd
 
 TODO Selected menu class-> active
 
+Brand (app_brand / app_brand_alert, set in carranca/__init__.py):
+  | Mode       | Schema    | Navbar             | Why                                     |
+  |------------|-----------|--------------------|-----------------------------------------|
+  | production | canoa     | Canoa              | normal                                  |
+  | debug      | canoa_dev | canoa_dev          | normal dev setup, the name shows it     |
+  | debug      | canoa     | Canoa       (red)  | testing on live data                    |
+  | production | canoa_dev | canoa_dev   (red)  | server running on the copy, config bug  |
+
 cSpell:ignore unselectable labelledby haspopup noopener noreferrer onclick elif
 cSpell:ignore semi-words: formul estrat gicos sess tojson jinja nbsp endfor j_user inser
 cSpell:ignore &ç gico endere spatialdata
@@ -26,7 +34,7 @@ cSpell:ignore &ç gico endere spatialdata
     {% endif %}
 
     <div class="container-fluid">
-        <div class="navbar-brand mb-1" inert>{{app_name}}</div>
+        <div class="navbar-brand mb-1 {{'brand-alert' if app_brand_alert else ''}}" title="Active Database">{{app_brand}}</div>
         <button class="navbar-toggler {{nav_button_state}}" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapsible"
             aria-controls="navbarCollapsible" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>

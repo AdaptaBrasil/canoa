@@ -61,14 +61,15 @@ def rv_check(cargo: Cargo, src_full_name: str, src_file_size: int, src_file_crc3
             task_code = 13
         elif not path.isfile(src_full_name):
             task_code = 14
-        # 2026-10-07 commented out for testing: the only test fixture has a stale size/crc32,
-        # bypass both checks so the pipeline can be exercised past rv_check. Re-enable after.
-        # elif (file_size := path.getsize(src_full_name)) != src_file_size:
-        #     task_code = 15
-        #     sidekick.display.error(f"{proc}Size mismatch: stored {file_size:,}b, registered {src_file_size:,}b.")
-        # elif (file_crc32 := _file_crc32(src_full_name)) != src_file_crc32:
-        #     task_code = 16
-        #     sidekick.display.error(f"{proc}CRC32 mismatch: stored {file_crc32}, registered {src_file_crc32}.")
+        elif cargo.receive_file_cfg.validate_process_debugging:
+            task_code = 0
+            sidekick.display.warn(f"{proc}Size & CRC32 checks skipped (VALIDATE_PROCESS_DEBUGGING).")
+        elif (file_size := path.getsize(src_full_name)) != src_file_size:
+            task_code = 15
+            sidekick.display.error(f"{proc}Size mismatch: stored {file_size:,}b, registered {src_file_size:,}b.")
+        elif (file_crc32 := _file_crc32(src_full_name)) != src_file_crc32:
+            task_code = 16
+            sidekick.display.error(f"{proc}CRC32 mismatch: stored {file_crc32}, registered {src_file_crc32}.")
         else:
             task_code = 0
 

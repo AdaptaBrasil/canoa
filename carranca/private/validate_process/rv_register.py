@@ -20,7 +20,6 @@ from ...models.private.user_data_files import UserDataFiles
 from ...helpers.py_helper import OS_IS_WINDOWS, now
 from ...common.app_context_vars import sidekick
 from ...common.app_error_assistant import ModuleErrorCode
-from ...private.received_files.constants import FILE_ORIGIN_CLOUD, FILE_ORIGIN_LOCAL
 
 
 def _link_or_copy(src_full_name: str, work_fname: str) -> str:
@@ -69,7 +68,7 @@ def rv_register(cargo: Cargo, src_full_name: str, file_size: int, file_crc32: in
             # file info
             file_crc32=file_crc32,
             file_name=cargo.pd.received_file_name,
-            file_origin=FILE_ORIGIN_LOCAL if cargo.pd.file_was_uploaded else FILE_ORIGIN_CLOUD,
+            file_origin=cargo.pd.file_origin,
             file_size=file_size,
             from_os="W" if OS_IS_WINDOWS else "L",  # Linux
             original_name=cargo.pd.received_original_name,

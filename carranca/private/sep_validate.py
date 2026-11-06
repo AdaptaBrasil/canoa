@@ -8,21 +8,22 @@ validator version processed it, and the last result (errors/warnings).
 
 First layer of the "Validar Visíveis" feature (Refs #61) -- display.
 [Validar Um] wires the second layer: revalidates the selected row's stored
-file (see `revalidate_sep.py`) and redisplays the grid with the result.
+file (see `revalidate_file.py`) and redisplays the grid with the result.
 [Validar Todos] (bulk, needs a background job) is still under development.
 
 Equipe da Canoa -- 2026
 mgd 2026-07-28
 """
 
-from .revalidate_sep import revalidate_sep
+from .revalidate_file import revalidate_file
 from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import is_str_none_or_empty
 from ..common.ups_handler import get_ups_jHtml, ups_handler
 from ..helpers.jinja_helper import Jinja_Rendered, process_template
 from ..helpers.route_helper import get_private_response_data, get_form_input_value, init_response_vars
-from ..common.app_context_vars import app_user
+from ..common.app_context_vars import sidekick
 from ..helpers.js_consts_helper import JS_GRID_COL_META_INFO, js_form_sec_check, js_ui_dictionary
+from ..helpers.ui_db_texts_manager import UITextsKeys
 from ..models.private.ExportGrid import ExportGrid
 from ..common.app_error_assistant import ModuleErrorCode
 
@@ -35,12 +36,8 @@ def get_sep_validate_grid() -> Jinja_Rendered:
         task_code += 1  # 1
         tmpl_ffn, is_get, ui_db_texts = get_private_response_data("sepValidate")
 
-        if not is_get:
-            # 2026-10-08: both [Validar Todos] and [O Selecionado] show the "under development"
-            # stub for now -- the single-row path below is wired and works, but known gaps
-            # (rv_check's size/CRC32 bypass, the export-view error_code bug, missing DB text
-            # keys) mean it shouldn't be reachable from the UI yet. Restore the
-            # `get_form_input_value("cmd") != "one"` condition here to re-enable it.
+        if not is_get and get_form_input_value("cmd") != "one":
+            # [Validar Todos] (bulk, needs a background job) is still under development.
             _, tmpl_ffn2, ui_texts = ups_handler(0, "A validação de todos os setores ainda está em desenvolvimento.")
             return process_template(tmpl_ffn2, **ui_texts)
 
@@ -53,12 +50,11 @@ def get_sep_validate_grid() -> Jinja_Rendered:
         else:
             task_code += 2  # 4
             code = ExportGrid.to_id(get_form_input_value("code"))
-            error_code, msg_id, msg_arg = revalidate_sep(code)
-            if error_code == 0:
-                # uploadFileSuccess expects (receipt, email) -- same shape receive_file.py feeds it.
-                ui_db_texts.set_msg_success(msg_id, (msg_arg, app_user.email))
-            else:
-                ui_db_texts.set_msg_error(msg_id, (str(error_code), msg_arg))
+            error_code, msg_kind, msg_text = revalidate_file(code)
+            ui_db_texts[msg_kind] = msg_text  # a compiled msg, from revalidate_file's own section
+            if error_code > 0:
+                # the "text below" of the error msg: the log file name, as receive_file.py
+                ui_db_texts.set_value(UITextsKeys.Msg.tech, sidekick.log_filename)
 
         task_code += 1  # 3
         # display_cols: need a matching "colMetaInfo" (header) entry each -- see sepValidate DB text.
@@ -73,6 +69,9 @@ def get_sep_validate_grid() -> Jinja_Rendered:
         for row in grid_data:
             # don't ship the raw pk to the browser -- same obfuscation every other grid uses
             row.id = ExportGrid.to_code(row.id)
+            # dates as local ISO for JS (Flask's tojson labels naive datetimes as GMT)
+            row.uploaded_at = sidekick.to_iso_dt(row.uploaded_at)
+            row.validated_at = sidekick.to_iso_dt(row.validated_at)
 
         task_code += 1  # 5
         jHtml = process_template(

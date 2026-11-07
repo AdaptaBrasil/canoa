@@ -13,7 +13,7 @@ mgd 2024-10-11: Base went to it's own file
 from os import environ
 from hashlib import sha384
 
-from .BaseConfig import BaseConfig, app_mode_development, app_mode_production, app_mode_stage
+from .BaseConfig import BaseConfig, APP_MODE_DEVELOPMENT, APP_MODE_PRODUCTION, APP_MODE_STAGE
 from ..common.app_constants import APP_NAME, APP_VERSION
 from ..common.igniter import Fuse
 from ..helpers.py_helper import as_bool, is_str_none_or_empty, get_envvar_prefix
@@ -66,7 +66,8 @@ class DynamicConfig(BaseConfig):
     APP_MODE = None
 
     def __init__(self, fuse: Fuse, app_debug: bool, app_propagate_debug: bool, server_address: str):
-        self.APP_DEBUG = app_debug
+        # The mode's default, unless --app_debug or CANOA_DEBUG says otherwise (None: not informed)
+        self.APP_DEBUG = app_debug if fuse.debugging is None else bool(fuse.debugging)
         self.APP_PROPAGATE_DEBUG = app_propagate_debug
         self.SERVER_ADDRESS = server_address
         self.EMAIL_REPORT_CC = ""
@@ -129,7 +130,7 @@ class DevelopmentConfig(DynamicConfig):
     The Debug Configuration Class for the App
     """
 
-    APP_MODE = app_mode_development
+    APP_MODE = APP_MODE_DEVELOPMENT
 
     def __init__(self, fuse: Fuse):
         super().__init__(fuse, True, True, "127.0.0.1:50090")
@@ -142,7 +143,7 @@ class StageConfig(DynamicConfig):
     non-production feature validation, reproduce platform-specific bugs and validate DB migrations/deploys.
     """
 
-    APP_MODE = app_mode_stage
+    APP_MODE = APP_MODE_STAGE
 
     def __init__(self, fuse: Fuse):
         super().__init__(fuse, True, True, "192.168.0.1:5002")
@@ -154,7 +155,7 @@ class ProductionConfig(DynamicConfig):
     The Production Configuration Class for the App
     """
 
-    APP_MODE = app_mode_production
+    APP_MODE = APP_MODE_PRODUCTION
 
     def __init__(self, fuse: Fuse):
         super().__init__(fuse, False, False, "192.168.0.1:5001")

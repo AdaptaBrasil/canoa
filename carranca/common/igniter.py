@@ -22,7 +22,7 @@ from typing import Tuple, Optional
 
 from .Args import Args
 from .app_constants import APP_NAME
-from ..helpers.py_helper import is_str_none_or_empty
+from ..helpers.py_helper import get_envvar, get_envvar_prefix, is_str_none_or_empty
 from .app_error_assistant import RaiseIf
 from ..helpers.email_helper import EmailProvider
 
@@ -50,32 +50,41 @@ class Fuse:
         self.display = display
         self.args = args
 
-        if is_str_none_or_empty(args.app_mode):
-            self.app_mode = app_mode_development
-        else:
-            self.app_mode: str = str(self.args.app_mode)
+        # App mode priority: 1. argument, 2. env CANOA_APP_MODE (set in rema.sh). There is no default:
+        # the app does not start without it. Case-insensitive, the upper case value selects one of the existing modes.
+        modes = {mode.upper(): mode for mode in (APP_MODE_PRODUCTION, APP_MODE_DEVELOPMENT, APP_MODE_STAGE)}
+        valid_modes = ", ".join(modes.values())
+        env_name = f"{get_envvar_prefix()}APP_MODE"
+        app_mode = get_envvar("app_mode") if is_str_none_or_empty(args.app_mode) else args.app_mode
+        if is_str_none_or_empty(app_mode):
+            raise ValueError(f"{env_name} is not set. Select one of: [{valid_modes}].")
+
+        selected_mode = modes.get(str(app_mode).strip().upper())
+        if selected_mode is None:
+            raise ValueError(f"Unknown {env_name} '{app_mode}'. Select one of: [{valid_modes}].")
+
+        self.app_mode: str = selected_mode
 
 
 # ---------------------------------------------------------------------------- #
-def _get_debug_2() -> bool:
+def _get_debug_2() -> bool | None:
 
     # Configuration priority (debug as am example):
-    # 1. Command-line argument (sys.argv): --debug
+    # 1. Command-line argument (sys.argv): --app_debug
     # 2. Environment: CANOA_DEBUG
-    # 3. Config: config.APP_DEBUG
+    # 3. Config: config.APP_DEBUG (the selected mode's own default)
     # 4. Code default values
     # Considerations:
     #    In this project, there are several configs
     #    available, of which one is selected according to
     #    the 'app_mode' argument (: 'D', 'P', etc, see config.py).
-    #    Taking this inb consideration, we skip 3. Config
+    #    At this point no config is selected yet, so 2. returns None when
+    #    CANOA_DEBUG is not set, and DynamicConfig falls back to 3.
     #
     from ..helpers.py_helper import get_envvar, as_bool
 
-    debug_4 = False
-    debug_3 = debug_4  # Read above 'Considerations'
-    debug_2 = as_bool(get_envvar("debug", str(debug_3)))
-    return debug_2
+    debug_2 = get_envvar("debug", None)
+    return None if is_str_none_or_empty(debug_2) else as_bool(debug_2)
 
 
 # ---------------------------------------------------------------------------- #
@@ -113,7 +122,7 @@ def _start_fuse(app_name: str, args: Args, started_from: float) -> Tuple[Fuse | 
 
 
 # ---------------------------------------------------------------------------- #
-from ..config.DynamicConfig import DynamicConfig, app_mode_development
+from ..config.DynamicConfig import DynamicConfig, APP_MODE_DEVELOPMENT, APP_MODE_PRODUCTION, APP_MODE_STAGE
 
 
 def _ignite_config(fuse: Fuse, flask_app_name: str) -> Tuple[DynamicConfig | None, str]:
@@ -134,7 +143,8 @@ def _ignite_config(fuse: Fuse, flask_app_name: str) -> Tuple[DynamicConfig | Non
         if not path.isfile(path.join(config.APP_PATH, flask_app_name)):
             raise Exception(f"{flask_app_name} file not found in the app folder. Check BaseConfig.APP_PATH.")
 
-        config.APP_DEBUGGING = True if fuse.debugging else config.APP_DEBUG
+        # fuse.debugging (--app_debug | CANOA_DEBUG) was already applied to config.APP_DEBUG by DynamicConfig
+        config.APP_DEBUGGING = config.APP_DEBUG
         # REMOVE config.APP_ARGS = fuse.args
         fuse.display.info(f"The app config, in '{fuse.app_mode}' mode, was ignited.")
     except Exception as e:
@@ -293,7 +303,9 @@ def ignite_app(app_name: str, flask_app_name: str, start_at: float) -> Tuple[Sid
     # Check DB connection, stop if not debugging
     error, db_version, db_schema = _ignite_sql_connection(fuse, config.SQLALCHEMY_DATABASE_URI)
     if not error:
-        fuse.display.info(f"SQLAlchemy engine was created and the db (version {db_version}) connection was successfully tested.")
+        fuse.display.info(
+            f"SQLAlchemy engine was created and the db (version {db_version}) connection to [{db_schema}] was successfully tested."
+        )
     elif RaiseIf.ignite_no_sql_conn:
         _log_and_exit(error)
     else:

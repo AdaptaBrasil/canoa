@@ -54,7 +54,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from .helpers.py_helper import crc16
 from .private.JinjaUser import JinjaUser
-from .config.BaseConfig import BaseConfig
+from .config.BaseConfig import BaseConfig, APP_MODE_PRODUCTION
 from .helpers.pw_helper import is_anyone_logged
 from .helpers.file_helper import file_full_name_parse
 
@@ -459,13 +459,24 @@ def create_app():
     db_is_production = db_schema == APP_SCHEMA
     # Brand: the app name on the production schema, otherwise the schema itself (e.g. canoa_dev)
     app_brand = APP_NAME if db_is_production else db_schema
-    # Alert on a mismatch: debugging on live data, or production running on a copy (see navigator.html.j2)
-    app_brand_alert = bool(gcfg.APP_DEBUGGING) == db_is_production
-    _register_jinja(
-        app, bool(gcfg.DEBUG_TEMPLATES), APP_NAME, APP_VERSION, db_version, app_brand, app_brand_alert, jinja_ui_defaults
-    )
+    # Mismatch between the app mode and the schema: production mode on a copy, or any other mode on
+    # the production schema (see navigator.html.j2). Debugging is not part of it.
+    mode_is_production = gcfg.APP_MODE == APP_MODE_PRODUCTION
+    app_mismatch_schema = mode_is_production != db_is_production
+    if app_mismatch_schema:
+        # tell whoever launched the app (screen / log file), the badge is only seen in a browser
+        db_kind = "the production" if db_is_production else "a develop"
+        global_sidekick.display.error(f"Canoa is in {gcfg.APP_MODE} mode using {db_kind} DB [{db_schema}].")
+
+    if db_is_production and gcfg.APP_DEBUGGING:
+        global_sidekick.display.warn("Debugging is ON on the production DB.")
+
+    # `app_brand_alert` is the name the templates know
+    _register_jinja(app, bool(gcfg.DEBUG_TEMPLATES), APP_NAME, APP_VERSION, db_version, app_brand, app_mismatch_schema, jinja_ui_defaults)
 
     # config sidekick.display
+    # debug lines follow the final APP_DEBUGGING (Args only knows CANOA_DEBUG, not the mode's own default)
+    global_sidekick.display.debug_output = bool(gcfg.APP_DEBUGGING)
     if display_mute_after_init:
         global_sidekick.display.mute_all = True
 

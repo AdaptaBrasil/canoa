@@ -50,7 +50,6 @@ class JSONObject:
 
 
 def get_envvar_prefix() -> str:
-
     return f"{APP_NAME}_".upper()
 
 

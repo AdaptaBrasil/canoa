@@ -37,9 +37,9 @@ CONFIG_MANDATORY_KEYS = [
 
 type TrueInDebug = bool | None
 # === Available app/config modes, add yours own mode here (extend)
-app_mode_production: str = "Production"  # capital P
-app_mode_development: str = "Development"  # capital D
-app_mode_stage: str = "Stage"  # capital S
+APP_MODE_PRODUCTION: str = "Production"  # capital P
+APP_MODE_DEVELOPMENT: str = "Development"  # capital D
+APP_MODE_STAGE: str = "Stage"  # capital S
 # ---------------------------
 # Get the folder from main.py
 _path: str = path_remove_last_folder(path.dirname("" + __file__))

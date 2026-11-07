@@ -53,11 +53,15 @@ flask run
 ```bash
 # Canoa Environment Variables
 # Call source ../canoa_env_vars.txt
-export CANOA_DEBUG="True"
+export CANOA_DEBUG="False"   # "True" on a server forces debug on in any mode (red badge)
+# export CANOA_DISPLAY_MUTE="True"   # silences the start-up log; omit for the verbose default
+export CANOA_EMAIL_PROVIDER="SMTP"
 export CANOA_EMAIL_API_KEY_PW="x"
-export CANOA_EMAIL_REPORT_CC="a1@canoa.com,a2@canoa.com"
-export CANOA_EMAIL_ORIGINATOR="canoa--adaptabrasil@"
-export CANOA_SQLALCHEMY_DATABASE_URI="postgresql://"
+export CANOA_EMAIL_REPORT_CC="a1@domain.com,Name One;a2@domain.com,Name Two"   # email,name;email,name
+export CANOA_EMAIL_ORIGINATOR="originator@domain.com"
+## NAT Adapter:: export CANOA_SQLALCHEMY_DATABASE_URI="postgresql://user:pw@10.0.0.1:5432/dbname"
+## Bridge Adapter (the VM's address on the LAN)
+export CANOA_SQLALCHEMY_DATABASE_URI="postgresql://user:pw@<db-host>:5432/dbname"
 export FLASK_APP="main"
 export FLASK_DEBUG=0
 export FLASK_RUN_HOST="0.0.0.0"

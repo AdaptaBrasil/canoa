@@ -9,6 +9,27 @@ ledger stays the tamper-evidence mechanism; this file is the human-readable "wha
 
 ---
 
+## 2026-11-07 — production ran `DevelopmentConfig` (`CANOA_APP_MODE` was never read)
+
+Found through the red `[Canoa]` badge on the live server. `rema.sh` exports
+`CANOA_APP_MODE="Production"`, but `Fuse` only read `args.app_mode`, which is always `None`, so it
+defaulted to `Development`: `DevelopmentConfig` (`APP_DEBUG=True`) ran in production while the log
+said "Production" (the env loop only overwrites the `APP_MODE` label). **Fix** (`igniter.py`,
+`DynamicConfig.py`, `Args.py`, `__init__.py`):
+- `Fuse` resolves the mode: argument, then `CANOA_APP_MODE`, then Development when debugging,
+  otherwise Production (a missing mode fails safe). Constants renamed to `APP_MODE_*`.
+- `CANOA_DEBUG` is three-state: unset = the mode's own default, `True`/`False` overrides it (applied
+  in `DynamicConfig.__init__` before the sub-flags are propagated). Before, only `True` counted.
+- The start-up log is verbose by default (`Args.display_mute` False; env `CANOA_DISPLAY_MUTE`
+  silences it, `flask run` rejects `--display_mute`). Debug lines only when debugging.
+- Badge: `app_mismatch_schema` (app mode vs schema, debugging is not part of it) is passed to Jinja
+  as `app_brand_alert`. `create_app()` logs an error on a mismatch and a warn for debugging on the
+  production DB.
+- `run-canoa.md` got the "Active DB badge" and "Start-up log" sections, `navigator.html.j2` the new
+  case table.
+
+---
+
 ## 2026-11-06 — test revalidations emailed the real SEP manager
 
 Found in test A of [O Selecionado] on `canoa_dev` (Refs #61): the log showed

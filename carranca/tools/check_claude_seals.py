@@ -30,12 +30,17 @@ def main() -> int:
         return 0
 
     stale: list[str] = []
-    for line in CERTIFICATE.read_text(encoding="utf-8").splitlines():
+    for line_no, line in enumerate(CERTIFICATE.read_text(encoding="utf-8").splitlines(), 1):
         line = line.strip()
         if not line or line.startswith("#"):
             continue
 
-        rel_path, review_date, recorded_crc32 = (part.strip() for part in line.split("|"))
+        parts = [part.strip() for part in line.split("|")]
+        if len(parts) not in (3, 4):  # path|date|crc32[|model_id]
+            stale.append(f"line {line_no}: unexpected format [{line}]")
+            continue
+
+        rel_path, review_date, recorded_crc32 = parts[:3]
         file_path = REPO_ROOT / rel_path
         if not file_path.is_file():
             stale.append(f"{rel_path}: certified {review_date}, file no longer exists")

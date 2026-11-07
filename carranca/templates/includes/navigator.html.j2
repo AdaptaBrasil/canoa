@@ -10,17 +10,26 @@ mgd
 
 TODO Selected menu class-> active
 
-Brand (app_brand / app_brand_alert, set in carranca/__init__.py):
-  | Mode       | Schema    | Navbar             | Why                                     |
-  |------------|-----------|--------------------|-----------------------------------------|
-  | production | canoa     | Canoa              | normal                                  |
-  | debug      | canoa_dev | canoa_dev          | normal dev setup, the name shows it     |
-  | debug      | canoa     | Canoa       (red)  | testing on live data                    |
-  | production | canoa_dev | canoa_dev   (red)  | server running on the copy, config bug  |
+Brand: Jinja vars app_brand / app_brand_alert (set in carranca/__init__.py from app_brand / app_mismatch_schema):
+  Red = the app mode does not fit the schema. Debugging is not part of it
+  (debug on the production schema only logs a warning).
+  | App mode (APP_MODE)   | Schema    | Navbar             | Why                                     |
+  |-----------------------|-----------|--------------------|-----------------------------------------|
+  | Production            | canoa     | Canoa              | Expected                                |
+  | Production            | canoa_dev | canoa_dev   (red)  | Alert! running on the development DB    |
+  | Development, Stage    | canoa_dev | canoa_dev          | Expected                                |
+  | Development, Stage    | canoa     | Canoa       (red)  | Alert! running on the live data DB      |
+
+  To check/fix a mismatch:
+    CANOA_SQLALCHEMY_DATABASE_URI  changes the current schema (its search_path)
+    CANOA_APP_MODE                 changes the application mode
+  If CANOA_APP_MODE is not set, the mode is selected by debugging (CANOA_DEBUG, or --app_debug):
+  debugging -> Development, otherwise Production. So a run with neither set is Production, and
+  on a copy (canoa_dev) the navbar is red. (The source of the confusion of 2026-11-07.)
 
 cSpell:ignore unselectable labelledby haspopup noopener noreferrer onclick elif
 cSpell:ignore semi-words: formul estrat gicos sess tojson jinja nbsp endfor j_user inser
-cSpell:ignore &ç gico endere spatialdata
+cSpell:ignore &ç gico endere spatialdata sqlalchemy
 --------------------------------------- #}
 <nav id="navbar-main" class="navbar fixed-top navbar-expand-sm shadow-sm px-2">
     {% set menu_header= app_menu('menuHeaders') %}

@@ -74,8 +74,11 @@ class Sidekick:
         self._echo_buffer: deque[tuple[Display.Kind, str]] = deque(maxlen=500)
         self._echo_logger: Logger | None = None
         echo = ""
+        pending = display.take_pending_echo()  # the igniter's lines, printed before this Sidekick existed
         if self.config.SIDEKICK_LOG:
             display.echo = self._echo
+            for kind, text in pending:
+                self._echo(kind, text)  # no log file yet: they wait in _echo_buffer, for attach_logger()
             echo = " and is echoing to the log file."
         display.debug(f"{self.__class__.__name__} was created{echo}.")
 

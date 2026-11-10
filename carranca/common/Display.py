@@ -13,6 +13,7 @@ mgd 2024-09-27,10-11,12-05
 from __future__ import annotations
 
 import time
+from collections import deque
 from math import log10, modf
 from enum import IntEnum
 from typing import List, Callable
@@ -126,7 +127,10 @@ class Display:
             _with_color = not OS_IS_WINDOWS
 
         _d = Display.default  # value is None => use default
-        self.echo: Callable[[Display.Kind, str], None] = lambda kind, text: None  # Default no-op function
+        # Until someone sets `echo` (the Sidekick does), the lines are kept (the igniter's, printed before any log file
+        # exists), see take_pending_echo()
+        self._pending_echo: deque[tuple[Display.Kind, str]] = deque(maxlen=500)
+        self.echo: Callable[[Display.Kind, str], None] = lambda kind, text: self._pending_echo.append((kind, text))
 
         self.restart_occurrences()
         self.prompt = _d.prompt if prompt is None else prompt
@@ -144,6 +148,16 @@ class Display:
 
         if icons is not None and len(icons) != len(Display.Kind):
             raise ValueError(k_error.format("icons"))
+
+    def take_pending_echo(self) -> List[tuple[Display.Kind, str]]:
+        """
+        The lines printed while `echo` had not been set, in the form `echo` receives them (with their elapsed time).
+        Empties the buffer and stops keeping lines: `echo` becomes a no-op until the caller sets its own.
+        """
+        pending = list(self._pending_echo)
+        self._pending_echo.clear()
+        self.echo = lambda kind, text: None
+        return pending
 
     def color_for_kind(self, kind: Kind) -> str:
         return self.colors[kind.value] if self.with_color else Display.no_color

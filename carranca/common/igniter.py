@@ -55,7 +55,7 @@ class Fuse:
         modes = {mode.upper(): mode for mode in (APP_MODE_PRODUCTION, APP_MODE_DEVELOPMENT, APP_MODE_STAGE)}
         valid_modes = ", ".join(modes.values())
         env_name = f"{get_envvar_prefix()}APP_MODE"
-        app_mode = get_envvar("app_mode") if is_str_none_or_empty(args.app_mode) else args.app_mode
+        app_mode = get_envvar("APP_MODE") if is_str_none_or_empty(args.app_mode) else args.app_mode
         if is_str_none_or_empty(app_mode):
             raise ValueError(f"{env_name} is not set. Select one of: [{valid_modes}].")
 
@@ -83,7 +83,7 @@ def _get_debug_2() -> bool | None:
     #
     from ..helpers.py_helper import get_envvar, as_bool
 
-    debug_2 = get_envvar("debug", None)
+    debug_2 = get_envvar("DEBUG", None)
     return None if is_str_none_or_empty(debug_2) else as_bool(debug_2)
 
 

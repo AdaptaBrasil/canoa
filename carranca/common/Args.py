@@ -18,7 +18,7 @@ class Args:
         self.display_debug = bool(as_debug)  # display debug, if in debug
         # verbose by default; silenced by env CANOA_DISPLAY_MUTE or the `--display_mute` argument
         # (`flask run` rejects unknown arguments, so on the server only the env var works)
-        self.display_mute = as_bool(get_envvar("display_mute", "false"))
+        self.display_mute = as_bool(get_envvar("DISPLAY_MUTE", "false"))
         self.display_icons = True
         # FALSE: runtime messages keep going to the console and the log file.
         #        Only the debug lines depend on display_debug.

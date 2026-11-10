@@ -14,8 +14,8 @@
 # model_id is the Claude model that did the review (e.g. claude-opus-5-5);
 # entries before 2026-10-24 have no model_id (unknown).
 
-carranca/common/igniter.py|2026-11-07|7ab466ec|claude-sonnet-5-5
-carranca/common/Args.py|2026-11-07|e8b796be|claude-sonnet-5-5
+carranca/common/igniter.py|2026-11-09|3199dff4|claude-sonnet-5-5
+carranca/common/Args.py|2026-11-09|2e25cdc1|claude-sonnet-5-5
 carranca/__init__.py|2026-11-07|fb9cc820|claude-sonnet-5-5
 carranca/private/validate_process/submit.py|2026-11-06|aa451e10|claude-opus-5-5
 carranca/common/Sidekick.py|2026-11-06|4432bc26|claude-opus-5-5

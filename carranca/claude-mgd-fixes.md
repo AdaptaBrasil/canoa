@@ -9,6 +9,18 @@ ledger stays the tamper-evidence mechanism; this file is the human-readable "wha
 
 ---
 
+## 2026-11-09 — `CANOA_APP_MODE` "is not set" on Linux (env var names are case-sensitive)
+
+Found on the first start of β 6.04 on the server: `CANOA_APP_MODE` was exported (`rema.sh` and
+`canoa_env_vars.txt`) but `Fuse` raised "CANOA_APP_MODE is not set". `get_envvar(name)` looks up
+`"CANOA_" + name`; the callers passed lower case (`"app_mode"`, `"debug"`, `"display_mute"`), i.e.
+`CANOA_app_mode`, which does not exist on Linux. Windows env vars are case-insensitive, so dev never
+showed it. **Fix:** the three callers (`igniter.py` x2, `Args.py`) pass the name in upper case
+(`APP_MODE`, `DEBUG`, `DISPLAY_MUTE`). Side effect on Linux: `CANOA_DEBUG` and `CANOA_DISPLAY_MUTE` were
+being ignored until now, they are really read from β 6.05. `get_envvar` itself is unchanged.
+
+---
+
 ## 2026-11-07 — production ran `DevelopmentConfig` (`CANOA_APP_MODE` was never read)
 
 Found through the red `[Canoa]` badge on the live server. `rema.sh` exports

@@ -14,17 +14,18 @@
 # model_id is the Claude model that did the review (e.g. claude-opus-5-5);
 # entries before 2026-10-24 have no model_id (unknown).
 
+carranca/static/js/sep_validate.js|2026-11-10|c94c2f33|claude-sonnet-5-5
 carranca/helpers/dv_version_helper.py|2026-11-10|4e8cbe4c|claude-sonnet-5-5
 carranca/main.py|2026-11-10|acced129|claude-sonnet-5-5
-carranca/public/display_html.py|2026-11-10|d29896ac|claude-sonnet-5-5
+carranca/public/display_html.py|2026-11-10|c6fefc1c|claude-sonnet-5-5
 carranca/config/BaseConfig.py|2026-11-10|55727154|claude-sonnet-5-5
 carranca/common/igniter.py|2026-11-10|b0579205|claude-sonnet-5-5
 carranca/common/Args.py|2026-11-09|2e25cdc1|claude-sonnet-5-5
-carranca/__init__.py|2026-11-10|0d7790e0|claude-sonnet-5-5
+carranca/__init__.py|2026-11-10|1db0e820|claude-sonnet-5-5
 carranca/helpers/log_helper.py|2026-11-09|4ac5133e|claude-sonnet-5-5
 carranca/private/validate_process/submit.py|2026-11-06|aa451e10|claude-opus-5-5
 carranca/common/Sidekick.py|2026-11-09|8ec90405|claude-sonnet-5-5
-carranca/private/sep_validate.py|2026-11-06|d0772c77|claude-opus-5-5
+carranca/private/sep_validate.py|2026-11-10|1720d695|claude-sonnet-5-5
 carranca/private/received_files/fetch_records.py|2026-11-06|04c75d33|claude-opus-5-5
 carranca/private/scm_export_ui_display.py|2026-11-06|998aa81c|claude-opus-5-5
 carranca/private/sep_mgmt/sep_mgmt.py|2026-11-06|57ef617a|claude-opus-5-5
@@ -35,7 +36,7 @@ carranca/common/Display.py|2026-07-16|a95c7475
 carranca/common/app_context_vars.py|2026-07-16|01fdfb83
 carranca/common/UITextsKeys.py|2026-07-20|1196c410
 carranca/common/app_error_assistant.py|2026-08-10|431a5a1c
-carranca/common/app_constants.py|2026-11-10|6531d46f|claude-sonnet-5-5
+carranca/common/app_constants.py|2026-11-10|3023b79a|claude-sonnet-5-5
 carranca/private/received_files/init_grid.py|2026-08-13|c11a0505
 carranca/models/private/sep.py|2026-08-13|9a39c0cb
 carranca/static/js/sep_log_grid.js|2026-07-20|e81540f7
@@ -45,7 +46,7 @@ carranca/templates/includes/grid-body.html.j2|2026-07-21|fa061c9e
 carranca/helpers/js_consts_helper.py|2026-07-20|ae98a15c
 carranca/templates/layouts/dialog.html.j2|2026-08-14|eeddcc3d
 carranca/templates/includes/_action_forms_and_btns.html.j2|2026-08-14|dc0ab8ac
-carranca/templates/private/sep_validate.html.j2|2026-08-14|0e6349e9
+carranca/templates/private/sep_validate.html.j2|2026-11-10|ccd17384|claude-sonnet-5-5
 carranca/templates/layouts/prompt.html.j2|2026-07-20|161521be
 carranca/templates/layouts/form.html.j2|2026-07-20|7343b1f4
 carranca/private/sep_grid.py|2026-08-13|4b4df145

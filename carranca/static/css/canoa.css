@@ -256,6 +256,11 @@ input[type="password"]::-ms-reveal {
     color: limegreen;
 }
 
+/* needs a look, eg the validator version differs from the current one (sep_validate.js) */
+.grid-item-attention {
+    color: firebrick;
+}
+
 .grid-body {
     padding: 0.5rem;
 }

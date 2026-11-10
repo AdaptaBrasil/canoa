@@ -43,6 +43,9 @@ var userList;
 /** @type {JSON} */
 var gridRows;
 
+/** @type {boolean} sep_validate: false when the current validator version is not available */
+var validatorReady;
+
 /** @type {HTMLScriptElement} */
 var jsData;
 

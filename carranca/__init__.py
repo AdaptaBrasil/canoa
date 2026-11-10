@@ -232,6 +232,12 @@ def _register_jinja(
 
         return sep_list
 
+    def __get_dv_version() -> str:
+        # A function, not a str global like db_version: ui_db_texts copies the str globals into its cache
+        # (frozen at start-up, "?"). This is evaluated at each render, and reading it may refresh it (see DVInfo).
+        # Use `{{dv_version()}}`.
+        return global_dv_info.version
+
     def __do_btn_id(action: str, data: str) -> str:
         if not isinstance(data, str):
             raise ValueError("Invalid argument: string expected in __do_btn_id(action: str, data: str)")
@@ -248,6 +254,7 @@ def _register_jinja(
         app_name=app_name,
         app_version=app_version,
         db_version=db_version,
+        dv_version=__get_dv_version,
         app_brand=app_brand,
         app_brand_alert=app_brand_alert,
         ui_defaults=json.loads(ui_defaults),

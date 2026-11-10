@@ -15,11 +15,12 @@ Equipe da Canoa -- 2026
 mgd 2026-07-28
 """
 
+from .. import global_dv_info
 from .revalidate_file import revalidate_file
 from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import is_str_none_or_empty
 from ..common.ups_handler import get_ups_jHtml, ups_handler
-from ..helpers.jinja_helper import Jinja_Rendered, process_template
+from ..helpers.jinja_helper import Jinja_Rendered, process_template, process_text
 from ..helpers.route_helper import get_private_response_data, get_form_input_value, init_response_vars
 from ..common.app_context_vars import sidekick
 from ..helpers.js_consts_helper import JS_GRID_COL_META_INFO, js_form_sec_check, js_ui_dictionary
@@ -65,8 +66,18 @@ def get_sep_validate_grid() -> Jinja_Rendered:
         js_ui_dict = js_ui_dictionary(ui_db_texts[JS_GRID_COL_META_INFO], display_cols, task_code)
 
         task_code += 1  # 4
+        # A row validated by another validator version than the current one is "old": only the difference
+        # counts, no ordering (the formats, eg 0.7.64b677, are free-form). Without the current version
+        # nothing is marked, a warning is shown and the buttons are disabled (template, js).
+        dv_version = global_dv_info.version  # reading it may start a refresh (see DVInfo)
+        dv_ready = global_dv_info.ready
+        if not dv_ready and is_get:  # after a POST, the msg is the revalidation's
+            ui_db_texts.set_msg_warn("validatorUnavailable")
+
         grid_data = ExportGrid.get_rows(fetch_cols, ExportGrid.is_exportable == True)
         for row in grid_data:
+            # hidden column (not in display_cols): the grid colors the validator_version cell with it
+            row.is_other_validator_version = dv_ready and row.validator_version != dv_version
             # don't ship the raw pk to the browser -- same obfuscation every other grid uses
             row.id = ExportGrid.to_code(row.id)
             # dates as local ISO for JS (Flask's tojson labels naive datetimes as GMT)
@@ -74,9 +85,13 @@ def get_sep_validate_grid() -> Jinja_Rendered:
             row.validated_at = sidekick.to_iso_dt(row.validated_at)
 
         task_code += 1  # 5
+        # the validator's version follows the title: its own text, with Jinja ({{dv_version()}}), is rendered here
+        title_validator = process_text(ui_db_texts.get_str("formTitleValidator")) if dv_ready else ""
+        ui_db_texts.set_value(UITextsKeys.Form.title, f"{ui_db_texts.get_str(UITextsKeys.Form.title)} {title_validator}".strip())
         jHtml = process_template(
             tmpl_ffn,
             grid_data=grid_data.to_list(),
+            dv_ready=dv_ready,
             fi=fi.with_icon("sep_validate"),
             **ui_db_texts.data(),
             **js_ui_dict,

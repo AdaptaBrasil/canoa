@@ -21,9 +21,11 @@ mgd
 {# ╒════════════════ Grid Footer ════════════════╕ #}
 {% block grid_blc_footer %}
 {% from "includes/_action_forms_and_btns.html.j2" import btn_submit %}
+{# 2026-11-10 hidden until the bulk revalidation exists (#61); sep_validate.py still answers cmd="all" with "under development"
 <div class="col-auto">
     {{ btn_submit(dlg_post_form_id, "btn-validate-all-id", grdBtnValidateAll, 'name="cmd" value="all"') }}
 </div>
+#}
 <div class="col-auto">
     {{ btn_submit(dlg_post_form_id, "btn-validate-one-id", grdBtnValidateOne, 'name="cmd" value="one" disabled') }}
 </div>
@@ -52,6 +54,7 @@ mgd
 
     const colMeta = {{ grid_col_meta | default([]) | tojson | safe }};
     const gridRows = {{ grid_data | default([]) | tojson | safe }};
+    const validatorReady = {{ dv_ready | default(false) | tojson }};
     const gridID = '{{ grid_id | default("ag-grid-id") }}';
     const userLocale = '{{ userLocale }}';
 </script>

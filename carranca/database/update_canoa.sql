@@ -10,7 +10,7 @@
 -- Equipe da Canoa -- 2026
 -- mgd 2026-10-24
 -- cSpell:ignore secsuccess secerror receivefile receivefilesubmit_error uploadfilesuccess revalidatefilesuccess revalidatedfile
--- cSpell:ignore aboutapp documentbody uploadedfile revalidatefile uploadfileerror uploadfilezip uploadfileemail receivefileexception receivefileadmit
+-- cSpell:ignore sepvalidate formtitle grdbtnvalidateone estrat gicos uploadedfile revalidatefile uploadfileerror uploadfilezip uploadfileemail receivefileexception receivefileadmit
 
 set search_path to canoa_dev;  -- ⚠️ canoa_dev for testing, canoa for production; same name in `expected` below
 
@@ -293,26 +293,33 @@ update ui_items itm
    and itm.name_lower = 'subject' and itm.text like '%esta anexado%';
 
 -- ============================================================================
--- 2026-11-10 aboutApp: show data_validate's version, the versions in monospace (css `code-text`) and a line (hr) under them;
--- the template gets `dv_version` (display_html.py), not the object. Replaces the h4 whether or not it had `dv_info`.
+-- 2026-11-10 sepValidate: current validator version after the title (own item formTitleValidator);
+-- warning when it is not available. {{dv_version()}} is a Jinja function (see __init__.py),
+-- sep_validate.py renders the item and appends it to formTitle.
 -- ============================================================================
 
-update ui_items itm
-   set text = regexp_replace(itm.text, '<h4>.*?</h4>',
-       '<h4>Vers&atilde;o <span class="code-text">{{app_version}}</span>, DB <span class="code-text">{{db_version}}</span>, '
-       || 'Validador <span class="code-text">{{dv_version}}</span></h4><hr>')
+insert into ui_items (id_section, name, text, description)
+select sec.id, 'validatorUnavailable',
+       'N&atilde;o foi poss&iacute;vel obter a vers&atilde;o do validador. A revalida&ccedil;&atilde;o est&aacute; desativada.',
+       'sep_validate.py: the current validator version is not available'
   from ui_sections sec
- where sec.id = itm.id_section and sec.name_lower = 'aboutapp'
-   and itm.name_lower = 'documentbody' and itm.text not like '%dv_version%';
+ where sec.name_lower = 'sepvalidate'
+on conflict do nothing;
 
--- aboutApp 1st paragraph: typos ("faciliar", "submter"), HTML entities instead of accents, the link's blank
-update ui_items itm
-   set text = regexp_replace(itm.text, '<p>Interface Web para faciliar.*?</p>',
-       '<p>Interface Web para facilitar ao usu&aacute;rio submeter arquivos &agrave; valida&ccedil;&atilde;o no '
-       || '<a href="https://github.com/AdaptaBrasil/data_validate">Adapta Parser</a>.</p>')
+insert into ui_items (id_section, name, text, description)
+select sec.id, 'formTitleValidator',
+       'com o Validador <span class="code-text"><i>v</i> {{dv_version()}}</span>',
+       'sep_validate.py: appended to formTitle'
   from ui_sections sec
- where sec.id = itm.id_section and sec.name_lower = 'aboutapp'
-   and itm.name_lower = 'documentbody' and itm.text like '%<p>Interface Web para faciliar%';
+ where sec.name_lower = 'sepvalidate'
+on conflict do nothing;
+
+-- the button revalidates the selected SEP's file (only if its validator version is not the current one)
+update ui_items itm
+   set text = 'Revalidar'
+  from ui_sections sec
+ where sec.id = itm.id_section and sec.name_lower = 'sepvalidate'
+   and itm.name_lower = 'grdbtnvalidateone' and itm.text is distinct from 'Revalidar';
 
 -- ============================================================================
 -- db_version 5.14.0 for app 6.03 (idempotent: only once per DB)

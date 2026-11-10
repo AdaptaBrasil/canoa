@@ -30,7 +30,12 @@ const btnValidateOne = /** @type {HTMLButtonElement} */ (document.getElementById
 
 /** @param {any} event */
 const onSelectionChanged = event => {
-    const row = event.api.getSelectedRows()[0];
+    // [Revalidar] only applies to items validated by another validator version than the current one.
+    // Items validated with the current version are not revalidated (same file + same validator = same result),
+    // so the button stays disabled for them; the future [Revalidar todos] will skip them too.
+    // Without the current version (validatorReady false, see sep_validate.html.j2) no item qualifies.
+    const selected = event.api.getSelectedRows()[0];
+    const row = validatorReady && selected?.is_other_validator_version ? selected : undefined;
     selectedUdfIdInput.value = row ? row.id : '';
     btnValidateOne.disabled = !row;
 };
@@ -71,6 +76,11 @@ const isToday = value => {
 
 /** @param {any} params */
 const isChangedToday = params => params.value && isToday(new Date(params.value));
+
+// validator_version: "attention" when the file was validated by another validator version than the
+// current one (a hidden column, set by sep_validate.py)
+/** @param {any} params */
+const isOtherValidatorVersion = params => !!params.data?.is_other_validator_version;
 
 // ag-grid's built-in 'numericColumn' type right-aligns both the header and the cells
 /** @type {Record<string, string>} */
@@ -128,6 +138,7 @@ const gridOptions = {
             ...(typeByField[n] ? { type: typeByField[n] } : {}),
             ...(formatterByField[n] ? { valueFormatter: formatterByField[n] } : {}),
             ...(n === 'validated_at' ? { cellClassRules: { 'grid-item-changed': isChangedToday } } : {}),
+            ...(n === 'validator_version' ? { cellClassRules: { 'grid-item-attention': isOtherValidatorVersion } } : {}),
         };
     })
 }; // gridOptions

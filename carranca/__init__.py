@@ -18,12 +18,14 @@ from typing import cast, Dict, List
 from .common.Sidekick import Sidekick
 from .helpers.py_helper import OS_IS_LINUX
 from .helpers.types_helper import UI_Texts_Cache
+from .helpers.dv_version_helper import DVInfo
 
 # App Global variables:
 global_sidekick: Sidekick
 global_login_manager: LoginManager
 global_sqlalchemy_scoped_session: scoped_session
 global_ui_texts_cache: UI_Texts_Cache = {}
+global_dv_info = DVInfo()  # data_validate's version, filled in place by a thread (see dv_version_helper.py)
 
 """
 'scoped' refers to the management of SQLAlchemy `Session` objects within a specific scope,
@@ -455,6 +457,9 @@ def create_app():
 
     # -- Start  Database User Interface Text Max Module:
     jinja_ui_defaults = _init_ui_db_texts()
+
+
+    # -- Data Validation Interface
 
     # -- Jinja2
     db_is_production = db_schema == APP_SCHEMA

@@ -100,6 +100,10 @@ class BaseConfig(Config):
     APP_UI_DB_TEXTS_CACHE_LIFETIME_MIN = 0
     APP_UI_DATETIME_FORMAT = "%H:%M %d/%m/%Y"
 
+    # data_validate's version (see helpers/dv_version_helper.py, carranca.global_dv_info):
+    # read it again when older than _n_ minutes; 0 = never refresh
+    APP_REFRESH_DV_INFO_MIN = 10
+
     APP_LINUX_LOCALE = "pt_BR.UTF-8"
     APP_WINDOWS_LOCALE = "Portuguese_Brazil.1252"
 

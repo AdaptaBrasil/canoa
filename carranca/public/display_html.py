@@ -19,6 +19,7 @@ import base64
 from flask import current_app
 from typing import List
 
+from .. import global_dv_info
 from ..common.UIDBTexts import UITextsKeys
 from ..config.FormIcons import FormIcons as fi
 from ..helpers.py_helper import is_str_none_or_empty
@@ -106,7 +107,8 @@ def display_html(docName: str):
         task_code += 1
         body_key = "documentBody"
         body_raw = ui_db_texts.get_str(body_key)
-        body_proc = process_text(body_raw, **ui_db_texts.data())
+        # dv_version: used in the document 'aboutApp' as {{dv_version}}; passed here because this function displays any document
+        body_proc = process_text(body_raw, dv_version=global_dv_info.version, **ui_db_texts.data())
         body_text = ui_db_texts.set_value(body_key, body_proc)
 
         images = ui_db_texts.get_str("images")

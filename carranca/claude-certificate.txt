@@ -14,9 +14,13 @@
 # model_id is the Claude model that did the review (e.g. claude-opus-5-5);
 # entries before 2026-10-24 have no model_id (unknown).
 
-carranca/common/igniter.py|2026-11-09|3199dff4|claude-sonnet-5-5
+carranca/helpers/dv_version_helper.py|2026-11-10|4e8cbe4c|claude-sonnet-5-5
+carranca/main.py|2026-11-10|acced129|claude-sonnet-5-5
+carranca/public/display_html.py|2026-11-10|d29896ac|claude-sonnet-5-5
+carranca/config/BaseConfig.py|2026-11-10|55727154|claude-sonnet-5-5
+carranca/common/igniter.py|2026-11-10|b0579205|claude-sonnet-5-5
 carranca/common/Args.py|2026-11-09|2e25cdc1|claude-sonnet-5-5
-carranca/__init__.py|2026-11-09|ced27acc|claude-sonnet-5-5
+carranca/__init__.py|2026-11-10|0d7790e0|claude-sonnet-5-5
 carranca/helpers/log_helper.py|2026-11-09|4ac5133e|claude-sonnet-5-5
 carranca/private/validate_process/submit.py|2026-11-06|aa451e10|claude-opus-5-5
 carranca/common/Sidekick.py|2026-11-09|8ec90405|claude-sonnet-5-5
@@ -31,7 +35,7 @@ carranca/common/Display.py|2026-07-16|a95c7475
 carranca/common/app_context_vars.py|2026-07-16|01fdfb83
 carranca/common/UITextsKeys.py|2026-07-20|1196c410
 carranca/common/app_error_assistant.py|2026-08-10|431a5a1c
-carranca/common/app_constants.py|2026-08-14|941ea460
+carranca/common/app_constants.py|2026-11-10|6531d46f|claude-sonnet-5-5
 carranca/private/received_files/init_grid.py|2026-08-13|c11a0505
 carranca/models/private/sep.py|2026-08-13|9a39c0cb
 carranca/static/js/sep_log_grid.js|2026-07-20|e81540f7

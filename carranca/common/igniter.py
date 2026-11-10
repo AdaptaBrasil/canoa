@@ -27,6 +27,7 @@ from .app_error_assistant import RaiseIf
 from ..helpers.email_helper import EmailProvider
 
 _ERROR_MSG = "[{}]: An error occurred while {}. Message: `{}`."
+_DV_WAIT_SECONDS = 10  # max wait for the data_validate version lookup (dv_version_helper), before the final message
 fuse: Optional["Fuse"] = None
 
 
@@ -325,6 +326,13 @@ def ignite_app(app_name: str, flask_app_name: str, start_at: float) -> Tuple[Sid
     sidekick = Sidekick(config, fuse.display)
     fuse.display.info("The 'sidekick' was ignited.")
 
+    # data_validate's version, read in the background while the next steps run (waited for before the final message)
+    from .. import global_dv_info  # imported here: the package imports this module
+    from ..helpers.dv_version_helper import start_dv_version_lookup, dv_app_and_path
+
+    dv_app, dv_path = dv_app_and_path(config)
+    dv_thread = start_dv_version_lookup(sidekick, global_dv_info, dv_path, dv_app.ui_name)
+
     # ---------------------------------------------------------------------------- #
     # Give warnings of import configuration that may be missing
 
@@ -343,11 +351,21 @@ def ignite_app(app_name: str, flask_app_name: str, start_at: float) -> Tuple[Sid
             fuse.display.warn(no_email_text.format("originator"))
 
     # ---------------------------------------------------------------------------- #
+    # data_validate's version: not reading it is a warning
+    dv_thread.join(timeout=_DV_WAIT_SECONDS)
+    if dv_thread.is_alive():
+        warns += 1
+        fuse.display.warn(f"The {dv_app.ui_name} version is still being read, it was waited for {_DV_WAIT_SECONDS}s.")
+    elif not global_dv_info.ready:
+        warns += 1  # the thread already displayed the reason
+
+    # ---------------------------------------------------------------------------- #
     # Final message
 
     fuse.display.print(
         (Display.Kind.INFO if warns + errors == 0 else (Display.Kind.WARN if errors == 0 else Display.Kind.ERROR)),
-        f"'[{__name__}] module completed with {errors} error{'' if errors == 1 else 's'} and {warns} warning{'' if warns == 1 else 's'} .",
+        f"[{__name__}] module completed with {errors} error{'' if errors == 1 else 's'} and {warns} warning{'' if warns == 1 else 's'}."
+        f" {dv_app.ui_name} version: {global_dv_info.version}.",
     )
     mute_display_after_init = fuse.args.display_mute_after_init
 

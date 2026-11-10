@@ -47,8 +47,9 @@ print(f"{'-' * len(the_aperture_msg)}\n{the_aperture_msg}")
 
 
 # Flask app
-from carranca import create_app, started  # see __init__.py
+from carranca import create_app, started, global_dv_info  # see __init__.py
 from .helpers.py_helper import is_str_none_or_empty
+from .config.ValidateProcessConfig import ValidateProcessConfig
 
 app, sidekick = create_app()
 
@@ -74,6 +75,14 @@ if sidekick.config.APP_DISPLAY_DEBUG_MSG:
     sidekick.display.debug("\n".join(f"{name}: {value}" for name, value in di))
 
 # Tell everybody how quick we are
+dv_name = ValidateProcessConfig().dv_app.ui_name
+if global_dv_info.ready:
+    sidekick.display.info(f"{dv_name} version {global_dv_info.version} was found.")
+elif global_dv_info.reading:
+    sidekick.display.warn(f"{dv_name} version is still being read, see the log.")
+else:
+    sidekick.display.error(f"{dv_name} version could not be read, see the start-up log.")
+
 elapsed = (time.perf_counter() - started) * 1000
 sidekick.display.info(f"{APP_NAME} version {APP_VERSION} is now ready for the journey.")
 sidekick.display.debug(f"It took {elapsed:,.0f} ms to create and initialize it.")

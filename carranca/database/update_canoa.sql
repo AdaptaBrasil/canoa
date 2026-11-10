@@ -10,7 +10,7 @@
 -- Equipe da Canoa -- 2026
 -- mgd 2026-10-24
 -- cSpell:ignore secsuccess secerror receivefile receivefilesubmit_error uploadfilesuccess revalidatefilesuccess revalidatedfile
--- cSpell:ignore uploadedfile revalidatefile uploadfileerror uploadfilezip uploadfileemail receivefileexception receivefileadmit
+-- cSpell:ignore aboutapp documentbody uploadedfile revalidatefile uploadfileerror uploadfilezip uploadfileemail receivefileexception receivefileadmit
 
 set search_path to canoa_dev;  -- ⚠️ canoa_dev for testing, canoa for production; same name in `expected` below
 
@@ -291,6 +291,28 @@ update ui_items itm
   from ui_sections sec
  where sec.id = itm.id_section and sec.name_lower = 'uploadedfile_email'
    and itm.name_lower = 'subject' and itm.text like '%esta anexado%';
+
+-- ============================================================================
+-- 2026-11-10 aboutApp: show data_validate's version, the versions in monospace (css `code-text`) and a line (hr) under them;
+-- the template gets `dv_version` (display_html.py), not the object. Replaces the h4 whether or not it had `dv_info`.
+-- ============================================================================
+
+update ui_items itm
+   set text = regexp_replace(itm.text, '<h4>.*?</h4>',
+       '<h4>Vers&atilde;o <span class="code-text">{{app_version}}</span>, DB <span class="code-text">{{db_version}}</span>, '
+       || 'Validador <span class="code-text">{{dv_version}}</span></h4><hr>')
+  from ui_sections sec
+ where sec.id = itm.id_section and sec.name_lower = 'aboutapp'
+   and itm.name_lower = 'documentbody' and itm.text not like '%dv_version%';
+
+-- aboutApp 1st paragraph: typos ("faciliar", "submter"), HTML entities instead of accents, the link's blank
+update ui_items itm
+   set text = regexp_replace(itm.text, '<p>Interface Web para faciliar.*?</p>',
+       '<p>Interface Web para facilitar ao usu&aacute;rio submeter arquivos &agrave; valida&ccedil;&atilde;o no '
+       || '<a href="https://github.com/AdaptaBrasil/data_validate">Adapta Parser</a>.</p>')
+  from ui_sections sec
+ where sec.id = itm.id_section and sec.name_lower = 'aboutapp'
+   and itm.name_lower = 'documentbody' and itm.text like '%<p>Interface Web para faciliar%';
 
 -- ============================================================================
 -- db_version 5.14.0 for app 6.03 (idempotent: only once per DB)

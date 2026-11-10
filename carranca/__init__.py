@@ -382,6 +382,7 @@ def _create_app_and_log_file(app_name: str):
         info = f"file '{full_name}' levels '{level}' and above"
         if not error:
             _info(f"Logging to {info}.")
+            g_sk.attach_logger(app.logger)  # the lines displayed so far go to the file, and the next ones too
             app.logger.log(
                 g_sk.config.LOG_MIN_LEVEL,
                 f"{app.name}'s log {info} is ready.",

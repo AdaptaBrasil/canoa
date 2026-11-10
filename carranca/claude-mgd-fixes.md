@@ -9,6 +9,22 @@ ledger stays the tamper-evidence mechanism; this file is the human-readable "wha
 
 ---
 
+## 2026-11-09 — the log file `canoa_<date>.log` was empty in production (INFO never reached it)
+
+Found on the server after β 6.05: the file stayed empty. Two causes. (1) Outside debug mode Flask leaves
+`app.logger.level` NOTSET, i.e. the root's WARNING, so INFO records (also the "log ... is ready" line)
+never reached the file handler (tested: effective level 30 non-debug, 10 debug). (2) `Sidekick._echo`
+returned while no app context existed (`# Todo create a buffer`), so the igniter's Display lines were
+never echoed. **Fix** (`log_helper.py`, `Sidekick.py`, `__init__.py`):
+- `do_log_file` sets `app.logger.setLevel(min_level)` and Flask's console `default_handler` to WARNING
+  (INFO is already shown by Display, no duplicates on the console).
+- `Sidekick._echo` keeps the lines in a buffer (deque, 500) while no logger exists; `attach_logger()`
+  flushes them to the file and is called by `_create_app_and_log_file` once the handler exists.
+  Lines outside a request get user id `sys`. Not changed: `RotatingFileHandler` is still 10000 bytes
+  x 1 backup, the start-up lines rotate out quickly.
+
+---
+
 ## 2026-11-09 — `CANOA_APP_MODE` "is not set" on Linux (env var names are case-sensitive)
 
 Found on the first start of β 6.04 on the server: `CANOA_APP_MODE` was exported (`rema.sh` and

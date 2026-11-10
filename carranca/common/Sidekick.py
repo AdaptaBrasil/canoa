@@ -38,8 +38,9 @@ Sidekick
 
 # cSpell:ignore sqlalchemy mgd appcontext timespec
 
-from flask import Flask, current_app
+from flask import Flask, current_app, has_request_context
 from typing import TYPE_CHECKING, cast
+from collections import deque
 from logging import Logger
 from datetime import date, datetime
 from .Display import Display
@@ -69,6 +70,9 @@ class Sidekick:
         self.display = display
         self.started_at = datetime.now()
         self.log_filename = ""
+        # Display lines echoed before the log file exists (the igniter's), kept for attach_logger()
+        self._echo_buffer: deque[tuple[Display.Kind, str]] = deque(maxlen=500)
+        self._echo_logger: Logger | None = None
         echo = ""
         if self.config.SIDEKICK_LOG:
             display.echo = self._echo
@@ -114,9 +118,23 @@ class Sidekick:
         _count = self.display.occurrences
         return {kind: _count(kind) for kind in Display.Kind if _count(kind) > filter}
 
+    def attach_logger(self, logger: Logger):
+        """
+        Called by create_app() when the log file's handler exists (no app context yet at that time):
+        from now on the Display lines are echoed to `logger`, and the lines kept so far go first.
+        """
+        self._echo_logger = logger
+        buffered = list(self._echo_buffer)
+        self._echo_buffer.clear()
+        for kind, log_text in buffered:
+            self._echo(kind, log_text)
+
     def _echo(self, kind: Display.Kind, log_text: str):
-        if not (self.app and self.app.logger):
-            # Todo create a buffer
+        # attach_logger()'s logger (start-up) or else the current app's
+        logger = self._echo_logger or (self.app.logger if self.app else None)
+        if logger is None:
+            # no log file yet (the igniter's lines): kept for attach_logger()
+            self._echo_buffer.append((kind, log_text))
             return
 
         if self._echoing:
@@ -124,10 +142,12 @@ class Sidekick:
             return
 
         self._echoing = True
+        user_id = "sys"  # no request: start-up
         try:
-            user_id = f"{(current_user.id if current_user.is_active else 0):03d}"
+            if has_request_context():
+                user_id = f"{(current_user.id if current_user.is_active else 0):03d}"
         except Exception as e:
-            self.app_log.debug(f"Current user load error in {self.__class__.__name__}: [{e}]")
+            logger.debug(f"Current user load error in {self.__class__.__name__}: [{e}]")
             user_id = "usr!"
         finally:
             self._echoing = False
@@ -138,18 +158,18 @@ class Sidekick:
             case Display.Kind.PROMPT | Display.Kind.ELAPSED | Display.Kind.USER:
                 pass  # not logged, console only
             case Display.Kind.INFO:
-                self.app_log.info(text)
+                logger.info(text)
             case Display.Kind.WARN:
-                self.app_log.warning(text)
+                logger.warning(text)
             case Display.Kind.ERROR:
-                self.app_log.error(text)
+                logger.error(text)
             case Display.Kind.DEBUG:
-                self.app_log.debug(text)
+                logger.debug(text)
             case Display.Kind.FATAL:
-                self.app_log.critical(text)
+                logger.critical(text)
             case _:
-                self.app_log.critical(f"Unknown kind '{kind}', with text:")
-                self.app_log.info(text)
+                logger.critical(f"Unknown kind '{kind}', with text:")
+                logger.info(text)
 
     def __str__(self):
         return f"{self.__class__.__name__} the ƒ+py dev's companion"

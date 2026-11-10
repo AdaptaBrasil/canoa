@@ -8,6 +8,7 @@ mgd 2025-03-14
 import logging
 from os import path
 from flask import Flask
+from flask.logging import default_handler
 from typing import Tuple
 from logging.handlers import RotatingFileHandler
 
@@ -44,6 +45,11 @@ def do_log_file(
             handler = RotatingFileHandler(full_name, maxBytes=10000, backupCount=1, encoding="utf-8")
             handler.setLevel(min_level)
             app.logger.addHandler(handler)
+            # Flask sets the logger's level only in debug mode; otherwise it is the root's (WARNING)
+            # and records below it never reach the handler.
+            app.logger.setLevel(min_level)
+            # Flask's console handler: keep it at WARNING and above, Display already shows the rest
+            default_handler.setLevel(logging.WARNING)
     except Exception as e:
         msg_error = f"Cannot create log's {task}: [{e}]"
 

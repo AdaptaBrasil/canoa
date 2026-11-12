@@ -55,6 +55,7 @@ class UITextsKeys:
     class Action:
         dlg_close = "dlgFormCloseAction"
         dlg_goto = "dlgFormGotoAction"
+        dlg_goto_cargo = "dlgFormGotoCargo"  # value of the goto form's hidden cargo input, JSON or ''
         dlg_sec_msg = "dlgFormSecMsg"
 
 

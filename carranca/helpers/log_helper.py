@@ -36,7 +36,7 @@ def do_log_file(
             msg_error = f"Cannot create log's files folder [{file_folder}]."
         else:
             task = "full_name"
-            full_name = path.join(".", file_folder, file_name)
+            full_name = path.join(file_folder, file_name)
 
             task = "level"
             s_level = logging._levelToName[min_level]

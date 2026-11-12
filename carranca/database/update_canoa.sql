@@ -10,7 +10,7 @@
 -- Equipe da Canoa -- 2026
 -- mgd 2026-10-24
 -- cSpell:ignore secsuccess secerror receivefile receivefilesubmit_error uploadfilesuccess revalidatefilesuccess revalidatedfile
--- cSpell:ignore sepvalidate formtitle grdbtnvalidateone estrat gicos uploadedfile revalidatefile uploadfileerror uploadfilezip uploadfileemail receivefileexception receivefileadmit
+-- cSpell:ignore spdgrid sepvalidate formtitle grdbtnvalidateone estrat gicos uploadedfile revalidatefile uploadfileerror uploadfilezip uploadfileemail receivefileexception receivefileadmit
 
 set search_path to canoa_dev;  -- ⚠️ canoa_dev for testing, canoa for production; same name in `expected` below
 
@@ -320,6 +320,30 @@ update ui_items itm
   from ui_sections sec
  where sec.id = itm.id_section and sec.name_lower = 'sepvalidate'
    and itm.name_lower = 'grdbtnvalidateone' and itm.text is distinct from 'Revalidar';
+
+-- ============================================================================
+-- 2026-11-11 spdGrid: key noRecord (spd_download.py [Baixar]; the key was missing in spdGrid and secError)
+-- ============================================================================
+
+insert into ui_items (id_section, name, text, description)
+select sec.id, 'noRecord',
+       'Registro n&atilde;o encontrado.',
+       'spd_download.py: no record, or its file is missing'
+  from ui_sections sec
+ where sec.name_lower = 'spdgrid'
+on conflict do nothing;
+
+-- ============================================================================
+-- 2026-11-11 passwordRecovery: "abra-o" must not wrap at the hyphen -> non-breaking hyphen (&#8209;), and the
+-- space before it becomes &nbsp;, so the dash before it (" — abra-o") moves down with the word.
+-- Handles both states (still "abra-o", or already "abra&#8209;o"), the dash itself is not touched.
+-- ============================================================================
+
+update ui_items itm
+   set text = regexp_replace(itm.text, '(\s|&nbsp;)abra(-|&#8209;)o', '&nbsp;abra&#8209;o')
+  from ui_sections sec
+ where sec.id = itm.id_section and sec.name_lower = 'passwordrecovery'
+   and itm.text ~ '(\s|&nbsp;)abra(-|&#8209;)o';
 
 -- ============================================================================
 -- db_version 5.14.0 for app 6.03 (idempotent: only once per DB)

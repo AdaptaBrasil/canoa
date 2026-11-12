@@ -41,7 +41,10 @@ def download_rec(code: str) -> Response:
             http_status_code = hsc
             raise AppStumbled(msg, task_code, log_out, True)
 
-        def _not_found(task_code: int):
+        def _not_found(branch_code: int):
+            # the branch's code is the one reported (`_raise` reads the enclosing `task_code`)
+            nonlocal task_code
+            task_code = branch_code
             _, msg = ui_db_texts.set_msg_error("noRecord", task_code)
             _raise(msg, HTTPStatus.NOT_FOUND)
             return
@@ -62,11 +65,13 @@ def download_rec(code: str) -> Response:
         elif not (file_name := db_records[0][_ufn]):
             _not_found(task_code + 5)
         elif not (original_name := db_records[0][_ofn]):
-            _not_found(task_code + 5)
-        elif not path.isfile(ffn := path.join(sidekick.config.LOCAL_SPATIAL_DATA_PATH, file_name)):
             _not_found(task_code + 6)
+        elif not path.isfile(ffn := path.join(sidekick.config.LOCAL_SPATIAL_DATA_PATH, file_name)):
+            _not_found(task_code + 7)
         else:
-            task_code += 7
+            # 2026-11-12 debug aid, uncomment to reproduce the server's missing-file 404 (branch +7)
+            # _not_found(task_code + 8)
+            task_code += 8
             file_response = send_file(ffn, as_attachment=True, download_name=original_name)
             http_status_code = file_response.status_code
             # see canoa.js's setSleepVeil() -- Set-Cookie arrives with the response headers,
@@ -75,7 +80,7 @@ def download_rec(code: str) -> Response:
             file_response.set_cookie(APP_DOWNLOAD_READY_COOKIE, "1", max_age=30, path="/")
 
     except Exception as e:
-        # see common.abort_handler for why this doesn't use the project's usual ups_handler page
+        # logs via ups_handler, then abort()s into the app-wide styled error page (carranca/__init__.py)
         abort_handler(task_code, e, http_status_code)
 
     return file_response

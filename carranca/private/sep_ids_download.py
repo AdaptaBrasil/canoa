@@ -46,8 +46,11 @@ def download_ids(code: str) -> Response:
             http_status_code = hsc
             raise AppStumbled(msg, task_code, log_out, True)
 
-        def _not_found(task_code: int):
+        def _not_found(branch_code: int):
             # same response for "doesn't exist" and "not yours" -- don't leak which one to a non-owner
+            # (the branch's code is reported: `_raise` reads the enclosing `task_code`)
+            nonlocal task_code
+            task_code = branch_code
             _, msg = ui_db_texts.set_msg_error(HTTP_StatusCode.CODE_404.value)
             _raise(msg, HTTPStatus.NOT_FOUND)
             return
@@ -108,7 +111,7 @@ def download_ids(code: str) -> Response:
             file_response.set_cookie(APP_DOWNLOAD_READY_COOKIE, "1", max_age=30, path="/")
 
     except Exception as e:
-        # see common.abort_handler for why this doesn't use the project's usual ups_handler page
+        # logs via ups_handler, then abort()s into the app-wide styled error page (carranca/__init__.py)
         abort_handler(task_code, e, http_status_code)
 
     return file_response

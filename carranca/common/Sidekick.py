@@ -38,6 +38,7 @@ Sidekick
 
 # cSpell:ignore sqlalchemy mgd appcontext timespec
 
+import re
 from flask import Flask, current_app, has_request_context
 from typing import TYPE_CHECKING, cast
 from collections import deque
@@ -46,6 +47,9 @@ from datetime import date, datetime
 from .Display import Display
 from flask_login import current_user
 from ..common.app_constants import APP_NAME
+
+# ANSI colour codes (Display.code): the console keeps them, the log file never gets them
+_ANSI_COLOR = re.compile(r"\x1b\[[0-9;]*m")
 
 if TYPE_CHECKING:
     from ..models.public.user import User
@@ -155,7 +159,7 @@ class Sidekick:
         finally:
             self._echoing = False
 
-        text = f"{user_id}|{log_text}"
+        text = f"{user_id}|{_ANSI_COLOR.sub('', log_text)}"
 
         match kind:
             case Display.Kind.PROMPT | Display.Kind.ELAPSED | Display.Kind.USER:

@@ -192,8 +192,8 @@ def process_template(tmpl_ffn: Jinja_Template, **context: Any) -> Jinja_Rendered
         if sidekick.config.DEBUG_RENDERED_TEMPLATES:
             bugged_file = sidekick.config.DEBUG_TEMPLATES_HTML_BUGS_FILE_NAME
             id = current_user.id if is_anyone_logged() else 0
-            folder = sidekick.config.LOG_FILE_FOLDER
-            bugged_ffname = path.join(".", folder, bugged_file).format(id) if bugged_file else ""
+            folder = sidekick.config.LOG_FILE_PATH
+            bugged_ffname = path.join(folder, bugged_file).format(id) if bugged_file else ""
 
             # Duplicated IDs
             dup_ids = _detect_duplicate_ids(jHtml_to_display)

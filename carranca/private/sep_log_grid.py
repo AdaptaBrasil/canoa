@@ -14,10 +14,10 @@ from .UserSep import UserSep
 from .sep_icon import do_icon_get_url
 from ..common.ups_handler import get_ups_jHtml
 from ..helpers.jinja_helper import Jinja_Rendered, process_template
-from ..helpers.uiact_helper import UiActResponseProxy
+from ..helpers.uiact_helper import UiActResponseKeys, UiActResponseProxy
 from ..helpers.route_helper import get_private_response_data, init_response_vars, private_route
 from ..common.app_context_vars import app_user, sidekick
-from ..helpers.js_consts_helper import JS_GRID_COL_META_INFO, js_ui_dictionary
+from ..helpers.js_consts_helper import JS_FORM_CARGO_ID, JS_GRID_COL_META_INFO, js_ui_dictionary
 from ..helpers.ui_db_texts_manager import UITextsKeys
 from ..common.app_error_assistant import ModuleErrorCode, JumpOut
 from ..models.private.sep import Sep
@@ -59,9 +59,23 @@ def get_sep_log_grid(sep_code: str, from_page: str = "sep_grid") -> Jinja_Render
         task_code += 1  # 6
         log_data = LogUserSepGrid.get_rows(col_names, LogUserSepGrid.id_sep == sep_id)
         operation_labels = json.loads(ui_db_texts.get_str("jsonOperation", "{}"))
-        # from_page is user-supplied (?from=), whitelist it -- sep_mgmt's route takes no `code`, unlike sep_grid's
-        goto_url = private_route("sep_mgmt") if from_page == "sep_mgmt" else private_route("sep_grid", code=UiActResponseProxy.show)
+        # from_page is user-supplied (?from=), whitelist it -- sep_mgmt's route takes no `code`, unlike sep_grid's.
+        # [Voltar] to sep_grid posts to the cargo route, the `show` sentinel travels inside the cargo (JSON, as
+        # sep_grid.js sends it), so the address bar shows /sep_grid/form_cargo_id, not the raw sentinel.
+        # sep_mgmt redisplays its grid on a POST with an empty cargo.
+        if from_page == "sep_mgmt":
+            goto_url, goto_cargo = private_route("sep_mgmt"), ""
+        else:
+            goto_url = private_route("sep_grid", code=JS_FORM_CARGO_ID)
+            goto_cargo = json.dumps(
+                {
+                    UiActResponseKeys.action: UiActResponseKeys.unknown,
+                    UiActResponseKeys.code: UiActResponseProxy.show,
+                    UiActResponseKeys.row_index: 0,
+                }
+            )
         ui_db_texts[UITextsKeys.Action.dlg_goto] = goto_url
+        ui_db_texts[UITextsKeys.Action.dlg_goto_cargo] = goto_cargo
         ui_db_texts[UITextsKeys.Action.dlg_sec_msg] = UiActResponseProxy.show
 
         for row in log_data:

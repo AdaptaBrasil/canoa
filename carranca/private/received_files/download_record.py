@@ -93,7 +93,7 @@ def download_rec() -> Response:
                 _raise(msg, HTTPStatus.GONE)
 
     except Exception as e:
-        # see common.abort_handler for why this doesn't use the project's usual ups_handler page
+        # logs via ups_handler, then abort()s into the app-wide styled error page (carranca/__init__.py)
         abort_handler(task_code, e, http_status_code)
 
     return file_response

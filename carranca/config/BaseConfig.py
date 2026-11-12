@@ -91,8 +91,6 @@ class BaseConfig(Config):
     APP_DISPLAY_DEBUG_MSG: TrueInDebug = None
 
     APP_MODE = "None"  # see below (enum)
-    # see main.py, uses package `watchfiles` if --no-reload is set in launch.json
-    APP_AUTO_RELOAD = True  # <- True if APP_PROPAGATE_DEBUG else False
 
     # UI Texts cache (to avoid multiple DB queries)
     # (see table ui_texts, UIDbTexts.py and carranca.py>global_ui_texts_cache: dict)
@@ -182,8 +180,9 @@ class BaseConfig(Config):
     """
     LOG_TO_FILE = True  # Log
     LOG_MIN_LEVEL = logging.INFO
-    # folder is log_files & HTML_TEMPLATE_BUGS file
+    # folder is log_files & HTML_TEMPLATE_BUGS file, anchored to the app folder (not the launch directory)
     LOG_FILE_FOLDER = "log_files"
+    LOG_FILE_PATH = path.join(APP_PATH, LOG_FILE_FOLDER)
     LOG_FILE_STATUS: str = "?"  # internal set at startup
 
     """ Database constant

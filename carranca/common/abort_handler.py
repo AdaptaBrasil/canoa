@@ -8,24 +8,28 @@ Equipe da Canoa -- 2026
 mgd 2026-08-13
 """
 
-from flask import g, abort
+from werkzeug.exceptions import default_exceptions
 
 from .ups_handler import ups_handler
-from .app_constants import APP_RAW_HTTP_ERROR_RAISED
+from .app_error_assistant import AppStumbled
 
 
 def abort_handler(task_code: int, e: Exception, http_status_code: int) -> None:
     """
-    Logs the error via ups_handler, then flags g.<APP_RAW_HTTP_ERROR_RAISED> so the
-    app-wide error handlers (see carranca/__init__.py) skip their styled HTML page
-    and let Werkzeug render its plain default instead -- an HTML error page here
-    would corrupt the binary download stream. Direct abort() is required for the
-    same reason; do not replace it with the project's usual ups_handler page unless
-    the download mechanism itself is redesigned.
+    Logs the error via ups_handler, then raises the HTTPException so the app-wide
+    error handlers (see carranca/__init__.py) render the styled HTTP-error page.
+    It raises before send_file() builds any response, so no download stream is
+    ever started: the browser just shows the error page in the download tab.
+
+    The route's own message travels as `ui_tech_msg`, shown in the page's technical
+    box under the generic HTTP-<code> text. Werkzeug's `description` can't carry
+    that signal: it is filled with an English default on every error.
     """
     ups_handler(task_code, str(e), e)
-    setattr(g, APP_RAW_HTTP_ERROR_RAISED, True)
-    abort(http_status_code, description=str(e))
+    tech = f"{e.msg} (Error Code: {e.error_code})" if isinstance(e, AppStumbled) else str(e)
+    exc = default_exceptions[http_status_code](description=tech)
+    exc.ui_tech_msg = tech  # read by _error_page() in carranca/__init__.py
+    raise exc
 
 
 # eof

@@ -8,7 +8,6 @@ Equipe da Canoa -- 2024
 
 # cSpell:ignore nullable sqlalchemy joinedload
 
-from flask import Request
 from typing import Any, List, Optional
 from datetime import datetime
 from sqlalchemy import Boolean, Column, Computed, DateTime, ForeignKey, Integer, LargeBinary, String, func, select
@@ -21,7 +20,6 @@ from .role import Role
 from ..base import CanoaBaseTable
 from ...helpers.pw_helper import hash_password
 from ...helpers.db_helper import db_fetch_rows
-from ...helpers.py_helper import is_str_none_or_empty
 from ...common.app_constants import APP_LANG
 from ...helpers.db_records.DBRecords import DBRecords
 
@@ -155,16 +153,6 @@ def user_loader(id: str) -> UserMixin | None:
 
     user = User.get_where(id=user_id)
     return user
-
-
-# 2026-08-18 dead code: silently authenticated `current_user` from any POST's `username`
-# field, no password check (confirmed via register.py testing -- traced in claude-mgd-fixes.md).
-# Not used by any real token/API flow (grepped the repo). TODO: remove in next version.
-# @global_login_manager.request_loader
-# def request_loader(request: Request) -> UserMixin | None:
-#     username = "" if len(request.form) == 0 else request.form.get("username", "")
-#     user = None if is_str_none_or_empty(username) else User.get_where(username_lower=username.lower())
-#     return user
 
 
 # eof

@@ -327,6 +327,11 @@ def get_id_values(spd_row: SpatialDataFile) -> List[int | str]:
 
     data = json.loads(spd_row.file_data)
     rows = data.get(SPD_DATA_KEY_VALUES, [])
+    if isinstance(rows, dict):
+        # 2026-11-11 old shape (before 2026-08-10, b96f2cd): {field: [unique values]}, not row-paired. Iterating it
+        # gave the key strings and `row[field_id]` raised "string indices must be integers". Still valid for ids.
+        return list(rows.get(spd_row.field_id, []))
+
     return [row[spd_row.field_id] for row in rows if spd_row.field_id in row]
 
 

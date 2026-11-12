@@ -49,7 +49,7 @@ import jinja2
 import socket
 
 from http import HTTPStatus
-from flask import Flask, g, render_template
+from flask import Flask, render_template
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask_sqlalchemy import SQLAlchemy
@@ -114,20 +114,12 @@ def _register_error_handlers(app: Flask):
     App-wide (not blueprint-scoped) handlers for common HTTPStatus errors, so they
     apply to bp_private routes too, not just bp_public (a Flask blueprint's own
     @errorhandler only fires for exceptions raised inside that same blueprint).
-
-    Routes that set `g.raw_http_error_raised = True` before calling abort() (see
-    received_files/download_record.py, spd_download.py: file-download responses,
-    where a styled HTML page would confuse the client) get Werkzeug's plain
-    default page instead of our styled one.
     """
     from .config.FormIcons import FormIcons as fi
     from .common.UITextsKeys import UITextsKeys
-    from .common.app_constants import APP_RAW_HTTP_ERROR_RAISED
     from .helpers.ui_db_texts_manager import init_ui_db_texts
 
-    def _page_or_raw(error, code: HTTPStatus):
-        if getattr(g, APP_RAW_HTTP_ERROR_RAISED, False):
-            return error
+    def _error_page(error, code: HTTPStatus):
         ui_db_texts = init_ui_db_texts(UITextsKeys.Section.error)
         _, message = ui_db_texts.set_msg_fatal(f"HTTP-{code.value}")
         # one shared word (DB item "httpErrorTitle", eg. "Erro") reused as the title for every code
@@ -137,37 +129,38 @@ def _register_error_handlers(app: Flask):
             UITextsKeys.Page.title: title,
             UITextsKeys.Form.title: title,
             UITextsKeys.Msg.error: message,
+            UITextsKeys.Msg.tech: getattr(error, "ui_tech_msg", ""),  # set by common/abort_handler.py
             UITextsKeys.Action.dlg_close: "/",
         }
         return render_template("home/html_error_page.html.j2", code=code, fi=fi.with_icon("http_error"), **ui_texts), code
 
     @app.errorhandler(HTTPStatus.BAD_REQUEST)
     def bad_request(error):
-        return _page_or_raw(error, HTTPStatus.BAD_REQUEST)
+        return _error_page(error, HTTPStatus.BAD_REQUEST)
 
     @app.errorhandler(HTTPStatus.UNAUTHORIZED)
     def unauthorized(error):
-        return _page_or_raw(error, HTTPStatus.UNAUTHORIZED)
+        return _error_page(error, HTTPStatus.UNAUTHORIZED)
 
     @app.errorhandler(HTTPStatus.FORBIDDEN)
     def forbidden(error):
-        return _page_or_raw(error, HTTPStatus.FORBIDDEN)
+        return _error_page(error, HTTPStatus.FORBIDDEN)
 
     @app.errorhandler(HTTPStatus.NOT_FOUND)
     def not_found(error):
-        return _page_or_raw(error, HTTPStatus.NOT_FOUND)
+        return _error_page(error, HTTPStatus.NOT_FOUND)
 
     @app.errorhandler(HTTPStatus.METHOD_NOT_ALLOWED)
     def method_not_allowed(error):
-        return _page_or_raw(error, HTTPStatus.METHOD_NOT_ALLOWED)
+        return _error_page(error, HTTPStatus.METHOD_NOT_ALLOWED)
 
     @app.errorhandler(HTTPStatus.GONE)
     def gone(error):
-        return _page_or_raw(error, HTTPStatus.GONE)
+        return _error_page(error, HTTPStatus.GONE)
 
     @app.errorhandler(HTTPStatus.INTERNAL_SERVER_ERROR)
     def internal_error(error):
-        return _page_or_raw(error, HTTPStatus.INTERNAL_SERVER_ERROR)
+        return _error_page(error, HTTPStatus.INTERNAL_SERVER_ERROR)
 
     # Flask-Login's own callback for @login_required routes -- fires *instead of* (never
     # alongside) the UNAUTHORIZED errorhandler above, since defining this callback tells
@@ -175,7 +168,7 @@ def _register_error_handlers(app: Flask):
     # so every home/html_error_page.html.j2 caller lives in one place.
     @global_login_manager.unauthorized_handler
     def unauthorized_handler():
-        return _page_or_raw(None, HTTPStatus.UNAUTHORIZED)
+        return _error_page(None, HTTPStatus.UNAUTHORIZED)
 
     return
 
@@ -372,7 +365,7 @@ def _create_app_and_log_file(app_name: str):
     # flask has config.from_prefixed_env()
     app.config.from_prefixed_env(app_name)
     pcName = socket.gethostname().upper()
-    _info(f"App's config updated with environment variables from [{pcName}].")
+    _info(f"App's config updated with environment variables from the environment of host [{pcName}].")
 
     # -- set python locale
     locale_str = g_sk.config.APP_LINUX_LOCALE if OS_IS_LINUX else g_sk.config.APP_WINDOWS_LOCALE
@@ -387,15 +380,11 @@ def _create_app_and_log_file(app_name: str):
         g_sk.config.LOG_FILE_STATUS = "off"
     else:
         cfg = g_sk.config
-        error, full_name, level = do_log_file(app, cfg.LOG_FILE_FOLDER, cfg.LOG_MIN_LEVEL)
+        error, full_name, level = do_log_file(app, cfg.LOG_FILE_PATH, cfg.LOG_MIN_LEVEL)
         info = f"file '{full_name}' levels '{level}' and above"
         if not error:
             _info(f"Logging to {info}.")
             g_sk.attach_logger(app.logger)  # the lines displayed so far go to the file, and the next ones too
-            app.logger.log(
-                g_sk.config.LOG_MIN_LEVEL,
-                f"{app.name}'s log {info} is ready.",
-            )
             g_sk.config.LOG_FILE_STATUS = "ready"
             g_sk.log_filename = file_full_name_parse(full_name)[2]
         else:

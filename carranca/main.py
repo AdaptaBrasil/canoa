@@ -36,6 +36,7 @@ def _init_minify(app: "Flask", config: str) -> Tuple[Minify | None, str]:
 
 
 import time
+from werkzeug.serving import is_running_from_reloader
 from .common.app_constants import APP_NAME, APP_VERSION
 
 # -------------------------------------------------------
@@ -84,7 +85,7 @@ else:
     sidekick.display.error(f"{dv_name} version could not be read, see the start-up log.")
 
 elapsed = (time.perf_counter() - started) * 1000
-sidekick.display.info(f"{APP_NAME} version {APP_VERSION} is now ready for the journey.")
+sidekick.display.info(f"{APP_NAME} version {APP_VERSION} is now ready for the journey in {sidekick.config.APP_MODE} mode.")
 sidekick.display.debug(f"It took {elapsed:,.0f} ms to create and initialize it.")
 
 # printed messages ;—)
@@ -107,25 +108,18 @@ finally:
 # -------------------------------------------
 # (i)
 # -------------------------------------------
-# on the server, __name__ is 'carranca.main'
-# the app is executed by
-# `canoa/.vscode/launch.json`
+# `flask run` starts the app everywhere (VS Code's launch.json, the server's rema.sh), so
+# __name__ is 'carranca.main' and app.run() is only reached by `python main.py`.
+# The reloader is decided by the CLI before this module runs: `--reload/--no-reload`, else
+# the env var FLASK_RUN_RELOAD (1 here, 0 on the server), else FLASK_DEBUG. Reported, not controlled.
 
 app_debug = sidekick.config.APP_DEBUG
-app_reload = sidekick.config.APP_AUTO_RELOAD
-if __name__ != "__main__":
-    sidekick.display.info("Using configuration from `.vscode/launch.json`.")
-    sidekick.display.warn("This module is *not* running as `__main__`, so the app will not automatically run.")
-else:
+if __name__ == "__main__":
+    sidekick.display.info(f"Launching app.run(debug={app_debug}).")
     app.run(debug=app_debug)
-
-# TODO use watchfiles to reload the app
-# elif if app_debug and not
-
-#     if sidekick.config.APP_AUTO_RERUN and app_debug:
-#         sidekick.display.warn(
-#             "You are running the app with both debug and auto-reload. This is not recommended."
-#         )
-#     app.run(debug=app_debug)
+else:
+    reloader = "on" if is_running_from_reloader() else "off"
+    sidekick.display.info(f"Started by `flask run` (debug={app_debug}, reloader={reloader}).")
+    sidekick.display.info("Configured by environment variables: on the server, `.vscode/launch.json` in VS Code.")
 
 # eof

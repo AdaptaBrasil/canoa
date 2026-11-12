@@ -29,7 +29,7 @@ mgd
 {% block grid_blc_forms %}
 
 {% from "includes/_action_forms_and_btns.html.j2" import action_form__post_cargo %}
-{{ action_form__post_cargo(dlg_post_form_id, dlg_goto_action_url, dlg_data_wait_process, sec_msg=dlg_post_sec_msg) }}
+{{ action_form__post_cargo(dlg_post_form_id, dlg_goto_action_url, dlg_data_wait_process, sec_msg=dlg_post_sec_msg, cargo=dlg_goto_cargo) }}
 
 {% endblock grid_blc_forms %}
 {# ╘════════════════ Grid Forms ═════════════════╛ #}

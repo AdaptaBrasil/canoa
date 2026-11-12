@@ -16,7 +16,7 @@ app_constants.py
 APP_NAME = "Canoa"
 
 # &beta; major.minor
-APP_VERSION = "β 6.09"  # 2026-11-10
+APP_VERSION = "β 6.10"  # 2026-11-12
 
 # production DB schema; on any other (e.g. canoa_dev) the navbar brand shows the schema name
 APP_SCHEMA = "canoa"
@@ -31,8 +31,6 @@ APP_UPS_HTML_PAGE_FILE_NAME = "ups_page.html.j2"
 APP_JINJA_TEMPLATE_BUG_FOUND = "🚨 A Jinja runtime error was detected"
 APP_JINJA_TEMPLATE_BUG_MSG_TECH = "Disable config.DEBUG_RENDERED_TEMPLATES to hide this error."
 
-
-APP_RAW_HTTP_ERROR_RAISED = "raw_http_error_raised"
 
 # Cookie name set on every file-download response (spd_download.py, sep_ids_download.py,
 # scm_export_db.py, received_files/download_record.py) so canoa.js's setSleepVeil() can poll

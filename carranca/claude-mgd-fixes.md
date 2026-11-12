@@ -1,384 +1,95 @@
 # Claude ↔ Miguel — Fix Log
 
 Narrative record of bugs Claude found/fixed while reviewing Canoa source files with Miguel.
-Kept separate from the source files themselves (no more docstring stamps — those were
-clutter) and separate from `mgd-logbook.txt` (Miguel's own dev diary — not for this).
+Kept separate from the source files themselves (no docstring stamps) and separate from
+`mgd-logbook.txt` (Miguel's own dev diary — not for this).
 
-Each file's CRC32 at time of fix is still tracked in `claude-certificate.txt`, so that
-ledger stays the tamper-evidence mechanism; this file is the human-readable "what and why."
-
----
-
-## 2026-11-09 — the log file `canoa_<date>.log` was empty in production (INFO never reached it)
-
-Found on the server after β 6.05: the file stayed empty. Two causes. (1) Outside debug mode Flask leaves
-`app.logger.level` NOTSET, i.e. the root's WARNING, so INFO records (also the "log ... is ready" line)
-never reached the file handler (tested: effective level 30 non-debug, 10 debug). (2) `Sidekick._echo`
-returned while no app context existed (`# Todo create a buffer`), so the igniter's Display lines were
-never echoed. **Fix** (`log_helper.py`, `Sidekick.py`, `__init__.py`):
-- `do_log_file` sets `app.logger.setLevel(min_level)` and Flask's console `default_handler` to WARNING
-  (INFO is already shown by Display, no duplicates on the console).
-- `Sidekick._echo` keeps the lines in a buffer (deque, 500) while no logger exists; `attach_logger()`
-  flushes them to the file and is called by `_create_app_and_log_file` once the handler exists.
-  Lines outside a request get user id `sys`. Not changed: `RotatingFileHandler` is still 10000 bytes
-  x 1 backup, the start-up lines rotate out quickly.
+Hot and short: an entry lives here until its fix is committed, then it leaves (the git history of
+this file keeps it). The "Still open" list at the end holds what a fix left pending.
+Each file's CRC32 at time of fix is tracked in `claude-certificate.txt`, the tamper-evidence ledger.
 
 ---
 
-## 2026-11-09 — `CANOA_APP_MODE` "is not set" on Linux (env var names are case-sensitive)
+## 2026-11-12 — sep_log_grid [Voltar] showed the raw `!@@` sentinel in the address bar
 
-Found on the first start of β 6.04 on the server: `CANOA_APP_MODE` was exported (`rema.sh` and
-`canoa_env_vars.txt`) but `Fuse` raised "CANOA_APP_MODE is not set". `get_envvar(name)` looks up
-`"CANOA_" + name`; the callers passed lower case (`"app_mode"`, `"debug"`, `"display_mute"`), i.e.
-`CANOA_app_mode`, which does not exist on Linux. Windows env vars are case-insensitive, so dev never
-showed it. **Fix:** the three callers (`igniter.py` x2, `Args.py`) pass the name in upper case
-(`APP_MODE`, `DEBUG`, `DISPLAY_MUTE`). Side effect on Linux: `CANOA_DEBUG` and `CANOA_DISPLAY_MUTE` were
-being ignored until now, they are really read from β 6.05. `get_envvar` itself is unchanged.
+Open since 2026-07-21: [Voltar] posted straight to `/sep_grid/!@@`, so the `show` sentinel stayed visible after
+the POST. **Fix:** the form now posts to `/sep_grid/form_cargo_id`, the route every sep_grid button already uses,
+and the sentinel travels inside the hidden cargo input as the JSON sep_grid.js would send
+(`{"act": "?", "code": "!@@", "idx": 0}`, action `unknown` = no action, code `show`): `_get_result()` in
+routes.py accepts it and `grid_route()` sees `code == show` and redisplays the grid. From sep_mgmt the cargo
+stays empty (its route redisplays on an empty cargo and would `json.loads` anything else). Plumbing:
+`action_form__post_cargo` gained an optional `cargo=''` (value of the hidden input, HTML-escaped),
+`UITextsKeys.Action.dlg_goto_cargo` (`dlgFormGotoCargo`) and `dlg_goto_cargo` in dialog.html.j2 carry it, set
+by sep_log_grid.py next to `dlg_goto`. Verified with the route functions under a logged-in request context:
+both origins render the log, and the POST back renders the SEP grid / the management grid with no error.
+
+---
+## 2026-11-12 — id obfuscation: the per-model seed was the numeric base, codes were digit-only
+
+Found by Miguel: `/sep_log_grid/140?from=sep_mgmt` looked like a raw SEP id (it was `MgmtSepsUser.to_code(7)`).
+Cause: `CanoaBase.__init_subclass__` passed `__code_seed__` (1..14 per model) as `IdToCode`'s first argument,
+`instance_base`, so each model wrote its codes in base *seed*: base 9 for `MgmtSepsUser` (digits only, trailing
+`0` from the `* base`), base 2 for `mgmt_email_sep` (binary strings), base 1 for `log_user_sep` (`to_base` raises
+`ValueError`, never called so far). **Fix (IdToCode.py only):** fixed base 36, the seed is now the code's last
+digit: `encode = to_base((id + 1000) * 36 + seed, 36)`, `decode` returns -1 unless `raw % 36 == seed`, then
+`raw // 36 - 1000`. Codes carry letters (`rz9` for SEP 7 in `MgmtSepsUser`), no fixed trailing zero, and a code
+made for one model is rejected by every other one instead of decoding to a random row. The constructor rejects
+seeds outside `[1, 35]`. Callers (`to_code`/`to_id`, `ExportProcessConfig.coder`) unchanged; codes are computed per
+page, nothing stored, old links are the only casualty (accepted). Round trip tested for all 14 seeds.
+
+---
+## 2026-11-12 — `request_loader` deleted (the passwordless fallback commented out on 2026-08-18)
+
+Flask-Login's `request_loader` in `models/public/user.py` read `request.form["username"]` and returned that `User`
+with no password check, so any POST carrying a `username` field authenticated that user for the request (seen
+in register.py's welcome flow, 2026-08-18; present since 7780a62, 2025-05-14). It was commented out then, with
+`TODO: remove in next version`. **Fix:** the block is gone, with the two imports only it used (`flask.Request`,
+`is_str_none_or_empty`). `user_loader` is the only Flask-Login callback left.
 
 ---
 
-## 2026-11-07 — production ran `DevelopmentConfig` (`CANOA_APP_MODE` was never read)
+## 2026-11-12 — the log folder followed the launch directory
 
-Found through the red `[Canoa]` badge on the live server. `rema.sh` exports
-`CANOA_APP_MODE="Production"`, but `Fuse` only read `args.app_mode`, which is always `None`, so it
-defaulted to `Development`: `DevelopmentConfig` (`APP_DEBUG=True`) ran in production while the log
-said "Production" (the env loop only overwrites the `APP_MODE` label). **Fix** (`igniter.py`,
-`DynamicConfig.py`, `Args.py`, `__init__.py`):
-- `Fuse` resolves the mode: argument, then `CANOA_APP_MODE`, then Development when debugging,
-  otherwise Production (a missing mode fails safe). Constants renamed to `APP_MODE_*`.
-- `CANOA_DEBUG` is three-state: unset = the mode's own default, `True`/`False` overrides it (applied
-  in `DynamicConfig.__init__` before the sub-flags are propagated). Before, only `True` counted.
-- The start-up log is verbose by default (`Args.display_mute` False; env `CANOA_DISPLAY_MUTE`
-  silences it, `flask run` rejects `--display_mute`). Debug lines only when debugging.
-- Badge: `app_mismatch_schema` (app mode vs schema, debugging is not part of it) is passed to Jinja
-  as `app_brand_alert`. `create_app()` logs an error on a mismatch and a warn for debugging on the
-  production DB.
-- `run-canoa.md` got the "Active DB badge" and "Start-up log" sections, `navigator.html.j2` the new
-  case table.
+Found by Miguel: an empty `log_files/Canoa_2026-08-13_*.log` at the repo root looked like a dead log. The
+live files were in `carranca/log_files/`. `LOG_FILE_FOLDER` is a relative name and `do_log_file` joined it
+with `.`, so the folder landed wherever the app was started from (repo root until August, `carranca/`
+since). **Fix:** `BaseConfig.LOG_FILE_PATH = path.join(APP_PATH, LOG_FILE_FOLDER)` (same pattern as
+`LOCAL_SPATIAL_DATA_PATH`), used by `do_log_file` and by `jinja_helper`'s rendered-template bugs file.
+The stale root folder was deleted (ignored by git).
 
 ---
 
-## 2026-11-06 — test revalidations emailed the real SEP manager
+## 2026-11-12 — download errors showed Werkzeug's bare page instead of the styled one
 
-Found in test A of [O Selecionado] on `canoa_dev` (Refs #61): the log showed
-`[rv_email]: An email was sent to [pedro.andrade.inpe@gmail.com,pedro.andrade]` -- a report made by
-the fake validator (`run_validate.bat`) went to a real manager. `rv_email` always picks the SEP's
-current manager, cc adm, also in a debug run. **Fix:** in debug mode (`cargo.in_debug_mode`) the report
-goes only to the user who started the revalidation, with a `warn` in the log.
-
----
-
-## 2026-11-06 — two receiveFile message keys missing, also for uploads
-
-Found while listing the keys the revalidation returns (Refs #61): `receiveFileAdmit_bad_lock`
-(`receive_file.py` lock failure) and `spd_extract_error` (`spdata.py`) existed in no DB section, so
-an upload that hit either one showed "key not found" instead of the message. **Fix:** both added to
-`receiveFile` (and copied to `revalidateFile`) in `update_canoa.sql`.
-
----
-
-## 2026-11-06 — grid dates shown 3h early (Flask `tojson` labels naive datetimes as GMT)
-
-Found in the revalidation grid: `validated_at` showed 10:26 for a DB value of 13:26. The DB stores
-naive local times (BRT); Flask's JSON provider turns any `datetime` into an HTTP date labeled GMT
-(`"Fri, 06 Nov 2026 13:26:28 GMT"`), and JS `new Date()` converts it to UTC-3. Same in
-`received_files_mgmt` (upload time 3h early, seen by every user), and dates off by one day for
-times between 00:00 and 02:59 in `scm_export_ui_display` and `sep_mgmt`. **Fix:** new
-`Sidekick.to_iso_dt()` (ISO without a time zone, read by JS as local time), called explicitly by each
-grid route (`sep_validate`, `fetch_records`, `scm_export_ui_display`, `sep_mgmt`, `sep_log_grid`).
-A global Flask JSON provider was tried and dropped, Miguel's call: don't change a global behavior
-the next developer won't expect.
+Found by Miguel: the [Baixar] 404 of 2026-11-11 came out as the plain black-on-white Werkzeug page, with
+the DB text's `&atilde;` escaped and the `(Error Code: 989, Logout: False, Fatal: True)` tail. Cause:
+`abort_handler.py` set `g.raw_http_error_raised` and `_page_or_raw` (`__init__.py`) returned the raw error
+on that flag. The flag came with f5e81a0 (2026-07-24): the handlers moved from `bp_public` to app-wide and
+the download routes, until then uncovered by accident, were "kept as they were"; eba15fb (2026-08-13) then
+documented it as "an HTML page would corrupt the binary download stream". That never held: `abort()` fires
+inside the `except`, before `send_file()` builds a response, and the downloads are plain form POSTs
+(`formtarget="_blank"`), so the browser renders whatever HTML the error status carries.
+**Fix:** `abort_handler.py` raises `default_exceptions[code]` with the route's text attached as
+`ui_tech_msg` (`e.msg (Error Code: N)` for an `AppStumbled`); `_error_page` (renamed from `_page_or_raw`)
+shows the generic `HTTP-<code>` DB text and that detail in the technical box. Removed: the flag check,
+`APP_RAW_HTTP_ERROR_RAISED` and the "see abort_handler for why" comments in the three download routes.
+`spd_download.py` keeps a commented-out `_not_found(task_code + 8)` as a dated debug aid to reproduce the
+server's missing-file 404.
 
 ---
 
-## 2026-11-05 — a failed submit could still count as `validated`
+## 2026-11-11 — [Baixar IDs] "string indices must be integers" and [Baixar] "noRecord" not found
 
-Found while reviewing the revalidation (Refs #61): `submit.py`'s `finally` called
-`_store_report_result`, which saved the validator's `report_tests` even when submit had failed
-afterwards (report missing, under 200 bytes, or not moved). With `validated` calculated as
-`report_tests > 0`, that broken record ranked first in `vw_export_data_files` and replaced the SEP's
-last good file. **Fix:** real column `user_data_files.validated`, set by `submit.py` only when the
-report is ready and `report_tests > 0`; `vw_base_data_files` just exposes it. Verified on `canoa_dev`
-(test C: no PDF, `tests: 1` → `validated = false`, error 268, the previous file stays current).
-
----
-
-## 2026-10-24 — "key not found" message dropped the current section name
-
-Found while testing [O Selecionado] revalidation (Refs #61): the message for a missing
-`receiveFileSubmit_error` read "não foi encontrada na; § , secError", with no current
-section. `UIDBTexts._key_not_found_ui_msg` (line 352) built it as
-`self.section + "" if ... else f", {alternative_section}"` -- the conditional expression
-binds looser than `+`, so with an alternative section the whole value became just
-`", secError"`. **Fix:** parenthesized the conditional, now reads "sepValidate, secError".
+Found by Miguel in the visual pass of the menus. (1) `get_id_values` (`spd_analysis.py`) assumed
+`file_data['values']` is a list of row dicts (shape since b96f2cd, 2026-08-10). A record analyzed before
+that has `{field: [unique values]}`; iterating the dict gives the key strings, and for the key equal to
+`field_id` the test `field_id in row` is a substring test that passes, then `row[field_id]` raises.
+**Fix:** a `dict` is read as the old shape (`rows.get(field_id, [])`), ids need no row pairing.
+(2) `spd_download.py` asked for the UI text `noRecord`, which no section had: **fix** an insert in
+`update_canoa.sql` (section `spdGrid`). (3) In `spd_download.py` and `sep_ids_download.py`, `_not_found(task_code)`
+only used its parameter in the message; `_raise` read the enclosing `task_code`, so the page always showed
+the same code whichever branch failed. **Fix:** `_not_found(branch_code)` sets the enclosing `task_code`
+(`nonlocal`); `spd_download.py` also had two branches with `+5`, now `+5`, `+6`, `+7`. Not verified on the
+server: the cause of the [Baixar] "no record" itself (DB record or the file on disk), the page now tells.
 
 ---
-
-## 2026-08-18 — `request_loader` silently authenticated from any POST's `username` field
-
-Found while testing the GH #1 welcome-email flow (`register.py`): right after registering,
-the response page rendered as if logged in as the brand-new user. Traced to Flask-Login's
-`request_loader` (`models/public/user.py:160-166`) — a fallback callback that fires whenever
-session-based lookup finds no user, reading `request.form.get("username")` and returning
-`User.get_where(username_lower=...)` for it, with **no password check at all**. Register's
-POST form has a `username` field, and by the time the response template's `is_anyone_logged()`
-call first touches `current_user` (in `base.html.j2`'s nav block), the just-created row already
-exists — so the fallback matched it. Didn't persist (no `login_user()`/session cookie set), but
-the mechanism itself is a real hole: any route with a `username`-named form field would trigger
-the same silent, passwordless authentication for that one request.
-
-Traced to its origin: the exact same suspicious comment (`# TODO, seems that this make a user
-name before log process has finished`) was already attached in the very first commit that added
-it (`7780a62`, 2025-05-14) — looks like Flask-Login tutorial boilerplate, flagged as suspicious
-immediately by Miguel, never revisited. Confirmed via grep: nothing else in the codebase relies
-on `request_loader` for any real token/API-auth flow.
-
-**Fix:** commented out (not yet deleted — Miguel's call, `TODO: remove in next version`, tracked
-in `project_next_tasks.md` memory), dated 2026-08-18 with the explanation above.
-
----
-
-## 2026-08-14 — `dialog.html.j2` footer row missing `align-items-center`
-
-`<select>` in a dialog footer (`sep_validate`'s user-list dropdown) rendered visibly
-misaligned against the neighboring buttons. `align-items-center` was on the outer
-`dlg-modal-content-footer-id` div, but the actual flex row grouping the controls
-(`dlg-btns-container-id`) only had `justify-content-center g-2` — missing its own
-`align-items-center`. Moved the class down to the row that needs it; removed it from the
-outer div since Bootstrap's `.modal-footer` already sets `align-items: center` by default,
-so it was redundant there.
-
----
-
-## 2026-07-24 — `SchemaData.coder` was dead weight, always `null` in every export
-
-Last open item from the Refs #57 export-format review: `scm_data.py:36`'s
-`self.coder = None  # coder` was never read or assigned anywhere else in the codebase
-(confirmed via grep), always emitting `"coder": null` in every export's `metadata.json`.
-Distinct from — and confusable with — `ExportProcessConfig.coder` (the real `IdToCode`
-instance used to obfuscate PKs for the UI, actively used elsewhere). Neither Miguel nor
-the code itself could account for its purpose, and `scm_import.py` (the export's
-counterpart) doesn't reference it either. Removed. This closes #57.
-
----
-
-## 2026-07-24 — `ExportProcessConfig.header`'s `"decoding"` claim didn't match reality
-
-Flagged during Refs #57 export-format review (2026-07-23): `header.json` always claimed
-`"decoding": "Base64 -> UTF-8"`, but `scm_export_db.py` constructs `ExportProcessConfig()`
-with `encode_data` defaulting to `False`, so the export never actually Base64-encodes —
-text fields ship as plain UTF-8. The literal in the `header` property ignored
-`self.encode_data` entirely. Fixed by conditioning the value on the flag itself:
-`"decoding": "Base64 -> UTF-8" if self.encode_data else "plain UTF-8, nothing to do"` —
-single source of truth, no change needed anywhere else that reads `config.header`.
-
----
-
-## 2026-07-21 — `grid.html.j2`'s `msgOnly` gating never actually worked, for any grid page
-
-While wiring `sep_log_grid.py`'s `JumpOut` path (a graceful "not found"/"not allowed"
-message instead of a crash — see the entry below), the message showed correctly, but a
-leftover empty ag-grid ("No Rows To Show") also rendered below it, and the dialog title
-showed the raw unformatted `"Log de {0}"` DB text instead of the SEP's name.
-
-**Root cause, verified with a minimal Jinja reproduction (not guessed):** `grid.html.j2`
-wrapped its block *declarations* — `dlg_blc_body`, `grid_blc_footer`, `grid_blc_javascript`,
-`grid_blc_forms`, `base_blc_head_js` — inside one shared `{% if dlg_bke_display_ui %}`, so
-that they'd only render when the page wasn't in `msgOnly` mode. Confirmed this is a genuine
-Jinja limitation, not specific to this file: wrapping a `{% block %}` override in `{% if %}`
-inside a child/middle template has **zero effect**, whether one block or several are
-grouped, and whether or not the block calls `{{ super() }}` — Jinja registers a block
-override unconditionally based on its presence in the child's source; the ancestor template
-that actually *calls* `{% block x %}{% endblock %}` has no visibility into any conditional
-that wrapped the override's *declaration*. Verified this precisely with `jinja2.Environment`
-reproductions matching the real 3-level chain (`dialog.html.j2` → `grid.html.j2` →
-`sep_log_grid.html.j2`) before touching the real file. This means `grid.html.j2`'s `msgOnly`
-support has likely never worked correctly for *any* grid page (`sep_grid`, `scm_grid`,
-`spd_grid` too) — just never previously exercised, since `sep_log_grid`'s `JumpOut` path was
-the first early-exit case any of them hit.
-
-**Fix:** moved the `{% if dlg_bke_display_ui %}` to live *inside* each block's own body
-(between its `{% block %}`/`{% endblock %}` tags) instead of wrapping the declarations from
-outside. Verified this pattern actually gates correctly, including at the real 3-level
-nesting depth, and that a grandchild's undefined-variable reference inside a gated block
-never even gets evaluated when the condition is false.
-
-**Also fixed in the same pass, `sep_log_grid.py`:** the `Form.title` DB text
-(`"Log de {0}"`) was only being formatted with the SEP's name *after* the
-not-found/not-allowed check — so on the `JumpOut` path, it stayed raw and unformatted.
-Moved the formatting up next to where `sep_fullname` is computed, before the check.
-Confirmed `set_msg_fatal()`'s internal `reset_messages()` only clears `Msg`-namespaced
-keys, not `Form.title`, so this reordering is safe.
-
----
-
-## 2026-07-21 — `grid.html.j2` `msgOnly` gap, part 2: message text and close button were also missing
-
-Follow-up to the entry above. After moving `{% if dlg_bke_display_ui %}` inside each
-block's body, `sep_log_grid`'s `JumpOut` path correctly suppressed the empty ag-grid —
-but the dialog body was then completely blank (no error text at all), and the footer had
-no button whatsoever. Two more instances of the same root shape:
-
-1. **Message text never rendered for any grid page.** `form.html.j2`'s `dlg_blc_body`
-   block includes `includes/backend-msg.html.j2` directly and unconditionally (line 33) —
-   that's the only place the `msgError`/`msgWarn`/etc. alerts actually get emitted.
-   `grid.html.j2`'s own `dlg_blc_body` override never included it at all; the include had
-   been placed instead inside `includes/grid-body.html.j2` (line 15), which is itself only
-   reached when `dlg_bke_display_ui` is `True` — i.e. exactly the one case where a message
-   isn't the point. So no page extending `grid.html.j2` (`sep_grid`, `scm_grid`, `spd_grid`,
-   `sep_log_grid`) has ever shown its backend message text.
-   **Fix:** moved the `{% include "includes/backend-msg.html.j2" %}` out of
-   `grid-body.html.j2` and into `grid.html.j2`'s `dlg_blc_body` block, unconditionally,
-   ahead of the `{% if dlg_bke_display_ui %}` grid include — matching `form.html.j2`'s shape.
-
-2. **No footer button in `msgOnly` mode.** `grid.html.j2`'s `dlg_blc_footer_buttons` block
-   only ever rendered `grid_blc_footer` (gated by `dlg_bke_display_ui`) — the page-specific
-   footer (e.g. `sep_log_grid.html.j2`'s only button, "Voltar") lives entirely inside that
-   gated block, so in `msgOnly` mode there was no way to close the dialog at all.
-   **Fix:** added an `{% else %}` branch to `dlg_blc_footer_buttons`, rendering a generic
-   close button via `btn_close_dlg(dlg_close_form_id, dlg_close_btn_id, ...)` against the
-   base close-form already defined unconditionally in `dialog.html.j2`'s `base_blc_forms` —
-   same pattern `form.html.j2` uses for its own message-only footer.
-
-Both verified live by Miguel against `sep_log_grid`'s not-allowed message (screenshot: alert
-text + OK button both render correctly now).
-
-**Still open, not yet applied (continue next session):**
-- The dialog title still shows the raw `"Log de {0}"` placeholder on this same screen, even
-  though the message body's own `sep_fullname` substitution works fine — so `sep_fullname`
-  itself is a valid non-empty string, but `ui_db_texts.format(UITextsKeys.Form.title, ...)`
-  isn't landing. Not yet traced further.
-- The "Voltar" button posts straight to `/sep_grid/!@@` — functionally correct (`grid_route`
-  in `routes.py` decodes the `!@@` "show" sentinel fine, same pattern used by
-  `sep_new_edit.py`/`scm_new_edit.py`/`spd_new_edit.py`), but the raw sentinel is visible in
-  the browser's address bar after the POST, since `action_form__post_cargo`'s `action`
-  attribute is the URL directly. Proposed scoped fix (agreed in shape, not yet applied):
-  route the POST through the existing `JS_FORM_CARGO_ID` cargo mechanism instead — target
-  the form at `private_route("sep_grid", code=JS_FORM_CARGO_ID)`, add an optional
-  `cargo=''` param to `action_form__post_cargo` (`_action_forms_and_btns.html.j2`) that sets
-  the hidden cargo input's `value`, and pass `dlg_post_sec_msg` as that cargo value from
-  `sep_log_grid.html.j2` (it already equals `UiActResponseProxy.show`). This makes the
-  visible POST target `/sep_grid/form_cargo_id` instead of `/sep_grid/!@@`, same security
-  check on the way back in. Deliberately scoped to this file + the one shared macro, not the
-  broader `dlg_goto_action_url`/`prompt_back_route` standardization already on the
-  next-tasks list.
-
----
-
-## 2026-07-18 — crossed `extra` param in `action_form__post_cargo`, plus `UITextsKeys.Action` adoption
-
-While building the security-token `extra` context-binding, `prompt.html.j2:77` ended up passing
-`dlg_post_sec_msg` into `action_form__post_cargo`'s existing 4th positional param — which is
-called `extra` too, but is actually raw HTML attributes dumped into the `<form ...>` tag (used
-for real by `sep_mgmt.html.j2`'s `onsubmit=...` and `received_files_mgmt.html.j2`'s
-`target="_blank"`). Same name, two different meanings — the macro's own hidden security input
-never received the value at all. No live bug (nothing sets `dlgPostSecExtra` from Python yet, so
-it was always `''`), but the wiring didn't do what it was meant to. Fixed by giving the macro a
-separate `sec_extra=''` parameter (`_action_forms_and_btns.html.j2`), used in its
-`safe_token.value(sec_extra)` call, and updating `prompt.html.j2` to pass it as an explicit
-keyword arg (`sec_extra=dlg_post_sec_msg`) instead of colliding positionally with `extra`.
-
-Also replaced the three remaining raw string literals (`"dlgFormCloseAction"`) with
-`UITextsKeys.Action.dlg_close` in `sep_new_edit.py`, `scm_new_edit.py`, `spd_new_edit.py` —
-`sep_log_grid.py` already used the constant form; these three were the last holdouts.
-
----
-
-## 2026-07-18 — sep_log_grid: blank names, garbled header, raw datetime string
-
-Three independent bugs found from one screenshot of the working grid:
-
-1. **Blank "Gestor"/"Gestor anterior" columns.** Traced to the raw DB, not the view or
-   template — `log_user_sep.id_users`/`id_users_prior` were genuinely `NULL` for the I/E
-   rows shown. `Sep.save()`'s `_log()` closure (`models/private/sep.py`) only ever set
-   `id_sep`/`done_by`/`operation`/`batch_code` — `id_users` is only ever populated by the
-   DB trigger, for S/R (assign/remove) operations. Fixed: `_log()` now also sets
-   `log_row.id_users = sep_row.users_id` (the SEP's current manager at that moment), so
-   Insert/Edit/schema-Change entries show who was managing the SEP when they happened.
-   Note: this only fixes new writes going forward — the two already-logged rows for this
-   SEP stay `NULL` unless backfilled (not done, not asked for).
-
-2. **`Operação` header showed literally as `Opera&ccedil;&atilde;o`.** `ui_items.text` is
-   normally ASCII-with-named-entities (`carranca/tools/encode-for-ui_items-table.py`), but
-   Miguel checked the DB across every grid section and found `colMetaInfo` is a deliberate
-   **exception** to that rule: it's consumed as plain JS text (`ag-grid` `headerName`/cell
-   values via `js_ui_dictionary()`), which doesn't HTML-decode, so raw UTF-8 is the correct
-   form there — confirmed by `sepGrid`/`scmGrid`/`sepMgmt`/`spdGrid` all storing it that
-   way already. `sepLogGrid`'s `operation` entry using entities was the actual outlier.
-   Fixed defensively (not by touching DB text) in `static/js/sep_log_grid.js`: a small
-   `decodeHtmlEntities()` (scratch `<textarea>`, read back `.value`) applied to every
-   column's `headerName`, so it renders correctly whether the underlying text is raw UTF-8
-   (the norm) or entity-encoded (harmless no-op). Took a couple of wrong turns getting
-   here — first assumed it was a DB bug, then genuinely wasn't sure if the JS decode step
-   was even necessary until Miguel tested it directly — worth double-checking assumptions
-   like this against real DB content instead of guessing from one screenshot next time.
-
-3. **`done_at` showed the raw string `Wed, 19 Nov 2025 09:56:2...`.** Flask's default
-   JSON provider serializes `datetime` via `http_date()` (RFC 1123), and that's exactly
-   what `{{ log_data | tojson }}` was sending straight to the grid. Fixed server-side in
-   `sep_log_grid.py`, formatting each row's `done_at` with the existing (previously
-   zero-caller) `helpers/py_helper.py:datetime_for_ui()` — `"%d/%m/%Y às %H:%M"`.
-
----
-
-## 2026-07-18 — `sep_log_grid.html.j2` missing its ag-grid init script
-
-Every other grid page (`sep_grid`, `scm_grid`, `spd_grid`) pairs its `.html.j2` with a
-`static/js/<name>_grid.js` file that actually calls `agGrid.createGrid(...)`.
-`sep_log_grid.html.j2` set up the `colMeta`/`gridRows`/`gridID` JS constants but never
-called `createGrid` — the dialog would have opened with a permanently empty grid body.
-Confirmed via DB (`ui_items.colMetaInfo`/`jsonOperation` for `sepLogGrid`, and
-`vw_log_user_sep`'s columns) that everything else feeding the template was already
-correct and in place; only the JS file itself was missing.
-
-Added `carranca/static/js/sep_log_grid.js` — a read-only variant of the `scm_grid.js`
-pattern (no `cargo`/action-form wiring, since this grid has nothing to submit): builds
-`columnDefs` generically from `colMeta` with a small per-field `flex` map. Wired it in
-via `<script src="{{static_route('js/sep_log_grid.js')}}"></script>` in
-`sep_log_grid.html.j2`.
-
----
-
-## 2026-07-18 — `carranca/private/received_files/init_grid.py`
-
-Stale `.user_id` references on `ReceivedFilesCount` rows (lines 40, 45, 54), orphaned by
-the 2026-07-15 `vw_user_data_files_count` column rename (`user_id → id`, see below). Every
-other caller of that model got updated in that commit; this one was missed. Threw
-`AttributeError: 'DBRecord' object has no attribute 'user_id'` whenever a power user opened
-Received Files management — caught by the route's `except`, so it degraded to an "Ups!"
-error screen rather than crashing outright. Confirmed via `Canoa_2026-07-18_8ie342.log`.
-Fixed: `.user_id` → `.id` in all three spots. Confirmed no template/static JS depends on
-the old attribute name.
-
----
-
-## 2026-07-16 — batch review of `carranca/common/`
-
-- **`Args.py`** — `ignite()`'s `cls(**data)` didn't match `__init__`'s signature; would
-  raise `TypeError` if ever called. Now builds via `cls(app_debug)` + `__dict__.update()`.
-- **`Display.py`** — `code()` built a `ValueError` but never raised it, and its range
-  missed the bright codes 90/91 that `default` itself uses. Fixed both.
-- **`app_context_vars.py`** — `if app_user is None:` was dead code (a `LocalProxy` is
-  never `is None`); changed to `if not app_user:`. (Double-conversion in
-  `__prepare_user_seps` still open — tracked in memory, not this file.)
-- **`UIDBTexts.py`** — `get_bool()` could return `None` despite its `-> bool` annotation;
-  default is now `False`. Deleted `_get_ui_datetime()`, dead code duplicating
-  `get_ui_datetime()`'s first line.
-- **`UITextsKeys.py`** — reviewed, no errors found.
-- **`app_error_assistant.py`** — `proper_user_exception()` accessed `app_user.id` before
-  the `if app_user` guard; crashed with `AttributeError` when called with no logged-in
-  user. Guarded it like the next line already does. (`RECEIVE_FILE_EXCEPTION = 100`
-  looks like it aliases `ACCESS_CONTROL_LOGIN`, but README.md documents "+100" as the
-  deliberate exception offset — left as-is, not a bug.)
-- **`igniter.py`** — `_get_debug_2()` did `bool(get_envvar(...))`; `bool()` of any
-  non-empty string is always `True`, so debug was unconditionally on regardless of
-  `CANOA_DEBUG`. Switched to the existing `as_bool()` helper.
-- **`app_constants.py`** — reviewed, no errors found.
-
----
-
-## 2026-07-15 — `carranca/common/Sidekick.py`
-
-`_echo`'s `match` was missing the `FATAL` (and any future unhandled `Kind`) case, so
-fatal-level messages were printed to console but never reached the log file or DB. Added
-the missing case.

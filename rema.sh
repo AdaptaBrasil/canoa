@@ -7,6 +7,6 @@ source ../../canoa_env_vars.txt
 source ../.venv/bin/activate
 export CANOA_APP_MODE="Production"
 export FLASK_RUN_PORT="5001"
-export FLASK_USE_RELOADER=0
+export FLASK_RUN_RELOAD=0
 flask run
 #eof

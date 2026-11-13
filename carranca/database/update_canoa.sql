@@ -355,6 +355,14 @@ select '5.14.0', '6.03',
        || 'ui sections revalidateFile & revalidatedFile_email, 2 missing receiveFile keys (Refs #61)'
  where not exists (select 1 from db_version where number = '5.14.0');
 
+-- ============================================================================
+-- db_updates: one row per run of this script (table created by hand, 2026-11-12).
+-- Bump app_version and last_change (date of the newest section above) with each deploy.
+-- ============================================================================
+
+insert into db_updates (app_version, last_change, notes)
+values ('6.10', '2026-11-11', 'spdGrid.noRecord, passwordRecovery abra-o; 5.14.0 row if missing');
+
 do $$ begin raise notice 'END schema [%] version [%]', current_schema(), (select number from db_version order by id desc limit 1); end $$;
 
 commit;

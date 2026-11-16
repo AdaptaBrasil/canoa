@@ -12,6 +12,7 @@ mgd 2024-09-27,10-11,12-05
 # for self.echo : Callable[[Display.Kind, str], None]
 from __future__ import annotations
 
+import sys
 import time
 from collections import deque
 from math import log10, modf
@@ -127,6 +128,11 @@ class Display:
             _with_color = not OS_IS_WINDOWS
 
         _d = Display.default  # value is None => use default
+        # Console encoding: a console that is not UTF-8 (eg Git Bash, cp1252) raised UnicodeEncodeError on a character
+        # it can not show (the β of the version) and stopped the start-up; now it shows `?` in its place.
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(errors="replace")
+
         # Until someone sets `echo` (the Sidekick does), the lines are kept (the igniter's, printed before any log file
         # exists), see take_pending_echo()
         self._pending_echo: deque[tuple[Display.Kind, str]] = deque(maxlen=500)

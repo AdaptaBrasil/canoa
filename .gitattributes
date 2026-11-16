@@ -1,0 +1,3 @@
+# Line endings: git stores text files with LF, each checkout converts them to the platform (CRLF on Windows)
+* text=auto
+*.sh text eol=lf

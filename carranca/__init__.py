@@ -363,7 +363,7 @@ def _create_app_and_log_file(app_name: str):
 
     # -- config from env vars
     # flask has config.from_prefixed_env()
-    app.config.from_prefixed_env(app_name)
+    app.config.from_prefixed_env(app_name) # type: ignore
     pcName = socket.gethostname().upper()
     _info(f"App's config updated with environment variables from the environment of host [{pcName}].")
 

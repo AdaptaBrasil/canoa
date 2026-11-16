@@ -5,9 +5,6 @@ Equipe da Canoa -- 2025
 mgd 2025-01-19 -- 10-08
 """
 
-# TODO: ui_form_helper
-
-
 # cSpell:ignore
 
 import json

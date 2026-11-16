@@ -16,7 +16,7 @@ app_constants.py
 APP_NAME = "Canoa"
 
 # &beta; major.minor
-APP_VERSION = "β 6.10"  # 2026-11-12
+APP_VERSION = "β 6.11"  # 2026-11-16
 
 # production DB schema; on any other (e.g. canoa_dev) the navbar brand shows the schema name
 APP_SCHEMA = "canoa"

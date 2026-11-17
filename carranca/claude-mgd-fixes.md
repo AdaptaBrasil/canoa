@@ -9,28 +9,6 @@ this file keeps it). The "Still open" list at the end holds what a fix left pend
 Each file's CRC32 at time of fix is tracked in `claude-certificate.txt`, the tamper-evidence ledger.
 
 ---
-
-## 2026-11-16 — `.sh` pinned to LF
-
-- `.gitattributes`: `*.sh text eol=lf`; `rema.sh` converted to LF in the working tree.
-- Seal of `js_consts_helper.py` restored (only Miguel's removal of a stale TODO since the 2026-07-20 review).
-
-## 2026-11-16 — non-UTF-8 console crash, line endings standardized, stale seals cleared
-
-1. **Console crash** (Git Bash, cp1252 pipe): `print()` raised `UnicodeEncodeError` on the β of the version and stopped
-   the start-up. **Fix:** `Display.__init__` reconfigures stdout with `errors="replace"` (`?` in place of the character,
-   nothing else changes; the log file is UTF-8 and keeps the real one). Verified: the same start-up now reaches
-   "Running on" under cp1252.
-2. **Line endings:** 60 text files had LF in the Windows working tree (tools write LF). All 248 text files are now
-   UTF-8 with CRLF; `.gitattributes` has `* text=auto` (git stores LF, the VM still checks out LF; a full renormalize
-   changed nothing in the repo). Seal CRC32s are now stable: they are computed over the CRLF bytes.
-3. **Seals:** 31 were stale. 20 differed only by the line-ending change (the CRC32 of the LF or CRLF form of the
-   current file equals the recorded one): CRC refreshed, date and model kept. 11 were really changed since their review
-   and were removed: `app_error_assistant.py`, `sep_log_grid.js`, `grid.html.j2`, `form.html.j2`, `js_consts_helper.py`,
-   `public/routes.py`, `login.py`, `private/routes.py`, `py_helper.py`, `canoa.js`, `ValidateProcessConfig.py` (git
-   history of the certificate keeps the old lines). `Display.py` needs its line refreshed at push time.
-
----
 ## 2026-11-12 22:00 — β 6.10 start-up log on the VM: clean, four cosmetic findings (not fixed)
 
 Log `Canoa_2026-11-12_f87700.log`, first start after the deploy (`ce10f86`, new rema.sh, trimmed env file).

@@ -68,7 +68,7 @@ def get_sep_validate_grid() -> Jinja_Rendered:
         task_code += 1  # 4
         # A row validated by another validator version than the current one is "old": only the difference
         # counts, no ordering (the formats, eg 0.7.64b677, are free-form). Without the current version
-        # nothing is marked, a warning is shown and the buttons are disabled (template, js).
+        # nothing is marked, a warning is shown and the button stays disabled (no row is marked, see sep_validate.js).
         dv_version = global_dv_info.version  # reading it may start a refresh (see DVInfo)
         dv_ready = global_dv_info.ready
         if not dv_ready and is_get:  # after a POST, the msg is the revalidation's
@@ -90,8 +90,7 @@ def get_sep_validate_grid() -> Jinja_Rendered:
         ui_db_texts.set_value(UITextsKeys.Form.title, f"{ui_db_texts.get_str(UITextsKeys.Form.title)} {title_validator}".strip())
         jHtml = process_template(
             tmpl_ffn,
-            grid_data=grid_data.to_list(),
-            dv_ready=dv_ready,
+            grid_rows=grid_data.to_list(),  # `grid_rows`: layouts/grid.html.j2 writes the grid's data as `Canoa.grid`
             fi=fi.with_icon("sep_validate"),
             **ui_db_texts.data(),
             **js_ui_dict,

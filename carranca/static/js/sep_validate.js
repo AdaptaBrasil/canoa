@@ -1,26 +1,18 @@
 /**
  * @preserve
  * sep_validate.js
- * version 0.1
- * 2026.07.28
+ * version 0.2
+ * 2026.07.28 -- 2026.11.16
  * Miguel Gastelumendi -- mgd
+ *
+ * The grid is built by CanoaAgGrid (canoa_ag_grid.js, loaded before this file);
+ * here is only what is specific of this page: the [Revalidar] rule and the two cell classes.
 */
 // @ts-check
 /* cSpell:locale en pt-br
  */
 /// <reference path="./ts-check.js" />
 
-// ui_items.text is HTML-named-entity-encoded (see tools/encode-for-ui_items-table.py);
-// ag-grid's headerName renders as plain text, not innerHTML, so entities must be
-// decoded here or they'd show literally (eg "Vers&atilde;o").
-/** @param {string} text */
-const decodeHtmlEntities = (text) => {
-    const el = document.createElement('textarea');
-    el.innerHTML = text;
-    return el.value;
-};
-
-// https://www.ag-grid.com/javascript-data-grid/column-definitions/
 // == Ag Grid (single-row selection feeds [Validar Um], posting the row's `id` -- the
 // user_data_files.id of the SEP's last file -- as `udf_id`; [Validar Todos] needs no
 // selection and still POSTs to the under-development stub in sep_validate.py, see #61)
@@ -33,36 +25,12 @@ const onSelectionChanged = event => {
     // [Revalidar] only applies to items validated by another validator version than the current one.
     // Items validated with the current version are not revalidated (same file + same validator = same result),
     // so the button stays disabled for them; the future [Revalidar todos] will skip them too.
-    // Without the current version (validatorReady false, see sep_validate.html.j2) no item qualifies.
+    // Without the current version no item qualifies: sep_validate.py marks none (is_other_validator_version).
     const selected = event.api.getSelectedRows()[0];
-    const row = validatorReady && selected?.is_other_validator_version ? selected : undefined;
+    const row = selected?.is_other_validator_version ? selected : undefined;
     selectedUdfIdInput.value = row ? row.id : '';
     btnValidateOne.disabled = !row;
 };
-
-// Only genuinely variable-length text columns flex; short/fixed-shape columns get a computed
-// width instead -- same balance already used in received_files_mgmt.js for its stat columns.
-/** @type {Record<string, number>} */
-const flexByField = { sep_fullname: 2, manager_name: 1 };
-
-// received_files_mgmt.js's trick: size a narrow column from its own header length (rem-based,
-// so it scales with root font-size), since the header is the widest thing that column shows.
-const remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
-/** @param {string} headerText */
-const widthFromHeader = headerText => Math.round(remPx * headerText.length);
-
-/** @type {Set<string>} */
-const headerSizedFields = new Set(['report_errors', 'report_warns']);
-
-// validator_version/uploaded_at: content (eg "2026-07-28") is much shorter than their headers --
-// size these columns to the content instead, and let the (now too-long-for-the-column) header
-// wrap onto two lines rather than force the column wide.
-/** @type {Set<string>} */
-const thinContentFields = new Set(['validator_version', 'uploaded_at']);
-const thinContentWidth = Math.round(remPx * 10);
-
-// validated_at shows date+time (eg "2026-07-28 14:32"), wider than the date-only columns above.
-const validatedAtWidth = Math.round(remPx * 16);
 
 // "just processed today" signal: same limegreen text canoa.css's .grid-item-changed already
 // uses elsewhere in the app, reused here rather than inventing a new highlight class.
@@ -82,69 +50,27 @@ const isChangedToday = params => params.value && isToday(new Date(params.value))
 /** @param {any} params */
 const isOtherValidatorVersion = params => !!params.data?.is_other_validator_version;
 
-// ag-grid's built-in 'numericColumn' type right-aligns both the header and the cells
-/** @type {Record<string, string>} */
-const typeByField = { report_errors: 'numericColumn', report_warns: 'numericColumn' };
-
-/** @param {any} params */
-const formatInt = params => params.value != null ? params.value.toLocaleString(userLocale) : '';
-
-// ISO-style yyyy-mm-dd, not locale-dependent -- uses local getters (not toISOString/getUTC*)
-// so a date near midnight doesn't shift to the adjacent day under a non-UTC timezone.
-/** @param {any} params */
-const formatIsoDate = params => {
-    if (!params.value) return '';
-    const d = new Date(params.value);
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${d.getFullYear()}-${mm}-${dd}`;
-};
-
-// same ISO style, plus hh:mm -- validated_at needs the time too, not just the date.
-/** @param {any} params */
-const formatIsoDateTime = params => {
-    if (!params.value) return '';
-    const d = new Date(params.value);
-    const hh = String(d.getHours()).padStart(2, '0');
-    const min = String(d.getMinutes()).padStart(2, '0');
-    return `${formatIsoDate(params)} ${hh}:${min}`;
-};
-
-/** @type {Record<string, (params: any) => string>} */
-const formatterByField = {
-    uploaded_at: formatIsoDate,
-    validated_at: formatIsoDateTime,
-    report_errors: formatInt,
-    report_warns: formatInt,
-};
-
-const gridOptions = {
-    rowSelection: 'single'
-    , onSelectionChanged: onSelectionChanged
-    , rowData: gridRows
-    , columnDefs: colMeta.map(({ n, h }) => {
-        const headerName = decodeHtmlEntities(h);
-        const sizing = n === 'validated_at'
-            ? { width: validatedAtWidth, maxWidth: validatedAtWidth, wrapHeaderText: true, autoHeaderHeight: true }
-            : thinContentFields.has(n)
-                ? { width: thinContentWidth, maxWidth: thinContentWidth, wrapHeaderText: true, autoHeaderHeight: true }
-                : headerSizedFields.has(n)
-                    ? { width: widthFromHeader(headerName), maxWidth: widthFromHeader(headerName) }
-                    : { flex: flexByField[n] ?? 1 };
-        return {
-            field: n,
-            headerName,
-            ...sizing,
-            ...(typeByField[n] ? { type: typeByField[n] } : {}),
-            ...(formatterByField[n] ? { valueFormatter: formatterByField[n] } : {}),
-            ...(n === 'validated_at' ? { cellClassRules: { 'grid-item-changed': isChangedToday } } : {}),
-            ...(n === 'validator_version' ? { cellClassRules: { 'grid-item-attention': isOtherValidatorVersion } } : {}),
-        };
-    })
-}; // gridOptions
-
 //-------------
 //== Init
-const gridContainer = document.getElementById(gridID);
-const api = /** type {Object} */(agGrid.createGrid(gridContainer, gridOptions));
+// Widths: only the variable-length text columns flex. uploaded_at/validator_version/validated_at have a content
+// (eg "2026-07-28") much shorter than their headers: sized to the content, the header wraps onto two lines.
+// report_errors/report_warns: the header is the widest thing the column shows, sized from it.
+const { api } = CanoaAgGrid.create(Canoa.grid, {
+    columns: {
+        sep_fullname: { flex: 2 },
+        manager_name: { flex: 1 },
+        uploaded_at: { kind: 'iso-date', width: '10rem', wrap: true },
+        validated_at: {
+            kind: 'iso-datetime', width: '16rem', wrap: true,
+            colDef: { cellClassRules: { 'grid-item-changed': isChangedToday } },
+        },
+        validator_version: {
+            width: '10rem', wrap: true,
+            colDef: { cellClassRules: { 'grid-item-attention': isOtherValidatorVersion } },
+        },
+        report_errors: { kind: 'int', width: 'header' },
+        report_warns: { kind: 'int', width: 'header' },
+    },
+    gridOptions: { onSelectionChanged },
+});
 //== eof

@@ -210,7 +210,7 @@ def _ignite_sql_connection(fuse: Fuse, uri: str) -> Tuple[str, str, str]:
     error = ""
     db_version: str = "?"
     db_schema: str = "?"
-    fuse.display.debug("Connecting to the database.")  # this may take a while
+    fuse.display.debug("Connecting to the database...")  # this may take a while
     error_msg = "{} error: Unable to connect to the database.{}\nError details:\n[{}]."
     try:
         engine = create_engine(uri)

@@ -68,6 +68,19 @@ mgd 2025-05-23
   {# ╒════════════ JavaScript ═════════════╕ #}
   {% block dlg_blc_javascript %}
     {{ super() }}
+    {# Converted grids (docs/grid-generalization.md): when the page passes `grid_rows`, the data of the grid is written
+       here as `Canoa.grid` and the common module is loaded; the page script calls CanoaAgGrid.create(Canoa.grid, ...) #}
+    {% if grid_rows is defined %}
+    <script>
+        Canoa.grid = {
+            id: '{{ grid_id | default("ag-grid-id") }}',
+            colMeta: {{ grid_col_meta | default([]) | tojson | safe }},
+            rows: {{ grid_rows | tojson | safe }},
+            locale: '{{ userLocale }}',
+        };
+    </script>
+    <script src="{{static_route('js/canoa_ag_grid.js')}}"></script>
+    {% endif %}
     {% block grid_blc_javascript %}{% endblock %}
   {% endblock %}
   {# ╘════════════ JavaScript ═════════════╛ #}

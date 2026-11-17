@@ -43,8 +43,8 @@ var userList;
 /** @type {JSON} */
 var gridRows;
 
-/** @type {boolean} sep_validate: false when the current validator version is not available */
-var validatorReady;
+/** @type {any} canoa_ag_grid.js: the common part of the ag-grid pages (for the checker it is a module, it ends with module.exports) */
+var CanoaAgGrid;
 
 /** @type {HTMLScriptElement} */
 var jsData;
@@ -79,6 +79,7 @@ var colMeta;
 /**
  * @typedef {Object} CanoaGlobal
  * @property {boolean} dataModified
+ * @property {any} grid the data of a converted grid, written by layouts/grid.html.j2 (see canoa_ag_grid.js)
 */
 /** @type {CanoaGlobal}
  * Defined in carranca\templates\layouts\dialog.html.j2 */

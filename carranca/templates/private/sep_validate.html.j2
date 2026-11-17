@@ -51,13 +51,8 @@ mgd
     // [O Selecionado] runs revalidate_sep() synchronously (~1.5 min) -- same reason/value as
     // receive_file.html.j2's process(): give the sleep-veil more time before the safety-net hides it.
     Canoa.wake_up_in_ms = 300000;
-
-    const colMeta = {{ grid_col_meta | default([]) | tojson | safe }};
-    const gridRows = {{ grid_data | default([]) | tojson | safe }};
-    const validatorReady = {{ dv_ready | default(false) | tojson }};
-    const gridID = '{{ grid_id | default("ag-grid-id") }}';
-    const userLocale = '{{ userLocale }}';
 </script>
+{# the data of the grid (`Canoa.grid`) and canoa_ag_grid.js come from the layout, sep_validate.py passes `grid_rows` #}
 <script src="{{static_route('js/sep_validate.js')}}"></script>
 
 {% endblock grid_blc_javascript %}
